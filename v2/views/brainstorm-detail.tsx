@@ -12,9 +12,12 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 // ---------------------------------------------------------------------------
 
 export const BrainstormDetailView: FC<
-  ViewProps & { item: Brainstorm }
+  ViewProps & {
+    item: Brainstorm;
+    taskInfo?: Map<string, { title: string } | null>;
+  }
 > = (
-  { item: brainstorm, ...viewProps },
+  { item: brainstorm, taskInfo, ...viewProps },
 ) => {
   const hasTags = brainstorm.tags && brainstorm.tags.length > 0;
   const hasLinks = (brainstorm.linkedProjects?.length ?? 0) > 0 ||
@@ -80,12 +83,26 @@ export const BrainstormDetailView: FC<
                 {p}
               </span>
             ))}
-            {brainstorm.linkedTasks?.map((t) => (
-              <a key={t} href={`/tasks/${t}`} class="brainstorm-detail__link">
-                <span class="brainstorm-detail__link-type">Task</span>
-                {t}
-              </a>
-            ))}
+            {brainstorm.linkedTasks?.map((t) => {
+              const info = taskInfo?.get(t) ?? null;
+              if (!info) {
+                return (
+                  <span
+                    key={t}
+                    class="brainstorm-detail__link brainstorm-detail__link--deleted"
+                  >
+                    <span class="brainstorm-detail__link-type">Task</span>
+                    [Deleted task]
+                  </span>
+                );
+              }
+              return (
+                <a key={t} href={`/tasks/${t}`} class="brainstorm-detail__link">
+                  <span class="brainstorm-detail__link-type">Task</span>
+                  {info.title}
+                </a>
+              );
+            })}
             {brainstorm.linkedGoals?.map((g) => (
               <a key={g} href={`/goals/${g}`} class="brainstorm-detail__link">
                 <span class="brainstorm-detail__link-type">Goal</span>

@@ -5,6 +5,7 @@ import { brainstormConfig } from "../../domains/brainstorm/config.tsx";
 import {
   getBrainstormService,
   getBrainstormTemplateService,
+  getTaskService,
 } from "../../singletons/services.ts";
 import { BrainstormDetailView } from "../brainstorm-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
@@ -19,10 +20,21 @@ brainstormsRouter.get("/:id", async (c) => {
   const item = await getBrainstormService().getById(id);
   if (!item) return c.notFound();
 
+  const linkedTaskIds = item.linkedTasks ?? [];
+  const resolvedTasks = await Promise.all(
+    linkedTaskIds.map((tid) => getTaskService().getById(tid)),
+  );
+  const taskInfo = new Map<string, { title: string } | null>();
+  linkedTaskIds.forEach((tid, i) => {
+    const t = resolvedTasks[i];
+    taskInfo.set(tid, t ? { title: t.title } : null);
+  });
+
   return c.html(
     <BrainstormDetailView
       {...viewProps(c, "/brainstorms")}
       item={item}
+      taskInfo={taskInfo}
     />,
   );
 });

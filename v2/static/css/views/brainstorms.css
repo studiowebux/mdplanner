@@ -37,6 +37,11 @@ a.brainstorm-detail__link:hover {
   letter-spacing: var(--letter-spacing-wide);
 }
 
+.brainstorm-detail__link--deleted {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 /* -- Questions ----------------------------------------------------------- */
 
 .brainstorm-detail__question {
