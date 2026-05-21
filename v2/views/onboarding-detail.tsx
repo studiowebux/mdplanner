@@ -11,9 +11,14 @@ import {
   STEP_STATUS_LABELS,
 } from "../domains/onboarding/constants.tsx";
 
-export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
-  { item, ...viewProps },
+export const OnboardingDetailView: FC<
+  ViewProps & { item: Onboarding; peopleById?: Map<string, string> }
+> = (
+  { item, peopleById, ...viewProps },
 ) => {
+  const onboardeeName = item.personId
+    ? (peopleById?.get(item.personId) ?? item.personId)
+    : null;
   const done = item.steps.filter((s) => s.status === "complete").length;
   const pct = item.steps.length > 0
     ? Math.round((done / item.steps.length) * 100)
@@ -70,9 +75,9 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
           )}
           {item.personId && (
             <div class="onboarding-detail__meta-item">
-              <span class="onboarding-detail__meta-label">Person ID</span>
+              <span class="onboarding-detail__meta-label">Onboardee</span>
               <span class="onboarding-detail__meta-value">
-                <a href={`/people/${item.personId}`}>{item.personId}</a>
+                <a href={`/people/${item.personId}`}>{onboardeeName}</a>
               </span>
             </div>
           )}
@@ -114,64 +119,77 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
                     ] ?? cat}
                   </h3>
                   <ul class="onboarding-detail__step-list">
-                    {steps.map((step) => (
-                      <li
-                        key={step.id}
-                        class={`onboarding-detail__step onboarding-detail__step--${step.status}`}
-                      >
-                        <input
-                          type="checkbox"
-                          class="onboarding-detail__step-checkbox"
-                          checked={step.status === "complete"}
-                          aria-label={`Mark "${step.title}" complete`}
-                          hx-post={`/onboarding/${item.id}/steps/${step.id}/toggle`}
-                          hx-target="#onboarding-detail-root"
-                          hx-select="#onboarding-detail-root"
-                          hx-swap="outerHTML"
-                        />
-                        <span
-                          class={`onboarding-detail__step-status badge badge--sm badge--${
-                            step.status === "complete"
-                              ? "success"
-                              : step.status === "in_progress"
-                              ? "accent"
-                              : "neutral"
-                          }`}
+                    {steps.map((step) => {
+                      const ownerName = step.owner
+                        ? (peopleById?.get(step.owner) ?? step.owner)
+                        : null;
+                      return (
+                        <li
+                          key={step.id}
+                          class={`onboarding-detail__step onboarding-detail__step--${step.status}`}
                         >
-                          {STEP_STATUS_LABELS[step.status]}
-                        </span>
-                        <div class="onboarding-detail__step-title-wrap">
-                          <span
-                            class="onboarding-detail__step-title"
-                            contenteditable
-                            data-inline-edit
-                            data-inline-original={step.title}
-                            data-inline-target={`step-title-value-${step.id}`}
-                            data-inline-save-btn={`step-title-save-${step.id}`}
-                          >
-                            {step.title}
-                          </span>
                           <input
-                            type="hidden"
-                            id={`step-title-value-${step.id}`}
-                            name="title"
-                            value={step.title}
-                          />
-                          <button
-                            type="button"
-                            id={`step-title-save-${step.id}`}
-                            class="btn btn--primary btn--sm is-hidden"
-                            hx-post={`/onboarding/${item.id}/steps/${step.id}/title`}
-                            hx-include={`#step-title-value-${step.id}`}
+                            type="checkbox"
+                            class="onboarding-detail__step-checkbox"
+                            checked={step.status === "complete"}
+                            aria-label={`Mark "${step.title}" complete`}
+                            hx-post={`/onboarding/${item.id}/steps/${step.id}/toggle`}
                             hx-target="#onboarding-detail-root"
                             hx-select="#onboarding-detail-root"
                             hx-swap="outerHTML"
+                          />
+                          <span
+                            class={`onboarding-detail__step-status badge badge--sm badge--${
+                              step.status === "complete"
+                                ? "success"
+                                : step.status === "in_progress"
+                                ? "accent"
+                                : "neutral"
+                            }`}
                           >
-                            Save
-                          </button>
-                        </div>
-                      </li>
-                    ))}
+                            {STEP_STATUS_LABELS[step.status]}
+                          </span>
+                          <div class="onboarding-detail__step-title-wrap">
+                            <span
+                              class="onboarding-detail__step-title"
+                              contenteditable
+                              data-inline-edit
+                              data-inline-original={step.title}
+                              data-inline-target={`step-title-value-${step.id}`}
+                              data-inline-save-btn={`step-title-save-${step.id}`}
+                            >
+                              {step.title}
+                            </span>
+                            <input
+                              type="hidden"
+                              id={`step-title-value-${step.id}`}
+                              name="title"
+                              value={step.title}
+                            />
+                            <button
+                              type="button"
+                              id={`step-title-save-${step.id}`}
+                              class="btn btn--primary btn--sm is-hidden"
+                              hx-post={`/onboarding/${item.id}/steps/${step.id}/title`}
+                              hx-include={`#step-title-value-${step.id}`}
+                              hx-target="#onboarding-detail-root"
+                              hx-select="#onboarding-detail-root"
+                              hx-swap="outerHTML"
+                            >
+                              Save
+                            </button>
+                            {step.owner && (
+                              <a
+                                class="onboarding-detail__step-owner"
+                                href={`/people/${step.owner}`}
+                              >
+                                {ownerName}
+                              </a>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}

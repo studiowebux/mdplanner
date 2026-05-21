@@ -103,6 +103,9 @@ export class OnboardingRepository extends CachedMarkdownRepository<
           )
           ? String(s.status)
           : "not_started") as OnboardingStep["status"],
+        owner: s.owner != null && String(s.owner).length > 0
+          ? String(s.owner)
+          : undefined,
       }];
     });
   }

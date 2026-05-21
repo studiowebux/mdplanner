@@ -39,6 +39,10 @@ export const OnboardingStepSchema = z.object({
     description: "Step completion status",
     example: "not_started",
   }),
+  owner: z.string().nullable().optional().openapi({
+    description: "Person ID responsible for completing this step",
+    example: "alice",
+  }),
 }).openapi("OnboardingStep");
 
 export type OnboardingStep = z.infer<typeof OnboardingStepSchema>;

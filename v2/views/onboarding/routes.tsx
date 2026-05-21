@@ -5,7 +5,10 @@
 import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { onboardingConfig } from "../../domains/onboarding/config.tsx";
-import { getOnboardingService } from "../../singletons/services.ts";
+import {
+  getOnboardingService,
+  getPeopleService,
+} from "../../singletons/services.ts";
 import { OnboardingDetailView } from "../onboarding-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
@@ -16,10 +19,13 @@ export const onboardingRouter = createDomainRoutes(onboardingConfig);
 async function renderDetail(c: AppContext, id: string) {
   const item = await getOnboardingService().getById(id);
   if (!item) return c.notFound();
+  const people = await getPeopleService().list();
+  const peopleById = new Map(people.map((p) => [p.id, p.name]));
   return c.html(
     <OnboardingDetailView
       {...viewProps(c, "/onboarding")}
       item={item}
+      peopleById={peopleById}
     />,
   );
 }

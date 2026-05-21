@@ -81,6 +81,13 @@ export const ONBOARDING_FORM_FIELDS: FieldDef[] = [
     freetext: true,
   },
   {
+    type: "autocomplete",
+    name: "personId",
+    label: "Onboardee",
+    source: "people",
+    placeholder: "Pick the person being onboarded...",
+  },
+  {
     type: "text",
     name: "role",
     label: "Role / Job Title",
@@ -97,6 +104,52 @@ export const ONBOARDING_FORM_FIELDS: FieldDef[] = [
     name: "notes",
     label: "Notes",
     rows: 4,
+  },
+  {
+    type: "array-table",
+    name: "steps",
+    label: "Step",
+    section: "onboarding_steps",
+    addLabel: "Add step",
+    itemFields: [
+      { type: "hidden", name: "id" },
+      {
+        type: "text",
+        name: "title",
+        label: "Title",
+        placeholder: "e.g. Laptop & equipment setup",
+      },
+      {
+        type: "select",
+        name: "category",
+        label: "Category",
+        options: [
+          { value: "equipment", label: "Equipment" },
+          { value: "accounts", label: "Accounts" },
+          { value: "docs", label: "Docs" },
+          { value: "training", label: "Training" },
+          { value: "intro", label: "Intro" },
+          { value: "other", label: "Other" },
+        ],
+      },
+      {
+        type: "select",
+        name: "status",
+        label: "Status",
+        options: [
+          { value: "not_started", label: "Not started" },
+          { value: "in_progress", label: "In progress" },
+          { value: "complete", label: "Complete" },
+        ],
+      },
+      {
+        type: "autocomplete",
+        name: "owner",
+        label: "Owner",
+        source: "people",
+        placeholder: "Pick owner...",
+      },
+    ],
   },
 ];
 

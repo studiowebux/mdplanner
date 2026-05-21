@@ -7,6 +7,7 @@ type Option = { value: string; label: string };
 
 /** Field definition for a single column within an array-table row. */
 export type ArrayTableItemField =
+  | { type: "hidden"; name: string }
   | { type: "text"; name: string; label: string; placeholder?: string }
   | { type: "number"; name: string; label: string; min?: number; max?: number }
   | { type: "date"; name: string; label: string }
@@ -122,6 +123,9 @@ const ArrayTableRowField: FC<
   { section: string; idx: number; field: ArrayTableItemField; value?: string }
 > = ({ section, idx, field, value }) => {
   const name = `${section}[${idx}].${field.name}`;
+  if (field.type === "hidden") {
+    return <input type="hidden" name={name} value={value ?? ""} />;
+  }
   return (
     <div class="array-table__field">
       <label class="array-table__field-label">{field.label}</label>

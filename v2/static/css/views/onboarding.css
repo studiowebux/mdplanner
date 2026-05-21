@@ -164,6 +164,20 @@
   background-color: var(--color-bg-secondary);
 }
 
+.onboarding-detail__step-owner {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: var(--space-2xs) var(--space-xs);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
+.onboarding-detail__step-owner:hover {
+  color: var(--color-accent);
+}
+
 /* ---------------------------------------------------------------------------
    Empty state
 --------------------------------------------------------------------------- */

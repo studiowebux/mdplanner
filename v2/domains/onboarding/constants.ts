@@ -1,1 +1,1 @@
-export const ONBOARDING_BODY_KEYS = ["id", "employeeName", "notes"] as const;
+export const ONBOARDING_BODY_KEYS = ["notes"] as const;

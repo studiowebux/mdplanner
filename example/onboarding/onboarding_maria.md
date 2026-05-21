@@ -3,6 +3,7 @@ id: onboarding_1708600000001_mari
 employeeName: Maria Garcia
 role: Product Designer
 start_date: "2026-02-17"
+personId: charlie
 created_at: "2026-02-22T12:00:00.000Z"
 steps:
   -
@@ -10,21 +11,25 @@ steps:
     title: Laptop & peripherals setup
     category: equipment
     status: complete
+    owner: diana
   -
     id: step_002
     title: Figma access and team workspace
     category: accounts
     status: not_started
+    owner: member_frontend_lead
   -
     id: step_003
     title: Email and Slack setup
     category: accounts
     status: not_started
+    owner: diana
   -
     id: step_004
     title: Design system documentation review
     category: docs
     status: not_started
+    owner: alice
   -
     id: step_005
     title: Brand guidelines review
@@ -35,20 +40,24 @@ steps:
     title: NDA and contracts signed
     category: docs
     status: not_started
+    owner: member_cfo
   -
     id: step_007
     title: Product roadmap walkthrough
     category: training
     status: not_started
+    owner: member_pm
   -
     id: step_008
     title: Meet the design team
     category: intro
     status: not_started
+    owner: member_frontend_lead
   -
     id: step_009
     title: "1:1 with design lead"
     category: intro
     status: not_started
+    owner: member_frontend_lead
 ---
 
