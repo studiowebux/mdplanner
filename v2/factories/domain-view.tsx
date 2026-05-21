@@ -844,6 +844,8 @@ export function createDomainForm<T extends Entity>(cfg: {
   idField?: string;
   /** Field names edited in-place on the detail page — hidden from the edit form. */
   inlineEditFields?: string[];
+  /** Edit-mode value override hook (see DomainConfig.formValueOverrides). */
+  formValueOverrides?: (item: T) => Record<string, string>;
 }) {
   const DomainForm: FC<{
     item?: T;
@@ -869,6 +871,11 @@ export function createDomainForm<T extends Entity>(cfg: {
           values[f.name] = String(raw ?? "");
         }
       }
+    }
+    // Apply domain-supplied overrides — replace keys after the default
+    // item-to-string fill (e.g. reshape `string[]` into array-table JSON).
+    if (isEdit && item && cfg.formValueOverrides) {
+      Object.assign(values, cfg.formValueOverrides(item));
     }
     // Merge resolved values into form values — covers nested fields
     // (e.g. billingAddress.street → street) that don't exist on the entity root.

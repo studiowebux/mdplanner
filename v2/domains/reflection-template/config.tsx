@@ -16,11 +16,20 @@ import {
 import { ReflectionTemplateCard } from "../../views/components/reflection-template-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
-function splitPrompts(body: Record<string, string>): string[] {
-  const raw = body["prompts"] ?? "";
-  return String(raw).split("\n").map((p) => p.trim()).filter((p) =>
-    p.length > 0
-  );
+/**
+ * Flatten parseFormBody's array-table output (`Array<{ text: string }>`) back
+ * into the entity's `string[]` shape. Trims and drops empty rows.
+ */
+function flattenPrompts(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((row) =>
+      row && typeof row === "object"
+        ? String((row as Record<string, unknown>).text ?? "")
+        : String(row)
+    )
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
 }
 
 export const reflectionTemplateConfig: DomainConfig<
@@ -64,7 +73,7 @@ export const reflectionTemplateConfig: DomainConfig<
     ) as Record<string, unknown>;
     return {
       ...base,
-      prompts: splitPrompts(body as Record<string, string>),
+      prompts: flattenPrompts(base.prompts),
     } as CreateReflectionTemplate;
   },
 
@@ -74,9 +83,18 @@ export const reflectionTemplateConfig: DomainConfig<
     }) as Record<string, unknown>;
     return {
       ...base,
-      prompts: splitPrompts(body as Record<string, string>),
+      prompts: flattenPrompts(base.prompts),
     } as Partial<UpdateReflectionTemplate>;
   },
+
+  // Reshape `prompts: string[]` into the wire shape `array-table` expects
+  // (`[{ text: "..." }, ...]` JSON-stringified) for the edit form. Keeps the
+  // public entity shape unchanged across types/repo/cache/MCP/API.
+  formValueOverrides: (item) => ({
+    prompts: JSON.stringify(
+      (item.prompts ?? []).map((text) => ({ text })),
+    ),
+  }),
 
   getService: () => getReflectionTemplateService(),
 

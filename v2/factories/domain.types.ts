@@ -119,6 +119,16 @@ export type DomainConfig<T extends Entity, C, U> = {
     values: Record<string, string>,
   ) => Promise<Record<string, string>>;
 
+  /**
+   * Override edit-form values after the factory's default item-to-string
+   * mapping. Use when a public entity shape (e.g. `string[]`) needs reshaping
+   * into the wire shape a form field expects (e.g. `array-table` JSON).
+   * Applied AFTER the default auto-fill and BEFORE the additive
+   * `resolveFormValues` merge — so keys returned here take precedence over
+   * both. Edit mode only (not used when prefilling a create form).
+   */
+  formValueOverrides?: (item: T) => Record<string, string>;
+
   /** Hide the default Grid/Table view toggle buttons. Use when all views are custom. */
   hideDefaultViews?: boolean;
 

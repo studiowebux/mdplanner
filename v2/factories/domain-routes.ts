@@ -32,11 +32,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
 ) {
   const router = new Hono<{ Variables: AppVariables }>();
   const { DomainPage, DomainViewContainer } = createDomainPage(cfg);
-  const DomainForm = createDomainForm({
+  const DomainForm = createDomainForm<T>({
     domain: cfg.name,
     singular: cfg.singular,
     fields: cfg.formFields,
     inlineEditFields: cfg.inlineEditFields,
+    formValueOverrides: cfg.formValueOverrides,
   });
 
   // Injected state keys — added here so every domain gets them without editing

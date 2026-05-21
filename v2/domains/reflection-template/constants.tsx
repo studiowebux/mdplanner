@@ -89,10 +89,19 @@ export const REFLECTION_TEMPLATE_FORM_FIELDS: FieldDef[] = [
     rows: 3,
   },
   {
-    type: "textarea",
+    type: "array-table",
     name: "prompts",
-    label: "Prompts (one per line)",
-    rows: 8,
+    label: "Prompt",
+    section: "reflection_template_prompts",
+    addLabel: "Add prompt",
+    itemFields: [
+      {
+        type: "text",
+        name: "text",
+        label: "Prompt",
+        placeholder: "e.g. What went well this week?",
+      },
+    ],
   },
 ];
 

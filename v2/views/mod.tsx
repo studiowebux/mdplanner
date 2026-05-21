@@ -70,6 +70,7 @@ import { BRAINSTORM_FORM_FIELDS } from "../domains/brainstorm/constants.tsx";
 import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
 import { ONBOARDING_TEMPLATE_FORM_FIELDS } from "../domains/onboarding-template/constants.tsx";
+import { REFLECTION_TEMPLATE_FORM_FIELDS } from "../domains/reflection-template/constants.tsx";
 import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
 import { PORTFOLIO_FORM_FIELDS } from "../domains/portfolio/config.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
@@ -444,6 +445,7 @@ for (
     PORTFOLIO_FORM_FIELDS,
     PEOPLE_FORM_FIELDS,
     ONBOARDING_TEMPLATE_FORM_FIELDS,
+    REFLECTION_TEMPLATE_FORM_FIELDS,
     SETTINGS_FORM_FIELDS,
   ]
 ) {
