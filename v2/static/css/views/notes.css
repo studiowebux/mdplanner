@@ -334,11 +334,6 @@
   outline: none;
 }
 
-.note-detail__updated {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
-
 .note-detail__top-bar {
   display: flex;
   justify-content: space-between;

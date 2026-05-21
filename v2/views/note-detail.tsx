@@ -5,7 +5,6 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Note } from "../types/note.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { timeAgo } from "../utils/time.ts";
 import { NoteBlocks } from "./components/note-blocks.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -123,9 +122,6 @@ export const NoteDetailView: FC<Props> = (props) => {
                   />
                 </div>
               </div>
-              <span class="note-detail__updated">
-                Updated {timeAgo(note.updatedAt)}
-              </span>
             </div>
           </header>
 
