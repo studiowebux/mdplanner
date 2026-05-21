@@ -10,3 +10,5 @@ mdplanner
 *.mdplanner-cache.db-shm
 *.mdplanner-cache.db-wal
 docker-compose.override.yml
+example/.state/
+example/.trash/
