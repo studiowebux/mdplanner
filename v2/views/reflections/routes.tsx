@@ -5,7 +5,10 @@
 import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { reflectionConfig } from "../../domains/reflection/config.tsx";
-import { getReflectionService } from "../../singletons/services.ts";
+import {
+  getReflectionService,
+  getReflectionTemplateService,
+} from "../../singletons/services.ts";
 import { ReflectionDetailView } from "../reflection-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
@@ -17,10 +20,14 @@ async function renderDetail(c: AppContext, id: string) {
   const item = await getReflectionService().getById(id);
   if (!item) return c.notFound();
   const editing = c.req.query("editing") === "true";
+  const template = item.templateId
+    ? await getReflectionTemplateService().getById(item.templateId)
+    : null;
   return c.html(
     <ReflectionDetailView
       {...viewProps(c, "/reflections")}
       item={item}
+      template={template ?? null}
       editing={editing}
     />,
   );

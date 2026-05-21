@@ -6,7 +6,10 @@ import type {
   Reflection,
   UpdateReflection,
 } from "../../types/reflection.types.ts";
-import { getReflectionService } from "../../singletons/services.ts";
+import {
+  getReflectionService,
+  getReflectionTemplateService,
+} from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
   REFLECTION_FORM_FIELDS,
@@ -58,6 +61,20 @@ export const reflectionConfig: DomainConfig<
     }) as Partial<UpdateReflection>,
 
   getService: () => getReflectionService(),
+
+  // Edit form: resolve templateId (an ID) to the template name so the
+  // autocomplete search input shows the readable label. The hidden input
+  // still carries the ID for submit.
+  resolveFormValues: async (values) => {
+    const resolved = { ...values };
+    if (values.templateId) {
+      const tpl = await getReflectionTemplateService().getById(
+        values.templateId,
+      );
+      if (tpl) resolved.templateId = tpl.name;
+    }
+    return resolved;
+  },
 
   extractFilterOptions: async () => {
     const items = await getReflectionService().list();

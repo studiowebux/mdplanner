@@ -87,6 +87,7 @@ import {
   getPeopleService,
   getPortfolioService,
   getProjectService,
+  getReflectionTemplateService,
   getTaskService,
 } from "../singletons/services.ts";
 import { DEFAULT_KPI_METRICS } from "../constants/mod.ts";
@@ -295,6 +296,16 @@ registerAutocompleteSource("meetings-by-id", {
     return all.filter((m) => ciIncludes(m.title, q));
   },
   displayKey: "title",
+  valueKey: "id",
+});
+
+registerAutocompleteSource("reflection-templates-by-id", {
+  list: () => getReflectionTemplateService().list({}),
+  search: async (q) => {
+    const all = await getReflectionTemplateService().list({});
+    return all.filter((t) => ciIncludes(t.name, q));
+  },
+  displayKey: "name",
   valueKey: "id",
 });
 

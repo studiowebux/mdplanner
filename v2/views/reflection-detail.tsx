@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { Reflection } from "../types/reflection.types.ts";
 import { REFLECTION_PERIOD_LABELS } from "../types/reflection.types.ts";
+import type { ReflectionTemplate } from "../types/reflection-template.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -58,8 +59,14 @@ const ContentSection: FC<{ reflection: Reflection }> = ({ reflection }) => (
 // ---------------------------------------------------------------------------
 
 export const ReflectionDetailView: FC<
-  ViewProps & { item: Reflection; editing?: boolean }
-> = ({ item: reflection, editing = false, ...viewProps }) => {
+  ViewProps & {
+    item: Reflection;
+    template?: ReflectionTemplate | null;
+    editing?: boolean;
+  }
+> = (
+  { item: reflection, template = null, editing = false, ...viewProps },
+) => {
   return (
     <MainLayout
       title={reflection.title}
@@ -119,6 +126,13 @@ export const ReflectionDetailView: FC<
             {REFLECTION_PERIOD_LABELS[reflection.period]}
           </InfoItem>
           <InfoItem label="Date">{reflection.date}</InfoItem>
+          {template && (
+            <InfoItem label="Template">
+              <a href={`/reflection-templates/${template.id}`}>
+                {template.name}
+              </a>
+            </InfoItem>
+          )}
         </div>
 
         {editing

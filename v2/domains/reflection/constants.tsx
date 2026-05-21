@@ -80,9 +80,11 @@ export const REFLECTION_FORM_FIELDS: FieldDef[] = [
     required: true,
   },
   {
-    type: "text",
+    type: "autocomplete",
     name: "templateId",
-    label: "Template ID (optional)",
+    label: "Template",
+    source: "reflection-templates-by-id",
+    placeholder: "Search templates...",
   },
   {
     type: "textarea",
