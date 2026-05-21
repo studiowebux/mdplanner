@@ -6,6 +6,7 @@ import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { toKebab } from "../utils/slug.ts";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -79,10 +80,14 @@ export const BrainstormDetailView: FC<
         {hasLinks && (
           <div class="detail-section brainstorm-detail__links">
             {brainstorm.linkedProjects?.map((p) => (
-              <span key={p} class="brainstorm-detail__link">
+              <a
+                key={p}
+                href={`/portfolio/${toKebab(p)}`}
+                class="brainstorm-detail__link"
+              >
                 <span class="brainstorm-detail__link-type">Project</span>
                 {p}
-              </span>
+              </a>
             ))}
             {brainstorm.linkedTasks?.map((t) => {
               const info = taskInfo?.get(t) ?? null;
