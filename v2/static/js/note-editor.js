@@ -224,7 +224,48 @@
       // back into typed blocks on save.
       mergeSubBlocksToMarkdown(section);
 
+      if (section.dataset.sectionType === "tabs") {
+        makeTabTitlesEditable(section);
+      }
+
       addSectionAddButtons(section);
+    });
+  }
+
+  // Wire an inline title input into each existing tab bar button so the
+  // user can rename tabs while in edit mode. Mirrors the title input
+  // pattern used by createTabElement for newly added tabs.
+  function makeTabTitlesEditable(section) {
+    qsa("[data-tab-id][role='tab']", section).forEach(function (btn) {
+      if (btn.dataset.titleEditable) return;
+      btn.dataset.titleEditable = "true";
+
+      var tabId = btn.dataset.tabId;
+      var current = btn.dataset.tabTitle || btn.textContent.trim();
+      btn.textContent = "";
+
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "note-editor__tab-title-input";
+      input.value = current;
+      // Prevent the tab-switch click delegate from firing on input
+      // interactions — the surrounding button stays clickable for switching.
+      input.addEventListener("mousedown", function (e) {
+        e.stopPropagation();
+      });
+      input.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+      input.addEventListener("input", function () {
+        var v = this.value;
+        btn.dataset.tabTitle = v;
+        var panel = section.querySelector(
+          '[data-tab-panel="' + tabId + '"]',
+        );
+        if (panel) panel.dataset.tabPanelTitle = v;
+        markDirty();
+      });
+      btn.appendChild(input);
     });
   }
 

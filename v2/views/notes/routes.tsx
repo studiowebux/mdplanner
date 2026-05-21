@@ -9,6 +9,7 @@ import { NoteDetailView } from "../note-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { markdownToHtml } from "../../utils/markdown.ts";
+import { publish } from "../../singletons/event-bus.ts";
 
 export const notesRouter = createDomainRoutes(noteConfig);
 
@@ -20,6 +21,7 @@ notesRouter.put("/:id", async (c) => {
   >();
   const note = await getNoteService().update(id, body as never);
   if (!note) return c.notFound();
+  publish("note.updated");
   return new Response(null, { status: 204 });
 });
 
