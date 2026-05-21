@@ -15,9 +15,10 @@ export const BrainstormDetailView: FC<
   ViewProps & {
     item: Brainstorm;
     taskInfo?: Map<string, { title: string } | null>;
+    goalInfo?: Map<string, { title: string } | null>;
   }
 > = (
-  { item: brainstorm, taskInfo, ...viewProps },
+  { item: brainstorm, taskInfo, goalInfo, ...viewProps },
 ) => {
   const hasTags = brainstorm.tags && brainstorm.tags.length > 0;
   const hasLinks = (brainstorm.linkedProjects?.length ?? 0) > 0 ||
@@ -103,12 +104,26 @@ export const BrainstormDetailView: FC<
                 </a>
               );
             })}
-            {brainstorm.linkedGoals?.map((g) => (
-              <a key={g} href={`/goals/${g}`} class="brainstorm-detail__link">
-                <span class="brainstorm-detail__link-type">Goal</span>
-                {g}
-              </a>
-            ))}
+            {brainstorm.linkedGoals?.map((g) => {
+              const info = goalInfo?.get(g) ?? null;
+              if (!info) {
+                return (
+                  <span
+                    key={g}
+                    class="brainstorm-detail__link brainstorm-detail__link--deleted"
+                  >
+                    <span class="brainstorm-detail__link-type">Goal</span>
+                    [Deleted goal]
+                  </span>
+                );
+              }
+              return (
+                <a key={g} href={`/goals/${g}`} class="brainstorm-detail__link">
+                  <span class="brainstorm-detail__link-type">Goal</span>
+                  {info.title}
+                </a>
+              );
+            })}
           </div>
         )}
 

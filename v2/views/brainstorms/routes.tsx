@@ -5,6 +5,7 @@ import { brainstormConfig } from "../../domains/brainstorm/config.tsx";
 import {
   getBrainstormService,
   getBrainstormTemplateService,
+  getGoalService,
   getTaskService,
 } from "../../singletons/services.ts";
 import { BrainstormDetailView } from "../brainstorm-detail.tsx";
@@ -30,11 +31,22 @@ brainstormsRouter.get("/:id", async (c) => {
     taskInfo.set(tid, t ? { title: t.title } : null);
   });
 
+  const linkedGoalIds = item.linkedGoals ?? [];
+  const resolvedGoals = await Promise.all(
+    linkedGoalIds.map((gid) => getGoalService().getById(gid)),
+  );
+  const goalInfo = new Map<string, { title: string } | null>();
+  linkedGoalIds.forEach((gid, i) => {
+    const g = resolvedGoals[i];
+    goalInfo.set(gid, g ? { title: g.title } : null);
+  });
+
   return c.html(
     <BrainstormDetailView
       {...viewProps(c, "/brainstorms")}
       item={item}
       taskInfo={taskInfo}
+      goalInfo={goalInfo}
     />,
   );
 });
