@@ -21,7 +21,7 @@
     return cs.getPropertyValue(name).trim();
   }
 
-  var C; // color cache, rebuilt on init
+  var C; // color cache — rebuilt every render() so dark-mode toggles take effect
   function buildColors() {
     cs = getComputedStyle(document.documentElement);
     C = {
@@ -35,12 +35,13 @@
       labelMuted: cssVar("--color-text-muted"),
       bgFill: cssVar("--color-bg-primary"),
       fontFamily: cssVar("--font-sans") || "system-ui, sans-serif",
-      // status fills — one per idea status
+      // status fills — subtle background tints per idea status.
+      // *-bg vars are the canonical subtle-tint tokens (defined in both themes).
       statusNew: cssVar("--color-bg-secondary"),
-      statusConsidering: cssVar("--color-info-subtle"),
+      statusConsidering: cssVar("--color-info-bg"),
       statusPlanned: cssVar("--color-accent-subtle"),
-      statusApproved: cssVar("--color-success-subtle"),
-      statusRejected: cssVar("--color-error-subtle"),
+      statusApproved: cssVar("--color-success-bg"),
+      statusRejected: cssVar("--color-error-bg"),
       statusImplemented: cssVar("--color-success"),
       statusCancelled: cssVar("--color-border-default"),
     };
@@ -86,7 +87,6 @@
     ideas = JSON.parse(canvas.dataset.ideas || "[]");
     if (ideas.length === 0) return;
 
-    buildColors();
     resize();
 
     // Build node list with random initial positions
@@ -262,6 +262,10 @@
   }
 
   function render() {
+    // Re-resolve theme colors every frame — canvas does not react to CSS class
+    // changes, so a dark-mode toggle (`html.dark`) only takes effect via re-read.
+    buildColors();
+
     var dpr = devicePixelRatio || 1;
     var w = canvas.width / dpr;
     var h = canvas.height / dpr;
