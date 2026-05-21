@@ -61,6 +61,9 @@
 
   var NODE_R = 28;
   var FONT_SIZE = 11;
+  var MAX_LABEL_WIDTH = 160; // screen px — labels wrap to a 2nd line beyond this
+  var LINE_HEIGHT_FACTOR = 1.15;
+  var MAX_LABEL_LINES = 2;
   var K_REPULSE = 4000;
   var K_SPRING = 0.04;
   var REST_LEN = 120;
@@ -201,6 +204,52 @@
 
   // ── render ────────────────────────────────────────────────────────────────
 
+  // Greedy word-wrap up to MAX_LABEL_LINES. Caller must set ctx.font first.
+  // Returns 1..MAX_LABEL_LINES strings; final line is ellipsized if overflow remains.
+  function wrapLabel(text, maxWidth) {
+    var words = String(text || "").split(/\s+/).filter(Boolean);
+    if (words.length === 0) return [String(text || "")];
+
+    var lines = [];
+    var idx = 0;
+    while (idx < words.length && lines.length < MAX_LABEL_LINES) {
+      var lineText = "";
+      while (idx < words.length) {
+        var cand = lineText ? lineText + " " + words[idx] : words[idx];
+        if (ctx.measureText(cand).width <= maxWidth) {
+          lineText = cand;
+          idx++;
+        } else {
+          break;
+        }
+      }
+      if (!lineText) {
+        // Current word alone overflows — force-fit by ellipsis on this line.
+        lines.push(ellipsize(words[idx], maxWidth));
+        idx++;
+      } else {
+        lines.push(lineText);
+      }
+    }
+
+    // Words still remain — ellipsize the last accepted line with leftover hint.
+    if (idx < words.length) {
+      var tail = lines[lines.length - 1] + " " + words.slice(idx).join(" ");
+      lines[lines.length - 1] = ellipsize(tail, maxWidth);
+    }
+    return lines;
+  }
+
+  // Strip trailing chars until `text + "…"` fits maxWidth. Caller must set ctx.font.
+  function ellipsize(text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    var s = text;
+    while (s.length > 1 && ctx.measureText(s + "…").width > maxWidth) {
+      s = s.slice(0, -1);
+    }
+    return s.replace(/\s+$/, "") + "…";
+  }
+
   function neighborSet(node) {
     var s = {};
     if (!node) return s;
@@ -275,10 +324,14 @@
     });
     ctx.globalAlpha = 1;
 
-    // Pass 3: labels (background rect to mask edges through text)
+    // Pass 3: labels — word-wrap up to MAX_LABEL_LINES, background rect masks
+    // edges through letter gaps (Brain Memory: text glyphs aren't opaque to SVG/canvas siblings).
     ctx.font = FONT_SIZE / zoom + "px " + C.fontFamily;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    var glyphH = FONT_SIZE / zoom;
+    var lineH = glyphH * LINE_HEIGHT_FACTOR;
+    var maxLabelW = MAX_LABEL_WIDTH / zoom;
     nodes.forEach(function (n) {
       var isDragging = n === draggingNode;
       var isHovered = n === hoveredNode;
@@ -286,20 +339,28 @@
       var dimmed = neighbors && !isNeighbor;
 
       ctx.globalAlpha = dimmed ? 0.25 : 1;
-      var label = n.title.length > 18 ? n.title.slice(0, 16) + "…" : n.title;
-      var tw = ctx.measureText(label).width;
+      var lines = wrapLabel(n.title, maxLabelW);
+      var maxLineW = 0;
+      for (var i = 0; i < lines.length; i++) {
+        var lw = ctx.measureText(lines[i]).width;
+        if (lw > maxLineW) maxLineW = lw;
+      }
       var pad = 3 / zoom;
+      var rectH = lineH * (lines.length - 1) + glyphH;
       ctx.fillStyle = isDragging || isHovered
         ? C.nodeHover
         : statusFill(n.status);
       ctx.fillRect(
-        n.x - tw / 2 - pad,
-        n.y - FONT_SIZE / zoom / 2 - pad,
-        tw + pad * 2,
-        FONT_SIZE / zoom + pad * 2,
+        n.x - maxLineW / 2 - pad,
+        n.y - rectH / 2 - pad,
+        maxLineW + pad * 2,
+        rectH + pad * 2,
       );
       ctx.fillStyle = dimmed ? C.labelMuted : C.labelFill;
-      ctx.fillText(label, n.x, n.y);
+      var firstY = n.y - (lineH * (lines.length - 1)) / 2;
+      for (var k = 0; k < lines.length; k++) {
+        ctx.fillText(lines[k], n.x, firstY + k * lineH);
+      }
     });
     ctx.globalAlpha = 1;
 
