@@ -91,9 +91,10 @@ export const REFLECTION_FORM_FIELDS: FieldDef[] = [
     rows: 8,
   },
   {
-    type: "text",
+    type: "tags",
     name: "tags",
-    label: "Tags (comma-separated)",
+    label: "Tags",
+    placeholder: "Add tag and press Enter...",
   },
 ];
 
