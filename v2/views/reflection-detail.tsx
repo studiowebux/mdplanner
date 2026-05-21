@@ -64,10 +64,7 @@ export const ReflectionDetailView: FC<
     <MainLayout
       title={reflection.title}
       {...viewProps}
-      styles={[
-        "/css/views/reflections.css",
-        "/css/views/reflection-templates.css",
-      ]}
+      styles={["/css/views/reflections.css"]}
       scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
@@ -103,15 +100,6 @@ export const ReflectionDetailView: FC<
             </div>
           </div>
           <div class="reflection-detail__header-actions">
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              hx-get={`/reflections/${reflection.id}/template-picker`}
-              hx-target="#reflections-template-picker-container"
-              hx-swap="innerHTML"
-            >
-              Use Template
-            </button>
             <DetailActions
               entity="reflections"
               id={reflection.id}
@@ -146,7 +134,6 @@ export const ReflectionDetailView: FC<
       </main>
 
       <div id="reflections-form-container" />
-      <div id="reflections-template-picker-container" />
     </MainLayout>
   );
 };
