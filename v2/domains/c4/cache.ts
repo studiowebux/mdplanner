@@ -89,7 +89,7 @@ export function registerC4Entity(repo: C4Repository): void {
     schema: SCHEMA,
     migrations: MIGRATIONS,
     fts: {
-      type: "c4_components",
+      type: "c4_component",
       columns: ["id", "name", "type", "description", "technology"],
       titleCol: "name",
       contentCol: "description",

@@ -130,7 +130,7 @@ export function registerLeanCanvasEntity(repo: LeanCanvasRepository): void {
     table: LEAN_CANVAS_TABLE,
     schema: LEAN_CANVAS_SCHEMA,
     fts: {
-      type: "lean-canvas",
+      type: "lean_canvas",
       columns: ["id", "title", "sections_text"],
       titleCol: "title",
       contentCol: "sections_text",

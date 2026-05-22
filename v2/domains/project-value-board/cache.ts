@@ -84,7 +84,7 @@ export function registerProjectValueBoardEntity(
     table: PROJECT_VALUE_BOARD_TABLE,
     schema: SCHEMA,
     fts: {
-      type: "project_value_board",
+      type: "project_value",
       columns: ["id", "title", "notes"],
       titleCol: "title",
       contentCol: "notes",

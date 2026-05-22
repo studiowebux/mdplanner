@@ -72,7 +72,7 @@ export function registerJournalEntity(repo: JournalRepository): void {
     table: JOURNAL_TABLE,
     schema: SCHEMA,
     fts: {
-      type: "journal_entry",
+      type: "journal",
       columns: ["id", "title", "content"],
       titleCol: "title",
       contentCol: "content",

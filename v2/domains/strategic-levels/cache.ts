@@ -74,7 +74,7 @@ export function registerStrategicLevelsEntity(
     table: STRATEGIC_LEVELS_TABLE,
     schema: SCHEMA,
     fts: {
-      type: "strategic_levels",
+      type: "strategic_builder",
       columns: ["id", "title"],
       titleCol: "title",
       contentCol: "title",

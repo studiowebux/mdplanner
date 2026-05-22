@@ -82,7 +82,7 @@ export function registerBillingRateEntity(
     table: BILLING_RATE_TABLE,
     schema: BILLING_RATE_SCHEMA,
     fts: {
-      type: "billing_rate",
+      type: "rate",
       columns: ["id", "name", "notes"],
       titleCol: "name",
       contentCol: "notes",
