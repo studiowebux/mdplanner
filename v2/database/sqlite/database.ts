@@ -29,6 +29,7 @@ function assertTableName(name: string): void {
 export class CacheDatabase {
   private db: DatabaseSync;
   private dbPath: string;
+  private readonly cleanup = () => this.close();
 
   constructor(dbPath: string = ".mdplanner.db") {
     this.dbPath = dbPath;
@@ -38,15 +39,14 @@ export class CacheDatabase {
     this.db.exec("PRAGMA foreign_keys = ON");
 
     // Graceful shutdown — close db on process exit to prevent corruption
-    const cleanup = () => this.close();
-    globalThis.addEventListener("unload", cleanup);
+    globalThis.addEventListener("unload", this.cleanup);
     try {
-      Deno.addSignalListener("SIGINT", cleanup);
+      Deno.addSignalListener("SIGINT", this.cleanup);
     } catch (err) {
       log.warn("[db] SIGINT listener not available:", err);
     }
     try {
-      Deno.addSignalListener("SIGTERM", cleanup);
+      Deno.addSignalListener("SIGTERM", this.cleanup);
     } catch (err) {
       log.warn("[db] SIGTERM listener not available:", err);
     }
@@ -118,6 +118,17 @@ export class CacheDatabase {
   close(): void {
     if (this.closed) return;
     this.closed = true;
+    globalThis.removeEventListener("unload", this.cleanup);
+    try {
+      Deno.removeSignalListener("SIGINT", this.cleanup);
+    } catch (err) {
+      log.warn("[db] SIGINT listener removal failed:", err);
+    }
+    try {
+      Deno.removeSignalListener("SIGTERM", this.cleanup);
+    } catch (err) {
+      log.warn("[db] SIGTERM listener removal failed:", err);
+    }
     this.db.close();
   }
 }
