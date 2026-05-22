@@ -12,6 +12,7 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { LineItemsTable } from "./components/line-items-table.tsx";
 import { BillingTotals } from "./components/billing-totals.tsx";
+import { QuoteLineItemsSection } from "./components/quote-line-items-editor.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -165,16 +166,20 @@ export const QuoteDetailView: FC<
         </div>
 
         {/* -- Line items ------------------------------------------------ */}
-        <section class="detail-section">
-          <h2 class="section-heading">Line Items</h2>
-          <LineItemsTable items={quote.lineItems} showOptional />
-          <BillingTotals
-            subtotal={quote.subtotal}
-            tax={quote.tax}
-            taxRate={quote.taxRate}
-            total={quote.total}
-          />
-        </section>
+        {quote.status === "draft"
+          ? <QuoteLineItemsSection quote={quote} />
+          : (
+            <section class="detail-section">
+              <h2 class="section-heading">Line Items</h2>
+              <LineItemsTable items={quote.lineItems} showOptional />
+              <BillingTotals
+                subtotal={quote.subtotal}
+                tax={quote.tax}
+                taxRate={quote.taxRate}
+                total={quote.total}
+              />
+            </section>
+          )}
 
         {/* -- Payment schedule ------------------------------------------ */}
         {hasSchedule && (

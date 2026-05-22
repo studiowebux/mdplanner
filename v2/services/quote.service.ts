@@ -135,4 +135,55 @@ export class QuoteService extends BaseService<
     }
     return updated;
   }
+
+  // ---------------------------------------------------------------------------
+  // Inline line-item editing (quote detail page) — index-addressed mutations.
+  // Each persists via update({ lineItems }), which recomputes totals.
+  // ---------------------------------------------------------------------------
+
+  /** Set one editable field on a single line item, then recalc totals. */
+  updateLineItemField(
+    quote: Quote,
+    index: number,
+    field: "description" | "quantity" | "unitRate",
+    raw: string,
+  ): Promise<Quote | null> {
+    const lineItems = quote.lineItems.map((li) => ({ ...li }));
+    const item = lineItems[index];
+    if (field === "description") {
+      item.description = raw;
+    } else {
+      const trimmed = raw.trim();
+      item[field] = trimmed === "" ? undefined : Number(trimmed);
+      if (item[field] != null && Number.isNaN(item[field])) {
+        item[field] = undefined;
+      }
+    }
+    return this.update(quote.id, { lineItems });
+  }
+
+  /** Append a blank service line item, then recalc totals. */
+  addLineItem(quote: Quote): Promise<Quote | null> {
+    const lineItems = [
+      ...quote.lineItems.map((li) => ({ ...li })),
+      {
+        id: `li_${crypto.randomUUID().slice(0, 8)}`,
+        type: "service" as const,
+        description: "",
+        quantity: undefined,
+        unit: undefined,
+        unitRate: undefined,
+        amount: 0,
+      },
+    ];
+    return this.update(quote.id, { lineItems });
+  }
+
+  /** Remove a single line item by index, then recalc totals. */
+  removeLineItem(quote: Quote, index: number): Promise<Quote | null> {
+    const lineItems = quote.lineItems
+      .filter((_, i) => i !== index)
+      .map((li) => ({ ...li }));
+    return this.update(quote.id, { lineItems });
+  }
 }

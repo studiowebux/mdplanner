@@ -72,3 +72,72 @@ details[open] .quote-detail__revisions-summary::before {
 .quote-detail__revisions-table {
   margin-top: var(--space-sm);
 }
+
+/* ---------------------------------------------------------------------------
+   Inline line-item editor (draft quotes) — Excel-like click-to-edit cells
+--------------------------------------------------------------------------- */
+
+.qli-cell {
+  padding: var(--space-sm) var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  vertical-align: middle;
+}
+
+.qli-cell--right {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.qli-cell--type {
+  white-space: nowrap;
+}
+
+/* Editable read cell — affords click-to-edit */
+.qli-cell--edit {
+  cursor: text;
+  border-radius: var(--radius-sm);
+}
+
+.qli-cell--edit:hover {
+  background: var(--color-accent-subtle);
+}
+
+.qli-cell__placeholder {
+  color: var(--color-text-muted);
+}
+
+.qli-cell--inert {
+  color: var(--color-text-muted);
+}
+
+/* Editing cell — input fills the cell */
+.qli-cell--editing {
+  padding: 0;
+}
+
+.qli-input {
+  width: 100%;
+  padding: var(--space-sm);
+  border: var(--border-width) solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+}
+
+.qli-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width) var(--color-accent);
+}
+
+.qli-cell--actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.qli-add {
+  margin-top: var(--space-sm);
+}

@@ -10,6 +10,26 @@ import { QuoteDetailView } from "../quote-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import {
+  EDITABLE_LINE_ITEM_FIELDS,
+  type EditableLineItemField,
+  EditCell,
+  LineItemAmountCell,
+  lineItemFieldValue,
+  LineItemReadCell,
+  QuoteLineItemsSection,
+  QuoteTotals,
+} from "../components/quote-line-items-editor.tsx";
+
+/** Reject inline line-item edits on non-draft quotes (HX toast). */
+function notDraftResponse(): Response {
+  return new Response(null, {
+    status: 422,
+    headers: {
+      "HX-Trigger": hxTrigger("error", "Only draft quotes can be edited"),
+    },
+  });
+}
 
 export const quotesRouter = createDomainRoutes(quoteConfig);
 
@@ -181,4 +201,86 @@ quotesRouter.post("/:id/reject", async (c) => {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
   });
+});
+
+// ---------------------------------------------------------------------------
+// Inline line-item editing (draft quotes) — htmx fragment routes.
+// No publish("quote.updated"): the page's own SseRefresh would full-reload the
+// detail root on every save and clobber these cell/OOB swaps.
+// ---------------------------------------------------------------------------
+
+function validField(field: string | undefined): field is EditableLineItemField {
+  return !!field &&
+    EDITABLE_LINE_ITEM_FIELDS.includes(field as EditableLineItemField);
+}
+
+// GET /:id/line-items/:idx/edit?field=… — swap a read cell for its input.
+quotesRouter.get("/:id/line-items/:idx/edit", async (c) => {
+  const id = c.req.param("id");
+  const idx = Number(c.req.param("idx"));
+  const field = c.req.query("field");
+  if (!validField(field)) return c.notFound();
+  const quote = await getQuoteService().getById(id);
+  if (!quote || quote.status !== "draft") return c.notFound();
+  const item = quote.lineItems[idx];
+  if (!item) return c.notFound();
+  return c.html(
+    <EditCell
+      quoteId={id}
+      index={idx}
+      field={field}
+      value={lineItemFieldValue(item, field)}
+    />,
+  );
+});
+
+// POST /:id/line-items/:idx?field=… — save a cell, return read cell + OOB.
+quotesRouter.post("/:id/line-items/:idx", async (c) => {
+  const id = c.req.param("id");
+  const idx = Number(c.req.param("idx"));
+  const field = c.req.query("field");
+  if (!validField(field)) return c.notFound();
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.notFound();
+  if (quote.status !== "draft") return notDraftResponse();
+  if (!quote.lineItems[idx]) return c.notFound();
+  const body = await c.req.parseBody();
+  const raw = typeof body.value === "string" ? body.value : "";
+  const updated = await service.updateLineItemField(quote, idx, field, raw);
+  if (!updated) return c.notFound();
+  const item = updated.lineItems[idx];
+  return c.html(
+    <>
+      <LineItemReadCell quoteId={id} index={idx} field={field} item={item} />
+      <LineItemAmountCell index={idx} amount={item.amount} oob />
+      <QuoteTotals quote={updated} oob />
+    </>,
+  );
+});
+
+// POST /:id/line-items — append a blank row, re-render the section.
+quotesRouter.post("/:id/line-items", async (c) => {
+  const id = c.req.param("id");
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.notFound();
+  if (quote.status !== "draft") return notDraftResponse();
+  const updated = await service.addLineItem(quote);
+  if (!updated) return c.notFound();
+  return c.html(<QuoteLineItemsSection quote={updated} />);
+});
+
+// DELETE /:id/line-items/:idx — remove a row, re-render the section.
+quotesRouter.delete("/:id/line-items/:idx", async (c) => {
+  const id = c.req.param("id");
+  const idx = Number(c.req.param("idx"));
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.notFound();
+  if (quote.status !== "draft") return notDraftResponse();
+  if (!quote.lineItems[idx]) return c.notFound();
+  const updated = await service.removeLineItem(quote, idx);
+  if (!updated) return c.notFound();
+  return c.html(<QuoteLineItemsSection quote={updated} />);
 });
