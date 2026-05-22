@@ -132,8 +132,16 @@ export type DomainConfig<T extends Entity, C, U> = {
   /** Hide the default Grid/Table view toggle buttons. Use when all views are custom. */
   hideDefaultViews?: boolean;
 
-  /** Optional async slot rendered between the toolbar and the view container. */
-  topSlot?: () => Promise<ReturnType<FC>>;
+  /** Optional async slot rendered between the toolbar and the view container.
+   *  Receives the request context so the slot can scope to the current user. */
+  topSlot?: (c: AppContext) => Promise<ReturnType<FC>>;
+
+  /** Per-request item source for the list page. When set, the factory uses it
+   *  instead of `getService().list()` for the full page, /view, and /more
+   *  routes — letting a domain scope or transform items per request (e.g.
+   *  per-user habit completions). The result is still passed through
+   *  applyFilters + applyGlobalFilters. */
+  listForRequest?: (c: AppContext) => Promise<T[]>;
 
   /** Enable server-side pagination. Only the first N items are rendered initially;
    *  scrolling past the sentinel loads the next page via /more?offset=N. */

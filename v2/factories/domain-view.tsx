@@ -583,6 +583,7 @@ export function createDomainPage<T extends Entity>(
     state: DomainFilterState;
     dynamicFilterOptions?: DynamicFilterOptions;
     customContent?: ReturnType<FC>;
+    topSlotContent?: ReturnType<FC>;
     hasMore?: boolean;
     nextOffset?: number;
   };
@@ -595,12 +596,12 @@ export function createDomainPage<T extends Entity>(
       state,
       dynamicFilterOptions,
       customContent,
+      topSlotContent = null,
       hasMore,
       nextOffset,
       ...viewProps
     },
   ) => {
-    const topSlotContent = cfg.topSlot ? await cfg.topSlot() : null;
     const showFilters = hasFilterControls(cfg);
     const activeFilterCount = countActiveFilters(cfg, state);
     // Open when the user expanded it explicitly, or — absent a saved

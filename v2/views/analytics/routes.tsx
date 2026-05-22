@@ -12,6 +12,7 @@ import { viewProps } from "../../middleware/view-props.ts";
 import { readUiState, writeUiState } from "../../utils/ui-state.ts";
 import type { AppVariables } from "../../types/app.ts";
 import { ANONYMOUS_ACTOR } from "../../types/actor.ts";
+import { resolveUserScope } from "../../utils/actor.ts";
 
 export const analyticsViewRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -40,8 +41,9 @@ analyticsViewRouter.get("/", async (c) => {
   );
   const hiddenSections: string[] = uiState.analyticsHiddenSections ?? [];
 
+  const scope = await resolveUserScope(c);
   const [data, allCustomers, allProjects, allPeople] = await Promise.all([
-    getProjectAnalytics(filters),
+    getProjectAnalytics(filters, scope),
     getCustomerService().list(),
     getPortfolioService().list(),
     getPeopleService().list(),
@@ -87,8 +89,9 @@ analyticsViewRouter.post("/customize", async (c) => {
   const person = actor.source !== "anonymous" ? actor.name : undefined;
   const filters = { person: person || undefined };
 
+  const scope = await resolveUserScope(c);
   const [data, allCustomers, allProjects, allPeople] = await Promise.all([
-    getProjectAnalytics(filters),
+    getProjectAnalytics(filters, scope),
     getCustomerService().list(),
     getPortfolioService().list(),
     getPeopleService().list(),

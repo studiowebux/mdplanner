@@ -9,6 +9,7 @@ import {
 import { viewProps } from "../../middleware/view-props.ts";
 import type { AppVariables } from "../../types/app.ts";
 import { MeDashboard } from "../me.tsx";
+import { resolveUserScope } from "../../utils/actor.ts";
 
 export const meRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -42,11 +43,12 @@ meRouter.get("/", async (c) => {
     return d.toLocaleDateString("en-CA");
   })();
 
+  const scope = await resolveUserScope(c);
   const [allTasks, allGoals, allHabits, allJournal, allMeetings] = await Promise
     .all([
       getTaskService().list({ assignee: person.id }),
       getGoalService().list(),
-      getHabitService().list(),
+      getHabitService().listForUser({}, scope),
       getJournalService().list(),
       getMeetingService().list(),
     ]);

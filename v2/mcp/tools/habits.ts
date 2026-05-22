@@ -10,6 +10,7 @@ import {
   UpdateHabitSchema,
 } from "../../types/habit.types.ts";
 import { err, ok } from "../utils.ts";
+import { defaultScope, scopeForUserId } from "../../utils/actor.ts";
 
 export function registerHabitTools(server: McpServer): void {
   const service = getHabitService();
@@ -97,14 +98,23 @@ export function registerHabitTools(server: McpServer): void {
   server.registerTool(
     "mark_habit_complete",
     {
-      description: "Mark a habit as complete for a specific date.",
+      description:
+        "Mark a habit as complete for a specific date. Completions are " +
+        "scoped per user; pass userId to log for a specific person, " +
+        "otherwise the project's default user is used.",
       inputSchema: {
         id: HabitSchema.shape.id.describe("Habit ID"),
         date: z.string().describe("Date to mark complete (YYYY-MM-DD)"),
+        userId: z.string().optional().describe(
+          "Person ID to attribute the completion to (defaults to project default user)",
+        ),
       },
     },
-    async ({ id, date }) => {
-      const item = await service.markComplete(id, date);
+    async ({ id, date, userId }) => {
+      const scope = userId
+        ? await scopeForUserId(userId)
+        : await defaultScope();
+      const item = await service.markComplete(id, date, scope);
       if (!item) return err(`Habit '${id}' not found`);
       return ok({ success: true });
     },
@@ -113,14 +123,23 @@ export function registerHabitTools(server: McpServer): void {
   server.registerTool(
     "unmark_habit_complete",
     {
-      description: "Remove a completion entry for a habit on a specific date.",
+      description:
+        "Remove a completion entry for a habit on a specific date. Completions " +
+        "are scoped per user; pass userId to target a specific person, " +
+        "otherwise the project's default user is used.",
       inputSchema: {
         id: HabitSchema.shape.id.describe("Habit ID"),
         date: z.string().describe("Date to unmark (YYYY-MM-DD)"),
+        userId: z.string().optional().describe(
+          "Person ID whose completion to remove (defaults to project default user)",
+        ),
       },
     },
-    async ({ id, date }) => {
-      const item = await service.unmarkComplete(id, date);
+    async ({ id, date, userId }) => {
+      const scope = userId
+        ? await scopeForUserId(userId)
+        : await defaultScope();
+      const item = await service.unmarkComplete(id, date, scope);
       if (!item) return err(`Habit '${id}' not found`);
       return ok({ success: true });
     },

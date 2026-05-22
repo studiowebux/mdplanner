@@ -75,6 +75,7 @@ export class HabitRepository extends CachedMarkdownRepository<
       typeof entry === "string" ? { date: entry } : {
         date: String((entry as Record<string, unknown>).date ?? ""),
         note: (entry as Record<string, unknown>).note as string | undefined,
+        userId: (entry as Record<string, unknown>).userId as string | undefined,
       }
     );
 

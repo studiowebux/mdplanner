@@ -13,6 +13,7 @@ import { HabitCompletionLog } from "./components/habit-completion-log.tsx";
 import { HabitCard } from "../components/habit-card.tsx";
 import type { Habit } from "../../types/habit.types.ts";
 import { publish } from "../../singletons/event-bus.ts";
+import { resolveUserScope } from "../../utils/actor.ts";
 
 export const habitRouter = createDomainRoutes(habitConfig);
 
@@ -47,7 +48,8 @@ function habitFragment(habit: Habit): string {
 }
 
 async function renderDetail(c: AppContext, id: string) {
-  const item = await getHabitService().getById(id);
+  const scope = await resolveUserScope(c);
+  const item = await getHabitService().getForUser(id, scope);
   if (!item) return c.notFound();
   return c.html(
     <HabitDetailView {...viewProps(c, "/habits")} item={item} />,
@@ -62,7 +64,8 @@ habitRouter.get("/:id", async (c) => {
 habitRouter.delete("/:id/completion/:date", async (c) => {
   const id = c.req.param("id");
   const date = c.req.param("date");
-  const habit = await getHabitService().deleteCompletion(id, date);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().deleteCompletion(id, date, scope);
   if (!habit) return c.notFound();
   publish("habit.updated");
   return c.html(habitFragment(habit), 200);
@@ -75,7 +78,8 @@ habitRouter.post("/:id/toggle-date/:date", async (c) => {
   const note = typeof body.note === "string" && body.note
     ? body.note
     : undefined;
-  const habit = await getHabitService().toggleDate(id, date, note);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().toggleDate(id, date, scope, note);
   if (!habit) return c.notFound();
   publish("habit.updated");
   return c.html(habitFragment(habit), 200);

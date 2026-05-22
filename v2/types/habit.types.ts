@@ -12,6 +12,12 @@ export type HabitFrequency = (typeof HABIT_FREQUENCIES)[number];
 export const CompletionEntrySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   note: z.string().optional(),
+  userId: z.string().optional().openapi({
+    description:
+      "Identifier of the user who logged this completion. Falls back to " +
+      "the project's default_user_id when absent (legacy entries pre-scoping).",
+    example: "person_1771824811363_phhxpx",
+  }),
 }).openapi("CompletionEntry");
 
 export type CompletionEntry = z.infer<typeof CompletionEntrySchema>;

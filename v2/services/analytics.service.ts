@@ -37,6 +37,7 @@ import type {
   TaskStats,
   TimeEntryStats,
 } from "../types/analytics.types.ts";
+import { defaultScope, type UserScope } from "../utils/actor.ts";
 
 function inDateRange(
   date: string | null | undefined,
@@ -357,8 +358,13 @@ async function collectDealStats(
 
 async function collectHabitStats(
   _filters: AnalyticsFilters,
+  scope?: UserScope,
 ): Promise<HabitStats> {
-  const habits = await getHabitService().list();
+  // Completion rate is per-user: count only the acting user's completions.
+  // Without a request scope (e.g. unauthenticated API), fall back to the
+  // project default user, which also owns legacy untagged entries.
+  const userScope = scope ?? await defaultScope();
+  const habits = await getHabitService().listForUser({}, userScope);
   if (habits.length === 0) return { total: 0, completionRateThisMonth: null };
 
   const now = new Date();
@@ -431,6 +437,7 @@ async function collectReflectionStats(
 
 export async function getProjectAnalytics(
   filters: AnalyticsFilters = {},
+  scope?: UserScope,
 ): Promise<AnalyticsData> {
   const [
     tasks,
@@ -463,7 +470,7 @@ export async function getProjectAnalytics(
     collectInvestorStats(filters),
     collectFinanceStats(filters),
     collectDealStats(filters),
-    collectHabitStats(filters),
+    collectHabitStats(filters, scope),
     collectJournalStats(filters),
     collectReflectionStats(filters),
   ]);

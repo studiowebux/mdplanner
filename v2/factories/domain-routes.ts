@@ -296,7 +296,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // Full page
   router.get("/", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
-    const all = await cfg.getService().list();
+    const all = cfg.listForRequest
+      ? await cfg.listForRequest(c)
+      : await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = await applyGlobalFilters(
       applyFilters(all, state, dynamicFilterOptions),
@@ -316,6 +318,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
         c.get("nonce"),
       )
       : undefined;
+    const topSlotContent = cfg.topSlot ? await cfg.topSlot(c) : undefined;
     return c.html(
       await DomainPage({
         ...viewProps(c, cfg.path),
@@ -327,6 +330,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
         state,
         dynamicFilterOptions,
         customContent,
+        topSlotContent,
       }) as unknown as string,
     );
   });
@@ -334,7 +338,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // View fragment
   router.get("/view", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
-    const all = await cfg.getService().list();
+    const all = cfg.listForRequest
+      ? await cfg.listForRequest(c)
+      : await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = await applyGlobalFilters(
       applyFilters(all, state, dynamicFilterOptions),
@@ -389,7 +395,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
       const pageSize = state.limit
         ? parseInt(String(state.limit), 10)
         : cfg.pageSize!;
-      const all = await cfg.getService().list();
+      const all = cfg.listForRequest
+        ? await cfg.listForRequest(c)
+        : await cfg.getService().list();
       const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
       const filtered = await applyGlobalFilters(
         applyFilters(all, state, dynamicFilterOptions),

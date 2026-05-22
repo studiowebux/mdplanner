@@ -156,6 +156,14 @@ export const ProjectConfigSchema = z.object({
       "API keys for programmatic access (MCP, CI, CLI). Stored encrypted in project.md.",
     example: [{ name: "CI Bot", key: "sk-abc123" }],
   }),
+  defaultUserId: z.string().optional().openapi({
+    description:
+      "Person ID treated as the owner of legacy data that pre-dates per-user " +
+      "scoping (e.g. untagged habit completions). Also used as the writer for " +
+      "automated tools that lack an explicit actor (MCP without an explicit " +
+      "userId). When unset, the first person record by name is used.",
+    example: "person_1771824811363_phhxpx",
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -217,6 +225,7 @@ export const FrontmatterProjectSchema = z.object({
   billing_logo_url: z.string().optional(),
   billing_default_footer: z.string().optional(),
   api_keys: z.array(z.unknown()).optional(),
+  default_user_id: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
     const githubToken = fm.github_token
@@ -284,6 +293,7 @@ export const FrontmatterProjectSchema = z.object({
             })),
         )
         : undefined,
+      defaultUserId: fm.default_user_id,
     };
   },
 );

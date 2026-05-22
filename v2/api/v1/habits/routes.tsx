@@ -13,8 +13,10 @@ import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 import { renderToString } from "hono/jsx/dom/server";
 import { HabitHeatmapRow } from "../../../views/habits/components/habit-heatmap.tsx";
 import { HabitCard } from "../../../views/components/habit-card.tsx";
+import { resolveUserScope } from "../../../utils/actor.ts";
+import type { AppVariables } from "../../../types/app.ts";
 
-export const habitApiRouter = new OpenAPIHono();
+export const habitApiRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
 const listHabitsRoute = createRoute({
   method: "get",
@@ -33,7 +35,11 @@ const listHabitsRoute = createRoute({
 
 habitApiRouter.openapi(listHabitsRoute, async (c) => {
   const { frequency, tag, q } = c.req.valid("query");
-  const items = await getHabitService().list({ frequency, tag, q });
+  const scope = await resolveUserScope(c);
+  const items = await getHabitService().listForUser(
+    { frequency, tag, q },
+    scope,
+  );
   return c.json(items, 200);
 });
 
@@ -58,7 +64,8 @@ const getHabitRoute = createRoute({
 
 habitApiRouter.openapi(getHabitRoute, async (c) => {
   const { id } = c.req.valid("param");
-  const habit = await getHabitService().getById(id);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().getForUser(id, scope);
   if (!habit) return c.json(notFound("Habit", id), 404);
   return c.json(habit, 200);
 });
@@ -179,7 +186,8 @@ const markCompleteRoute = createRoute({
 habitApiRouter.openapi(markCompleteRoute, async (c) => {
   const { id } = c.req.valid("param");
   const { date } = c.req.valid("json");
-  const habit = await getHabitService().markComplete(id, date);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().markComplete(id, date, scope);
   if (!habit) return c.json(notFound("Habit", id), 404);
   publish("habit.updated");
   return c.json(habit, 200);
@@ -213,7 +221,8 @@ const unmarkCompleteRoute = createRoute({
 habitApiRouter.openapi(unmarkCompleteRoute, async (c) => {
   const { id } = c.req.valid("param");
   const { date } = c.req.valid("json");
-  const habit = await getHabitService().unmarkComplete(id, date);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().unmarkComplete(id, date, scope);
   if (!habit) return c.json(notFound("Habit", id), 404);
   publish("habit.updated");
   return c.json(habit, 200);
@@ -243,7 +252,8 @@ const toggleDateRoute = createRoute({
 
 habitApiRouter.openapi(toggleDateRoute, async (c) => {
   const { id, date } = c.req.valid("param");
-  const habit = await getHabitService().toggleDate(id, date);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().toggleDate(id, date, scope);
   if (!habit) return c.json(notFound("Habit", id), 404);
   publish("habit.updated");
   const today = new Date().toISOString().slice(0, 10);
@@ -289,7 +299,8 @@ const checkTodayRoute = createRoute({
 habitApiRouter.openapi(checkTodayRoute, async (c) => {
   const { id } = c.req.valid("param");
   const { note } = c.req.valid("json");
-  const habit = await getHabitService().checkToday(id, note);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().checkToday(id, scope, note);
   if (!habit) return c.json(notFound("Habit", id), 404);
   publish("habit.updated");
   const res = c.html(renderToString(<HabitCard item={habit} />), 200);
@@ -321,7 +332,8 @@ const deleteCompletionRoute = createRoute({
 
 habitApiRouter.openapi(deleteCompletionRoute, async (c) => {
   const { id, date } = c.req.valid("param");
-  const habit = await getHabitService().deleteCompletion(id, date);
+  const scope = await resolveUserScope(c);
+  const habit = await getHabitService().deleteCompletion(id, date, scope);
   if (!habit) return c.json(notFound("Habit", id), 404);
   publish("habit.updated");
   return new Response(null, { status: 204 });

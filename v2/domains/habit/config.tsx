@@ -16,6 +16,7 @@ import {
 import { HabitCard } from "../../views/components/habit-card.tsx";
 import { HabitHeatmap } from "../../views/habits/components/habit-heatmap.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
+import { resolveUserScope } from "../../utils/actor.ts";
 
 export const habitConfig: DomainConfig<Habit, CreateHabit, UpdateHabit> = {
   name: "habits",
@@ -40,8 +41,17 @@ export const habitConfig: DomainConfig<Habit, CreateHabit, UpdateHabit> = {
     },
   ],
 
-  topSlot: async () => {
-    const habits = await getHabitService().list();
+  // Per-user scoping: the list grid + heatmap show only the current user's
+  // completions. Both go through listForUser so streaks/this-month/today on
+  // each card and the heatmap reflect the acting user, not all users combined.
+  listForRequest: async (c) => {
+    const scope = await resolveUserScope(c);
+    return getHabitService().listForUser({}, scope);
+  },
+
+  topSlot: async (c) => {
+    const scope = await resolveUserScope(c);
+    const habits = await getHabitService().listForUser({}, scope);
     return <HabitHeatmap habits={habits} />;
   },
 

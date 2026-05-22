@@ -17,6 +17,36 @@ This is trust-based — no password is required. It is designed for small,
 trusted teams on a private network. Do not expose MD Planner to the public
 internet without an additional access layer (VPN, reverse proxy with auth, etc.).
 
+## Per-user data scoping
+
+Some data is private to the person who created it. Habit completions (and the
+streaks, monthly totals, and heatmaps derived from them) are scoped to the
+selected identity — each person sees and toggles only their own completions,
+even though all people share the same habit definitions.
+
+The acting user is the identity chosen at `/identity` (or, for the REST API, the
+`X-Api-Key` holder). Completions are tagged with that user's id.
+
+### `default_user_id`
+
+Set `default_user_id` in `project.md` to a person id. It serves two purposes:
+
+- **Legacy data.** Habit completions logged before per-user scoping carry no
+  user id. They are attributed to the default user, so that person's history is
+  preserved after upgrading.
+- **Automation fallback.** Unattended writers without an explicit user — the
+  MCP `mark_habit_complete` / `unmark_habit_complete` tools when called without
+  a `userId`, and unauthenticated API calls — write as the default user.
+
+```yaml
+---
+default_user_id: person_1771824811363_phhxpx
+---
+```
+
+When unset, the first person in the registry (alphabetical by name) is used.
+For single-person installs this is automatic and needs no configuration.
+
 ## MCP token
 
 Protect the `/mcp` endpoint with a bearer token:

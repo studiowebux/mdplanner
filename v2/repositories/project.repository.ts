@@ -93,6 +93,9 @@ export class ProjectRepository {
     if (config.billingDefaultFooter !== undefined) {
       fm.billing_default_footer = config.billingDefaultFooter || undefined;
     }
+    if (config.defaultUserId !== undefined) {
+      fm.default_user_id = config.defaultUserId || undefined;
+    }
     fm.last_updated = new Date().toISOString();
 
     let body = `# ${config.name}`;
