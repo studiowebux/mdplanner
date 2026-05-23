@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { BrainstormTemplate } from "../types/brainstorm-template.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -24,6 +25,12 @@ export const BrainstormTemplateDetailView: FC<
         targetId="btemplate-detail-root"
       />
       <main id="btemplate-detail-root" class="detail-view btemplate-detail">
+        <Breadcrumb
+          items={[
+            { label: "Brainstorm Templates", href: "/brainstorm-templates" },
+            { label: template.name },
+          ]}
+        />
         <BackButton
           href="/brainstorm-templates"
           label="Back to Brainstorm Templates"

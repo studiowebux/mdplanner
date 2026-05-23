@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Customer } from "../types/customer.types.ts";
 import type { Quote } from "../types/quote.types.ts";
 import type { Invoice } from "../types/invoice.types.ts";
@@ -222,6 +223,12 @@ export const CustomerDetailView: FC<
         targetId="customer-detail-root"
       />
       <main id="customer-detail-root" class="detail-view customer-detail">
+        <Breadcrumb
+          items={[
+            { label: "Customers", href: "/customers" },
+            { label: customer.name },
+          ]}
+        />
         <BackButton href="/customers" label="Back to Customers" />
 
         {/* -- Header ---------------------------------------------------- */}

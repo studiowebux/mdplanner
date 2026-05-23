@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Mindmap } from "../types/mindmap.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
@@ -33,6 +34,12 @@ export const MindmapDetailView: FC<
         targetId="mindmap-detail-root"
       />
       <main id="mindmap-detail-root" class="detail-view mindmap-detail">
+        <Breadcrumb
+          items={[
+            { label: "Mindmaps", href: "/mindmaps" },
+            { label: item.title },
+          ]}
+        />
         <BackButton href="/mindmaps" label="Back to Mindmaps" />
 
         <header class="detail-section detail-header mindmap-detail__header">

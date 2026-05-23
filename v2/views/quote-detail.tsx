@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Quote, QuoteRevision } from "../types/quote.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import type { ProjectConfig } from "../types/project.types.ts";
@@ -45,6 +46,12 @@ export const QuoteDetailView: FC<
         targetId="quote-detail-root"
       />
       <main id="quote-detail-root" class="detail-view quote-detail">
+        <Breadcrumb
+          items={[
+            { label: "Quotes", href: "/quotes" },
+            { label: quote.number },
+          ]}
+        />
         <BackButton href="/quotes" label="Back to Quotes" />
 
         <BillingDocumentHeader config={billingConfig} />

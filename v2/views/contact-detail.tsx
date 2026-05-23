@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Contact } from "../types/contact.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -30,6 +31,12 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
         targetId="contact-detail-root"
       />
       <main id="contact-detail-root" class="detail-view contact-detail">
+        <Breadcrumb
+          items={[
+            { label: "Contacts", href: "/contacts" },
+            { label: contact.name },
+          ]}
+        />
         <BackButton href="/contacts" label="Back to Contacts" />
 
         <header class="detail-section detail-header contact-detail__header">

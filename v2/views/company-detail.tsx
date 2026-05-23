@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Company } from "../types/company.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -30,6 +31,12 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
         targetId="company-detail-root"
       />
       <main id="company-detail-root" class="detail-view company-detail">
+        <Breadcrumb
+          items={[
+            { label: "Companies", href: "/companies" },
+            { label: company.name },
+          ]}
+        />
         <BackButton href="/companies" label="Back to Companies" />
 
         <header class="detail-section detail-header company-detail__header">

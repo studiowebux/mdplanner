@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Finance } from "../types/finance.types.ts";
 import { FINANCE_TYPE_LABELS } from "../types/finance.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -30,6 +31,12 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
         targetId="finance-detail-root"
       />
       <main id="finance-detail-root" class="detail-view finance-detail">
+        <Breadcrumb
+          items={[
+            { label: "Finances", href: "/finances" },
+            { label: finance.title },
+          ]}
+        />
         <BackButton href="/finances" label="Back to Finances" />
 
         <header class="detail-section detail-header finance-detail__header">

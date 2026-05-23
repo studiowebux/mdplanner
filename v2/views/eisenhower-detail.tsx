@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Eisenhower } from "../types/eisenhower.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
@@ -39,6 +40,12 @@ export const EisenhowerDetailView: FC<
           editing ? " eisenhower-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Eisenhower Matrices", href: "/eisenhower" },
+            { label: e.title },
+          ]}
+        />
         <BackButton href="/eisenhower" label="Back to Eisenhower Matrices" />
 
         {/* -- Header ---------------------------------------------------- */}

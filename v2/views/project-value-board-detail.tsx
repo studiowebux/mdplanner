@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { ProjectValueBoard } from "../types/project-value-board.types.ts";
 import {
   PROJECT_VALUE_BOARD_SECTION_KEYS,
@@ -131,6 +132,12 @@ export const ProjectValueBoardDetailView: FC<
         id="pv-detail-root"
         class={`detail-view pv-detail${editing ? " pv-detail--editing" : ""}`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Value Boards", href: "/project-value" },
+            { label: board.title },
+          ]}
+        />
         <BackButton href="/project-value" label="Back to Value Boards" />
 
         {/* -- Header ------------------------------------------------------- */}

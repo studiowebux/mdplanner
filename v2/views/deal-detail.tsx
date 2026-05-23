@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Deal } from "../types/deal.types.ts";
 import { DEAL_STAGE_LABELS } from "../types/deal.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -30,6 +31,12 @@ export const DealDetailView: FC<ViewProps & { item: Deal }> = (
         targetId="deal-detail-root"
       />
       <main id="deal-detail-root" class="detail-view deal-detail">
+        <Breadcrumb
+          items={[
+            { label: "Deals", href: "/deals" },
+            { label: deal.title },
+          ]}
+        />
         <BackButton href="/deals" label="Back to Deals" />
 
         <header class="detail-section detail-header deal-detail__header">

@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Risk } from "../types/risk.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
@@ -29,6 +30,12 @@ export const RiskDetailView: FC<ViewProps & { item: Risk }> = (
         targetId="risk-detail-root"
       />
       <main id="risk-detail-root" class="detail-view risk-detail">
+        <Breadcrumb
+          items={[
+            { label: "Risks", href: "/risks" },
+            { label: risk.title },
+          ]}
+        />
         <BackButton href="/risks" label="Back to Risks" />
 
         {/* -- Header ---------------------------------------------------- */}

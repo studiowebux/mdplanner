@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Brief } from "../types/brief.types.ts";
 import { BRIEF_SECTIONS } from "../types/brief.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -55,6 +56,12 @@ export const BriefDetailView: FC<
         targetId="brief-detail-root"
       />
       <main id="brief-detail-root" class="detail-view brief-detail">
+        <Breadcrumb
+          items={[
+            { label: "Briefs", href: "/briefs" },
+            { label: brief.title },
+          ]}
+        />
         <BackButton href="/briefs" label="Back to Briefs" />
 
         {/* -- Header ---------------------------------------------------- */}

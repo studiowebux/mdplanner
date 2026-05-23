@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -720,6 +721,12 @@ export const CapacityPlanDetailView: FC<
       id="capacity-plan-detail-root"
       class="detail-view capacity-plan-detail"
     >
+      <Breadcrumb
+        items={[
+          { label: "Capacity Plans", href: "/capacity-plans" },
+          { label: plan.title },
+        ]}
+      />
       <BackButton href="/capacity-plans" label="Back to Capacity Plans" />
 
       <header class="detail-section detail-header capacity-plan-detail__header">

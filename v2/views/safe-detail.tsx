@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Safe } from "../types/safe.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -25,6 +26,12 @@ export const SafeDetailView: FC<ViewProps & { item: Safe }> = (
         targetId="safe-detail-root"
       />
       <main id="safe-detail-root" class="detail-view safe-detail">
+        <Breadcrumb
+          items={[
+            { label: "SAFEs", href: "/safe" },
+            { label: safe.investor },
+          ]}
+        />
         <BackButton href="/safe" label="Back to SAFEs" />
 
         {/* -- Header ---------------------------------------------------- */}

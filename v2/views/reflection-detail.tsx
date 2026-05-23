@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Reflection } from "../types/reflection.types.ts";
 import { REFLECTION_PERIOD_LABELS } from "../types/reflection.types.ts";
 import type { ReflectionTemplate } from "../types/reflection-template.types.ts";
@@ -86,6 +87,12 @@ export const ReflectionDetailView: FC<
           editing ? " reflection-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Reflections", href: "/reflections" },
+            { label: reflection.title },
+          ]}
+        />
         <BackButton href="/reflections" label="Back to Reflections" />
 
         <header class="detail-section detail-header reflection-detail__header">

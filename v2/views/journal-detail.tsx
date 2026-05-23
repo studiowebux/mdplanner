@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { JournalEntry } from "../types/journal.types.ts";
 import { JOURNAL_MOOD_LABELS } from "../types/journal.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -77,6 +78,12 @@ export const JournalDetailView: FC<
         editing ? " journal-detail--editing" : ""
       }`}
     >
+      <Breadcrumb
+        items={[
+          { label: "Journal", href: "/journal" },
+          { label: entry.title },
+        ]}
+      />
       <BackButton href="/journal" label="Back to Journal" />
 
       <header class="detail-section detail-header journal-detail__header">

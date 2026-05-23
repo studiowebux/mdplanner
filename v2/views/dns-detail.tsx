@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { DnsDomain } from "../types/dns.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -148,6 +149,12 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
       targetId="dns-detail-root"
     />
     <main id="dns-detail-root" class="detail-view dns-detail">
+      <Breadcrumb
+        items={[
+          { label: "DNS", href: "/dns" },
+          { label: domain.domain },
+        ]}
+      />
       <BackButton href="/dns" label="Back to DNS" />
 
       <header class="detail-section detail-header dns-detail__header">

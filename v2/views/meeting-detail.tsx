@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { renderToString } from "hono/jsx/dom/server";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { AutocompleteWidget } from "../components/ui/autocomplete-widget.tsx";
 import type {
   Meeting,
@@ -364,6 +365,12 @@ export const MeetingDetailView: FC<
         targetId="meeting-detail-root"
       />
       <main id="meeting-detail-root" class="detail-view meeting-detail">
+        <Breadcrumb
+          items={[
+            { label: "Meetings", href: "/meetings" },
+            { label: meeting.title },
+          ]}
+        />
         <BackButton href="/meetings" label="Back to Meetings" />
 
         {/* -- Header ----------------------------------------------------- */}

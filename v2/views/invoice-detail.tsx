@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Invoice } from "../types/invoice.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import type { ProjectConfig } from "../types/project.types.ts";
@@ -44,6 +45,12 @@ export const InvoiceDetailView: FC<
         targetId="invoice-detail-root"
       />
       <main id="invoice-detail-root" class="detail-view invoice-detail">
+        <Breadcrumb
+          items={[
+            { label: "Invoices", href: "/invoices" },
+            { label: invoice.number },
+          ]}
+        />
         <BackButton href="/invoices" label="Back to Invoices" />
 
         <BillingDocumentHeader config={billingConfig} />

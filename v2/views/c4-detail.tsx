@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { C4Component, C4Connection } from "../types/c4.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { C4_LEVEL_LABELS } from "../domains/c4/constants.tsx";
@@ -41,6 +42,12 @@ export const C4DetailView: FC<Props> = ({
         targetId="c4-detail-root"
       />
       <main id="c4-detail-root" class="detail-view c4-detail">
+        <Breadcrumb
+          items={[
+            { label: "C4", href: "/c4" },
+            { label: component.name },
+          ]}
+        />
         <BackButton
           href={`/c4?level=${component.level}${
             component.parent ? `&parent=${component.parent}` : ""

@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { BusinessModel } from "../types/business-model.types.ts";
 import {
   BUSINESS_MODEL_SECTION_KEYS,
@@ -110,6 +111,12 @@ export const BusinessModelDetailView: FC<
         id="bmc-detail-root"
         class={`detail-view bmc-detail${editing ? " bmc-detail--editing" : ""}`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Business Models", href: "/business-models" },
+            { label: bmc.title },
+          ]}
+        />
         <BackButton href="/business-models" label="Back to Business Models" />
 
         {/* -- Header ------------------------------------------------------- */}

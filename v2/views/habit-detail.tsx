@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Habit } from "../types/habit.types.ts";
 import { HABIT_FREQUENCY_LABELS } from "../types/habit.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -30,6 +31,12 @@ export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
         targetId="habit-detail-root"
       />
       <main id="habit-detail-root" class="detail-view habit-detail">
+        <Breadcrumb
+          items={[
+            { label: "Habits", href: "/habits" },
+            { label: habit.title },
+          ]}
+        />
         <BackButton href="/habits" label="Back to Habits" />
 
         <header class="detail-section detail-header habit-detail__header">

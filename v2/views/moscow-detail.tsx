@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Moscow } from "../types/moscow.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
@@ -44,6 +45,12 @@ export const MoscowDetailView: FC<
           editing ? " moscow-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "MoSCoW Analyses", href: "/moscow" },
+            { label: moscow.title },
+          ]}
+        />
         <BackButton href="/moscow" label="Back to MoSCoW Analyses" />
 
         {/* -- Header ---------------------------------------------------- */}

@@ -6,6 +6,7 @@ import type { Task } from "../types/task.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
@@ -35,6 +36,12 @@ export const MilestoneDetailView: FC<Props> = (
         targetId="milestone-detail-root"
       />
       <main id="milestone-detail-root" class="detail-view milestone-detail">
+        <Breadcrumb
+          items={[
+            { label: "Milestones", href: "/milestones" },
+            { label: milestone.name },
+          ]}
+        />
         <BackButton href="/milestones" label="Back to milestones" />
         <header class="detail-section detail-header milestone-detail__header">
           <div class="detail-title-row milestone-detail__title-row">

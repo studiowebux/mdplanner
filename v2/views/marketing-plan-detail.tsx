@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { MarketingPlan } from "../types/marketing-plan.types.ts";
 import type { Goal } from "../types/goal.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -144,6 +145,12 @@ export const MarketingPlanDetailView: FC<
           editing ? " mktplan-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Marketing Plans", href: "/marketing-plans" },
+            { label: plan.name },
+          ]}
+        />
         <BackButton href="/marketing-plans" label="Back to Marketing Plans" />
 
         {/* -- Header ---------------------------------------------------- */}

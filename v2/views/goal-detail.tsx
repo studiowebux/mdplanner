@@ -10,6 +10,7 @@ import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -82,6 +83,12 @@ export const GoalDetailView: FC<
         targetId="goal-detail-root"
       />
       <main id="goal-detail-root" class="detail-view goal-detail">
+        <Breadcrumb
+          items={[
+            { label: "Goals", href: "/goals" },
+            { label: goal.title },
+          ]}
+        />
         <BackButton href="/goals" label="Back to Goals" />
 
         {/* ── Header ─────────────────────────────────────────────── */}

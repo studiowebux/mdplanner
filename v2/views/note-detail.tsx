@@ -8,6 +8,7 @@ import type { ViewProps } from "../types/app.ts";
 import { NoteBlocks } from "./components/note-blocks.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -45,6 +46,12 @@ export const NoteDetailView: FC<Props> = (props) => {
           id="note-detail-root"
           data-note-id={note.id}
         >
+          <Breadcrumb
+            items={[
+              { label: "Notes", href: "/notes" },
+              { label: note.title },
+            ]}
+          />
           <div class="note-detail__top-bar">
             <a href="/notes" class="btn btn--secondary">Back to notes</a>
             <div class="note-detail__top-bar-actions">

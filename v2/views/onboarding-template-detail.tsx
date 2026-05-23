@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { OnboardingTemplate } from "../types/onboarding-template.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -24,6 +25,12 @@ export const OnboardingTemplateDetailView: FC<
       id="onboarding-template-detail-root"
       class="detail-view onboarding-template-detail"
     >
+      <Breadcrumb
+        items={[
+          { label: "Onboarding Templates", href: "/onboarding-templates" },
+          { label: tmpl.name },
+        ]}
+      />
       <BackButton
         href="/onboarding-templates"
         label="Back to Onboarding Templates"

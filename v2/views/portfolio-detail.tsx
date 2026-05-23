@@ -10,6 +10,7 @@ import { GitHubSection } from "./github.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -123,6 +124,12 @@ export const PortfolioDetailView: FC<Props> = (
         targetId="portfolio-detail-root"
       />
       <main id="portfolio-detail-root" class="detail-view portfolio-detail">
+        <Breadcrumb
+          items={[
+            { label: "Portfolio", href: "/portfolio" },
+            { label: item.name },
+          ]}
+        />
         <BackButton href="/portfolio" label="Back to portfolio" />
 
         <header class="detail-section detail-header portfolio-detail__header">

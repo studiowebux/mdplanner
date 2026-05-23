@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Retrospective } from "../types/retrospective.types.ts";
 import { RETROSPECTIVE_SECTIONS } from "../types/retrospective.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -43,6 +44,12 @@ export const RetrospectiveDetailView: FC<
           editing ? " retro-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Retrospectives", href: "/retrospectives" },
+            { label: retro.title },
+          ]}
+        />
         <BackButton href="/retrospectives" label="Back to Retrospectives" />
 
         {/* -- Header ---------------------------------------------------- */}

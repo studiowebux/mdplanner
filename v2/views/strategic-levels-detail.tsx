@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { StrategicLevelsBuilder } from "../types/strategic-levels.types.ts";
 import { LEVEL_ORDER } from "../types/strategic-levels.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -38,6 +39,12 @@ export const StrategicLevelsDetailView: FC<
         id="sl-detail-root"
         class={`detail-view sl-detail${editing ? " sl-detail--editing" : ""}`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Strategic Levels", href: "/strategic-levels" },
+            { label: builder.title },
+          ]}
+        />
         <BackButton href="/strategic-levels" label="Back to Strategic Levels" />
 
         <header class="detail-section detail-header sl-detail__header">

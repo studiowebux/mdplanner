@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Payment } from "../types/payment.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
@@ -33,6 +34,12 @@ export const PaymentDetailView: FC<
         targetId="payment-detail-root"
       />
       <main id="payment-detail-root" class="detail-view payment-detail">
+        <Breadcrumb
+          items={[
+            { label: "Payments", href: "/payments" },
+            { label: payment.reference ?? payment.id },
+          ]}
+        />
         <BackButton href="/payments" label="Back to Payments" />
 
         {/* -- Header ---------------------------------------------------- */}

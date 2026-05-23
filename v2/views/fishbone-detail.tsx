@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Fishbone } from "../types/fishbone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
@@ -32,6 +33,12 @@ export const FishboneDetailView: FC<
           editing ? " fishbone-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Fishbone Diagrams", href: "/fishbones" },
+            { label: fishbone.title },
+          ]}
+        />
         <BackButton href="/fishbones" label="Back to Fishbone Diagrams" />
 
         {/* -- Header ---------------------------------------------------- */}

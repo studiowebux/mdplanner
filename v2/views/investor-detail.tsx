@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Investor } from "../types/investor.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -32,6 +33,12 @@ export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
         targetId="investor-detail-root"
       />
       <main id="investor-detail-root" class="detail-view investor-detail">
+        <Breadcrumb
+          items={[
+            { label: "Investors", href: "/investors" },
+            { label: investor.name },
+          ]}
+        />
         <BackButton href="/investors" label="Back to Investors" />
 
         <header class="detail-section detail-header investor-detail__header">

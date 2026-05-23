@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { LeanCanvas } from "../types/lean-canvas.types.ts";
 import {
   LEAN_CANVAS_SECTIONS,
@@ -106,6 +107,12 @@ export const LeanCanvasDetailView: FC<
         id="lc-detail-root"
         class={`detail-view lc-detail${editing ? " lc-detail--editing" : ""}`}
       >
+        <Breadcrumb
+          items={[
+            { label: "Lean Canvases", href: "/lean-canvases" },
+            { label: lc.title },
+          ]}
+        />
         <BackButton href="/lean-canvases" label="Back to Lean Canvases" />
 
         {/* -- Header ------------------------------------------------------- */}

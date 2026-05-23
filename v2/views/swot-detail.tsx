@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Swot } from "../types/swot.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
@@ -46,6 +47,12 @@ export const SwotDetailView: FC<
           editing ? " swot-detail--editing" : ""
         }`}
       >
+        <Breadcrumb
+          items={[
+            { label: "SWOT Analyses", href: "/swot" },
+            { label: swot.title },
+          ]}
+        />
         <BackButton href="/swot" label="Back to SWOT Analyses" />
 
         {/* -- Header ---------------------------------------------------- */}

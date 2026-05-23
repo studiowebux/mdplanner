@@ -21,6 +21,7 @@ import {
   getTaskService,
 } from "../singletons/services.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { type MentionOpts, parseMentions } from "../utils/mentions.ts";
@@ -403,6 +404,12 @@ export const TaskDetailView: FC<Props> = (
       />
       <main id="task-detail-root" class="detail-view task-detail">
         {/* Back link */}
+        <Breadcrumb
+          items={[
+            { label: "Tasks", href: "/tasks" },
+            { label: task.title },
+          ]}
+        />
         <BackButton href="/tasks" label="Back to tasks" />
 
         {/* Quick actions bar — move, assign, then mark complete last */}

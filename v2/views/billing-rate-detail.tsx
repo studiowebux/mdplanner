@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { BillingRate } from "../types/billing-rate.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -34,6 +35,12 @@ export const BillingRateDetailView: FC<
         id="billing-rate-detail-root"
         class="detail-view billing-rate-detail"
       >
+        <Breadcrumb
+          items={[
+            { label: "Billing Rates", href: "/billing-rates" },
+            { label: rate.name },
+          ]}
+        />
         <BackButton href="/billing-rates" label="Back to Billing Rates" />
 
         {/* -- Header ---------------------------------------------------- */}

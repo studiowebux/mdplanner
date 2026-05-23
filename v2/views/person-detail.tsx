@@ -5,6 +5,7 @@ import type { Retrospective } from "../types/retrospective.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import {
   PERSON_STATUS_VARIANTS,
@@ -39,6 +40,12 @@ export const PersonDetailView: FC<Props> = (
         styles={["/css/views/people.css"]}
       >
         <main id="person-detail" class="detail-view person-detail">
+          <Breadcrumb
+            items={[
+              { label: "People", href: "/people" },
+              { label: person.name },
+            ]}
+          />
           <BackButton href="/people" label="Back to people" />
 
           <header class="detail-header person-detail__header">

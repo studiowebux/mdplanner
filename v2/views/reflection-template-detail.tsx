@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { ReflectionTemplate } from "../types/reflection-template.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -24,6 +25,12 @@ export const ReflectionTemplateDetailView: FC<
         targetId="rtemplate-detail-root"
       />
       <main id="rtemplate-detail-root" class="detail-view rtemplate-detail">
+        <Breadcrumb
+          items={[
+            { label: "Reflection Templates", href: "/reflection-templates" },
+            { label: template.name },
+          ]}
+        />
         <BackButton
           href="/reflection-templates"
           label="Back to Reflection Templates"
