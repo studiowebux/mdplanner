@@ -54,6 +54,10 @@ export const IdeaSchema = z.object({
   project: z.string().nullable().optional().openapi({
     description: "Linked project name",
   }),
+  submittedBy: z.string().nullable().optional().openapi({
+    description: "Person who submitted the idea (name)",
+    example: "Alice",
+  }),
   startDate: z.string().nullable().optional().openapi({
     description: "Planned start date (YYYY-MM-DD)",
     example: "2026-04-01",
@@ -97,6 +101,7 @@ export const CreateIdeaSchema = IdeaSchema.pick({
   category: true,
   priority: true,
   project: true,
+  submittedBy: true,
   startDate: true,
   endDate: true,
   resources: true,

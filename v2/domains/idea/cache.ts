@@ -24,6 +24,7 @@ export function rowToIdea(row: Record<string, string | number | null>): Idea {
     category: row.category as string | undefined,
     priority: row.priority as Idea["priority"] | undefined,
     project: row.project as string | undefined,
+    submittedBy: row.submitted_by as string | undefined,
     startDate: row.start_date as string | undefined,
     endDate: row.end_date as string | undefined,
     resources: row.resources as string | undefined,
@@ -47,6 +48,7 @@ const IDEA_SCHEMA = `CREATE TABLE IF NOT EXISTS ${IDEA_TABLE} (
   category TEXT,
   priority TEXT,
   project TEXT,
+  submitted_by TEXT,
   start_date TEXT,
   end_date TEXT,
   resources TEXT,
@@ -68,10 +70,10 @@ function insertIdeaRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${IDEA_TABLE} (id, title, description, status,
-       category, priority, project, start_date, end_date, resources,
+       category, priority, project, submitted_by, start_date, end_date, resources,
        subtasks, links, implemented_at, cancelled_at,
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(i.id),
       val(i.title),
@@ -80,6 +82,7 @@ function insertIdeaRow(
       val(i.category),
       val(i.priority),
       val(i.project),
+      val(i.submittedBy),
       val(i.startDate),
       val(i.endDate),
       val(i.resources),
@@ -104,6 +107,9 @@ export function registerIdeaEntity(repo: IdeaRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
+    migrations: [
+      `ALTER TABLE ${IDEA_TABLE} ADD COLUMN submitted_by TEXT`,
+    ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();
       for (const i of items) insertIdeaRow(db, i, syncedAt);

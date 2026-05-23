@@ -3,6 +3,7 @@ id: idea_darkmode
 title: Dark Mode
 status: approved
 category: enhancement
+submitted_by: Charlie
 created_at: 2026-01-10
 links: []
 ---

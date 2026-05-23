@@ -27,19 +27,21 @@ export const IdeaDetailView: FC<
     item: Idea;
     linkedIdeas?: { id: string; title: string }[];
     backlinks?: { id: string; title: string }[];
+    submittedByPerson?: { id: string; name: string } | null;
   }
 > = (
   {
     item: idea,
     linkedIdeas = [],
     backlinks = [],
+    submittedByPerson = null,
     ...viewProps
   },
 ) => {
   const isCompleted = IDEA_COMPLETED_STATUSES.has(idea.status);
 
   const hasOverview = idea.category || idea.priority || idea.project ||
-    idea.resources;
+    idea.resources || idea.submittedBy;
   const hasTimeline = idea.startDate || idea.endDate || idea.implementedAt ||
     idea.cancelledAt;
   const hasSubtasks = (idea.subtasks?.length ?? 0) > 0;
@@ -105,6 +107,17 @@ export const IdeaDetailView: FC<
                 <a href={`/portfolio/${toKebab(idea.project)}`}>
                   {idea.project}
                 </a>
+              </InfoItem>
+            )}
+            {idea.submittedBy && (
+              <InfoItem label="Idea by">
+                {submittedByPerson
+                  ? (
+                    <a href={`/people/${submittedByPerson.id}`}>
+                      {idea.submittedBy}
+                    </a>
+                  )
+                  : idea.submittedBy}
               </InfoItem>
             )}
             {idea.resources && (

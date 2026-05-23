@@ -115,6 +115,7 @@ id: idea_templates
 title: Project Templates
 status: approved
 category: feature
+submitted_by: Alice
 created: 2026-01-15
 links: [idea_ai, idea_onboarding]
 ---

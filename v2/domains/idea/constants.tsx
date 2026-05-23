@@ -71,6 +71,7 @@ export const IDEA_TABLE_COLUMNS: ColumnDef[] = [
       );
     },
   },
+  { key: "submittedBy", label: "Idea by", sortable: true },
   {
     key: "project",
     label: "Project",
@@ -142,6 +143,13 @@ export const IDEA_FORM_FIELDS: FieldDef[] = [
   },
   {
     type: "autocomplete",
+    name: "submittedBy",
+    label: "Idea by",
+    source: "people-names",
+    placeholder: "Who submitted this idea?",
+  },
+  {
+    type: "autocomplete",
     name: "project",
     label: "Project",
     source: "portfolio",
@@ -178,6 +186,7 @@ export function ideaToRow(i: Idea): Record<string, unknown> {
     status: i.status,
     category: i.category ?? "",
     priority: i.priority ?? "",
+    submittedBy: i.submittedBy ?? "",
     project: i.project ?? "",
     startDate: i.startDate ?? "",
     endDate: i.endDate ?? "",

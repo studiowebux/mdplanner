@@ -4,6 +4,7 @@ title: Workflow Automation
 status: planned
 category: feature
 priority: medium
+submitted_by: Bob
 start_date: "2026-05-01"
 end_date: "2026-07-31"
 resources: 1 dev, n8n license

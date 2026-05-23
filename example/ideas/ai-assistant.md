@@ -4,6 +4,7 @@ title: AI Task Assistant
 status: considering
 category: feature
 priority: high
+submitted_by: Alice
 start_date: "2026-04-01"
 end_date: "2026-06-30"
 resources: 2 devs, API budget

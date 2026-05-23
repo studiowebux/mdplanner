@@ -2,9 +2,10 @@
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { ideaConfig } from "../../domains/idea/config.tsx";
-import { getIdeaService } from "../../singletons/services.ts";
+import { getIdeaService, getPeopleService } from "../../singletons/services.ts";
 import { IdeaDetailView } from "../idea-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
+import { resolvePersonByName } from "../../utils/person-name-match.ts";
 
 export const ideasRouter = createDomainRoutes(ideaConfig);
 
@@ -34,12 +35,22 @@ ideasRouter.get("/:id", async (c) => {
     )
     .map((other) => ({ id: other.id, title: other.title }));
 
+  // Resolve submittedBy name → person for the detail-page link.
+  // Tolerant resolver (exact → case-insensitive → unambiguous first-word).
+  let submittedByPerson: { id: string; name: string } | null = null;
+  if (idea.submittedBy) {
+    const people = await getPeopleService().list();
+    const match = resolvePersonByName(idea.submittedBy, people);
+    if (match) submittedByPerson = { id: match.id, name: match.name };
+  }
+
   return c.html(
     <IdeaDetailView
       {...viewProps(c, "/ideas")}
       item={idea}
       linkedIdeas={linkedIdeas}
       backlinks={backlinks}
+      submittedByPerson={submittedByPerson}
     />,
   );
 });

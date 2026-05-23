@@ -144,6 +144,9 @@ export class IdeaRepository extends CachedMarkdownRepository<
         ? String(fm.priority) as Idea["priority"]
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
+      submittedBy: fm.submitted_by != null
+        ? String(fm.submitted_by)
+        : undefined,
       startDate: fm.start_date != null ? String(fm.start_date) : undefined,
       endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       resources: fm.resources != null ? String(fm.resources) : undefined,
