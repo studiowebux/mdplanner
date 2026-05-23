@@ -609,12 +609,6 @@ html.focus-mode .focus-mode-exit {
   border-color: var(--color-border-default);
 }
 
-/* Motion toggle active state — motion is OFF (html.no-animations) */
-html.no-animations #animations-toggle {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
 /* Overflow toggle — hidden on desktop, shown on mobile */
 .topbar__overflow-btn {
   display: none;
@@ -842,8 +836,6 @@ html.no-animations #animations-toggle {
 /* At ≤1170px: hide secondary buttons, show ⋮, open panel on toggle. */
 @media (max-width: 1400px) {
   #pomodoro-btn,
-  #animations-toggle,
-  #font-toggle,
   .topbar__filter-wrap {
     display: none;
   }
@@ -888,8 +880,6 @@ html.no-animations #animations-toggle {
 
   /* Restore all hidden items inside the panel */
   .topbar__actions #pomodoro-btn,
-  .topbar__actions #animations-toggle,
-  .topbar__actions #font-toggle,
   .topbar__actions .topbar__filter-wrap {
     display: flex;
   }

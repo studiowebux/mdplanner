@@ -75,6 +75,7 @@
 #tab-caching:checked ~ .settings-tabs__panel--caching,
 #tab-data:checked ~ .settings-tabs__panel--data,
 #tab-integrity:checked ~ .settings-tabs__panel--integrity,
+#tab-display:checked ~ .settings-tabs__panel--display,
 #tab-shortcuts:checked ~ .settings-tabs__panel--shortcuts,
 #tab-support:checked ~ .settings-tabs__panel--support {
   display: block;

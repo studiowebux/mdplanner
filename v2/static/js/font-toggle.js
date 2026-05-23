@@ -1,12 +1,17 @@
 // Font toggle — switches between Roboto (sans) and JetBrains Mono.
-// Persisted in localStorage. Class "font-mono" on <html> overrides --font-sans.
+// Persisted in localStorage under "fontMono". The control lives in
+// Settings → Display ("Use monospace font" checkbox); init.js applies
+// html.font-mono pre-paint so there is no FOUC.
 
 (function () {
-  var btn = document.getElementById("font-toggle");
-  if (!btn) return;
+  var cb = document.getElementById("pref-font-mono");
+  if (!cb) return;
 
-  btn.addEventListener("click", function () {
-    var isMono = document.documentElement.classList.toggle("font-mono");
-    localStorage.setItem("fontMono", isMono ? "true" : "false");
+  cb.checked = localStorage.getItem("fontMono") === "true";
+
+  cb.addEventListener("change", function () {
+    var on = cb.checked;
+    document.documentElement.classList.toggle("font-mono", on);
+    localStorage.setItem("fontMono", on ? "true" : "false");
   });
 })();

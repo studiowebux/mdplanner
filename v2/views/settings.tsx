@@ -26,6 +26,7 @@ import { SectionsTab } from "./settings/tabs/sections-tab.tsx";
 import { LinksTab } from "./settings/tabs/links-tab.tsx";
 import { BillingTab } from "./settings/tabs/billing-tab.tsx";
 import { IntegrityTab } from "./settings/tabs/integrity-tab.tsx";
+import { DisplayTab } from "./settings/tabs/display-tab.tsx";
 import { ShortcutsTab } from "./settings/tabs/shortcuts-tab.tsx";
 
 type SettingsProps = ViewProps & {
@@ -209,6 +210,16 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
+            id="tab-display"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-display" class="settings-tabs__label">
+            Display
+          </label>
+
+          <input
+            type="radio"
+            name="settings-tab"
             id="tab-shortcuts"
             class="settings-tabs__radio"
           />
@@ -243,6 +254,7 @@ export const SettingsView: FC<SettingsProps> = ({
           <CachingTab />
           <DataTab />
           <IntegrityTab />
+          <DisplayTab />
           <ShortcutsTab navLinks={navLinks} preferences={preferences} />
           <SupportTab />
         </div>

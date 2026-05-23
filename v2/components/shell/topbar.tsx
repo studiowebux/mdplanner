@@ -177,23 +177,6 @@ export async function Topbar(
           Pomodoro
         </button>
         <button
-          id="animations-toggle"
-          class="topbar__action-btn"
-          type="button"
-          aria-label="Toggle animations"
-          aria-pressed="false"
-        >
-          Motion
-        </button>
-        <button
-          id="font-toggle"
-          class="topbar__action-btn"
-          type="button"
-          aria-label="Toggle font"
-        >
-          Font
-        </button>
-        <button
           id="theme-toggle"
           class="topbar__action-btn"
           type="button"
