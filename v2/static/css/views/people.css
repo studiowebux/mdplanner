@@ -177,7 +177,8 @@
 .person-detail__vacations,
 .person-detail__assigned-tasks,
 .person-detail__assigned-goals,
-.person-detail__meetings {
+.person-detail__meetings,
+.person-detail__mention-list {
   list-style: none;
   padding: 0;
   display: flex;
@@ -190,7 +191,8 @@
 .person-detail__vacations li,
 .person-detail__assigned-tasks li,
 .person-detail__assigned-goals li,
-.person-detail__meetings li {
+.person-detail__meetings li,
+.person-detail__mention-list li {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
@@ -212,7 +214,8 @@
 .person-detail__vacations a,
 .person-detail__assigned-tasks a,
 .person-detail__assigned-goals a,
-.person-detail__meetings a {
+.person-detail__meetings a,
+.person-detail__mention-list a {
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
@@ -223,8 +226,21 @@
 .person-detail__vacations a:hover,
 .person-detail__assigned-tasks a:hover,
 .person-detail__assigned-goals a:hover,
-.person-detail__meetings a:hover {
+.person-detail__meetings a:hover,
+.person-detail__mention-list a:hover {
   text-decoration: underline;
+}
+
+.person-detail__mentions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.person-detail__mention-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
 }
 
 .person-detail__report-title,

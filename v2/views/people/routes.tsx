@@ -7,9 +7,11 @@ import {
   getMeetingService,
   getPeopleService,
   getRetrospectiveService,
+  getSearchEngine,
   getTaskService,
   getVacationService,
 } from "../../singletons/services.ts";
+import type { SearchResult } from "../../types/search.types.ts";
 import { PersonDetailView } from "../person-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { resolvePersonByName } from "../../utils/person-name-match.ts";
@@ -115,6 +117,22 @@ peopleRouter.get("/:id", async (c) => {
     meetingsAttended: attendedMeetingsTotal,
   };
 
+  // Mentions — FTS search across all indexed domains for the person's name,
+  // excluding the person's own record (their name matches their own FTS row).
+  // Cross-person matches (this person referenced in another person's notes)
+  // legitimately count and are kept.
+  const engine = getSearchEngine();
+  const rawMentions = engine ? engine.search(person.name, { limit: 30 }) : [];
+  const filteredMentions = rawMentions.filter((r) =>
+    !(r.type === "person" && r.id === person.id)
+  );
+  const mentionsTotal = filteredMentions.length;
+  const cappedMentions = filteredMentions.slice(0, 20);
+  const mentionsByType: Record<string, SearchResult[]> = {};
+  for (const r of cappedMentions) {
+    (mentionsByType[r.type] ??= []).push(r);
+  }
+
   return c.html(
     <PersonDetailView
       {...viewProps(c, "/people")}
@@ -128,6 +146,8 @@ peopleRouter.get("/:id", async (c) => {
       attendedMeetings={attendedMeetings}
       attendedMeetingsTotal={attendedMeetingsTotal}
       analytics={analytics}
+      mentionsByType={mentionsByType}
+      mentionsTotal={mentionsTotal}
       showCompleted={showCompleted}
     />,
   );

@@ -4,9 +4,11 @@ import type { Goal } from "../types/goal.types.ts";
 import type { Meeting } from "../types/meeting.types.ts";
 import type { Person } from "../types/person.types.ts";
 import type { Retrospective } from "../types/retrospective.types.ts";
+import type { SearchResult } from "../types/search.types.ts";
 import type { Task } from "../types/task.types.ts";
 import type { VacationRequest } from "../types/vacation.types.ts";
 import type { ViewProps } from "../types/app.ts";
+import { ENTITY_TYPE_LABELS, ENTITY_TYPE_ROUTES } from "../constants/mod.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
@@ -42,6 +44,8 @@ type Props = ViewProps & {
   attendedMeetings?: Meeting[];
   attendedMeetingsTotal?: number;
   analytics?: PersonAnalytics;
+  mentionsByType?: Record<string, SearchResult[]>;
+  mentionsTotal?: number;
   showCompleted?: boolean;
 };
 
@@ -57,6 +61,8 @@ export const PersonDetailView: FC<Props> = (
     attendedMeetings = [],
     attendedMeetingsTotal = 0,
     analytics,
+    mentionsByType = {},
+    mentionsTotal = 0,
     showCompleted = false,
     ...viewProps
   },
@@ -478,6 +484,56 @@ export const PersonDetailView: FC<Props> = (
                 </ul>
               )
               : <EmptyState message="No vacations recorded for this person." />}
+          </section>
+
+          <section class="detail-section person-detail__section">
+            <h2>
+              Mentions
+              {mentionsTotal > 0 && (
+                <span class="person-detail__count">({mentionsTotal})</span>
+              )}
+            </h2>
+            {mentionsTotal > 0
+              ? (
+                <>
+                  <div class="person-detail__mentions">
+                    {Object.entries(mentionsByType)
+                      .sort(([, a], [, b]) => b.length - a.length)
+                      .map(([type, items]) => (
+                        <div key={type} class="person-detail__mention-group">
+                          <h3 class="person-detail__subsection-heading">
+                            {ENTITY_TYPE_LABELS[type] ?? type}
+                            <span class="person-detail__count">
+                              ({items.length})
+                            </span>
+                          </h3>
+                          <ul class="person-detail__mention-list">
+                            {items.map((r) => (
+                              <li key={r.id}>
+                                <a
+                                  href={`${
+                                    ENTITY_TYPE_ROUTES[type] ?? ""
+                                  }/${r.id}`}
+                                >
+                                  {r.title}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                  </div>
+                  {mentionsTotal > 20 && (
+                    <a
+                      class="person-detail__toggle"
+                      href={`/search?q=${encodeURIComponent(person.name)}`}
+                    >
+                      Search all mentions ({mentionsTotal})
+                    </a>
+                  )}
+                </>
+              )
+              : <EmptyState message="No mentions found." />}
           </section>
 
           <AuditMeta
