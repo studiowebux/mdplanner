@@ -426,6 +426,13 @@ a.badge:hover {
   color: var(--color-text-primary);
 }
 
+.detail-audit .detail-info-item,
+.detail-audit .detail-info-label,
+.detail-audit .detail-info-value {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 .section-heading {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
