@@ -4,9 +4,10 @@ import type { DomainConfig } from "../../factories/domain.types.ts";
 import type {
   CreateFinance,
   Finance,
+  ListFinanceOptions,
   UpdateFinance,
 } from "../../types/finance.types.ts";
-import { FINANCE_TYPE_LABELS } from "../../types/finance.types.ts";
+import { FINANCE_TYPES } from "../../types/finance.types.ts";
 import { getFinanceService } from "../../singletons/services.ts";
 import { FinanceService } from "../../services/finance.service.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
@@ -14,11 +15,30 @@ import {
   FINANCE_FORM_FIELDS,
   FINANCE_TABLE_COLUMNS,
   FINANCE_TYPE_OPTIONS,
+  financeMapRows,
   financeToRow,
 } from "./constants.tsx";
 import { FinanceSummaryBanner } from "../../views/finances/components/finance-summary.tsx";
 import { FinanceChart } from "../../views/finances/components/finance-chart.tsx";
+import { FinanceByTag } from "../../views/finances/components/finance-by-tag.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
+
+/** Read the current request's filter query into ListFinanceOptions so the
+ *  summary banner and any other top-of-page aggregations see exactly the same
+ *  filtered set the list/chart/by-tag views see. */
+function readFinanceFilterOpts(c: {
+  req: { query: (key: string) => string | undefined };
+}): ListFinanceOptions {
+  const q = c.req.query("q") ?? undefined;
+  const tag = c.req.query("tag") ?? undefined;
+  const from = c.req.query("from") ?? undefined;
+  const to = c.req.query("to") ?? undefined;
+  const rawType = c.req.query("type");
+  const type = rawType && (FINANCE_TYPES as readonly string[]).includes(rawType)
+    ? (rawType as ListFinanceOptions["type"])
+    : undefined;
+  return { q, type, tag, from, to };
+}
 
 export const financeConfig: DomainConfig<
   Finance,
@@ -56,6 +76,7 @@ export const financeConfig: DomainConfig<
   },
 
   toRow: financeToRow,
+  mapRows: financeMapRows,
 
   parseCreate: (body) =>
     parseFormBody(FINANCE_FORM_FIELDS, body) as CreateFinance,
@@ -67,8 +88,21 @@ export const financeConfig: DomainConfig<
 
   getService: () => getFinanceService(),
 
-  topSlot: async () => {
-    const summary = await getFinanceService().getSummary();
+  topSlot: async (c) => {
+    const opts = readFinanceFilterOpts(c);
+    const filtered = await getFinanceService().list(opts);
+    let totalIncome = 0;
+    let totalExpense = 0;
+    for (const f of filtered) {
+      if (f.type === "income") totalIncome += f.amount;
+      else totalExpense += f.amount;
+    }
+    const summary = {
+      totalIncome,
+      totalExpense,
+      balance: totalIncome - totalExpense,
+      byTag: FinanceService.aggregateByTag(filtered),
+    };
     return <FinanceSummaryBanner summary={summary} />;
   },
 
@@ -78,9 +112,15 @@ export const financeConfig: DomainConfig<
     { type: "array", get: (f) => f.tags },
   ]),
 
-  extraViewModes: [{ key: "chart", label: "Chart" }],
+  extraViewModes: [
+    { key: "by-tag", label: "By Category" },
+    { key: "chart", label: "Chart" },
+  ],
 
-  customViewRenderer: (_view, _state, items) => {
+  customViewRenderer: (view, _state, items) => {
+    if (view === "by-tag") {
+      return Promise.resolve(<FinanceByTag items={items} />);
+    }
     const monthly = FinanceService.aggregateMonthly(items);
     const byTag = FinanceService.aggregateByTag(items);
     return Promise.resolve(<FinanceChart monthly={monthly} byTag={byTag} />);

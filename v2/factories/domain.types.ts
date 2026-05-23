@@ -89,6 +89,26 @@ export type DomainConfig<T extends Entity, C, U> = {
   // Row mapper — converts domain item to flat Record for DataTable.
   toRow: (item: T) => Record<string, unknown>;
 
+  /**
+   * Optional batch row mapper. When set, the factory uses it INSTEAD of the
+   * per-item `toRow` map inside the table view (and the /more pagination
+   * fragment). Use this when a row needs cross-item state — e.g. a running
+   * balance, per-row rank, or position in a sorted list.
+   *
+   * Receives the visible items (already filtered + sorted + paged) and the
+   * current filter state. Must include `_q: state.q` on each row if the row
+   * uses the search-highlight column renderers.
+   *
+   * NOTE on pagination: with `pageSize` set, the input is a page slice — any
+   * cumulative computed here is page-local. Domains that need cross-page
+   * cumulative must either disable pagination or compute the cumulative
+   * upstream (e.g. in `listForRequest`).
+   */
+  mapRows?: (
+    items: T[],
+    state: DomainFilterState,
+  ) => Array<Record<string, unknown>>;
+
   // Card component for grid view. Optional if grid view is not used.
   Card?: CardComponent<T>;
 

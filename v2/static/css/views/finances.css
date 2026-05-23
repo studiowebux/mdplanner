@@ -161,6 +161,154 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Table view — running balance column (right-aligned, tabular nums)
+--------------------------------------------------------------------------- */
+
+[data-column-table="finances"] th[data-col="amount"],
+[data-column-table="finances"] td[data-col="amount"],
+[data-column-table="finances"] th[data-col="runningBalance"],
+[data-column-table="finances"] td[data-col="runningBalance"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-column-table="finances"] td[data-col="runningBalance"] {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ---------------------------------------------------------------------------
+   By Category view — per-tag groups with subtotal headers
+--------------------------------------------------------------------------- */
+
+.finance-bytag {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.finance-bytag__group {
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.finance-bytag__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.finance-bytag__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+
+.finance-bytag__subtotals {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.finance-bytag__subtotal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-bytag__subtotal-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: var(--font-weight-medium);
+}
+
+.finance-bytag__subtotal-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.finance-bytag__subtotal[data-type="income"] .finance-bytag__subtotal-value {
+  color: var(--color-success);
+}
+
+.finance-bytag__subtotal[data-type="expense"] .finance-bytag__subtotal-value {
+  color: var(--color-error);
+}
+
+.finance-bytag__subtotal--net[data-positive="true"]
+  .finance-bytag__subtotal-value {
+  color: var(--color-success);
+}
+
+.finance-bytag__subtotal--net[data-positive="false"]
+  .finance-bytag__subtotal-value {
+  color: var(--color-error);
+}
+
+.finance-bytag__count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.finance-bytag__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.finance-bytag__item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xs) 0;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.finance-bytag__item:last-child {
+  border-bottom: none;
+}
+
+.finance-bytag__item-title {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.finance-bytag__item-title:hover {
+  color: var(--color-accent);
+}
+
+.finance-bytag__item-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.finance-bytag__item-date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
    Detail view
 --------------------------------------------------------------------------- */
 

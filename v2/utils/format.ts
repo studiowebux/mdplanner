@@ -14,12 +14,18 @@ export function getLocale(): string {
   return _locale;
 }
 
-/** Format a number as currency (no decimals). Returns "" for 0/undefined. */
-export function formatCurrency(n: number | undefined | null): string {
-  if (!n) return "";
+/** Format a number as currency. Returns "" for null/undefined; renders 0 as
+ *  the formatted zero (e.g. "$0.00") so totals/balance rows always show. */
+export function formatCurrency(
+  n: number | undefined | null,
+  opts?: { decimals?: number },
+): string {
+  if (n === undefined || n === null) return "";
+  const decimals = opts?.decimals ?? 0;
   return n.toLocaleString(_locale, {
     style: "currency",
     currency: _currency,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   });
 }

@@ -96,6 +96,10 @@ export function createMoreFragment<T extends Entity>(cfg: {
   stateKeys: readonly string[];
   columns: ColumnDef[];
   toRow: (item: T) => Record<string, unknown>;
+  mapRows?: (
+    items: T[],
+    state: DomainFilterState,
+  ) => Array<Record<string, unknown>>;
   Card?: FC<{ item: T; q?: string }>;
 }) {
   return function MoreFragment(
@@ -108,10 +112,12 @@ export function createMoreFragment<T extends Entity>(cfg: {
     },
   ) {
     if (view === "table") {
-      const rows: Record<string, unknown>[] = items.map((item) => ({
-        ...cfg.toRow(item),
-        _q: state.q,
-      }));
+      const rows: Record<string, unknown>[] = cfg.mapRows
+        ? cfg.mapRows(items, state)
+        : items.map((item) => ({
+          ...cfg.toRow(item),
+          _q: state.q,
+        }));
       return (
         <>
           {rows.map((row) => (
@@ -520,7 +526,9 @@ export function createDomainViewContainer<T extends Entity>(
               domain={cfg.name}
               compact
               columns={cfg.columns}
-              rows={items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
+              rows={cfg.mapRows
+                ? cfg.mapRows(items, state)
+                : items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
               sort={{
                 url: `/${cfg.name}/view`,
                 target: `#${cfg.name}-view`,

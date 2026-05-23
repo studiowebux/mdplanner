@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import type { FinanceSummary } from "../../../types/finance.types.ts";
+import { formatCurrency } from "../../../utils/format.ts";
 
 export const FinanceSummaryBanner: FC<{ summary: FinanceSummary }> = (
   { summary },
@@ -10,13 +11,13 @@ export const FinanceSummaryBanner: FC<{ summary: FinanceSummary }> = (
       <div class="finance-summary__tile" data-type="income">
         <span class="finance-summary__label">Income</span>
         <span class="finance-summary__value">
-          {summary.totalIncome.toLocaleString()}
+          {formatCurrency(summary.totalIncome, { decimals: 2 })}
         </span>
       </div>
       <div class="finance-summary__tile" data-type="expense">
         <span class="finance-summary__label">Expenses</span>
         <span class="finance-summary__value">
-          {summary.totalExpense.toLocaleString()}
+          {formatCurrency(summary.totalExpense, { decimals: 2 })}
         </span>
       </div>
       <div
@@ -25,7 +26,7 @@ export const FinanceSummaryBanner: FC<{ summary: FinanceSummary }> = (
       >
         <span class="finance-summary__label">Balance</span>
         <span class="finance-summary__value">
-          {balance.toLocaleString()}
+          {formatCurrency(balance, { decimals: 2 })}
         </span>
       </div>
     </div>

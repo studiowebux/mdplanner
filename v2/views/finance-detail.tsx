@@ -12,6 +12,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { FINANCE_TYPE_VARIANTS } from "../domains/finance/constants.tsx";
+import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
 
 export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
@@ -57,7 +58,7 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
         <div class="detail-section detail-info-row">
           <InfoItem label="Amount">
             <strong class="finance-detail__amount">
-              {finance.amount.toLocaleString()}
+              {formatCurrency(finance.amount, { decimals: 2 })}
               {finance.currency ? ` ${finance.currency}` : ""}
             </strong>
           </InfoItem>

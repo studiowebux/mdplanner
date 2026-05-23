@@ -97,6 +97,30 @@ export class FinanceService extends BaseService<
   }
 
   /**
+   * Compute a running balance per entry: cumulative `income − expense` over a
+   * date-ascending projection. Returns `Map<id, runningBalance>` so callers can
+   * look up each row's value regardless of the user's current sort.
+   *
+   * Entries with no `date` are placed first (treated as "earliest"), keeping
+   * them visible in the cumulative without breaking the date-asc ordering of
+   * the rest. Pure function.
+   */
+  static computeRunningBalance(items: Finance[]): Map<string, number> {
+    const sorted = [...items].sort((a, b) => {
+      const ad = a.date ?? "";
+      const bd = b.date ?? "";
+      return ad.localeCompare(bd);
+    });
+    const out = new Map<string, number>();
+    let running = 0;
+    for (const f of sorted) {
+      running += f.type === "income" ? f.amount : -f.amount;
+      out.set(f.id, running);
+    }
+    return out;
+  }
+
+  /**
    * Bucket entries into monthly income/expense totals, sorted ascending by
    * `YYYY-MM`. Entries with no `date` are skipped. Pure function.
    */
