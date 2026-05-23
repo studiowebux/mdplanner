@@ -89,6 +89,14 @@
   gap: var(--space-md);
 }
 
+.person-detail__section h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
 .person-detail__count {
   font-weight: var(--font-weight-normal);
   color: var(--color-text-muted);
@@ -125,7 +133,9 @@
 
 .person-detail__reports,
 .person-detail__retros,
-.person-detail__vacations {
+.person-detail__vacations,
+.person-detail__assigned-tasks,
+.person-detail__assigned-goals {
   list-style: none;
   padding: 0;
   display: flex;
@@ -135,13 +145,17 @@
 
 .person-detail__reports li,
 .person-detail__retros li,
-.person-detail__vacations li {
+.person-detail__vacations li,
+.person-detail__assigned-tasks li,
+.person-detail__assigned-goals li {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
 }
 
-.person-detail__vacations li {
+.person-detail__vacations li,
+.person-detail__assigned-tasks li,
+.person-detail__assigned-goals li {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -151,7 +165,9 @@
 
 .person-detail__reports a,
 .person-detail__retros a,
-.person-detail__vacations a {
+.person-detail__vacations a,
+.person-detail__assigned-tasks a,
+.person-detail__assigned-goals a {
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
@@ -159,7 +175,9 @@
 
 .person-detail__reports a:hover,
 .person-detail__retros a:hover,
-.person-detail__vacations a:hover {
+.person-detail__vacations a:hover,
+.person-detail__assigned-tasks a:hover,
+.person-detail__assigned-goals a:hover {
   text-decoration: underline;
 }
 
@@ -169,16 +187,48 @@
   font-size: var(--font-size-sm);
 }
 
-.person-detail__vacation-meta {
+.person-detail__vacation-meta,
+.person-detail__assigned-meta {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   font-size: var(--font-size-sm);
+  flex-wrap: wrap;
 }
 
 .person-detail__vacation-type {
   color: var(--color-text-muted);
   text-transform: capitalize;
+}
+
+.person-detail__subsection-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin: var(--space-md) 0 var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.person-detail__subsection-heading:first-of-type {
+  margin-top: 0;
+}
+
+.person-detail__assigned-date {
+  color: var(--color-text-muted);
+}
+
+.person-detail__toggle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-accent);
+  margin-left: auto;
+  text-decoration: none;
+}
+
+.person-detail__toggle:hover {
+  text-decoration: underline;
 }
 
 /* =========================================================================

@@ -1,7 +1,9 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import type { Goal } from "../types/goal.types.ts";
 import type { Person } from "../types/person.types.ts";
 import type { Retrospective } from "../types/retrospective.types.ts";
+import type { Task } from "../types/task.types.ts";
 import type { VacationRequest } from "../types/vacation.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
@@ -14,6 +16,8 @@ import {
   PERSON_TYPE_VARIANTS,
 } from "../domains/people/constants.tsx";
 import { VACATION_STATUS_VARIANTS } from "../domains/vacation/constants.tsx";
+import { TASK_SECTION_VARIANTS } from "../domains/task/constants.tsx";
+import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -24,6 +28,9 @@ type Props = ViewProps & {
   manager: Person | null;
   retrospectives?: Retrospective[];
   vacations?: VacationRequest[];
+  assignedTasks?: Task[];
+  assignedGoals?: Goal[];
+  showCompleted?: boolean;
 };
 
 export const PersonDetailView: FC<Props> = (
@@ -33,9 +40,16 @@ export const PersonDetailView: FC<Props> = (
     manager,
     retrospectives = [],
     vacations = [],
+    assignedTasks = [],
+    assignedGoals = [],
+    showCompleted = false,
     ...viewProps
   },
 ) => {
+  const toggleHref = showCompleted
+    ? `/people/${person.id}`
+    : `/people/${person.id}?show_completed=true`;
+  const toggleLabel = showCompleted ? "Hide completed" : "Show completed";
   const initials = person.name
     .split(/\s+/)
     .map((w) => w[0])
@@ -271,6 +285,76 @@ export const PersonDetailView: FC<Props> = (
               </ul>
             </section>
           )}
+
+          <section class="detail-section person-detail__section">
+            <h2>
+              Assigned
+              <a class="person-detail__toggle" href={toggleHref}>
+                {toggleLabel}
+              </a>
+            </h2>
+
+            <h3 class="person-detail__subsection-heading">
+              Tasks
+              <span class="person-detail__count">({assignedTasks.length})</span>
+            </h3>
+            {assignedTasks.length > 0
+              ? (
+                <ul class="person-detail__assigned-tasks">
+                  {assignedTasks.map((t) => (
+                    <li key={t.id}>
+                      <a href={`/tasks/${t.id}`}>{t.title}</a>
+                      <span class="person-detail__assigned-meta">
+                        <span
+                          class={badgeClass(TASK_SECTION_VARIANTS, t.section)}
+                        >
+                          {t.section}
+                        </span>
+                        {t.priority != null && (
+                          <span class={`badge priority--${t.priority}`}>
+                            P{t.priority}
+                          </span>
+                        )}
+                        {t.due_date && (
+                          <span class="person-detail__assigned-date">
+                            due {formatDate(t.due_date)}
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )
+              : <EmptyState message="No tasks assigned to this person." />}
+
+            <h3 class="person-detail__subsection-heading">
+              Goals
+              <span class="person-detail__count">({assignedGoals.length})</span>
+            </h3>
+            {assignedGoals.length > 0
+              ? (
+                <ul class="person-detail__assigned-goals">
+                  {assignedGoals.map((g) => (
+                    <li key={g.id}>
+                      <a href={`/goals/${g.id}`}>{g.title}</a>
+                      <span class="person-detail__assigned-meta">
+                        <span
+                          class={badgeClass(GOAL_STATUS_VARIANTS, g.status)}
+                        >
+                          {g.status}
+                        </span>
+                        {g.progress != null && (
+                          <span class="person-detail__assigned-date">
+                            {g.progress}%
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )
+              : <EmptyState message="No goals owned by this person." />}
+          </section>
 
           <section class="detail-section person-detail__section">
             <h2>
