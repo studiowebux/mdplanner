@@ -2,15 +2,18 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Person } from "../types/person.types.ts";
 import type { Retrospective } from "../types/retrospective.types.ts";
+import type { VacationRequest } from "../types/vacation.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EmptyState } from "../components/ui/empty-state.tsx";
 import {
   PERSON_STATUS_VARIANTS,
   PERSON_TYPE_VARIANTS,
 } from "../domains/people/constants.tsx";
+import { VACATION_STATUS_VARIANTS } from "../domains/vacation/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -20,10 +23,18 @@ type Props = ViewProps & {
   reports: Person[];
   manager: Person | null;
   retrospectives?: Retrospective[];
+  vacations?: VacationRequest[];
 };
 
 export const PersonDetailView: FC<Props> = (
-  { person, reports, manager, retrospectives = [], ...viewProps },
+  {
+    person,
+    reports,
+    manager,
+    retrospectives = [],
+    vacations = [],
+    ...viewProps
+  },
 ) => {
   const initials = person.name
     .split(/\s+/)
@@ -260,6 +271,40 @@ export const PersonDetailView: FC<Props> = (
               </ul>
             </section>
           )}
+
+          <section class="detail-section person-detail__section">
+            <h2>
+              Vacation
+              {vacations.length > 0 && (
+                <span class="person-detail__count">({vacations.length})</span>
+              )}
+            </h2>
+            {vacations.length > 0
+              ? (
+                <ul class="person-detail__vacations">
+                  {vacations.map((v) => (
+                    <li key={v.id}>
+                      <a href={`/vacation/${v.id}`}>
+                        {formatDate(v.startDate)} &ndash;{" "}
+                        {formatDate(v.endDate)}
+                      </a>
+                      <span class="person-detail__vacation-meta">
+                        <span class="person-detail__vacation-type">
+                          {v.type}
+                        </span>
+                        <span
+                          class={badgeClass(VACATION_STATUS_VARIANTS, v.status)}
+                        >
+                          {v.status}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )
+              : <EmptyState message="No vacations recorded for this person." />}
+          </section>
+
           <AuditMeta
             createdAt={person.createdAt}
             updatedAt={person.updatedAt}

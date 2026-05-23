@@ -124,7 +124,8 @@
 }
 
 .person-detail__reports,
-.person-detail__retros {
+.person-detail__retros,
+.person-detail__vacations {
   list-style: none;
   padding: 0;
   display: flex;
@@ -133,21 +134,32 @@
 }
 
 .person-detail__reports li,
-.person-detail__retros li {
+.person-detail__retros li,
+.person-detail__vacations li {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
 }
 
+.person-detail__vacations li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
 .person-detail__reports a,
-.person-detail__retros a {
+.person-detail__retros a,
+.person-detail__vacations a {
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
 }
 
 .person-detail__reports a:hover,
-.person-detail__retros a:hover {
+.person-detail__retros a:hover,
+.person-detail__vacations a:hover {
   text-decoration: underline;
 }
 
@@ -155,6 +167,18 @@
 .person-detail__retro-date {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+.person-detail__vacation-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+.person-detail__vacation-type {
+  color: var(--color-text-muted);
+  text-transform: capitalize;
 }
 
 /* =========================================================================
