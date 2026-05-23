@@ -103,6 +103,47 @@
   font-size: var(--font-size-base);
 }
 
+/* Analytics — per-person stat cards. Mirrors .analytics__stat-* shape
+   using shared --analytics-stat-* tokens; not yet promoted to a shared
+   component (rule of three not hit). */
+
+.person-detail__stat-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(var(--analytics-stat-card-min-w), 1fr));
+  gap: var(--space-md);
+}
+
+.person-detail__stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-sm);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.person-detail__stat-value {
+  font-size: var(--analytics-stat-value-size);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  line-height: var(--analytics-stat-value-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.person-detail__stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-task-badge);
+}
+
 .person-detail__prompt {
   border: var(--card-border);
   border-radius: var(--card-radius);

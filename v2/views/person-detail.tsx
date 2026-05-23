@@ -22,6 +22,14 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 
+export type PersonAnalytics = {
+  openTasks: number;
+  doneTasks: number;
+  activeGoals: number;
+  hoursLogged: number;
+  meetingsAttended: number;
+};
+
 type Props = ViewProps & {
   person: Person;
   reports: Person[];
@@ -30,6 +38,7 @@ type Props = ViewProps & {
   vacations?: VacationRequest[];
   assignedTasks?: Task[];
   assignedGoals?: Goal[];
+  analytics?: PersonAnalytics;
   showCompleted?: boolean;
 };
 
@@ -42,6 +51,7 @@ export const PersonDetailView: FC<Props> = (
     vacations = [],
     assignedTasks = [],
     assignedGoals = [],
+    analytics,
     showCompleted = false,
     ...viewProps
   },
@@ -283,6 +293,46 @@ export const PersonDetailView: FC<Props> = (
                   </li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {analytics && (
+            <section class="detail-section person-detail__section">
+              <h2>Analytics</h2>
+              <div class="person-detail__stat-grid">
+                <div class="person-detail__stat-card">
+                  <span class="person-detail__stat-value">
+                    {analytics.openTasks}
+                  </span>
+                  <span class="person-detail__stat-label">Open tasks</span>
+                </div>
+                <div class="person-detail__stat-card">
+                  <span class="person-detail__stat-value">
+                    {analytics.doneTasks}
+                  </span>
+                  <span class="person-detail__stat-label">Tasks done</span>
+                </div>
+                <div class="person-detail__stat-card">
+                  <span class="person-detail__stat-value">
+                    {analytics.activeGoals}
+                  </span>
+                  <span class="person-detail__stat-label">Active goals</span>
+                </div>
+                <div class="person-detail__stat-card">
+                  <span class="person-detail__stat-value">
+                    {analytics.hoursLogged}h
+                  </span>
+                  <span class="person-detail__stat-label">Time logged</span>
+                </div>
+                <div class="person-detail__stat-card">
+                  <span class="person-detail__stat-value">
+                    {analytics.meetingsAttended}
+                  </span>
+                  <span class="person-detail__stat-label">
+                    Meetings attended
+                  </span>
+                </div>
+              </div>
             </section>
           )}
 

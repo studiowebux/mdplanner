@@ -4,6 +4,7 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { peopleConfig } from "../../domains/people/config.tsx";
 import {
   getGoalService,
+  getMeetingService,
   getPeopleService,
   getRetrospectiveService,
   getTaskService,
@@ -23,15 +24,25 @@ peopleRouter.get("/:id", async (c) => {
   const svc = getPeopleService();
   const person = await svc.getById(id);
   if (!person) return c.notFound();
-  const [reports, allPeople, allRetros, vacations, assignedTasksRaw, allGoals] =
-    await Promise.all([
-      svc.getDirectReports(id),
-      svc.list(),
-      getRetrospectiveService().list(),
-      getVacationService().list({ personId: id }),
-      getTaskService().list({ assignee: id }),
-      getGoalService().list(),
-    ]);
+  const [
+    reports,
+    allPeople,
+    allRetros,
+    vacations,
+    assignedTasksRaw,
+    allGoals,
+    allTasks,
+    allMeetings,
+  ] = await Promise.all([
+    svc.getDirectReports(id),
+    svc.list(),
+    getRetrospectiveService().list(),
+    getVacationService().list({ personId: id }),
+    getTaskService().list({ assignee: id }),
+    getGoalService().list(),
+    getTaskService().list(),
+    getMeetingService().list(),
+  ]);
   const manager = person.reportsTo ? await svc.getById(person.reportsTo) : null;
   // Filter retrospectives whose participants resolve to this person via the
   // same tolerant matcher the retrospective detail view uses for links.
@@ -69,6 +80,36 @@ peopleRouter.get("/:id", async (c) => {
       a.status.localeCompare(b.status) || a.title.localeCompare(b.title)
     );
 
+  // Analytics — per-person aggregates computed from the same data slices the
+  // section above already touches, plus a full tasks scan for time entries
+  // (entries live on tasks, not just assigned ones) and a meetings scan
+  // (attendees mix names + IDs — resolve via the tolerant name matcher).
+  const openTasksCount = assignedTasksRaw.filter((t) => !t.completed).length;
+  const doneTasksCount = assignedTasksRaw.filter((t) => t.completed).length;
+  const activeGoalsCount = allGoals.filter((g) =>
+    g.owner === person.name && g.status !== "success" && g.status !== "failed"
+  ).length;
+  let hoursLoggedTotal = 0;
+  for (const t of allTasks) {
+    for (const e of t.time_entries ?? []) {
+      if (e.person === id) hoursLoggedTotal += e.hours;
+    }
+  }
+  const hoursLogged = Math.round(hoursLoggedTotal * 100) / 100;
+  const meetingsAttendedCount = allMeetings.filter((m) =>
+    (m.attendees ?? []).some((a) =>
+      a === id || a === person.name ||
+      resolvePersonByName(a, allPeople)?.id === id
+    )
+  ).length;
+  const analytics = {
+    openTasks: openTasksCount,
+    doneTasks: doneTasksCount,
+    activeGoals: activeGoalsCount,
+    hoursLogged,
+    meetingsAttended: meetingsAttendedCount,
+  };
+
   return c.html(
     <PersonDetailView
       {...viewProps(c, "/people")}
@@ -79,6 +120,7 @@ peopleRouter.get("/:id", async (c) => {
       vacations={vacations}
       assignedTasks={assignedTasks}
       assignedGoals={assignedGoals}
+      analytics={analytics}
       showCompleted={showCompleted}
     />,
   );
