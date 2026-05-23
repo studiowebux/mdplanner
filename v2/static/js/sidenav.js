@@ -42,6 +42,9 @@
   }
 
   function updateDirtyIndicator(el, dirty) {
+    // Toggle on the root so CSS can tint the header and the sticky save bar
+    // when the form is dirty (cues that don't require scrolling to notice).
+    el.classList.toggle("is-dirty", dirty);
     var title = el.querySelector(".sidenav__title");
     if (!title) return;
     if (dirty) {

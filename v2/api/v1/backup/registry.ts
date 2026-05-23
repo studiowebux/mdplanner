@@ -18,6 +18,21 @@ export interface ImportDomainResult {
   errors: string[];
 }
 
+export interface PreviewDomainResult {
+  /** Domain key from the backup file. */
+  key: string;
+  /** Human-readable label, or the raw key for unknown domains. */
+  label: string;
+  /** Whether this domain key is registered (importable). */
+  known: boolean;
+  /** Number of records present for this domain in the backup. */
+  backupCount: number;
+  /** Records whose id does not exist in current data (would be created). */
+  add: number;
+  /** Records whose id already exists in current data (would be overwritten). */
+  update: number;
+}
+
 export interface BackupPayload {
   version: string;
   exportedAt: string;

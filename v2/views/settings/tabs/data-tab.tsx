@@ -22,12 +22,15 @@ export const DataTab: FC = () => (
     <section class="settings-data__section">
       <h3 class="settings-data__section-title">Import</h3>
       <p class="settings-data__description">
-        Restore from a backup file. Existing records with the same ID are
-        overwritten. Records not in the backup are left untouched.
+        Restore from a backup file. Preview first — you'll see how many records
+        are new vs overwritten before anything is written. Existing records with
+        the same ID are overwritten; records not in the backup are left
+        untouched (import never deletes).
       </p>
       <form
+        id="backup-import-form"
         class="settings-data__import-form"
-        hx-post="/api/v1/backup/import"
+        hx-post="/api/v1/backup/preview"
         hx-encoding="multipart/form-data"
         hx-swap="innerHTML"
         hx-target="#backup-import-result"
@@ -36,16 +39,17 @@ export const DataTab: FC = () => (
           <input
             type="file"
             name="file"
+            id="backup-file-input"
             accept=".json,application/json"
             class="settings-data__file-input"
             required
           />
         </label>
         <button type="submit" class="btn btn--secondary">
-          Restore Backup
+          Preview Backup
         </button>
+        <div id="backup-import-result" class="settings-data__result" />
       </form>
-      <div id="backup-import-result" class="settings-data__result" />
     </section>
   </div>
 );

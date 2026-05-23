@@ -463,45 +463,57 @@ settingsViewRouter.post("/preferences/filter-defaults", async (c) => {
 });
 
 // -- Data integrity scan --
+// Renders per-domain collapsibles (green when clean, red/yellow when issues
+// exist). A global "all clean" banner is shown only when every domain passes.
 settingsViewRouter.get("/integrity/scan", async (c) => {
-  const result = await getIntegrityService().scan();
-  const { checks, summary, durationMs } = result;
+  const { domains, summary, durationMs } = await getIntegrityService().scan();
 
-  if (checks.length === 0) {
-    return c.html(
-      `<p class="settings-integrity__clean">No issues found. All references are valid. (${durationMs}ms)</p>`,
-    );
-  }
-
-  const rows = checks
-    .map(
-      (r) =>
-        `<tr class="settings-integrity__row settings-integrity__row--${r.severity}">` +
-        `<td class="settings-integrity__cell">${r.severity}</td>` +
-        `<td class="settings-integrity__cell">${r.entityType}</td>` +
-        `<td class="settings-integrity__cell settings-integrity__cell--id">${r.entityId}</td>` +
-        `<td class="settings-integrity__cell">${r.field}</td>` +
-        `<td class="settings-integrity__cell">${r.issue}</td>` +
-        `</tr>`,
-    )
-    .join("");
-
-  return c.html(
-    `<p class="settings-integrity__summary">${summary.errors} error${
+  const cleanAll = summary.errors === 0 && summary.warnings === 0;
+  const overall = cleanAll
+    ? `<p class="settings-integrity__clean">All clean — ${summary.checked} record${
+      summary.checked !== 1 ? "s" : ""
+    } across ${domains.length} domain${
+      domains.length !== 1 ? "s" : ""
+    }. (${durationMs}ms)</p>`
+    : `<p class="settings-integrity__summary">${summary.errors} error${
       summary.errors !== 1 ? "s" : ""
-    }, ` +
-      `${summary.warnings} warning${
-        summary.warnings !== 1 ? "s" : ""
-      } — ${durationMs}ms</p>` +
-      `<table class="settings-integrity__table">` +
-      `<thead><tr>` +
-      `<th class="settings-integrity__cell">Severity</th>` +
-      `<th class="settings-integrity__cell">Type</th>` +
-      `<th class="settings-integrity__cell">ID</th>` +
-      `<th class="settings-integrity__cell">Field</th>` +
-      `<th class="settings-integrity__cell">Issue</th>` +
-      `</tr></thead>` +
-      `<tbody>${rows}</tbody>` +
-      `</table>`,
-  );
+    }, ${summary.warnings} warning${
+      summary.warnings !== 1 ? "s" : ""
+    } across ${domains.length} domain${
+      domains.length !== 1 ? "s" : ""
+    } — ${summary.checked} record${
+      summary.checked !== 1 ? "s" : ""
+    } scanned in ${durationMs}ms</p>`;
+
+  const items = domains.map((d) => {
+    const errs = d.checks.filter((x) => x.severity === "error").length;
+    const warns = d.checks.filter((x) => x.severity === "warning").length;
+    const clean = d.checks.length === 0;
+    const state = clean ? "clean" : errs > 0 ? "errors" : "warnings";
+    const summaryText = clean
+      ? `${d.label} — clean (${d.checked} checked)`
+      : `${d.label} — ${errs} error${errs !== 1 ? "s" : ""}, ${warns} warning${
+        warns !== 1 ? "s" : ""
+      } (${d.checked} checked)`;
+
+    if (clean) {
+      return `<details class="settings-integrity__domain settings-integrity__domain--${state}"><summary class="settings-integrity__domain-summary">${summaryText}</summary></details>`;
+    }
+
+    const rows = d.checks
+      .map(
+        (r) =>
+          `<tr class="settings-integrity__row settings-integrity__row--${r.severity}">` +
+          `<td class="settings-integrity__cell">${r.severity}</td>` +
+          `<td class="settings-integrity__cell settings-integrity__cell--id">${r.entityId}</td>` +
+          `<td class="settings-integrity__cell">${r.field}</td>` +
+          `<td class="settings-integrity__cell">${r.issue}</td>` +
+          `</tr>`,
+      )
+      .join("");
+
+    return `<details class="settings-integrity__domain settings-integrity__domain--${state}" open><summary class="settings-integrity__domain-summary">${summaryText}</summary><table class="settings-integrity__table"><thead><tr><th class="settings-integrity__cell">Severity</th><th class="settings-integrity__cell">ID</th><th class="settings-integrity__cell">Field</th><th class="settings-integrity__cell">Issue</th></tr></thead><tbody>${rows}</tbody></table></details>`;
+  }).join("");
+
+  return c.html(`${overall}${items}`);
 });

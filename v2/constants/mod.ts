@@ -257,6 +257,49 @@ export function groupByCategory(
   return ordered;
 }
 
+// -- Per-domain supported view modes --------------------------------------
+//
+// Every factory-based domain supports `grid` + `table`. A domain may also
+// declare `extraViewModes` in its `config.tsx` (e.g. board, timeline, org,
+// canvas, calendar). The Settings "View defaults" selector reads this map so
+// it shows only the views a domain actually supports — picking a mode the
+// domain can't render would silently fall back to the default.
+//
+// New domains: add an entry here whenever you add `extraViewModes` to a
+// domain config. Hand-maintained, same as ENTITY_TYPE_LABELS / _ROUTES above.
+
+export type ViewModeOption = { key: string; label: string };
+
+export const DEFAULT_VIEW_MODES: ReadonlyArray<ViewModeOption> = [
+  { key: "grid", label: "Grid" },
+  { key: "table", label: "Table" },
+];
+
+export const DOMAIN_VIEW_MODES: Record<string, ReadonlyArray<ViewModeOption>> =
+  {
+    task: [
+      ...DEFAULT_VIEW_MODES,
+      { key: "list", label: "List" },
+      { key: "board", label: "Board" },
+      { key: "timeline", label: "Timeline" },
+    ],
+    goal: [...DEFAULT_VIEW_MODES, { key: "tree", label: "Tree" }],
+    person: [...DEFAULT_VIEW_MODES, { key: "org", label: "Org chart" }],
+    deal: [...DEFAULT_VIEW_MODES, { key: "pipeline", label: "Pipeline" }],
+    idea: [...DEFAULT_VIEW_MODES, { key: "graph", label: "Graph" }],
+    risk: [...DEFAULT_VIEW_MODES, { key: "matrix", label: "Matrix" }],
+    c4_component: [...DEFAULT_VIEW_MODES, { key: "canvas", label: "Canvas" }],
+    sticky_note: [...DEFAULT_VIEW_MODES, { key: "canvas", label: "Canvas" }],
+    vacation: [...DEFAULT_VIEW_MODES, { key: "calendar", label: "Calendar" }],
+  };
+
+/** Returns the view modes a domain supports, or the factory default. */
+export function getDomainViewModes(
+  domainKey: string,
+): ReadonlyArray<ViewModeOption> {
+  return DOMAIN_VIEW_MODES[domainKey] ?? DEFAULT_VIEW_MODES;
+}
+
 /** Maps entity FTS type to the URL path prefix for that domain's list view. */
 export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   task: "/tasks",

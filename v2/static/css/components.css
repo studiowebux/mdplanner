@@ -828,6 +828,12 @@ a.badge:hover {
   height: var(--input-height);
 }
 
+/* Textareas auto-grow to fit their content — no scrolling inside the box.
+   Matches the existing `.quadrant-card__textarea` pattern. */
+.form__textarea {
+  field-sizing: content;
+}
+
 .form__select--sm,
 .form__input--sm {
   height: var(--input-height-sm);
@@ -1503,6 +1509,31 @@ a.badge:hover {
 .sidenav__title--dirty::after {
   content: " \2022";
   color: var(--color-warning);
+}
+
+/* Sidenav save bar — pinned to the bottom of the body scroll container so
+   the Save button is always visible. Negative horizontal margin pulls the
+   bar's opaque background out to the panel edges (overriding the body's
+   horizontal padding) so content scrolling underneath cannot bleed through. */
+.sidenav__body .form__actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--color-bg-primary);
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  margin: var(--space-md) calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg));
+  padding: var(--space-sm) var(--space-lg);
+  z-index: var(--z-sticky);
+}
+
+/* Dirty cues — amber tint on the header and the sticky save bar so the
+   unsaved state is visible without the user scrolling. */
+.sidenav.is-dirty .sidenav__header {
+  background: var(--color-bg-warning);
+}
+
+.sidenav.is-dirty .sidenav__body .form__actions {
+  border-top-color: var(--color-warning);
 }
 
 /* Sidenav resize handle */

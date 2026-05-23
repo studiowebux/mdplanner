@@ -1,5 +1,5 @@
 import type { FC } from "hono/jsx";
-import type { NavLink } from "../../../constants/mod.ts";
+import { getDomainViewModes, type NavLink } from "../../../constants/mod.ts";
 import type { PersonPreferences } from "../../../types/person.types.ts";
 import { ArrayTable } from "../../../components/ui/form-builder.tsx";
 import type { FieldDef } from "../../../components/ui/form-builder.tsx";
@@ -52,8 +52,6 @@ const SHORTCUT_GROUPS = [
   },
 ];
 
-const VIEW_MODES = ["grid", "table", "board", "timeline", "org", "card"];
-
 type Props = {
   navLinks?: NavLink[];
   preferences?: PersonPreferences;
@@ -74,6 +72,12 @@ function filterDefaultsToRows(
   return rows;
 }
 
+// All preferences in this tab are stored on PersonPreferences (server-side,
+// per actor) and loaded in settings/routes.tsx via getPeopleService().
+// The notice below makes that scope explicit to the user.
+const PER_USER_NOTE =
+  "These preferences are stored per user — they apply to your account only, not to other people in this project.";
+
 export const ShortcutsTab: FC<Props> = (
   { navLinks = [], preferences = {} },
 ) => {
@@ -83,193 +87,208 @@ export const ShortcutsTab: FC<Props> = (
 
   return (
     <div class="settings-tabs__panel settings-tabs__panel--shortcuts">
-      {/* View defaults */}
-      <section class="shortcuts-group">
-        <h2 class="shortcuts-group__title">View defaults</h2>
-        <p class="shortcuts-group__desc">
-          Default view mode per domain. Applies when no query param or session
-          state is set. Override anytime with the view toggle on the domain
-          page.
-        </p>
-        <form
-          hx-post="/settings/preferences/view-prefs"
-          hx-swap="none"
-          hx-target="this"
-        >
-          <div class="shortcuts-fields">
-            {navLinks.map((link) => (
-              <div key={link.key} class="shortcuts-row">
-                <label
-                  class="shortcuts-row__label"
-                  for={"vp-" + link.key}
-                >
-                  {link.label}
-                </label>
-                <select
-                  id={"vp-" + link.key}
-                  name={link.key}
-                  class="shortcuts-input"
-                >
-                  <option value="">— default —</option>
-                  {VIEW_MODES.map((m) => (
-                    <option
-                      key={m}
-                      value={m}
-                      selected={viewPrefs[link.key] === m}
-                    >
-                      {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
-          </div>
-          <div class="settings-page__form-actions shortcuts-form-actions">
-            <button type="submit" class="btn btn--primary">
-              Save view defaults
-            </button>
-            <button
-              type="submit"
-              name="_reset"
-              value="1"
-              class="btn btn--secondary"
-            >
-              Reset
-            </button>
-          </div>
-        </form>
-      </section>
+      {/* ── View & UI Preferences (per-user) ─────────────────────────── */}
+      <section class="shortcuts-section">
+        <h2 class="shortcuts-section__title">View &amp; UI Preferences</h2>
+        <p class="shortcuts-section__scope">{PER_USER_NOTE}</p>
 
-      {/* Pinned nav */}
-      <section class="shortcuts-group">
-        <h2 class="shortcuts-group__title">Pinned nav</h2>
-        <p class="shortcuts-group__desc">
-          Pin up to 8 domains to the top of the sidebar for quick access.
-        </p>
-        <form
-          hx-post="/settings/preferences/pinned-nav"
-          hx-swap="none"
-          hx-target="this"
-        >
-          <div class="shortcuts-fields">
-            {navLinks.map((link) => (
-              <div key={link.key} class="shortcuts-row">
-                <input
-                  type="checkbox"
-                  id={"pin-" + link.key}
-                  name="pinned"
-                  value={link.key}
-                  class="shortcuts-checkbox"
-                  checked={pinnedNav.has(link.key)}
-                />
-                <label
-                  class="shortcuts-row__label"
-                  for={"pin-" + link.key}
-                >
-                  {link.label}
-                </label>
-              </div>
-            ))}
-          </div>
-          <div class="settings-page__form-actions shortcuts-form-actions">
-            <button type="submit" class="btn btn--primary">
-              Save pinned nav
-            </button>
-            <button
-              type="submit"
-              name="_reset"
-              value="1"
-              class="btn btn--secondary"
-            >
-              Clear pins
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* Filter defaults */}
-      <section class="shortcuts-group">
-        <h2 class="shortcuts-group__title">Filter defaults</h2>
-        <p class="shortcuts-group__desc">
-          Pre-apply filters when visiting a domain with no active filters. One
-          row per filter: <code>domain</code> + <code>filter key</code> +{" "}
-          <code>value</code> — e.g. <code>tasks</code> / <code>section</code> /
-          {" "}
-          <code>In Progress</code>.
-        </p>
-        <form
-          hx-post="/settings/preferences/filter-defaults"
-          hx-swap="none"
-          hx-target="this"
-        >
-          <ArrayTable
-            section={FILTER_DEFAULTS_FIELD.section}
-            itemFields={FILTER_DEFAULTS_FIELD.itemFields}
-            rows={filterRows}
-            rowsId="filter-defaults-rows"
-            addLabel="Add filter default"
-          />
-          <div class="settings-page__form-actions shortcuts-form-actions">
-            <button type="submit" class="btn btn--primary">
-              Save filter defaults
-            </button>
-            <button
-              type="submit"
-              name="_reset"
-              value="1"
-              class="btn btn--secondary"
-            >
-              Clear
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* Keyboard shortcuts */}
-      <form id="shortcuts-form">
-        {SHORTCUT_GROUPS.map((group) => (
-          <section key={group.title} class="shortcuts-group">
-            <h2 class="shortcuts-group__title">{group.title}</h2>
-            <p class="shortcuts-group__desc">{group.desc}</p>
+        {/* View defaults */}
+        <section class="shortcuts-group">
+          <h3 class="shortcuts-group__title">Default views</h3>
+          <p class="shortcuts-group__desc">
+            Default view mode per domain. Applies when no query param or session
+            state is set. Override anytime with the view toggle on the domain
+            page. Only views the domain actually supports are listed — domains
+            with a single view show no selector.
+          </p>
+          <form
+            hx-post="/settings/preferences/view-prefs"
+            hx-swap="none"
+            hx-target="this"
+          >
             <div class="shortcuts-fields">
-              {group.fields.map((f) => (
-                <div key={f.name} class="shortcuts-row">
-                  <label class="shortcuts-row__label" for={"kb-" + f.name}>
-                    {f.label}
-                  </label>
+              {navLinks
+                .map((link) => ({ link, modes: getDomainViewModes(link.key) }))
+                .filter((row) => row.modes.length > 1)
+                .map(({ link, modes }) => (
+                  <div key={link.key} class="shortcuts-row">
+                    <label
+                      class="shortcuts-row__label"
+                      for={"vp-" + link.key}
+                    >
+                      {link.label}
+                    </label>
+                    <select
+                      id={"vp-" + link.key}
+                      name={link.key}
+                      class="shortcuts-input"
+                    >
+                      <option value="">— default —</option>
+                      {modes.map((m) => (
+                        <option
+                          key={m.key}
+                          value={m.key}
+                          selected={viewPrefs[link.key] === m.key}
+                        >
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+            </div>
+            <div class="settings-page__form-actions shortcuts-form-actions">
+              <button type="submit" class="btn btn--primary">
+                Save default views
+              </button>
+              <button
+                type="submit"
+                name="_reset"
+                value="1"
+                class="btn btn--secondary"
+              >
+                Reset
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* Pinned nav */}
+        <section class="shortcuts-group">
+          <h3 class="shortcuts-group__title">Pinned navigation</h3>
+          <p class="shortcuts-group__desc">
+            Pin up to 8 domains to the top of the sidebar for quick access.
+          </p>
+          <form
+            hx-post="/settings/preferences/pinned-nav"
+            hx-swap="none"
+            hx-target="this"
+          >
+            <div class="shortcuts-fields">
+              {navLinks.map((link) => (
+                <div key={link.key} class="shortcuts-row">
                   <input
-                    type="text"
-                    id={"kb-" + f.name}
-                    name={f.name}
-                    maxlength={1}
-                    autocomplete="off"
-                    class="shortcuts-input"
-                    data-default={f.defaultVal}
-                    placeholder={f.defaultVal}
+                    type="checkbox"
+                    id={"pin-" + link.key}
+                    name="pinned"
+                    value={link.key}
+                    class="shortcuts-checkbox"
+                    checked={pinnedNav.has(link.key)}
                   />
+                  <label
+                    class="shortcuts-row__label"
+                    for={"pin-" + link.key}
+                  >
+                    {link.label}
+                  </label>
                 </div>
               ))}
             </div>
-          </section>
-        ))}
+            <div class="settings-page__form-actions shortcuts-form-actions">
+              <button type="submit" class="btn btn--primary">
+                Save pinned navigation
+              </button>
+              <button
+                type="submit"
+                name="_reset"
+                value="1"
+                class="btn btn--secondary"
+              >
+                Clear pins
+              </button>
+            </div>
+          </form>
+        </section>
 
-        <p id="shortcuts-conflict-msg" class="shortcuts-conflict is-hidden">
-          Fix conflicting keys before saving.
-        </p>
-
-        <div class="settings-page__form-actions shortcuts-form-actions">
-          <button type="submit" class="btn btn--primary">
-            Save shortcuts
-          </button>
-          <button
-            type="button"
-            id="shortcuts-reset"
-            class="btn btn--secondary"
+        {/* Filter defaults */}
+        <section class="shortcuts-group">
+          <h3 class="shortcuts-group__title">Filter defaults</h3>
+          <p class="shortcuts-group__desc">
+            Pre-apply filters when visiting a domain with no active filters. One
+            row per filter: <code>domain</code> + <code>filter key</code> +{" "}
+            <code>value</code> — e.g. <code>tasks</code> / <code>section</code>
+            {" "}
+            / <code>In Progress</code>.
+          </p>
+          <form
+            hx-post="/settings/preferences/filter-defaults"
+            hx-swap="none"
+            hx-target="this"
           >
-            Reset to defaults
-          </button>
-        </div>
-      </form>
+            <ArrayTable
+              section={FILTER_DEFAULTS_FIELD.section}
+              itemFields={FILTER_DEFAULTS_FIELD.itemFields}
+              rows={filterRows}
+              rowsId="filter-defaults-rows"
+              addLabel="Add filter default"
+            />
+            <div class="settings-page__form-actions shortcuts-form-actions">
+              <button type="submit" class="btn btn--primary">
+                Save filter defaults
+              </button>
+              <button
+                type="submit"
+                name="_reset"
+                value="1"
+                class="btn btn--secondary"
+              >
+                Clear
+              </button>
+            </div>
+          </form>
+        </section>
+      </section>
+
+      {/* ── Keyboard Shortcuts (per-user) ────────────────────────────── */}
+      <section class="shortcuts-section">
+        <h2 class="shortcuts-section__title">Keyboard Shortcuts</h2>
+        <p class="shortcuts-section__scope">{PER_USER_NOTE}</p>
+
+        <form id="shortcuts-form">
+          {SHORTCUT_GROUPS.map((group) => (
+            <section key={group.title} class="shortcuts-group">
+              <h3 class="shortcuts-group__title">{group.title}</h3>
+              <p class="shortcuts-group__desc">{group.desc}</p>
+              <div class="shortcuts-fields">
+                {group.fields.map((f) => (
+                  <div key={f.name} class="shortcuts-row">
+                    <label class="shortcuts-row__label" for={"kb-" + f.name}>
+                      {f.label}
+                    </label>
+                    <input
+                      type="text"
+                      id={"kb-" + f.name}
+                      name={f.name}
+                      maxlength={1}
+                      autocomplete="off"
+                      class="shortcuts-input"
+                      data-default={f.defaultVal}
+                      placeholder={f.defaultVal}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+
+          <p id="shortcuts-conflict-msg" class="shortcuts-conflict is-hidden">
+            Fix conflicting keys before saving.
+          </p>
+
+          <div class="settings-page__form-actions shortcuts-form-actions">
+            <button type="submit" class="btn btn--primary">
+              Save shortcuts
+            </button>
+            <button
+              type="button"
+              id="shortcuts-reset"
+              class="btn btn--secondary"
+            >
+              Reset to defaults
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   );
 };

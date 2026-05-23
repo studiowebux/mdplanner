@@ -274,6 +274,7 @@
 .settings-field__textarea {
   resize: vertical;
   min-height: var(--settings-textarea-min-height);
+  field-sizing: content;
 }
 
 .settings-field__hint {
@@ -536,6 +537,11 @@ html.sidebar-collapsed .settings-page__form-actions {
   flex-wrap: wrap;
   gap: var(--space-xs);
   margin-bottom: var(--space-md);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--color-bg-primary);
+  padding: var(--space-sm) 0;
 }
 
 .settings-nav__jump-pill {
@@ -658,6 +664,15 @@ html.sidebar-collapsed .settings-page__form-actions {
   font-size: var(--font-size-sm);
 }
 
+/* Result panel sits on its own row below the file input + button. */
+.settings-data__import-form .settings-data__result {
+  flex-basis: 100%;
+}
+
+.settings-data__confirm-row {
+  margin-top: var(--space-md);
+}
+
 .settings-data__result-summary {
   margin-bottom: var(--space-sm);
   color: var(--color-text-primary);
@@ -758,9 +773,80 @@ html.sidebar-collapsed .settings-page__form-actions {
   font-weight: var(--font-weight-semibold);
 }
 
+/* Per-domain collapsible — green/red/yellow header by status */
+
+.settings-integrity__domain {
+  margin-bottom: var(--space-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.settings-integrity__domain-summary {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.settings-integrity__domain-summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-integrity__domain--clean .settings-integrity__domain-summary {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border-left: var(--space-xs) solid var(--color-success-border);
+}
+
+.settings-integrity__domain--errors .settings-integrity__domain-summary {
+  background: var(--color-bg-warning);
+  color: var(--color-error-text);
+  border-left: var(--space-xs) solid var(--color-error-text);
+}
+
+.settings-integrity__domain--warnings .settings-integrity__domain-summary {
+  background: var(--color-bg-warning);
+  color: var(--color-warning-text);
+  border-left: var(--space-xs) solid var(--color-warning);
+}
+
+.settings-integrity__domain .settings-integrity__table {
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
+}
+
 /* ---------------------------------------------------------------------------
-   Shortcuts tab
+   Shortcuts tab — two top-level sections (View & UI Preferences, Keyboard
+   Shortcuts); each contains one or more inner groups.
    --------------------------------------------------------------------------- */
+
+.shortcuts-section {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+}
+
+.shortcuts-section:last-child {
+  border-bottom: none;
+}
+
+.shortcuts-section__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.shortcuts-section__scope {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+  font-style: italic;
+}
 
 .shortcuts-group {
   margin-bottom: var(--space-xl);
