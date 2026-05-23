@@ -4,8 +4,8 @@ import type { FinanceRepository } from "../repositories/finance.repository.ts";
 import type {
   CreateFinance,
   Finance,
+  FinanceMonthlyTotal,
   FinanceSummary,
-  FinanceType,
   ListFinanceOptions,
   UpdateFinance,
 } from "../types/finance.types.ts";
@@ -61,37 +61,60 @@ export class FinanceService extends BaseService<
 
     let totalIncome = 0;
     let totalExpense = 0;
-    const tagMap = new Map<string, { type: FinanceType; total: number }>();
-
     for (const f of all) {
-      if (f.type === "income") {
-        totalIncome += f.amount;
-      } else {
-        totalExpense += f.amount;
-      }
-      const tagList = f.tags?.length ? f.tags : ["uncategorized"];
-      for (const tag of tagList) {
-        const key = `${f.type}::${tag}`;
-        const existing = tagMap.get(key);
-        if (existing) {
-          existing.total += f.amount;
-        } else {
-          tagMap.set(key, { type: f.type, total: f.amount });
-        }
-      }
+      if (f.type === "income") totalIncome += f.amount;
+      else totalExpense += f.amount;
     }
-
-    const byTag = [...tagMap.entries()].map(([key, v]) => ({
-      tag: key.split("::")[1],
-      type: v.type,
-      total: v.total,
-    })).sort((a, b) => b.total - a.total);
 
     return {
       totalIncome,
       totalExpense,
       balance: totalIncome - totalExpense,
-      byTag,
+      byTag: FinanceService.aggregateByTag(all),
     };
+  }
+
+  /**
+   * Aggregate entries into `(tag, type) → total` rows, sorted by total desc.
+   * Entries with no tags fall into a `"uncategorized"` bucket. Pure function —
+   * mirrors the `PeopleService.buildTree(items)` static-helper pattern.
+   */
+  static aggregateByTag(items: Finance[]): FinanceSummary["byTag"] {
+    const tagMap = new Map<
+      string,
+      { tag: string; type: Finance["type"]; total: number }
+    >();
+    for (const f of items) {
+      const tagList = f.tags?.length ? f.tags : ["uncategorized"];
+      for (const tag of tagList) {
+        const key = `${f.type}::${tag}`;
+        const existing = tagMap.get(key);
+        if (existing) existing.total += f.amount;
+        else tagMap.set(key, { tag, type: f.type, total: f.amount });
+      }
+    }
+    return [...tagMap.values()].sort((a, b) => b.total - a.total);
+  }
+
+  /**
+   * Bucket entries into monthly income/expense totals, sorted ascending by
+   * `YYYY-MM`. Entries with no `date` are skipped. Pure function.
+   */
+  static aggregateMonthly(items: Finance[]): FinanceMonthlyTotal[] {
+    const monthMap = new Map<string, FinanceMonthlyTotal>();
+    for (const f of items) {
+      if (!f.date) continue;
+      const month = f.date.slice(0, 7);
+      let bucket = monthMap.get(month);
+      if (!bucket) {
+        bucket = { month, income: 0, expense: 0 };
+        monthMap.set(month, bucket);
+      }
+      if (f.type === "income") bucket.income += f.amount;
+      else bucket.expense += f.amount;
+    }
+    return [...monthMap.values()].sort((a, b) =>
+      a.month.localeCompare(b.month)
+    );
   }
 }

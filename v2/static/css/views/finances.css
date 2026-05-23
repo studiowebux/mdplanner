@@ -55,6 +55,112 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Chart view — server-rendered SVG, two sections (monthly + by-tag)
+--------------------------------------------------------------------------- */
+
+.finance-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--finance-chart-section-gap);
+}
+
+.finance-chart__section {
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.finance-chart__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.finance-chart__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+
+.finance-chart__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.finance-chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.finance-chart__legend-swatch {
+  display: inline-block;
+  width: var(--finance-chart-legend-swatch-size);
+  height: var(--finance-chart-legend-swatch-size);
+  border-radius: var(--radius-sm);
+}
+
+.finance-chart__legend-swatch--income {
+  background: var(--color-success);
+}
+
+.finance-chart__legend-swatch--expense {
+  background: var(--color-error);
+}
+
+.finance-chart__scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.finance-chart__svg {
+  display: block;
+  width: 100%;
+  max-height: var(--finance-chart-svg-max-h);
+}
+
+.finance-chart__svg--monthly {
+  min-width: var(--card-min-width);
+}
+
+.finance-chart__bar--income {
+  fill: var(--color-success);
+}
+
+.finance-chart__bar--expense {
+  fill: var(--color-error);
+}
+
+.finance-chart__gridline {
+  stroke: var(--color-border-default);
+  stroke-width: var(--border-width);
+}
+
+.finance-chart__axis-label {
+  fill: var(--color-text-muted);
+  font-size: var(--finance-chart-axis-font-size);
+}
+
+.finance-chart__axis-label--tag {
+  fill: var(--color-text-secondary);
+}
+
+.finance-chart__axis-label--value {
+  fill: var(--color-text-primary);
+}
+
+/* ---------------------------------------------------------------------------
    Detail view
 --------------------------------------------------------------------------- */
 

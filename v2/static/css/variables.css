@@ -285,6 +285,10 @@
   --card-min-width: 10rem;
   --card-description-fade: 2rem;
   --finance-summary-tile-min-w: 8rem;
+  --finance-chart-section-gap: var(--space-lg);
+  --finance-chart-axis-font-size: var(--font-size-xs);
+  --finance-chart-legend-swatch-size: 0.75rem;
+  --finance-chart-svg-max-h: 22rem;
 
   /* Avatar */
   --avatar-size: var(--space-xl);

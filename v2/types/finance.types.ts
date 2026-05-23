@@ -130,3 +130,14 @@ export const FinanceSummarySchema = z.object({
 }).openapi("FinanceSummary");
 
 export type FinanceSummary = z.infer<typeof FinanceSummarySchema>;
+
+export const FinanceMonthlyTotalSchema = z.object({
+  month: z.string().openapi({
+    description: "Year-month bucket (YYYY-MM)",
+    example: "2026-01",
+  }),
+  income: z.number(),
+  expense: z.number(),
+}).openapi("FinanceMonthlyTotal");
+
+export type FinanceMonthlyTotal = z.infer<typeof FinanceMonthlyTotalSchema>;

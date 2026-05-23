@@ -8,6 +8,7 @@ import type {
 } from "../../types/finance.types.ts";
 import { FINANCE_TYPE_LABELS } from "../../types/finance.types.ts";
 import { getFinanceService } from "../../singletons/services.ts";
+import { FinanceService } from "../../services/finance.service.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
   FINANCE_FORM_FIELDS,
@@ -16,6 +17,7 @@ import {
   financeToRow,
 } from "./constants.tsx";
 import { FinanceSummaryBanner } from "../../views/finances/components/finance-summary.tsx";
+import { FinanceChart } from "../../views/finances/components/finance-chart.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
 export const financeConfig: DomainConfig<
@@ -75,4 +77,12 @@ export const financeConfig: DomainConfig<
     { type: "string", get: (f) => f.description },
     { type: "array", get: (f) => f.tags },
   ]),
+
+  extraViewModes: [{ key: "chart", label: "Chart" }],
+
+  customViewRenderer: (_view, _state, items) => {
+    const monthly = FinanceService.aggregateMonthly(items);
+    const byTag = FinanceService.aggregateByTag(items);
+    return Promise.resolve(<FinanceChart monthly={monthly} byTag={byTag} />);
+  },
 };
