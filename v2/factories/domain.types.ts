@@ -132,6 +132,14 @@ export type DomainConfig<T extends Entity, C, U> = {
   /** Hide the default Grid/Table view toggle buttons. Use when all views are custom. */
   hideDefaultViews?: boolean;
 
+  /**
+   * Hide only the Grid view toggle button (and coerce a stale `view=grid` in
+   * URL/cookie to the Table render). Use for domains whose data is inherently
+   * tabular (e.g. finance entries) and would never benefit from a card grid.
+   * Independent of `hideDefaultViews`, which hides both built-in buttons.
+   */
+  hideGridView?: boolean;
+
   /** Optional async slot rendered between the toolbar and the view container.
    *  Receives the request context so the slot can scope to the current user. */
   topSlot?: (c: AppContext) => Promise<ReturnType<FC>>;

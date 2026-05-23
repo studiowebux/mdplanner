@@ -15,7 +15,6 @@ import {
   FINANCE_TYPE_OPTIONS,
   financeToRow,
 } from "./constants.tsx";
-import { FinanceCard } from "../../views/components/finance-card.tsx";
 import { FinanceSummaryBanner } from "../../views/finances/components/finance-summary.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
@@ -32,6 +31,7 @@ export const financeConfig: DomainConfig<
   styles: ["/css/views/finances.css"],
   emptyMessage: "No finance entries yet. Create one to get started.",
   defaultView: "table",
+  hideGridView: true,
 
   stateKeys: ["view", "type", "tag", "q", "sort", "order", "from", "to"],
   columns: FINANCE_TABLE_COLUMNS,
@@ -54,8 +54,6 @@ export const financeConfig: DomainConfig<
   },
 
   toRow: financeToRow,
-
-  Card: ({ item, q }) => <FinanceCard item={item} q={q} />,
 
   parseCreate: (body) =>
     parseFormBody(FINANCE_FORM_FIELDS, body) as CreateFinance,

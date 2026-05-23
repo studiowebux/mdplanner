@@ -308,12 +308,13 @@ function DateRangeFilter(
 // ---------------------------------------------------------------------------
 
 function ViewToggleButtons(
-  { domain, view, oobSwap, extraModes, hideDefault }: {
+  { domain, view, oobSwap, extraModes, hideDefault, hideGrid }: {
     domain: string;
     view: string;
     oobSwap?: string;
     extraModes?: { key: string; label: string }[];
     hideDefault?: boolean;
+    hideGrid?: boolean;
   },
 ) {
   const id = `${domain}-view-toggle`;
@@ -323,7 +324,7 @@ function ViewToggleButtons(
       class="view-toggle"
       {...(oobSwap ? { "hx-swap-oob": oobSwap } : {})}
     >
-      {!hideDefault && (
+      {!hideDefault && !hideGrid && (
         <button
           class={`btn btn--secondary view-toggle__btn${
             view === "grid" ? " view-toggle__btn--active" : ""
@@ -484,6 +485,7 @@ export function createDomainViewContainer<T extends Entity>(
           oobSwap="true"
           extraModes={cfg.extraViewModes}
           hideDefault={cfg.hideDefaultViews}
+          hideGrid={cfg.hideGridView}
         />
       )}
       {fragment && (
@@ -511,7 +513,7 @@ export function createDomainViewContainer<T extends Entity>(
           ? customContent
           : items.length === 0
           ? <EmptyState message={cfg.emptyMessage} />
-          : state.view === "table"
+          : (state.view === "table" || cfg.hideGridView)
           ? (
             <DataTable
               id={`${cfg.name}-table`}
@@ -714,6 +716,7 @@ export function createDomainPage<T extends Entity>(
                 view={state.view}
                 extraModes={cfg.extraViewModes}
                 hideDefault={cfg.hideDefaultViews}
+                hideGrid={cfg.hideGridView}
               />
             </div>
             {showFilters && (
