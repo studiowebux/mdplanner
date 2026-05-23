@@ -16,6 +16,22 @@ effort: 6
 order: 40
 tags: [storage, uploads]
 blocked_by: [task_crud]
+time_entries:
+  - id: te_att_1
+    date: 2026-03-13
+    hours: 4
+    person: agent_claude
+    description: S3 backend + signed URL flow
+  - id: te_att_2
+    date: 2026-03-16
+    hours: 5
+    person: agent_claude
+    description: Drag-and-drop upload + progress UI
+  - id: te_att_3
+    date: 2026-03-19
+    hours: 2
+    person: agent_claude
+    description: Image preview thumbnails
 ---
 
 # File Attachments

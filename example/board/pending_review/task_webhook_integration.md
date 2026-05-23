@@ -13,6 +13,22 @@ order: 1
 planned_start: 2026-03-14
 planned_end: 2026-03-19
 tags: [integrations, webhooks, api]
+time_entries:
+  - id: te_wh_1
+    date: 2026-03-14
+    hours: 4
+    person: agent_claude
+    description: Registration endpoint + persistence
+  - id: te_wh_2
+    date: 2026-03-16
+    hours: 3
+    person: agent_claude
+    description: HMAC signature + delivery worker
+  - id: te_wh_3
+    date: 2026-03-18
+    hours: 2
+    person: agent_claude
+    description: Retry policy + delivery log
 ---
 
 # Webhook Integration

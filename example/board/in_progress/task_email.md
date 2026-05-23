@@ -16,6 +16,27 @@ effort: 8
 order: 10
 tags: [notifications, email]
 blocked_by: [task_auth]
+time_entries:
+  - id: te_email_1
+    date: 2026-03-11
+    hours: 3
+    person: charlie
+    description: AWS SES integration + auth setup
+  - id: te_email_2
+    date: 2026-03-14
+    hours: 5
+    person: charlie
+    description: Template engine implementation
+  - id: te_email_3
+    date: 2026-03-18
+    hours: 2
+    person: charlie
+    description: Background queue worker
+  - id: te_email_4
+    date: 2026-03-25
+    hours: 4
+    person: charlie
+    description: Daily digest job + delivery testing
 ---
 
 # Email Notifications

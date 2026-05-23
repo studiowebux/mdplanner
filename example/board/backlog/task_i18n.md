@@ -10,6 +10,12 @@ project: Client Portal
 tags: [i18n, localization]
 planned_start: 2026-09-01
 planned_end: 2026-10-01
+time_entries:
+  - id: te_i18n_1
+    date: 2026-04-09
+    hours: 0.25
+    person: bob
+    description: "Scoping spike: string extraction tooling survey"
 ---
 
 # Internationalization (i18n)

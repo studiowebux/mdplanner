@@ -15,6 +15,27 @@ planned_start: 2026-01-20
 planned_end: 2026-02-05
 tags: [security, auth]
 blocked_by: [task_project_structure]
+time_entries:
+  - id: te_auth_1
+    date: 2026-01-22
+    hours: 6
+    person: bob
+    description: JWT issuer + JWKS endpoint
+  - id: te_auth_2
+    date: 2026-01-27
+    hours: 4
+    person: bob
+    description: Refresh token rotation
+  - id: te_auth_3
+    date: 2026-01-30
+    hours: 1
+    person: alice
+    description: Security code review on JWT implementation
+  - id: te_auth_4
+    date: 2026-02-04
+    hours: 8
+    person: bob
+    description: Login/logout endpoints + middleware
 ---
 
 # Authentication System

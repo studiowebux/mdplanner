@@ -25,6 +25,36 @@ time_entries:
     hours: 6
     person: bob
     description: Backend implementation
+  - id: te_3
+    date: 2026-03-24
+    hours: 5
+    person: bob
+    description: Timer component UI
+  - id: te_4
+    date: 2026-03-25
+    hours: 0.5
+    person: bob
+    description: Sprint planning + standup
+  - id: te_5
+    date: 2026-03-30
+    hours: 4
+    person: bob
+    description: Timesheet view implementation
+  - id: te_6
+    date: 2026-04-02
+    hours: 1
+    person: bob
+    description: Code review walk-through with charlie
+  - id: te_7
+    date: 2026-04-02
+    hours: 0.5
+    person: charlie
+    description: Code review on time tracking PR
+  - id: te_8
+    date: 2026-04-07
+    hours: 6
+    person: bob
+    description: Reports integration + bug fixes
 ---
 
 # Time Tracking Feature
