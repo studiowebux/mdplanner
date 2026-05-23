@@ -2,6 +2,7 @@
 id: fishbone_1740700001000_ex3c4d
 title: Customer Churn Increase
 description: Why are monthly cancellations up 18% this quarter?
+project: TaskFlow Platform
 created_at: 2026-02-28T00:00:00.000Z
 updated_at: 2026-02-28T00:00:00.000Z
 ---
