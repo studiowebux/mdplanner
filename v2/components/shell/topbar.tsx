@@ -181,6 +181,7 @@ export async function Topbar(
           class="topbar__action-btn"
           type="button"
           aria-label="Toggle animations"
+          aria-pressed="false"
         >
           Motion
         </button>

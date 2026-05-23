@@ -609,6 +609,12 @@ html.focus-mode .focus-mode-exit {
   border-color: var(--color-border-default);
 }
 
+/* Motion toggle active state — motion is OFF (html.no-animations) */
+html.no-animations #animations-toggle {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 /* Overflow toggle — hidden on desktop, shown on mobile */
 .topbar__overflow-btn {
   display: none;

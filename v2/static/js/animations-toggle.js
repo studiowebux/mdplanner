@@ -6,13 +6,16 @@
   if (!btn) return;
 
   // Restore on load
-  if (localStorage.getItem("noAnimations") === "true") {
+  var initiallyOff = localStorage.getItem("noAnimations") === "true";
+  if (initiallyOff) {
     document.documentElement.classList.add("no-animations");
   }
+  btn.setAttribute("aria-pressed", initiallyOff ? "true" : "false");
 
   btn.addEventListener("click", function () {
     var off = document.documentElement.classList.toggle("no-animations");
     localStorage.setItem("noAnimations", off ? "true" : "false");
+    btn.setAttribute("aria-pressed", off ? "true" : "false");
   });
 
   // Strip swap delay when animations are disabled
