@@ -75,6 +75,102 @@
 }
 
 /* ---------------------------------------------------------------------------
+   SMART criteria assessment (detail page, server-rendered)
+--------------------------------------------------------------------------- */
+
+.goal-smart-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+@media (max-width: 1024px) {
+  /* --bp-desktop-sm range — collapse to 2 cols on tablet */
+  .goal-smart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
+  .goal-smart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.goal-smart-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  border-top: var(--space-xs) solid var(--color-border-default);
+  min-width: 0;
+}
+
+.goal-smart-card--met {
+  border-top-color: var(--color-success);
+}
+
+.goal-smart-card--unmet {
+  border-top-color: var(--color-warning);
+}
+
+.goal-smart-card--neutral {
+  border-top-color: var(--color-info);
+}
+
+.goal-smart-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.goal-smart-card__letter {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.goal-smart-card__indicator {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.goal-smart-card--met .goal-smart-card__indicator {
+  color: var(--color-success-text);
+}
+
+.goal-smart-card--unmet .goal-smart-card__indicator {
+  color: var(--color-warning-text);
+}
+
+.goal-smart-card--neutral .goal-smart-card__indicator {
+  color: var(--color-text-muted);
+}
+
+.goal-smart-card__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.goal-smart-card__value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--body-line-height);
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------------
    SMART criteria hints (progressive enhancement via goal-smart.js)
 --------------------------------------------------------------------------- */
 

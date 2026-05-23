@@ -22,6 +22,115 @@ import {
 import { badgeClass } from "../components/ui/status-badge.tsx";
 
 // ---------------------------------------------------------------------------
+// SMART criteria — server-rendered assessment
+// ---------------------------------------------------------------------------
+
+type SmartStatus = "met" | "unmet" | "neutral";
+
+type SmartCriterion = {
+  key: "S" | "M" | "A" | "R" | "T";
+  name: string;
+  status: SmartStatus;
+  value: string;
+};
+
+function evaluateSmart(goal: Goal): SmartCriterion[] {
+  const title = (goal.title ?? "").trim();
+  const description = (goal.description ?? "").trim();
+  const kpi = (goal.kpi ?? "").trim();
+  const kpiMetric = (goal.kpiMetric ?? "").trim();
+  const project = (goal.project ?? "").trim();
+
+  const measurableValue = kpi
+    ? `KPI: ${kpi}`
+    : kpiMetric
+    ? `Metric: ${kpiMetric}`
+    : goal.kpiTarget != null
+    ? `Target: ${goal.kpiTarget}`
+    : goal.progress != null
+    ? `Progress: ${goal.progress}%`
+    : "No measurable target";
+
+  const isMeasurable = kpi.length > 0 || kpiMetric.length > 0 ||
+    goal.kpiTarget != null || goal.progress != null;
+
+  const timeBound = goal.startDate && goal.endDate
+    ? `${formatDate(goal.startDate)} → ${formatDate(goal.endDate)}`
+    : goal.startDate
+    ? `From ${formatDate(goal.startDate)}`
+    : goal.endDate
+    ? `Until ${formatDate(goal.endDate)}`
+    : "No timeline";
+
+  return [
+    {
+      key: "S",
+      name: "Specific",
+      status: title.length > 10 ? "met" : "unmet",
+      value: title.length > 0 ? title : "Add a clearer title",
+    },
+    {
+      key: "M",
+      name: "Measurable",
+      status: isMeasurable ? "met" : "unmet",
+      value: measurableValue,
+    },
+    {
+      key: "A",
+      name: "Achievable",
+      status: "neutral",
+      value: description.length > 30
+        ? "Rationale provided in description"
+        : "Add rationale to description",
+    },
+    {
+      key: "R",
+      name: "Relevant",
+      status: project.length > 0 ? "met" : "unmet",
+      value: project.length > 0 ? project : "No linked project",
+    },
+    {
+      key: "T",
+      name: "Time-bound",
+      status: goal.startDate && goal.endDate ? "met" : "unmet",
+      value: timeBound,
+    },
+  ];
+}
+
+const SMART_INDICATOR: Record<SmartStatus, string> = {
+  met: "✓",
+  unmet: "✗",
+  neutral: "—",
+};
+
+const SmartCriteriaSection: FC<{ goal: Goal }> = ({ goal }) => {
+  const criteria = evaluateSmart(goal);
+  return (
+    <section class="detail-section goal-detail__smart">
+      <h2 class="section-heading">SMART Criteria</h2>
+      <div class="goal-smart-grid">
+        {criteria.map((c) => (
+          <article
+            key={c.key}
+            class={`goal-smart-card goal-smart-card--${c.status}`}
+          >
+            <div class="goal-smart-card__head">
+              <span class="goal-smart-card__letter">{c.key}</span>
+              <span class="goal-smart-card__indicator" aria-hidden="true">
+                {SMART_INDICATOR[c.status]}
+              </span>
+            </div>
+            <div class="goal-smart-card__name">{c.name}</div>
+            <div class="goal-smart-card__value">{c.value}</div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
@@ -305,6 +414,9 @@ export const GoalDetailView: FC<
             </table>
           </section>
         )}
+        {/* ── SMART criteria ─────────────────────────────────────── */}
+        <SmartCriteriaSection goal={goal} />
+
         <AuditMeta
           createdAt={goal.createdAt}
           updatedAt={goal.updatedAt}
