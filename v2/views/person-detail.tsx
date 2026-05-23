@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Goal } from "../types/goal.types.ts";
+import type { Meeting } from "../types/meeting.types.ts";
 import type { Person } from "../types/person.types.ts";
 import type { Retrospective } from "../types/retrospective.types.ts";
 import type { Task } from "../types/task.types.ts";
@@ -38,6 +39,8 @@ type Props = ViewProps & {
   vacations?: VacationRequest[];
   assignedTasks?: Task[];
   assignedGoals?: Goal[];
+  attendedMeetings?: Meeting[];
+  attendedMeetingsTotal?: number;
   analytics?: PersonAnalytics;
   showCompleted?: boolean;
 };
@@ -51,6 +54,8 @@ export const PersonDetailView: FC<Props> = (
     vacations = [],
     assignedTasks = [],
     assignedGoals = [],
+    attendedMeetings = [],
+    attendedMeetingsTotal = 0,
     analytics,
     showCompleted = false,
     ...viewProps
@@ -295,6 +300,42 @@ export const PersonDetailView: FC<Props> = (
               </ul>
             </section>
           )}
+
+          <section class="detail-section person-detail__section">
+            <h2>
+              Meetings
+              {attendedMeetingsTotal > 0 && (
+                <span class="person-detail__count">
+                  ({attendedMeetingsTotal})
+                </span>
+              )}
+            </h2>
+            {attendedMeetings.length > 0
+              ? (
+                <>
+                  <ul class="person-detail__meetings">
+                    {attendedMeetings.map((m) => (
+                      <li key={m.id}>
+                        <a href={`/meetings/${m.id}`}>{m.title}</a>
+                        <span class="person-detail__meeting-meta">
+                          {formatDate(m.date)} &middot;{" "}
+                          {(m.attendees ?? []).length} attendees
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {attendedMeetingsTotal > attendedMeetings.length && (
+                    <a
+                      class="person-detail__toggle"
+                      href={`/meetings?q=${encodeURIComponent(person.name)}`}
+                    >
+                      View all ({attendedMeetingsTotal})
+                    </a>
+                  )}
+                </>
+              )
+              : <EmptyState message="No meetings attended yet." />}
+          </section>
 
           {analytics && (
             <section class="detail-section person-detail__section">

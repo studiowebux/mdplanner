@@ -96,18 +96,23 @@ peopleRouter.get("/:id", async (c) => {
     }
   }
   const hoursLogged = Math.round(hoursLoggedTotal * 100) / 100;
-  const meetingsAttendedCount = allMeetings.filter((m) =>
-    (m.attendees ?? []).some((a) =>
-      a === id || a === person.name ||
-      resolvePersonByName(a, allPeople)?.id === id
+  const attendedAll = allMeetings
+    .filter((m) =>
+      (m.attendees ?? []).some((a) =>
+        a === id || a === person.name ||
+        resolvePersonByName(a, allPeople)?.id === id
+      )
     )
-  ).length;
+    .slice()
+    .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  const attendedMeetingsTotal = attendedAll.length;
+  const attendedMeetings = attendedAll.slice(0, 10);
   const analytics = {
     openTasks: openTasksCount,
     doneTasks: doneTasksCount,
     activeGoals: activeGoalsCount,
     hoursLogged,
-    meetingsAttended: meetingsAttendedCount,
+    meetingsAttended: attendedMeetingsTotal,
   };
 
   return c.html(
@@ -120,6 +125,8 @@ peopleRouter.get("/:id", async (c) => {
       vacations={vacations}
       assignedTasks={assignedTasks}
       assignedGoals={assignedGoals}
+      attendedMeetings={attendedMeetings}
+      attendedMeetingsTotal={attendedMeetingsTotal}
       analytics={analytics}
       showCompleted={showCompleted}
     />,

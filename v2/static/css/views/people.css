@@ -176,7 +176,8 @@
 .person-detail__retros,
 .person-detail__vacations,
 .person-detail__assigned-tasks,
-.person-detail__assigned-goals {
+.person-detail__assigned-goals,
+.person-detail__meetings {
   list-style: none;
   padding: 0;
   display: flex;
@@ -188,7 +189,8 @@
 .person-detail__retros li,
 .person-detail__vacations li,
 .person-detail__assigned-tasks li,
-.person-detail__assigned-goals li {
+.person-detail__assigned-goals li,
+.person-detail__meetings li {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
@@ -196,7 +198,8 @@
 
 .person-detail__vacations li,
 .person-detail__assigned-tasks li,
-.person-detail__assigned-goals li {
+.person-detail__assigned-goals li,
+.person-detail__meetings li {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -208,7 +211,8 @@
 .person-detail__retros a,
 .person-detail__vacations a,
 .person-detail__assigned-tasks a,
-.person-detail__assigned-goals a {
+.person-detail__assigned-goals a,
+.person-detail__meetings a {
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
@@ -218,12 +222,14 @@
 .person-detail__retros a:hover,
 .person-detail__vacations a:hover,
 .person-detail__assigned-tasks a:hover,
-.person-detail__assigned-goals a:hover {
+.person-detail__assigned-goals a:hover,
+.person-detail__meetings a:hover {
   text-decoration: underline;
 }
 
 .person-detail__report-title,
-.person-detail__retro-date {
+.person-detail__retro-date,
+.person-detail__meeting-meta {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
