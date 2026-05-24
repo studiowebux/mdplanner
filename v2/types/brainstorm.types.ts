@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -51,7 +55,7 @@ export const BrainstormSchema = z.object({
   questions: z.array(BrainstormQuestionSchema).openapi({
     description: "Ordered Q&A pairs",
   }),
-}).merge(AuditFieldsSchema).openapi("Brainstorm");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Brainstorm");
 
 export type Brainstorm = z.infer<typeof BrainstormSchema>;
 

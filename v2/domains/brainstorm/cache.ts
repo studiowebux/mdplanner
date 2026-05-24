@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -31,6 +36,7 @@ export function rowToBrainstorm(
     linkedTasks: parseJson<string[]>(row.linked_tasks),
     linkedGoals: parseJson<string[]>(row.linked_goals),
     questions: parseJson<BrainstormQuestion[]>(row.questions) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -54,6 +60,7 @@ const BRAINSTORM_SCHEMA = `CREATE TABLE IF NOT EXISTS ${BRAINSTORM_TABLE} (
   linked_goals TEXT,
   questions TEXT,
   questions_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -70,8 +77,9 @@ function insertBrainstormRow(
     `INSERT OR REPLACE INTO ${BRAINSTORM_TABLE} (id, title, tags,
        linked_projects, linked_tasks, linked_goals,
        questions, questions_text,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
       val(b.title),
@@ -81,6 +89,7 @@ function insertBrainstormRow(
       jsonVal(b.linkedGoals),
       json(b.questions),
       questionsToText(b.questions),
+      ...archiveVals(b),
       ...auditVals(b),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -98,6 +107,9 @@ export function registerBrainstormEntity(repo: BrainstormRepository): void {
       titleCol: "title",
       contentCol: "questions_text",
     },
+    migrations: [
+      ...archiveMigrations(BRAINSTORM_TABLE),
+    ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();
       for (const b of items) insertBrainstormRow(db, b, syncedAt);

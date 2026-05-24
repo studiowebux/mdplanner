@@ -5,6 +5,7 @@ import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Brainstorm } from "../types/brainstorm.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { toKebab } from "../utils/slug.ts";
@@ -59,6 +60,7 @@ export const BrainstormDetailView: FC<
             id={brainstorm.id}
             title={brainstorm.title}
             formContainerId="brainstorms-form-container"
+            archived={brainstorm.archived === true}
           >
             <button
               type="button"
@@ -71,6 +73,8 @@ export const BrainstormDetailView: FC<
             </button>
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={brainstorm} />
 
         {/* -- Tags ------------------------------------------------------ */}
         {hasTags && (
