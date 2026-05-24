@@ -39,6 +39,7 @@ export const NoteDetailView: FC<Props> = (props) => {
           "/js/note-highlight.js",
           "/js/note-tabs.js",
           "/js/note-editor.js",
+          "/js/note-undo.js",
         ]}
       >
         <main
