@@ -49,6 +49,16 @@ export const DisplayTab: FC = () => (
           </label>
         </div>
       </section>
+
+      <section class="shortcuts-group">
+        <h3 class="shortcuts-group__title">Columns</h3>
+        <p class="shortcuts-group__desc">
+          Column visibility is saved per module (Tasks, Goals, Notes, etc.) in
+          this browser's local storage. Each module tracks its own visible
+          columns independently. The preference does not sync across devices or
+          browsers — adjust the column toggle on each list view as needed.
+        </p>
+      </section>
     </section>
   </div>
 );
