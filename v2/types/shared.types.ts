@@ -34,3 +34,30 @@ export const AuditFieldsSchema = z.object({
 });
 
 export type AuditFields = z.infer<typeof AuditFieldsSchema>;
+
+// ---------------------------------------------------------------------------
+// Archive fields — present on every domain that opts into soft-delete
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete frontmatter fields. Domain schemas merge this in alongside
+ * `AuditFieldsSchema`. Pair with the cache helpers in
+ * `v2/database/sqlite/entities.ts` (`archiveCols`/`archiveVals`/
+ * `archiveFieldsFromRow`/`archiveMigrations`) and the shared
+ * `<ArchivedBanner>` view component.
+ *
+ * See `[architecture] MD Planner — Soft-delete (archive) pattern`.
+ */
+export const ArchiveFieldsSchema = z.object({
+  archived: z.boolean().optional().openapi({
+    description: "True when the entity has been soft-deleted (archived).",
+  }),
+  archivedAt: z.string().nullable().optional().openapi({
+    description: "ISO timestamp when the entity was archived",
+  }),
+  archivedBy: z.string().nullable().optional().openapi({
+    description: "Name of the person who archived the entity",
+  }),
+});
+
+export type ArchiveFields = z.infer<typeof ArchiveFieldsSchema>;

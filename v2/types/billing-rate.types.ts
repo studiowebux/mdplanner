@@ -5,7 +5,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { UNIT_TYPES } from "./billing.types.ts";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -44,7 +44,7 @@ export const BillingRateSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Rate notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("BillingRate");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("BillingRate");
 
 export type BillingRate = z.infer<typeof BillingRateSchema>;
 

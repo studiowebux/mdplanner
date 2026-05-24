@@ -18,6 +18,7 @@ export class BillingRateRepository extends CachedMarkdownRepository<
   UpdateBillingRate
 > {
   protected readonly tableName = BILLING_RATE_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

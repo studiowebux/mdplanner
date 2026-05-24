@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -26,6 +31,7 @@ export function rowToBillingRate(
     assignee: row.assignee as string | undefined,
     isDefault: row.is_default != null ? Boolean(row.is_default) : undefined,
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -42,6 +48,7 @@ const BILLING_RATE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${BILLING_RATE_TABLE} (
   assignee TEXT,
   is_default INTEGER,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -57,8 +64,9 @@ function insertBillingRateRow(
   db.execute(
     `INSERT OR REPLACE INTO ${BILLING_RATE_TABLE} (id, name, unit, rate,
        currency, assignee, is_default, notes,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.name),
@@ -68,6 +76,7 @@ function insertBillingRateRow(
       val(r.assignee),
       r.isDefault ? 1 : 0,
       val(r.notes),
+      ...archiveVals(r),
       ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -87,6 +96,9 @@ export function registerBillingRateEntity(
       titleCol: "name",
       contentCol: "notes",
     },
+    migrations: [
+      ...archiveMigrations(BILLING_RATE_TABLE),
+    ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();
       for (const r of items) insertBillingRateRow(db, r, syncedAt);

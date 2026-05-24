@@ -1,6 +1,11 @@
 export { CacheDatabase } from "./database.ts";
 export type { BindParams, BindValue, QueryResult } from "./database.ts";
 export {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   buildFtsDropSql,

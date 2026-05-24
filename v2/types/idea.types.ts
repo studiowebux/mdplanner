@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -85,16 +89,7 @@ export const IdeaSchema = z.object({
   cancelledAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when status changed to cancelled",
   }),
-  archived: z.boolean().optional().openapi({
-    description: "True when the idea has been soft-deleted (archived).",
-  }),
-  archivedAt: z.string().nullable().optional().openapi({
-    description: "ISO timestamp when the idea was archived",
-  }),
-  archivedBy: z.string().nullable().optional().openapi({
-    description: "Name of the person who archived the idea",
-  }),
-}).merge(AuditFieldsSchema).openapi("Idea");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Idea");
 
 export type Idea = z.infer<typeof IdeaSchema>;
 

@@ -102,6 +102,62 @@ export function auditVals(e: {
   ];
 }
 
+// ============================================================
+// Archive (soft-delete) helpers
+// ============================================================
+// Drop these into any domain's cache.ts to opt into the canonical
+// soft-delete pattern. See `[architecture] MD Planner — Soft-delete
+// (archive) pattern` and the `ArchiveFieldsSchema` Zod fragment.
+
+/** Column DDL fragment for the three archive fields. Inline into CREATE TABLE. */
+export const ARCHIVE_COLS_DDL =
+  "archived INTEGER DEFAULT 0,\n  archived_at TEXT,\n  archived_by TEXT";
+
+/** Column fragment for the three archive fields. Pairs with `archiveVals`. */
+export function archiveCols(): string {
+  return "archived, archived_at, archived_by";
+}
+
+/** Values for the three archive fields, matching archiveCols() order. */
+export function archiveVals(e: {
+  archived?: boolean | null;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
+}): BindValue[] {
+  return [
+    e.archived ? 1 : 0,
+    val(e.archivedAt),
+    val(e.archivedBy),
+  ];
+}
+
+/**
+ * Deserialize the three archive columns from a cache row. Spread into the
+ * object literal returned by a domain's `rowTo<X>` mapper.
+ */
+export function archiveFieldsFromRow(
+  row: Record<string, string | number | null>,
+): { archived?: boolean; archivedAt?: string; archivedBy?: string } {
+  return {
+    archived: row.archived === 1 || row.archived === "1" ? true : undefined,
+    archivedAt: row.archived_at as string | undefined,
+    archivedBy: row.archived_by as string | undefined,
+  };
+}
+
+/**
+ * Idempotent ALTER TABLE statements for the three archive columns. Append
+ * to a domain's `EntityDef.migrations` array — failures are swallowed so
+ * pre-existing columns are a no-op.
+ */
+export function archiveMigrations(table: string): string[] {
+  return [
+    `ALTER TABLE ${table} ADD COLUMN archived INTEGER DEFAULT 0`,
+    `ALTER TABLE ${table} ADD COLUMN archived_at TEXT`,
+    `ALTER TABLE ${table} ADD COLUMN archived_by TEXT`,
+  ];
+}
+
 /** Parse a JSON string from a cache column back to a typed value. */
 export function parseJson<T>(v: unknown): T | undefined {
   if (v == null || v === "[]" || v === "null") return undefined;

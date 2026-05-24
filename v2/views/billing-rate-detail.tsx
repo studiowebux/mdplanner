@@ -6,6 +6,7 @@ import type { BillingRate } from "../types/billing-rate.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { formatRate, UNIT_LABELS } from "../domains/billing-rate/constants.tsx";
@@ -54,8 +55,11 @@ export const BillingRateDetailView: FC<
             id={rate.id}
             title={rate.name}
             formContainerId="billing-rates-form-container"
+            archived={rate.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={rate} />
 
         {/* -- Rate info ------------------------------------------------- */}
         <div class="detail-section detail-info-row">
