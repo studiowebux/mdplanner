@@ -41,10 +41,56 @@ export function createActionBtns(
         class="btn btn--danger btn--sm"
         type="button"
         hx-delete={`/${path}/${row.id}`}
-        hx-confirm={`Delete "${row[nameField]}"? This cannot be undone.`}
+        hx-confirm={`Archive "${
+          row[nameField]
+        }"? Archived items can be restored from the archived view.`}
+        data-confirm-title="Archive"
+        data-confirm-label="Archive"
         hx-swap="none"
       >
-        Delete
+        Archive
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Renders Restore + Delete Permanently buttons for archived-view rows.
+ * The destroy button uses `data-confirm-title`/`data-confirm-label` overrides
+ * picked up by the global `htmx:confirm` interceptor in `htmx-triggers.js`.
+ */
+export function createArchiveActionBtns(
+  path: string,
+  opts: ActionBtnsOptions = {},
+): (_value: unknown, row: Record<string, unknown>) => unknown {
+  const nameField = opts.nameField ?? "title";
+  const actionsClass = opts.actionsClass ?? "domain-card__actions";
+
+  return (_value, row) => (
+    <div class={actionsClass}>
+      <a class="btn btn--secondary btn--sm" href={`/${path}/${row.id}`}>
+        View
+      </a>
+      <button
+        class="btn btn--secondary btn--sm"
+        type="button"
+        hx-post={`/${path}/${row.id}/restore`}
+        hx-swap="none"
+      >
+        Restore
+      </button>
+      <button
+        class="btn btn--danger btn--sm"
+        type="button"
+        hx-post={`/${path}/${row.id}/destroy`}
+        hx-confirm={`Permanently delete "${
+          row[nameField]
+        }"? This cannot be undone — the file will be removed from disk.`}
+        data-confirm-title="Delete permanently"
+        data-confirm-label="Delete permanently"
+        hx-swap="none"
+      >
+        Delete permanently
       </button>
     </div>
   );

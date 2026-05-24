@@ -86,8 +86,29 @@ export const IdeaDetailView: FC<
             id={idea.id}
             title={idea.title}
             formContainerId="ideas-form-container"
+            archived={idea.archived === true}
           />
         </header>
+
+        {idea.archived === true && (
+          <aside class="detail-section detail-archived-banner" role="alert">
+            <strong>Archived</strong>
+            {idea.archivedAt && (
+              <span class="detail-archived-banner__meta">
+                on {formatDate(idea.archivedAt)}
+              </span>
+            )}
+            {idea.archivedBy && (
+              <span class="detail-archived-banner__meta">
+                by {idea.archivedBy}
+              </span>
+            )}
+            <span class="detail-archived-banner__hint">
+              Archived items are hidden from the default list. Use Restore to
+              bring it back, or Delete permanently to remove the file.
+            </span>
+          </aside>
+        )}
 
         {/* -- Overview row ---------------------------------------------- */}
         {hasOverview && (

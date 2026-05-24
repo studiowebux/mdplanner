@@ -109,12 +109,29 @@ Deno.test("GoalRepository - update returns null for non-existent ID", async () =
 
 // === delete ===
 
-Deno.test("GoalRepository - delete removes entity", async () => {
+Deno.test("GoalRepository - delete soft-archives entity", async () => {
   const { repo, dir } = await setup();
   try {
     const goal = await repo.create({ title: "To be deleted", type: "project" });
     const deleted = await repo.delete(goal.id);
     assertEquals(deleted, true);
+    // delete() now aliases archive() — file stays on disk, findById still
+    // resolves it. findAll filters it out.
+    const found = await repo.findById(goal.id);
+    assertExists(found);
+    const all = await repo.findAll();
+    assertStrictEquals(all.find((g) => g.id === goal.id), undefined);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("GoalRepository - hardDelete removes the file", async () => {
+  const { repo, dir } = await setup();
+  try {
+    const goal = await repo.create({ title: "Truly gone", type: "project" });
+    const ok = await repo.hardDelete(goal.id);
+    assertEquals(ok, true);
     const found = await repo.findById(goal.id);
     assertStrictEquals(found, null);
   } finally {

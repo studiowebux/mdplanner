@@ -15,6 +15,13 @@ export interface DomainService<T extends Entity, C, U> {
   create(data: C): Promise<T>;
   update(id: string, data: U): Promise<T | null>;
   delete(id: string): Promise<boolean>;
+  // Optional soft-delete methods — required when DomainConfig.supportsArchive
+  // is true (default). BaseService provides these for every service whose
+  // repo extends BaseMarkdownRepository.
+  archive?(id: string, by?: string): Promise<boolean>;
+  restore?(id: string): Promise<boolean>;
+  hardDelete?(id: string): Promise<boolean>;
+  listArchived?(): Promise<T[]>;
 }
 
 // Dynamic filter option values — plain strings or value/label pairs.
@@ -231,6 +238,18 @@ export type DomainConfig<T extends Entity, C, U> = {
   // When true, renders a "Show hidden" checkbox in the toolbar (name="showHidden").
   // Pair with customFilter to let users temporarily reveal hidden items.
   showHiddenToggle?: boolean;
+
+  /**
+   * Soft-delete (archive) opt-out. Defaults to `true` — `DELETE /:id` routes
+   * call `service.archive`, the toolbar gains a "Show archived" toggle, and
+   * archived rows render with Restore + Delete Permanently actions. Set to
+   * `false` for domains that should always hard-delete (e.g. brain-agent
+   * People records that must never be archivable). When false, the factory
+   * keeps the legacy `DELETE → service.delete → hardDelete` path and omits
+   * the archive UI. See `[architecture] MD Planner — Soft-delete (archive)
+   * pattern`.
+   */
+  supportsArchive?: boolean;
 };
 
 // Default date range filter applied to every factory-driven domain. Filters on

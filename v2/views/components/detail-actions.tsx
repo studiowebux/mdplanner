@@ -14,17 +14,66 @@ type DetailActionsProps = {
   formContainerId: string;
   /** Optional redirect URL after successful delete */
   onDeleteRedirect?: string;
-  /** Extra buttons rendered between Edit and Delete */
+  /**
+   * When true, render Restore + Delete Permanently instead of Edit + Archive.
+   * Pair with `[architecture] MD Planner — Soft-delete (archive) pattern`.
+   */
+  archived?: boolean;
+  /** Extra buttons rendered between Edit and Delete (ignored when archived). */
   children?: Child;
 };
 
 export function DetailActions(
-  { entity, id, title, formContainerId, onDeleteRedirect, children }:
-    DetailActionsProps,
+  {
+    entity,
+    id,
+    title,
+    formContainerId,
+    onDeleteRedirect,
+    archived,
+    children,
+  }: DetailActionsProps,
 ) {
+  if (archived) {
+    const destroyAttrs: Record<string, string> = {
+      "hx-post": `/${entity}/${id}/destroy`,
+      "hx-confirm":
+        `Permanently delete "${title}"? This cannot be undone — the file will be removed from disk.`,
+      "data-confirm-title": "Delete permanently",
+      "data-confirm-label": "Delete permanently",
+      "hx-swap": "none",
+    };
+    if (onDeleteRedirect) {
+      destroyAttrs["hx-on--after-request"] =
+        `if(event.detail.successful) window.location.href='${onDeleteRedirect}'`;
+    }
+    return (
+      <div class="detail-actions">
+        <button
+          class="btn btn--secondary btn--sm"
+          type="button"
+          hx-post={`/${entity}/${id}/restore`}
+          hx-swap="none"
+        >
+          Restore
+        </button>
+        <button
+          class="btn btn--danger btn--sm"
+          type="button"
+          {...destroyAttrs}
+        >
+          Delete permanently
+        </button>
+      </div>
+    );
+  }
+
   const deleteAttrs: Record<string, string> = {
     "hx-delete": `/${entity}/${id}`,
-    "hx-confirm": `Delete "${title}"? This cannot be undone.`,
+    "hx-confirm":
+      `Archive "${title}"? Archived items can be restored from the archived view.`,
+    "data-confirm-title": "Archive",
+    "data-confirm-label": "Archive",
     "hx-swap": "none",
   };
   if (onDeleteRedirect) {
@@ -49,7 +98,7 @@ export function DetailActions(
         type="button"
         {...deleteAttrs}
       >
-        Delete
+        Archive
       </button>
     </div>
   );

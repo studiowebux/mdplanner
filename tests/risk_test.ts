@@ -96,7 +96,7 @@ Deno.test("RiskRepository - update modifies existing entity", async () => {
   });
 });
 
-Deno.test("RiskRepository - delete removes entity", async () => {
+Deno.test("RiskRepository - delete soft-archives entity", async () => {
   await withTmpDir(async (dir) => {
     const repo = new RiskRepository(dir);
     const created = await repo.create({
@@ -109,6 +109,29 @@ Deno.test("RiskRepository - delete removes entity", async () => {
 
     const deleted = await repo.delete(created.id);
     assertEquals(deleted, true);
+
+    // delete() now aliases archive() — file stays on disk, findById still
+    // resolves it. findAll filters it out.
+    const found = await repo.findById(created.id);
+    assertExists(found);
+    const all = await repo.findAll();
+    assertEquals(all.find((r) => r.id === created.id), undefined);
+  });
+});
+
+Deno.test("RiskRepository - hardDelete removes the file", async () => {
+  await withTmpDir(async (dir) => {
+    const repo = new RiskRepository(dir);
+    const created = await repo.create({
+      title: "Truly Gone",
+      category: "financial",
+      likelihood: 2,
+      impact: 2,
+      status: "open",
+    });
+
+    const ok = await repo.hardDelete(created.id);
+    assertEquals(ok, true);
 
     const found = await repo.findById(created.id);
     assertEquals(found, null);

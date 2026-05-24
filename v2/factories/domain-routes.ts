@@ -44,12 +44,17 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // 40+ domain configs' stateKeys arrays:
   //  - filtersCollapsed: collapsible-filters UI preference, persisted per domain.
   //  - date range from/to keys: the universal date range filter.
+  //  - archived: "Show archived" toggle (only when supportsArchive !== false).
   const dateRange = effectiveDateRangeFilter(cfg);
+  const archiveEnabled = cfg.supportsArchive !== false;
   const stateKeys = [
     ...cfg.stateKeys,
     ...(cfg.stateKeys.includes("filtersCollapsed") ? [] : ["filtersCollapsed"]),
     ...(cfg.stateKeys.includes(dateRange.fromKey) ? [] : [dateRange.fromKey]),
     ...(cfg.stateKeys.includes(dateRange.toKey) ? [] : [dateRange.toKey]),
+    ...(archiveEnabled && !cfg.stateKeys.includes("archived")
+      ? ["archived"]
+      : []),
   ];
 
   // ---------------------------------------------------------------------------
@@ -245,6 +250,25 @@ export function createDomainRoutes<T extends Entity, C, U>(
   }
 
   // ---------------------------------------------------------------------------
+  // List source resolver — archived view substitutes service.listArchived().
+  // Used by all three list endpoints (/, /view, /more) so the source switch
+  // happens in one place. `cfg.listForRequest` still wins when set — domains
+  // with per-request item sources own their own archive behaviour.
+  // ---------------------------------------------------------------------------
+
+  async function loadItems(
+    c: AppContext,
+    state: DomainFilterState,
+  ): Promise<T[]> {
+    if (cfg.listForRequest) return cfg.listForRequest(c);
+    if (archiveEnabled && state.archived === "true") {
+      const archived = await cfg.getService().listArchived?.();
+      return archived ?? [];
+    }
+    return cfg.getService().list();
+  }
+
+  // ---------------------------------------------------------------------------
   // Middleware — UI state from cookie + query params
   // ---------------------------------------------------------------------------
 
@@ -296,9 +320,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // Full page
   router.get("/", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
-    const all = cfg.listForRequest
-      ? await cfg.listForRequest(c)
-      : await cfg.getService().list();
+    const all = await loadItems(c, state);
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = await applyGlobalFilters(
       applyFilters(all, state, dynamicFilterOptions),
@@ -338,9 +360,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // View fragment
   router.get("/view", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
-    const all = cfg.listForRequest
-      ? await cfg.listForRequest(c)
-      : await cfg.getService().list();
+    const all = await loadItems(c, state);
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = await applyGlobalFilters(
       applyFilters(all, state, dynamicFilterOptions),
@@ -519,10 +539,19 @@ export function createDomainRoutes<T extends Entity, C, U>(
     }
   });
 
-  // Delete
+  // Delete (soft-delete by default — see DomainConfig.supportsArchive).
+  // Base/Cached repo route `delete` through `archive` when the repo opts in;
+  // emit `.updated` so a detail page open on the archived item re-renders
+  // with the archived banner, plus `.deleted` for list-view listeners.
   router.delete("/:id", async (c) => {
     const id = c.req.param("id");
-    const ok = await cfg.getService().delete(id);
+    const actor = c.get("actor");
+    const by = actor && actor.source !== "anonymous" ? actor.name : undefined;
+    const ok = archiveEnabled
+      ? await (cfg.getService().archive
+        ? cfg.getService().archive!(id, by)
+        : cfg.getService().delete(id))
+      : await cfg.getService().delete(id);
     if (!ok) {
       return new Response(null, {
         status: 404,
@@ -532,13 +561,69 @@ export function createDomainRoutes<T extends Entity, C, U>(
       });
     }
     publish(`${cfg.ssePrefix}.deleted`);
+    if (archiveEnabled) publish(`${cfg.ssePrefix}.updated`);
     return new Response(null, {
       status: 204,
       headers: {
-        "HX-Trigger": hxTrigger("success", `${cfg.singular} deleted`),
+        "HX-Trigger": hxTrigger(
+          "success",
+          archiveEnabled
+            ? `${cfg.singular} archived`
+            : `${cfg.singular} deleted`,
+        ),
       },
     });
   });
+
+  // Restore + Destroy (only when archive is enabled).
+  if (archiveEnabled) {
+    // Restore: clear the archived flag. Emits `.restored` (archived-view
+    // listeners can drop the row) + `.updated` (detail-page re-render).
+    router.post("/:id/restore", async (c) => {
+      const id = c.req.param("id");
+      const ok = await cfg.getService().restore?.(id);
+      if (!ok) {
+        return new Response(null, {
+          status: 404,
+          headers: {
+            "HX-Trigger": hxTrigger("error", `${cfg.singular} not found`),
+          },
+        });
+      }
+      publish(`${cfg.ssePrefix}.restored`);
+      publish(`${cfg.ssePrefix}.updated`);
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "HX-Trigger": hxTrigger("success", `${cfg.singular} restored`),
+        },
+      });
+    });
+
+    // Permanently delete: file removed from disk (no recovery).
+    router.post("/:id/destroy", async (c) => {
+      const id = c.req.param("id");
+      const ok = await cfg.getService().hardDelete?.(id);
+      if (!ok) {
+        return new Response(null, {
+          status: 404,
+          headers: {
+            "HX-Trigger": hxTrigger("error", `${cfg.singular} not found`),
+          },
+        });
+      }
+      publish(`${cfg.ssePrefix}.deleted`);
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "HX-Trigger": hxTrigger(
+            "success",
+            `${cfg.singular} permanently deleted`,
+          ),
+        },
+      });
+    });
+  }
 
   // Detail view (if provided)
   if (cfg.DetailView) {

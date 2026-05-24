@@ -22,6 +22,16 @@ export abstract class CachedMarkdownRepository<
   /** SQLite table name for this entity. */
   protected abstract readonly tableName: string;
 
+  /**
+   * Opt-in flag for soft-delete (archive). When true, the cache table is
+   * expected to have an `archived` column (gated by an idempotent migration
+   * in the entity's cache.ts) and `findAll`/`findArchived` apply SQL filters.
+   * Default false — domains that haven't run the rollout get unchanged
+   * `SELECT * FROM table` behaviour. See
+   * `[architecture] MD Planner — Soft-delete (archive) pattern`.
+   */
+  protected readonly supportsArchive: boolean = false;
+
   /** Convert a SQLite row to a domain entity. */
   protected abstract rowToEntity(
     row: Record<string, string | number | null>,
@@ -50,9 +60,11 @@ export abstract class CachedMarkdownRepository<
       try {
         const count = this.cacheDb.count(this.tableName);
         if (count > 0) {
-          return this.cacheDb.query<QueryResult>(
-            `SELECT * FROM "${this.tableName}"`,
-          ).map((row) => this.rowToEntity(row));
+          const sql = this.supportsArchive
+            ? `SELECT * FROM "${this.tableName}" WHERE archived IS NULL OR archived = 0`
+            : `SELECT * FROM "${this.tableName}"`;
+          return this.cacheDb.query<QueryResult>(sql)
+            .map((row) => this.rowToEntity(row));
         }
       } catch (err) {
         log.warn(
@@ -62,6 +74,31 @@ export abstract class CachedMarkdownRepository<
       }
     }
     return this.findAllFromDisk();
+  }
+
+  /**
+   * Cached read of archived items. Falls through to disk
+   * (`super.findArchived`) when the cache is dirty or unavailable.
+   * Cross-domain references to archived items still resolve via `findById`
+   * (which is intentionally NOT filtered).
+   */
+  override async findArchived(): Promise<T[]> {
+    if (this.cacheDb && !this.listDirty && this.supportsArchive) {
+      try {
+        const count = this.cacheDb.count(this.tableName);
+        if (count > 0) {
+          return this.cacheDb.query<QueryResult>(
+            `SELECT * FROM "${this.tableName}" WHERE archived = 1`,
+          ).map((row) => this.rowToEntity(row));
+        }
+      } catch (err) {
+        log.warn(
+          `[cache] ${this.tableName} archived read failed, falling back to disk:`,
+          err,
+        );
+      }
+    }
+    return super.findArchived();
   }
 
   override async findById(id: string): Promise<T | null> {
@@ -97,8 +134,31 @@ export abstract class CachedMarkdownRepository<
     return updated;
   }
 
-  override async delete(id: string): Promise<boolean> {
-    const deleted = await super.delete(id);
+  // `delete` is intentionally NOT overridden — it inherits from the base as
+  // `delete = archive`, and `archive`'s override below handles cache eviction.
+
+  override async archive(id: string, by?: string): Promise<boolean> {
+    const archived = await super.archive(id, by);
+    if (archived) {
+      this.listDirty = true;
+      // Evict the row so the next findById/findAll re-reads from disk with
+      // the new archived flag. The next fullSync reseeds.
+      this.cacheRemoveRow(id);
+    }
+    return archived;
+  }
+
+  override async restore(id: string): Promise<boolean> {
+    const restored = await super.restore(id);
+    if (restored) {
+      this.listDirty = true;
+      this.cacheRemoveRow(id);
+    }
+    return restored;
+  }
+
+  override async hardDelete(id: string): Promise<boolean> {
+    const deleted = await super.hardDelete(id);
     if (deleted) {
       this.listDirty = true;
       this.cacheRemoveRow(id);

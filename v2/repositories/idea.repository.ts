@@ -16,6 +16,7 @@ export class IdeaRepository extends CachedMarkdownRepository<
   UpdateIdea
 > {
   protected readonly tableName = IDEA_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
@@ -161,6 +162,9 @@ export class IdeaRepository extends CachedMarkdownRepository<
         ? String(fm.implementedAt)
         : undefined,
       cancelledAt: fm.cancelledAt != null ? String(fm.cancelledAt) : undefined,
+      archived: fm.archived === true ? true : undefined,
+      archivedAt: fm.archivedAt != null ? String(fm.archivedAt) : undefined,
+      archivedBy: fm.archivedBy != null ? String(fm.archivedBy) : undefined,
       createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
       updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,

@@ -191,7 +191,7 @@ Deno.test("JournalRepository - update returns null for non-existent ID", async (
 
 // === delete ===
 
-Deno.test("JournalRepository - delete removes entity", async () => {
+Deno.test("JournalRepository - delete soft-archives entity", async () => {
   const { repo, dir } = await setup();
   try {
     const entry = await repo.create({
@@ -200,6 +200,26 @@ Deno.test("JournalRepository - delete removes entity", async () => {
     });
     const deleted = await repo.delete(entry.id);
     assertEquals(deleted, true);
+    // delete() now aliases archive() — file stays on disk, findById still
+    // resolves it for cross-domain reference safety. findAll filters it out.
+    const found = await repo.findById(entry.id);
+    assertExists(found);
+    const all = await repo.findAll();
+    assertStrictEquals(all.find((j) => j.id === entry.id), undefined);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("JournalRepository - hardDelete removes the file", async () => {
+  const { repo, dir } = await setup();
+  try {
+    const entry = await repo.create({
+      title: "Truly Ephemeral",
+      date: "2026-03-10",
+    });
+    const ok = await repo.hardDelete(entry.id);
+    assertEquals(ok, true);
     const found = await repo.findById(entry.id);
     assertStrictEquals(found, null);
   } finally {

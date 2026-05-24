@@ -9,6 +9,7 @@ import type { ColumnDef } from "../components/ui/data-table.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
+import { createArchiveActionBtns } from "../components/ui/action-btns.tsx";
 import type { ViewMode, ViewProps } from "../types/app.ts";
 import {
   type DomainConfig,
@@ -95,6 +96,8 @@ export function createMoreFragment<T extends Entity>(cfg: {
   name: string;
   stateKeys: readonly string[];
   columns: ColumnDef[];
+  /** When true, swap the `_actions` column to archive-actions in archived view. */
+  supportsArchive?: boolean;
   toRow: (item: T) => Record<string, unknown>;
   mapRows?: (
     items: T[],
@@ -111,6 +114,15 @@ export function createMoreFragment<T extends Entity>(cfg: {
       view: "table" | "grid";
     },
   ) {
+    const archivedActive = cfg.supportsArchive !== false &&
+      state.archived === "true";
+    const effectiveColumns: ColumnDef[] = archivedActive
+      ? cfg.columns.map((col) =>
+        col.key === "_actions"
+          ? { ...col, render: createArchiveActionBtns(cfg.name) }
+          : col
+      )
+      : cfg.columns;
     if (view === "table") {
       const rows: Record<string, unknown>[] = cfg.mapRows
         ? cfg.mapRows(items, state)
@@ -127,7 +139,7 @@ export function createMoreFragment<T extends Entity>(cfg: {
               class="data-table__row"
               data-row-id={String(row.id)}
             >
-              {cfg.columns.map((col) => (
+              {effectiveColumns.map((col) => (
                 <td key={col.key} class="data-table__td" data-col={col.key}>
                   {col.render
                     ? col.render(row[col.key], row)
@@ -239,6 +251,7 @@ function countActiveFilters<T extends Entity>(
   ) {
     count++;
   }
+  if (cfg.supportsArchive !== false && state.archived === "true") count++;
   return count;
 }
 
@@ -470,109 +483,128 @@ export function createDomainViewContainer<T extends Entity>(
       hasMore,
       nextOffset,
     },
-  ) => (
-    <>
-      {fragment && (
-        <span
-          id={`${cfg.name}-count`}
-          class="domain-page__count"
-          {...{ "hx-swap-oob": "true" }}
-        >
-          {totalCount !== undefined &&
-              (filteredCount ?? items.length) !== totalCount
-            ? `${filteredCount ?? items.length}/${totalCount}`
-            : `${filteredCount ?? items.length} total`}
-        </span>
-      )}
-      {fragment && (
-        <ViewToggleButtons
-          domain={cfg.name}
-          view={state.view}
-          oobSwap="true"
-          extraModes={cfg.extraViewModes}
-          hideDefault={cfg.hideDefaultViews}
-          hideGrid={cfg.hideGridView}
-        />
-      )}
-      {fragment && (
-        <div
-          id={`${cfg.name}-column-toggle-wrapper`}
-          {...{ "hx-swap-oob": "true" }}
-        >
-          <ColumnToggle
+  ) => {
+    const archivedActive = cfg.supportsArchive !== false &&
+      state.archived === "true";
+    // In archived view the `_actions` column renders Restore + Delete
+    // Permanently instead of the domain's default View/Edit/Archive trio.
+    // Column is replaced in place so column ordering and toggle state are
+    // preserved.
+    const effectiveColumns: ColumnDef[] = archivedActive
+      ? cfg.columns.map((col) =>
+        col.key === "_actions"
+          ? { ...col, render: createArchiveActionBtns(cfg.name) }
+          : col
+      )
+      : cfg.columns;
+    return (
+      <>
+        {fragment && (
+          <span
+            id={`${cfg.name}-count`}
+            class="domain-page__count"
+            {...{ "hx-swap-oob": "true" }}
+          >
+            {totalCount !== undefined &&
+                (filteredCount ?? items.length) !== totalCount
+              ? `${filteredCount ?? items.length}/${totalCount}`
+              : `${filteredCount ?? items.length} total`}
+          </span>
+        )}
+        {fragment && (
+          <ViewToggleButtons
             domain={cfg.name}
-            columns={cfg.columns}
             view={state.view}
+            oobSwap="true"
+            extraModes={cfg.extraViewModes}
+            hideDefault={cfg.hideDefaultViews}
+            hideGrid={cfg.hideGridView}
           />
-        </div>
-      )}
-      {fragment && hasFilterControls(cfg) && (
-        <FilterCountBadge
-          domain={cfg.name}
-          count={countActiveFilters(cfg, state)}
-          oob
-        />
-      )}
-      <div id={`${cfg.name}-view`} class="view-container">
-        <input type="hidden" name="view" value={state.view} />
-        {customContent
-          ? customContent
-          : items.length === 0
-          ? <EmptyState message={cfg.emptyMessage} />
-          : (state.view === "table" || cfg.hideGridView)
-          ? (
-            <DataTable
-              id={`${cfg.name}-table`}
+        )}
+        {fragment && (
+          <div
+            id={`${cfg.name}-column-toggle-wrapper`}
+            {...{ "hx-swap-oob": "true" }}
+          >
+            <ColumnToggle
               domain={cfg.name}
-              compact
               columns={cfg.columns}
-              rows={cfg.mapRows
-                ? cfg.mapRows(items, state)
-                : items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
-              sort={{
-                url: `/${cfg.name}/view`,
-                target: `#${cfg.name}-view`,
-                include: `#${cfg.name}-toolbar`,
-                current: state.sort,
-                order: state.order,
-              }}
-              tbodyFooter={hasMore && nextOffset !== undefined
-                ? (
-                  <TableSentinelRow
-                    domain={cfg.name}
-                    stateKeys={cfg.stateKeys}
-                    state={state}
-                    nextOffset={nextOffset}
-                    columnCount={cfg.columns.length}
-                  />
-                )
-                : undefined}
+              view={state.view}
             />
-          )
-          : cfg.Card
-          ? (
-            <GridView
-              Card={cfg.Card}
-              items={items}
-              toRow={cfg.toRow}
-              name={cfg.name}
-              q={state.q}
-              sentinel={hasMore && nextOffset !== undefined
-                ? (
-                  <GridSentinelDiv
-                    domain={cfg.name}
-                    stateKeys={cfg.stateKeys}
-                    state={state}
-                    nextOffset={nextOffset}
-                  />
-                )
-                : undefined}
-            />
-          )
-          : <EmptyState message={cfg.emptyMessage} />}
-      </div>
-    </>
-  );
+          </div>
+        )}
+        {fragment && hasFilterControls(cfg) && (
+          <FilterCountBadge
+            domain={cfg.name}
+            count={countActiveFilters(cfg, state)}
+            oob
+          />
+        )}
+        <div id={`${cfg.name}-view`} class="view-container">
+          <input type="hidden" name="view" value={state.view} />
+          {customContent ? customContent : items.length === 0
+            ? (
+              <EmptyState
+                message={archivedActive
+                  ? `No archived ${cfg.plural ?? `${cfg.singular}s`} yet.`
+                  : cfg.emptyMessage}
+              />
+            )
+            : (state.view === "table" || cfg.hideGridView)
+            ? (
+              <DataTable
+                id={`${cfg.name}-table`}
+                domain={cfg.name}
+                compact
+                columns={effectiveColumns}
+                rows={cfg.mapRows
+                  ? cfg.mapRows(items, state)
+                  : items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
+                sort={{
+                  url: `/${cfg.name}/view`,
+                  target: `#${cfg.name}-view`,
+                  include: `#${cfg.name}-toolbar`,
+                  current: state.sort,
+                  order: state.order,
+                }}
+                tbodyFooter={hasMore && nextOffset !== undefined
+                  ? (
+                    <TableSentinelRow
+                      domain={cfg.name}
+                      stateKeys={cfg.stateKeys}
+                      state={state}
+                      nextOffset={nextOffset}
+                      columnCount={cfg.columns.length}
+                    />
+                  )
+                  : undefined}
+              />
+            )
+            : cfg.Card
+            ? (
+              <GridView
+                Card={cfg.Card}
+                items={items}
+                toRow={cfg.toRow}
+                name={cfg.name}
+                q={state.q}
+                sentinel={hasMore && nextOffset !== undefined
+                  ? (
+                    <GridSentinelDiv
+                      domain={cfg.name}
+                      stateKeys={cfg.stateKeys}
+                      state={state}
+                      nextOffset={nextOffset}
+                    />
+                  )
+                  : undefined}
+              />
+            )
+            : <EmptyState message={cfg.emptyMessage} />}
+        </div>
+      </>
+    );
+  };
 
   return DomainViewContainer;
 }
@@ -819,6 +851,24 @@ export function createDomainPage<T extends Entity>(
                       />
                       <span class="domain-toolbar__toggle-label">
                         Show hidden
+                      </span>
+                    </label>
+                  )}
+                  {cfg.supportsArchive !== false && (
+                    <label class="domain-toolbar__toggle">
+                      <input
+                        type="checkbox"
+                        name="archived"
+                        value="true"
+                        checked={state.archived === "true"}
+                        hx-get={`/${cfg.name}/view`}
+                        hx-trigger="change"
+                        hx-target={`#${cfg.name}-view`}
+                        hx-swap="outerHTML"
+                        hx-include={`#${cfg.name}-toolbar`}
+                      />
+                      <span class="domain-toolbar__toggle-label">
+                        Show archived
                       </span>
                     </label>
                   )}

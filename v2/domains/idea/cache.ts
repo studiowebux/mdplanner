@@ -33,6 +33,9 @@ export function rowToIdea(row: Record<string, string | number | null>): Idea {
     links: parseJson<string[]>(row.links),
     implementedAt: row.implemented_at as string | undefined,
     cancelledAt: row.cancelled_at as string | undefined,
+    archived: row.archived === 1 || row.archived === "1" ? true : undefined,
+    archivedAt: row.archived_at as string | undefined,
+    archivedBy: row.archived_by as string | undefined,
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -56,6 +59,9 @@ const IDEA_SCHEMA = `CREATE TABLE IF NOT EXISTS ${IDEA_TABLE} (
   links TEXT,
   implemented_at TEXT,
   cancelled_at TEXT,
+  archived INTEGER DEFAULT 0,
+  archived_at TEXT,
+  archived_by TEXT,
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -72,8 +78,9 @@ function insertIdeaRow(
     `INSERT OR REPLACE INTO ${IDEA_TABLE} (id, title, description, status,
        category, priority, project, submitted_by, start_date, end_date, resources,
        subtasks, links, implemented_at, cancelled_at,
+       archived, archived_at, archived_by,
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(i.id),
       val(i.title),
@@ -90,6 +97,9 @@ function insertIdeaRow(
       jsonVal(i.links),
       val(i.implementedAt),
       val(i.cancelledAt),
+      i.archived ? 1 : 0,
+      val(i.archivedAt),
+      val(i.archivedBy),
       ...auditVals(i),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -109,6 +119,9 @@ export function registerIdeaEntity(repo: IdeaRepository): void {
     },
     migrations: [
       `ALTER TABLE ${IDEA_TABLE} ADD COLUMN submitted_by TEXT`,
+      `ALTER TABLE ${IDEA_TABLE} ADD COLUMN archived INTEGER DEFAULT 0`,
+      `ALTER TABLE ${IDEA_TABLE} ADD COLUMN archived_at TEXT`,
+      `ALTER TABLE ${IDEA_TABLE} ADD COLUMN archived_by TEXT`,
     ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();

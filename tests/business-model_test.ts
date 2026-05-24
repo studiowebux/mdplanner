@@ -75,13 +75,30 @@ Deno.test("BusinessModelRepository - update modifies existing entity", async () 
   });
 });
 
-Deno.test("BusinessModelRepository - delete removes entity", async () => {
+Deno.test("BusinessModelRepository - delete soft-archives entity", async () => {
   await withTmpDir(async (dir) => {
     const repo = new BusinessModelRepository(dir);
     const created = await repo.create({ title: "To Delete" });
 
     const deleted = await repo.delete(created.id);
     assertEquals(deleted, true);
+
+    // delete() now aliases archive() — file stays on disk, findById still
+    // resolves it for cross-domain reference safety. findAll filters it out.
+    const found = await repo.findById(created.id);
+    assertExists(found);
+    const all = await repo.findAll();
+    assertEquals(all.find((b) => b.id === created.id), undefined);
+  });
+});
+
+Deno.test("BusinessModelRepository - hardDelete removes the file", async () => {
+  await withTmpDir(async (dir) => {
+    const repo = new BusinessModelRepository(dir);
+    const created = await repo.create({ title: "Truly Gone" });
+
+    const ok = await repo.hardDelete(created.id);
+    assertEquals(ok, true);
 
     const found = await repo.findById(created.id);
     assertEquals(found, null);

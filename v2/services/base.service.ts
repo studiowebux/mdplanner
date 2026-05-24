@@ -9,6 +9,16 @@ export interface ReadWriteRepository<T, C, U> {
   create(data: C): Promise<T>;
   update(id: string, data: U): Promise<T | null>;
   delete(id: string): Promise<boolean>;
+  // Optional — present on BaseMarkdownRepository-derived repos. Standalone
+  // repos (portfolio, project, note, task) gain these in their per-domain
+  // soft-delete rollout. BaseService throws when called against a repo that
+  // hasn't implemented them — the factory gates calls behind
+  // `DomainConfig.supportsArchive` so the throw path is unreachable in
+  // properly-configured domains.
+  findArchived?(): Promise<T[]>;
+  archive?(id: string, by?: string): Promise<boolean>;
+  restore?(id: string): Promise<boolean>;
+  hardDelete?(id: string): Promise<boolean>;
 }
 
 export abstract class BaseService<
@@ -48,6 +58,50 @@ export abstract class BaseService<
 
   async delete(id: string): Promise<boolean> {
     return this.repo.delete(id);
+  }
+
+  /**
+   * Soft-delete an item (set `archived = true` on disk, stamp
+   * `archivedAt`/`archivedBy`). Throws if the underlying repo does not
+   * support archive — the factory only routes here for domains with
+   * `DomainConfig.supportsArchive !== false`.
+   */
+  async archive(id: string, by?: string): Promise<boolean> {
+    if (!this.repo.archive) {
+      throw new Error(
+        `${this.constructor.name}: archive() not supported by repository`,
+      );
+    }
+    return this.repo.archive(id, by);
+  }
+
+  /** Restore an archived item (clear `archived`/`archivedAt`/`archivedBy`). */
+  async restore(id: string): Promise<boolean> {
+    if (!this.repo.restore) {
+      throw new Error(
+        `${this.constructor.name}: restore() not supported by repository`,
+      );
+    }
+    return this.repo.restore(id);
+  }
+
+  /** Permanently remove the item from disk (no recovery). */
+  async hardDelete(id: string): Promise<boolean> {
+    if (!this.repo.hardDelete) {
+      throw new Error(
+        `${this.constructor.name}: hardDelete() not supported by repository`,
+      );
+    }
+    return this.repo.hardDelete(id);
+  }
+
+  /**
+   * List archived items only. Returns [] for repos without archive support
+   * (lets callers render an empty archived view without crashing).
+   */
+  async listArchived(): Promise<T[]> {
+    if (!this.repo.findArchived) return [];
+    return this.repo.findArchived();
   }
 
   async upsertMany(

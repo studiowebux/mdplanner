@@ -86,7 +86,7 @@ Deno.test("FishboneRepository - update modifies existing entity", async () => {
   });
 });
 
-Deno.test("FishboneRepository - delete removes entity", async () => {
+Deno.test("FishboneRepository - delete soft-archives entity", async () => {
   await withTmpDir(async (dir) => {
     const repo = new FishboneRepository(dir);
     const created = await repo.create({
@@ -96,6 +96,26 @@ Deno.test("FishboneRepository - delete removes entity", async () => {
 
     const deleted = await repo.delete(created.id);
     assertEquals(deleted, true);
+
+    // delete() now aliases archive() — file stays on disk, findById still
+    // resolves it. findAll filters it out.
+    const found = await repo.findById(created.id);
+    assertExists(found);
+    const all = await repo.findAll();
+    assertEquals(all.find((f) => f.id === created.id), undefined);
+  });
+});
+
+Deno.test("FishboneRepository - hardDelete removes the file", async () => {
+  await withTmpDir(async (dir) => {
+    const repo = new FishboneRepository(dir);
+    const created = await repo.create({
+      title: "Truly Gone",
+      causes: [],
+    });
+
+    const ok = await repo.hardDelete(created.id);
+    assertEquals(ok, true);
 
     const found = await repo.findById(created.id);
     assertEquals(found, null);
