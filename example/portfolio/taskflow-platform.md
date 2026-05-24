@@ -23,7 +23,7 @@ license: MIT
 github_repo: studiowebux/mdplanner
 billing_customer_id: cust_tf_001
 brain_managed: true
-linked_goals: [goal_revenue_q2, goal_user_growth]
+linked_goals: [goal_revenue, goal_users, goal_churn]
 kpis:
   - target: 15000
     unit: USD

@@ -6,6 +6,7 @@ client: Enterprise
 revenue: 0
 expenses: 15000
 progress: 10
+linked_goals: [goal_qualified_leads, goal_campaign_revenue, goal_annual_conversions]
 ---
 
 # Analytics Dashboard

@@ -6,6 +6,7 @@ client: Internal
 revenue: 35000
 expenses: 12000
 progress: 90
+linked_goals: [goal_api_v2, goal_sso]
 ---
 
 # API Gateway

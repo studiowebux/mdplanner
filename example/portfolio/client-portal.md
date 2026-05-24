@@ -7,6 +7,7 @@ revenue: 45000
 expenses: 18000
 progress: 60
 brain_managed: false
+linked_goals: [goal_email_open_rate, goal_rebrand]
 ---
 
 # Client Portal
