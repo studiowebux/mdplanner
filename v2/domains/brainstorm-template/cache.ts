@@ -1,6 +1,11 @@
 // BrainstormTemplate entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -24,6 +29,7 @@ export function rowToBrainstormTemplate(
     description: row.description as string | null | undefined,
     categories: parseJson<string[]>(row.categories),
     questions: parseJson<string[]>(row.questions) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -39,6 +45,7 @@ const BRAINSTORM_TEMPLATE_SCHEMA =
   categories TEXT,
   questions TEXT,
   questions_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -54,8 +61,9 @@ function insertBrainstormTemplateRow(
   db.execute(
     `INSERT OR REPLACE INTO ${BRAINSTORM_TEMPLATE_TABLE} (id, name, description,
        categories, questions, questions_text,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(t.id),
       val(t.name),
@@ -63,6 +71,7 @@ function insertBrainstormTemplateRow(
       jsonVal(t.categories),
       json(t.questions),
       t.questions.join(" "),
+      ...archiveVals(t),
       ...auditVals(t),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -77,6 +86,7 @@ export function registerBrainstormTemplateEntity(
     schema: BRAINSTORM_TEMPLATE_SCHEMA,
     migrations: [
       `ALTER TABLE ${BRAINSTORM_TEMPLATE_TABLE} ADD COLUMN categories TEXT`,
+      ...archiveMigrations(BRAINSTORM_TEMPLATE_TABLE),
     ],
     fts: {
       type: "brainstorm_template",

@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -30,7 +30,9 @@ export const BrainstormTemplateSchema = z.object({
   questions: z.array(z.string()).openapi({
     description: "Ordered list of guiding questions",
   }),
-}).merge(AuditFieldsSchema).openapi("BrainstormTemplate");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi(
+  "BrainstormTemplate",
+);
 
 export type BrainstormTemplate = z.infer<typeof BrainstormTemplateSchema>;
 

@@ -19,6 +19,7 @@ export class BrainstormTemplateRepository extends CachedMarkdownRepository<
   UpdateBrainstormTemplate
 > {
   protected readonly tableName = BRAINSTORM_TEMPLATE_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

@@ -5,6 +5,7 @@ import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { BrainstormTemplate } from "../types/brainstorm-template.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
@@ -57,8 +58,11 @@ export const BrainstormTemplateDetailView: FC<
             id={template.id}
             title={template.name}
             formContainerId="brainstorm-templates-form-container"
+            archived={template.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={template} />
 
         {/* -- Description ----------------------------------------------- */}
         {template.description && (
