@@ -1,6 +1,11 @@
 // C4 entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -30,6 +35,7 @@ export function rowToC4(
     parent: row.parent as string | undefined,
     children: parseJson<string[]>(row.children) ?? [],
     connections: parseJson<C4Connection[]>(row.connections) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -49,6 +55,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${C4_TABLE} (
   parent TEXT,
   children TEXT,
   connections TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -58,13 +65,16 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${C4_TABLE} (
 
 const MIGRATIONS = [
   `ALTER TABLE ${C4_TABLE} ADD COLUMN diagram TEXT DEFAULT 'default'`,
+  ...archiveMigrations(C4_TABLE),
 ];
 
 function insertRow(db: CacheDatabase, c: C4Component, syncedAt?: string): void {
   db.execute(
     `INSERT OR REPLACE INTO ${C4_TABLE} (id, name, level, type, description, technology,
-       position, diagram, parent, children, connections, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       position, diagram, parent, children, connections,
+       ${archiveCols()},
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(c.id),
       val(c.name),
@@ -77,6 +87,7 @@ function insertRow(db: CacheDatabase, c: C4Component, syncedAt?: string): void {
       val(c.parent),
       json(c.children ?? []),
       json(c.connections ?? []),
+      ...archiveVals(c),
       ...auditVals(c),
       syncedAt ?? new Date().toISOString(),
     ],

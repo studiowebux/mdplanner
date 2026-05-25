@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { C4_LEVEL_LABELS } from "../domains/c4/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
@@ -70,8 +71,11 @@ export const C4DetailView: FC<Props> = ({
             id={component.id}
             title={component.name}
             formContainerId="c4-form-container"
+            archived={component.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={component} />
 
         <section class="detail-section">
           <dl class="detail-meta">

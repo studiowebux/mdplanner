@@ -8,7 +8,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Level enum — used by z.enum below; UI labels/constants live in domains/c4/constants.tsx
@@ -94,7 +98,7 @@ export const C4ComponentSchema = z.object({
   connections: z.array(C4ConnectionSchema).optional().openapi({
     description: "Outgoing connections from this component",
   }),
-}).merge(AuditFieldsSchema).openapi("C4Component");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("C4Component");
 
 export type C4Component = z.infer<typeof C4ComponentSchema>;
 
