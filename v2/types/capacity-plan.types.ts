@@ -7,7 +7,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -109,7 +109,7 @@ export const CapacityPlanSchema = z.object({
   allocations: z.array(ProjectAllocationSchema).openapi({
     description: "Per-person-per-project allocations (% or h/week)",
   }),
-}).merge(AuditFieldsSchema).openapi("CapacityPlan");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("CapacityPlan");
 
 export type CapacityPlan = z.infer<typeof CapacityPlanSchema>;
 

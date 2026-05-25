@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -29,6 +34,7 @@ export function rowToCapacityPlan(
       : undefined,
     teamMembers: parseJson(row.team_members) ?? [],
     allocations: parseJson(row.allocations) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -45,6 +51,7 @@ const CAPACITY_PLAN_SCHEMA =
   budget_hours REAL,
   team_members TEXT,
   allocations TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -55,6 +62,7 @@ const CAPACITY_PLAN_SCHEMA =
 const CAPACITY_PLAN_MIGRATIONS = [
   `ALTER TABLE ${CAPACITY_PLAN_TABLE} ADD COLUMN start_date TEXT`,
   `ALTER TABLE ${CAPACITY_PLAN_TABLE} ADD COLUMN end_date TEXT`,
+  ...archiveMigrations(CAPACITY_PLAN_TABLE),
 ];
 
 function insertCapacityPlanRow(
@@ -65,8 +73,9 @@ function insertCapacityPlanRow(
   db.execute(
     `INSERT OR REPLACE INTO ${CAPACITY_PLAN_TABLE} (id, title, start_date, end_date,
        budget_hours, team_members, allocations,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.title),
@@ -75,6 +84,7 @@ function insertCapacityPlanRow(
       p.budgetHours ?? null,
       jsonVal(p.teamMembers),
       jsonVal(p.allocations),
+      ...archiveVals(p),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],

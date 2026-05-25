@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -739,8 +740,11 @@ export const CapacityPlanDetailView: FC<
           title={plan.title}
           formContainerId="capacity-plans-form-container"
           onDeleteRedirect="/capacity-plans"
+          archived={plan.archived === true}
         />
       </header>
+
+      <ArchivedBanner entity={plan} />
 
       <div class="detail-section detail-info-row">
         {plan.startDate && <InfoItem label="Start">{plan.startDate}</InfoItem>}
