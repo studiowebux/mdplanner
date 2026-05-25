@@ -9,6 +9,7 @@ import {
 } from "../types/lean-canvas.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -128,6 +129,7 @@ export const LeanCanvasDetailView: FC<
             id={lc.id}
             title={lc.title}
             formContainerId="lean-canvases-form-container"
+            archived={lc.archived === true}
           >
             {editing
               ? (
@@ -148,6 +150,8 @@ export const LeanCanvasDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={lc} />
 
         {/* -- Info --------------------------------------------------------- */}
         <div class="detail-section detail-info-row">

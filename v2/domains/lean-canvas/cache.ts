@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -40,6 +45,7 @@ export function rowToLeanCanvas(
     completedSections: (row.completed_sections as number) ?? 0,
     sectionCount: (row.section_count as number) ?? 0,
     completionPct: (row.completion_pct as number) ?? 0,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -76,6 +82,7 @@ const LEAN_CANVAS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${LEAN_CANVAS_TABLE} (
   completed_sections INTEGER DEFAULT 0,
   section_count INTEGER DEFAULT 0,
   completion_pct INTEGER DEFAULT 0,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -95,8 +102,9 @@ export function insertLeanCanvasRow(
        customer_segments, existing_alternatives, key_metrics, high_level_concept,
        channels, early_adopters, cost_structure, revenue_streams,
        sections_text, completed_sections, section_count, completion_pct,
+       ${archiveCols()},
        ${auditCols()}, synced_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(lc.id),
       val(lc.title),
@@ -118,6 +126,7 @@ export function insertLeanCanvasRow(
       lc.completedSections,
       lc.sectionCount,
       lc.completionPct,
+      ...archiveVals(lc),
       ...auditVals(lc),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -129,6 +138,9 @@ export function registerLeanCanvasEntity(repo: LeanCanvasRepository): void {
   const entity: EntityDef = {
     table: LEAN_CANVAS_TABLE,
     schema: LEAN_CANVAS_SCHEMA,
+    migrations: [
+      ...archiveMigrations(LEAN_CANVAS_TABLE),
+    ],
     fts: {
       type: "lean_canvas",
       columns: ["id", "title", "sections_text"],

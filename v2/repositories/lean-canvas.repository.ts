@@ -21,6 +21,7 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
   UpdateLeanCanvas
 > {
   protected readonly tableName = LEAN_CANVAS_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schema — single source of truth
@@ -75,7 +79,7 @@ export const LeanCanvasSchema = z.object({
   completionPct: z.number().openapi({
     description: "Completion percentage (0–100)",
   }),
-}).merge(AuditFieldsSchema).openapi("LeanCanvas");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("LeanCanvas");
 
 export type LeanCanvas = z.infer<typeof LeanCanvasSchema>;
 
