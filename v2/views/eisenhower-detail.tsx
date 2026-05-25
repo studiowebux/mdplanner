@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import {
   EISENHOWER_QUADRANT_KEYS,
   EISENHOWER_QUADRANT_META,
@@ -61,6 +62,7 @@ export const EisenhowerDetailView: FC<
             id={e.id}
             title={e.title}
             formContainerId="eisenhower-form-container"
+            archived={e.archived === true}
           >
             {editing
               ? (
@@ -81,6 +83,8 @@ export const EisenhowerDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={e} />
 
         {/* -- Project --------------------------------------------------- */}
         {e.project && (

@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 // stringArray used by tags below
 
 export const HABIT_FREQUENCIES = ["daily", "weekly", "monthly"] as const;
@@ -60,7 +64,7 @@ export const HabitSchema = z.object({
     example: "--color-success",
   }),
   tags: stringArray.nullable().optional(),
-}).merge(AuditFieldsSchema).openapi("Habit");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Habit");
 
 export type Habit = z.infer<typeof HabitSchema>;
 

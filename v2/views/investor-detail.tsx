@@ -6,6 +6,7 @@ import type { Investor } from "../types/investor.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -67,8 +68,11 @@ export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
             id={investor.id}
             title={investor.name}
             formContainerId="investors-form-container"
+            archived={investor.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={investor} />
 
         <div class="detail-section detail-info-row">
           <InfoItem label="Contact">{investor.contact ?? "—"}</InfoItem>

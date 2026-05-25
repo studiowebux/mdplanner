@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -34,6 +39,7 @@ export function rowToDnsDomain(
     notes: row.notes as string | undefined,
     lastFetchedAt: row.last_fetched_at as string | undefined,
     project: row.project as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by != null ? row.created_by as string : undefined,
@@ -54,6 +60,7 @@ const DNS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DNS_TABLE} (
   notes TEXT,
   last_fetched_at TEXT,
   project TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -69,8 +76,10 @@ function insertDnsRow(
   db.execute(
     `INSERT OR REPLACE INTO ${DNS_TABLE} (id, domain, provider, status,
        expiry_date, auto_renew, renewal_cost_usd, nameservers, dns_records,
-       notes, last_fetched_at, project, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       notes, last_fetched_at, project,
+       ${archiveCols()},
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(d.id),
       val(d.domain),
@@ -84,6 +93,7 @@ function insertDnsRow(
       val(d.notes),
       val(d.lastFetchedAt),
       val(d.project),
+      ...archiveVals(d),
       ...auditVals(d),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -95,6 +105,9 @@ export function registerDnsEntity(repo: DnsRepository): void {
   const entity: EntityDef = {
     table: DNS_TABLE,
     schema: DNS_SCHEMA,
+    migrations: [
+      ...archiveMigrations(DNS_TABLE),
+    ],
     fts: {
       type: "dns_domain",
       columns: ["id", "domain", "notes"],

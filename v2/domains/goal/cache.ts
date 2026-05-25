@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -37,6 +42,7 @@ export function rowToGoal(row: Record<string, string | number | null>): Goal {
       : undefined,
     linkedPortfolioItems: parseJson<string[]>(row.linked_portfolio_items),
     project: row.project as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -62,6 +68,7 @@ const GOAL_SCHEMA = `CREATE TABLE IF NOT EXISTS ${GOAL_TABLE} (
   github_milestone INTEGER,
   linked_portfolio_items TEXT,
   project TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -79,8 +86,10 @@ function insertGoalRow(
        kpi, kpi_metric, kpi_target, start_date, end_date, status,
        owner, priority, progress,
        github_repo, github_milestone, linked_portfolio_items,
-       project, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project,
+       ${archiveCols()},
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(g.id),
       val(g.title),
@@ -99,6 +108,7 @@ function insertGoalRow(
       g.githubMilestone ?? null,
       jsonVal(g.linkedPortfolioItems),
       val(g.project),
+      ...archiveVals(g),
       ...auditVals(g),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -116,6 +126,7 @@ export function registerGoalEntity(repo: GoalRepository): void {
       `ALTER TABLE ${GOAL_TABLE} ADD COLUMN progress INTEGER`,
       `CREATE INDEX IF NOT EXISTS idx_goals_project ON ${GOAL_TABLE} (project)`,
       `CREATE INDEX IF NOT EXISTS idx_goals_status ON ${GOAL_TABLE} (status)`,
+      ...archiveMigrations(GOAL_TABLE),
     ],
     fts: {
       type: "goal",

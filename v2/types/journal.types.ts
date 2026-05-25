@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 export const JOURNAL_MOODS = [
   "great",
@@ -43,7 +47,7 @@ export const JournalEntrySchema = z.object({
     example: "good",
   }),
   tags: stringArray.nullable().optional(),
-}).merge(AuditFieldsSchema).openapi("JournalEntry");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("JournalEntry");
 
 export type JournalEntry = z.infer<typeof JournalEntrySchema>;
 

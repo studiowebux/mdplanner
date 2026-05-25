@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -40,7 +40,7 @@ export const FishboneSchema = z.object({
   causes: z.array(FishboneCauseSchema).openapi({
     description: "Cause categories with their items",
   }),
-}).merge(AuditFieldsSchema).openapi("Fishbone");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Fishbone");
 
 export type Fishbone = z.infer<typeof FishboneSchema>;
 

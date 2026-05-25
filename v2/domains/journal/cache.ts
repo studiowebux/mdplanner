@@ -1,6 +1,11 @@
 // Journal entry entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -24,6 +29,7 @@ export function rowToJournalEntry(
     date: (row.date as string) ?? "",
     mood: row.mood as JournalEntry["mood"],
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -38,6 +44,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${JOURNAL_TABLE} (
   date TEXT,
   mood TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -52,8 +59,9 @@ function insertRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${JOURNAL_TABLE} (id, title, content, date, mood, tags,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(e.id),
       val(e.title),
@@ -61,6 +69,7 @@ function insertRow(
       val(e.date),
       val(e.mood),
       json(e.tags),
+      ...archiveVals(e),
       ...auditVals(e),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -71,6 +80,9 @@ export function registerJournalEntity(repo: JournalRepository): void {
   const entity: EntityDef = {
     table: JOURNAL_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(JOURNAL_TABLE),
+    ],
     fts: {
       type: "journal",
       columns: ["id", "title", "content"],

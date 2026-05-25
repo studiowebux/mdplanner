@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -82,7 +86,7 @@ export const InvestorSchema = z.object({
   tags: stringArray.optional().openapi({
     description: "Tags",
   }),
-}).merge(AuditFieldsSchema).openapi("Investor");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Investor");
 
 export type Investor = z.infer<typeof InvestorSchema>;
 

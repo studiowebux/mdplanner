@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -38,6 +43,7 @@ export function rowToInvoice(
     paidAmount: Number(row.paid_amount) || 0,
     notes: row.notes as string | undefined,
     footer: row.footer as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     sentAt: row.sent_at as string | undefined,
@@ -65,6 +71,7 @@ const INVOICE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${INVOICE_TABLE} (
   paid_amount REAL,
   notes TEXT,
   footer TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   sent_at TEXT,
@@ -84,8 +91,9 @@ function insertInvoiceRow(
        title, status, currency, due_date, payment_terms, line_items,
        subtotal, tax, tax_rate, total, paid_amount, notes, footer,
        sent_at, paid_at,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(inv.id),
       val(inv.number),
@@ -106,6 +114,7 @@ function insertInvoiceRow(
       val(inv.footer),
       val(inv.sentAt),
       val(inv.paidAt),
+      ...archiveVals(inv),
       ...auditVals(inv),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -119,6 +128,7 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
     schema: INVOICE_SCHEMA,
     migrations: [
       "ALTER TABLE invoices ADD COLUMN line_items TEXT",
+      ...archiveMigrations(INVOICE_TABLE),
     ],
     fts: {
       type: "invoice",

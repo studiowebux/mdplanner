@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -54,7 +58,7 @@ export const FinanceSchema = z.object({
     description: "Tags for categorization (e.g. saas, salary, hosting)",
     example: ["saas", "recurring"],
   }),
-}).merge(AuditFieldsSchema).openapi("Finance");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Finance");
 
 export type Finance = z.infer<typeof FinanceSchema>;
 

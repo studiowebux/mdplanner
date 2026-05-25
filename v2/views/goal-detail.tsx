@@ -12,6 +12,7 @@ import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -230,8 +231,11 @@ export const GoalDetailView: FC<
             id={goal.id}
             title={goal.title}
             formContainerId="goals-form-container"
+            archived={goal.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={goal} />
 
         {/* ── Overview row ───────────────────────────────────────── */}
         {hasOverview && (

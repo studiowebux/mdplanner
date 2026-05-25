@@ -7,6 +7,7 @@ import { FINANCE_TYPE_LABELS } from "../types/finance.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -52,8 +53,11 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
             id={finance.id}
             title={finance.title}
             formContainerId="finances-form-container"
+            archived={finance.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={finance} />
 
         <div class="detail-section detail-info-row">
           <InfoItem label="Amount">

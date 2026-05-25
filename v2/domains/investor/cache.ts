@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -33,6 +38,7 @@ export function rowToInvestor(
     lastContact: row.last_contact as string | undefined,
     notes: row.notes as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -52,6 +58,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${INVESTOR_TABLE} (
   last_contact TEXT,
   notes TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -67,8 +74,9 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${INVESTOR_TABLE} (id, name, type, stage, status,
        amount_target, contact, intro_date, last_contact, notes, tags,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(inv.id),
       val(inv.name),
@@ -81,6 +89,7 @@ function insertRow(
       val(inv.lastContact),
       val(inv.notes),
       json(inv.tags),
+      ...archiveVals(inv),
       ...auditVals(inv),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -92,6 +101,9 @@ export function registerInvestorEntity(repo: InvestorRepository): void {
   const entity: EntityDef = {
     table: INVESTOR_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(INVESTOR_TABLE),
+    ],
     fts: {
       type: "investor",
       columns: ["id", "name", "contact", "notes"],

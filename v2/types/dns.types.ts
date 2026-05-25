@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -93,7 +97,7 @@ export const DnsDomainSchema = z.object({
   project: z.string().optional().openapi({
     description: "Linked project name",
   }),
-}).merge(AuditFieldsSchema).openapi("DnsDomain");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("DnsDomain");
 
 export type DnsDomain = z.infer<typeof DnsDomainSchema>;
 

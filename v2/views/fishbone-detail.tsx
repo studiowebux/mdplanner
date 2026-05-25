@@ -6,6 +6,7 @@ import type { Fishbone } from "../types/fishbone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -54,6 +55,7 @@ export const FishboneDetailView: FC<
             id={fishbone.id}
             title={fishbone.title}
             formContainerId="fishbones-form-container"
+            archived={fishbone.archived === true}
           >
             {editing
               ? (
@@ -74,6 +76,8 @@ export const FishboneDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={fishbone} />
 
         {/* -- Project --------------------------------------------------- */}
         {fishbone.project && (

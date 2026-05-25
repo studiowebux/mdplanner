@@ -16,6 +16,7 @@ export class DnsRepository extends CachedMarkdownRepository<
   UpdateDnsDomain
 > {
   protected readonly tableName = DNS_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

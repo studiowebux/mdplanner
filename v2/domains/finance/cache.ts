@@ -1,6 +1,11 @@
 // Finance entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -26,6 +31,7 @@ export function rowToFinance(
     date: row.date as string | undefined,
     description: row.description as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -42,6 +48,7 @@ const FINANCE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${FINANCE_TABLE} (
   date TEXT,
   description TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -57,8 +64,9 @@ export function insertFinanceRow(
   db.execute(
     `INSERT OR REPLACE INTO ${FINANCE_TABLE} (id, title, type, amount, currency,
        date, description, tags,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(f.id),
       val(f.title),
@@ -68,6 +76,7 @@ export function insertFinanceRow(
       val(f.date),
       val(f.description),
       json(f.tags ?? []),
+      ...archiveVals(f),
       ...auditVals(f),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -78,6 +87,9 @@ export function registerFinanceEntity(repo: FinanceRepository): void {
   const entity: EntityDef = {
     table: FINANCE_TABLE,
     schema: FINANCE_SCHEMA,
+    migrations: [
+      ...archiveMigrations(FINANCE_TABLE),
+    ],
     fts: {
       type: "finance",
       columns: ["id", "title", "description"],

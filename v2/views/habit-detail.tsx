@@ -14,6 +14,7 @@ import { HabitHeatmap } from "./habits/components/habit-heatmap.tsx";
 import { HabitStats } from "./habits/components/habit-stats.tsx";
 import { HabitCompletionLog } from "./habits/components/habit-completion-log.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 
 export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
   { item: habit, ...viewProps },
@@ -60,8 +61,11 @@ export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
             title={habit.title}
             formContainerId="habits-form-container"
             onDeleteRedirect="/habits"
+            archived={habit.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={habit} />
 
         {/* Stats row */}
         <HabitStats habit={habit} />

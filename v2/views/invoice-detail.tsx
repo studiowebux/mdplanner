@@ -9,6 +9,7 @@ import { formatDate } from "../utils/time.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { LineItemsTable } from "./components/line-items-table.tsx";
@@ -73,6 +74,7 @@ export const InvoiceDetailView: FC<
               id={invoice.id}
               title={invoice.title}
               formContainerId="invoices-form-container"
+              archived={invoice.archived === true}
             />
             {invoice.status === "draft" && (
               <button
@@ -95,6 +97,8 @@ export const InvoiceDetailView: FC<
             </a>
           </div>
         </header>
+
+        <ArchivedBanner entity={invoice} />
 
         {/* -- Info ------------------------------------------------------- */}
         <div class="detail-section detail-info-row">

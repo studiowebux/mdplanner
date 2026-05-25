@@ -13,6 +13,7 @@ import {
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -174,8 +175,11 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
           id={domain.id}
           title={domain.domain}
           formContainerId="dns-form-container"
+          archived={domain.archived === true}
         />
       </header>
+
+      <ArchivedBanner entity={domain} />
 
       <div class="detail-section detail-info-row">
         {domain.expiryDate && (

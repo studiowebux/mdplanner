@@ -12,6 +12,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { JOURNAL_MOOD_VARIANTS } from "../domains/journal/constants.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
 // ---------------------------------------------------------------------------
@@ -106,10 +107,13 @@ export const JournalDetailView: FC<
           title={entry.title}
           formContainerId="journal-form-container"
           onDeleteRedirect="/journal"
+          archived={entry.archived === true}
         >
           <EditModeToggle href={`/journal/${entry.id}`} editing={editing} />
         </DetailActions>
       </header>
+
+      <ArchivedBanner entity={entry} />
 
       <div class="detail-section detail-info-row">
         <InfoItem label="Date">{entry.date ?? "—"}</InfoItem>

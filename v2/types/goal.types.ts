@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -99,7 +103,7 @@ export const GoalSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("Goal");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Goal");
 
 export type Goal = z.infer<typeof GoalSchema>;
 

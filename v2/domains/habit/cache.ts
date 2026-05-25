@@ -1,6 +1,11 @@
 // Habit entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -28,6 +33,7 @@ export function rowToHabit(row: Record<string, string | number | null>): Habit {
       ),
     color: row.color as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -45,6 +51,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${HABIT_TABLE} (
   completed_dates TEXT,
   color TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -56,8 +63,9 @@ function insertRow(db: CacheDatabase, h: Habit, syncedAt?: string): void {
   db.execute(
     `INSERT OR REPLACE INTO ${HABIT_TABLE} (id, title, description,
        frequency, target_per_period, unit, completed_dates, color, tags,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(h.id),
       val(h.title),
@@ -68,6 +76,7 @@ function insertRow(db: CacheDatabase, h: Habit, syncedAt?: string): void {
       json(h.completedDates),
       val(h.color),
       json(h.tags),
+      ...archiveVals(h),
       ...auditVals(h),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -78,6 +87,9 @@ export function registerHabitEntity(repo: HabitRepository): void {
   const entity: EntityDef = {
     table: HABIT_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(HABIT_TABLE),
+    ],
     fts: {
       type: "habit",
       columns: ["id", "title", "description"],

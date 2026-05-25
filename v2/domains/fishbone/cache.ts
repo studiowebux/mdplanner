@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -25,6 +30,7 @@ export function rowToFishbone(
     description: row.description as string | undefined,
     project: row.project as string | undefined,
     causes: parseJson<FishboneCause[]>(row.causes) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -38,6 +44,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${FISHBONE_TABLE} (
   description TEXT,
   project TEXT,
   causes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -52,14 +59,17 @@ function insertRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${FISHBONE_TABLE} (id, title, description,
-       project, causes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project, causes,
+       ${archiveCols()},
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(f.id),
       val(f.title),
       val(f.description),
       val(f.project),
       json(f.causes),
+      ...archiveVals(f),
       ...auditVals(f),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -71,6 +81,9 @@ export function registerFishboneEntity(repo: FishboneRepository): void {
   const entity: EntityDef = {
     table: FISHBONE_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(FISHBONE_TABLE),
+    ],
     fts: {
       type: "fishbone",
       columns: ["id", "title", "description", "causes"],
