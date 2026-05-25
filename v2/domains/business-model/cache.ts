@@ -1,6 +1,11 @@
 // Business Model Canvas entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -33,6 +38,7 @@ export function rowToBusinessModel(
     revenueStreams: parseJson<string[]>(row.revenue_streams) ?? [],
     project: row.project as string | undefined,
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -55,6 +61,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${BUSINESS_MODEL_TABLE} (
   revenue_streams TEXT,
   project TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -72,8 +79,9 @@ function insertRow(
        key_partners, key_activities, key_resources, value_proposition,
        customer_relationships, channels, customer_segments,
        cost_structure, revenue_streams, project, notes,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
       val(b.title),
@@ -89,6 +97,7 @@ function insertRow(
       json(b.revenueStreams),
       val(b.project),
       val(b.notes),
+      ...archiveVals(b),
       ...auditVals(b),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -120,6 +129,9 @@ export function registerBusinessModelEntity(
       titleCol: "title",
       contentCol: "notes",
     },
+    migrations: [
+      ...archiveMigrations(BUSINESS_MODEL_TABLE),
+    ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();
       for (const b of items) insertRow(db, b, syncedAt);

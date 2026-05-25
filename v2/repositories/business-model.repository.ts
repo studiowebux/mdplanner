@@ -57,6 +57,7 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
   UpdateBusinessModel
 > {
   protected readonly tableName = BUSINESS_MODEL_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
@@ -195,6 +196,11 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
     fm.updated_at = item.updatedAt;
     if (item.createdBy) fm.created_by = item.createdBy;
     if (item.updatedBy) fm.updated_by = item.updatedBy;
+    // Preserve archive fields — custom serializers must round-trip these or
+    // update() drops them. See soft-delete architecture note.
+    if (item.archived) fm.archived = item.archived;
+    if (item.archivedAt) fm.archived_at = item.archivedAt;
+    if (item.archivedBy) fm.archived_by = item.archivedBy;
 
     const bodyLines: string[] = [];
 

@@ -12,6 +12,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BUSINESS_MODEL_SECTION_META } from "../domains/business-model/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -130,6 +131,7 @@ export const BusinessModelDetailView: FC<
             id={bmc.id}
             title={bmc.title}
             formContainerId="business-models-form-container"
+            archived={bmc.archived === true}
           >
             {editing
               ? (
@@ -150,6 +152,8 @@ export const BusinessModelDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={bmc} />
 
         {/* -- Project ------------------------------------------------------- */}
         {bmc.project && (

@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -39,7 +43,7 @@ export const BusinessModelSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("BusinessModel");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("BusinessModel");
 
 export type BusinessModel = z.infer<typeof BusinessModelSchema>;
 
