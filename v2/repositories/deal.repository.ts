@@ -17,6 +17,7 @@ export class DealRepository extends CachedMarkdownRepository<
   UpdateDeal
 > {
   protected readonly tableName = DEAL_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

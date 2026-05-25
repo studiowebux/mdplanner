@@ -7,6 +7,7 @@ import { DEAL_STAGE_LABELS } from "../types/deal.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -51,8 +52,11 @@ export const DealDetailView: FC<ViewProps & { item: Deal }> = (
             id={deal.id}
             title={deal.title}
             formContainerId="deals-form-container"
+            archived={deal.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={deal} />
 
         <div class="detail-section detail-info-row">
           {deal.value != null && (

@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -77,7 +81,7 @@ export const DealSchema = z.object({
   closedAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when deal was closed (won or lost)",
   }),
-}).merge(AuditFieldsSchema).openapi("Deal");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Deal");
 
 export type Deal = z.infer<typeof DealSchema>;
 

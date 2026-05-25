@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -31,6 +36,7 @@ export function rowToDeal(
     description: row.description as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
     closedAt: row.closed_at as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -50,6 +56,7 @@ const DEAL_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DEAL_TABLE} (
   description TEXT,
   tags TEXT,
   closed_at TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -65,8 +72,9 @@ export function insertDealRow(
   db.execute(
     `INSERT OR REPLACE INTO ${DEAL_TABLE} (id, title, stage, value, currency,
        company, contact, assignee, description, tags, closed_at,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(d.id),
       val(d.title),
@@ -79,6 +87,7 @@ export function insertDealRow(
       val(d.description),
       json(d.tags ?? []),
       val(d.closedAt),
+      ...archiveVals(d),
       ...auditVals(d),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -90,6 +99,9 @@ export function registerDealEntity(repo: DealRepository): void {
   const entity: EntityDef = {
     table: DEAL_TABLE,
     schema: DEAL_SCHEMA,
+    migrations: [
+      ...archiveMigrations(DEAL_TABLE),
+    ],
     fts: {
       type: "deal",
       columns: ["id", "title", "company", "contact", "assignee", "description"],
