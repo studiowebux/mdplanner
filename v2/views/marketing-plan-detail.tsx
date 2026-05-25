@@ -9,6 +9,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -166,6 +167,7 @@ export const MarketingPlanDetailView: FC<
             id={plan.id}
             title={plan.name}
             formContainerId="marketing-plans-form-container"
+            archived={plan.archived === true}
           >
             <EditModeToggle
               href={`/marketing-plans/${plan.id}`}
@@ -173,6 +175,8 @@ export const MarketingPlanDetailView: FC<
             />
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={plan} />
 
         {/* -- Overview -------------------------------------------------- */}
         {(hasOverview || hasTimeline) && (

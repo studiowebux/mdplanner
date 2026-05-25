@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Recursive node — Zod lazy schema
@@ -65,7 +65,7 @@ export const MindmapSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("Mindmap");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Mindmap");
 
 export type Mindmap = z.infer<typeof MindmapSchema>;
 

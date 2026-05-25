@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -17,7 +22,7 @@ export const MARKETING_PLAN_TABLE = "marketing_plans";
 
 /** Deserialize a SQLite row to a MarketingPlan. */
 export function rowToMarketingPlan(
-  row: Record<string, unknown>,
+  row: Record<string, string | number | null>,
 ): MarketingPlan {
   return {
     id: row.id as string,
@@ -40,6 +45,7 @@ export function rowToMarketingPlan(
     hypothesis: parseJson(row.hypothesis),
     learnings: parseJson(row.learnings),
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -66,6 +72,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MARKETING_PLAN_TABLE} (
   hypothesis TEXT,
   learnings TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -83,8 +90,8 @@ function insertRow(
        budget_total, budget_currency, start_date, end_date,
        target_audiences, channels, campaigns, linked_goals,
        project, responsible, team,
-       hypothesis, learnings, notes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       hypothesis, learnings, notes, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -104,6 +111,7 @@ function insertRow(
       val(p.hypothesis),
       val(p.learnings),
       val(p.notes),
+      ...archiveVals(p),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -117,6 +125,9 @@ export function registerMarketingPlanEntity(
   const entity: EntityDef = {
     table: MARKETING_PLAN_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(MARKETING_PLAN_TABLE),
+    ],
     fts: {
       type: "marketing_plan",
       columns: ["id", "name", "description", "notes"],

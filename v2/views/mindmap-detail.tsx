@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { countAllNodes } from "../domains/mindmap/constants.tsx";
@@ -58,8 +59,11 @@ export const MindmapDetailView: FC<
             id={item.id}
             title={item.title}
             formContainerId="mindmaps-form-container"
+            archived={item.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={item} />
 
         {editing
           ? (

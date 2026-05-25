@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import {
   MOSCOW_QUADRANT_KEYS,
   MOSCOW_QUADRANT_META,
@@ -66,6 +67,7 @@ export const MoscowDetailView: FC<
             id={moscow.id}
             title={moscow.title}
             formContainerId="moscow-form-container"
+            archived={moscow.archived === true}
           >
             {editing
               ? (
@@ -86,6 +88,8 @@ export const MoscowDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={moscow} />
 
         {/* -- Project --------------------------------------------------- */}
         {moscow.project && (

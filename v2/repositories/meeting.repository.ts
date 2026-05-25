@@ -19,6 +19,7 @@ export class MeetingRepository extends CachedMarkdownRepository<
   UpdateMeeting
 > {
   protected readonly tableName = MEETING_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

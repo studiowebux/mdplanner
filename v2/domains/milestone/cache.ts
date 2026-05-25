@@ -2,6 +2,9 @@
 // Called by initServices() after repos are created.
 
 import {
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -26,6 +29,7 @@ export function rowToMilestone(
     id: row.id as string,
     name: row.name as string,
     status: (row.status as MilestoneBase["status"]) ?? "open",
+    ...archiveFieldsFromRow(row),
   };
   if (row.target != null) m.target = row.target as string;
   if (row.description != null) m.description = row.description as string;
@@ -47,8 +51,8 @@ export function insertMilestoneRow(
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, ${auditCols()}, links, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, ${auditCols()}, links, ${archiveCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.name),
@@ -59,6 +63,7 @@ export function insertMilestoneRow(
       val(m.completedAt),
       ...auditVals(m),
       json(m.links ?? []),
+      ...archiveVals(m),
       syncedAt ?? new Date().toISOString(),
     ],
   );

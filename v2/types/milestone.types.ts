@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { stringArray } from "./shared.types.ts";
+import { ArchiveFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Status enum — shared across all milestone schemas
@@ -65,7 +65,7 @@ export const MilestoneBaseSchema = z.object({
     description: "External resource URLs related to this milestone",
     example: ["https://github.com/org/repo/milestone/1"],
   }),
-});
+}).merge(ArchiveFieldsSchema);
 
 export type MilestoneBase = z.infer<typeof MilestoneBaseSchema>;
 

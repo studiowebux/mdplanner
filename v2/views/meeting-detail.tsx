@@ -13,6 +13,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -383,8 +384,11 @@ export const MeetingDetailView: FC<
             id={meeting.id}
             title={meeting.title}
             formContainerId="meetings-form-container"
+            archived={meeting.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={meeting} />
 
         {/* -- Info -------------------------------------------------------- */}
         <div class="detail-section detail-info-row">

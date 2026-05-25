@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -181,7 +185,7 @@ export const MarketingPlanSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Plan notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("MarketingPlan");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("MarketingPlan");
 
 export type MarketingPlan = z.infer<typeof MarketingPlanSchema>;
 

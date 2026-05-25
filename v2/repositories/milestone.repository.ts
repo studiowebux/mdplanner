@@ -23,6 +23,7 @@ export class MilestoneRepository extends CachedMarkdownRepository<
   UpdateMilestone
 > {
   protected readonly tableName = MILESTONE_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
@@ -137,6 +138,10 @@ export class MilestoneRepository extends CachedMarkdownRepository<
         MILESTONE_BODY_KEYS,
       ),
     );
+    // Preserve archive fields — custom serializers must round-trip these.
+    if (item.archived) fm.archived = item.archived;
+    if (item.archivedAt) fm.archived_at = item.archivedAt;
+    if (item.archivedBy) fm.archived_by = item.archivedBy;
     const body = `# ${item.name}\n\n${item.description ?? ""}`.trimEnd();
     return serializeFrontmatter(fm, body);
   }

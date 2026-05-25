@@ -8,6 +8,7 @@ import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -59,6 +60,7 @@ export const MilestoneDetailView: FC<Props> = (
             id={milestone.id}
             title={milestone.name}
             formContainerId="milestones-form-container"
+            archived={milestone.archived === true}
           />
 
           <div class="milestone-detail__meta">
@@ -86,6 +88,8 @@ export const MilestoneDetailView: FC<Props> = (
             </span>
           </div>
         </header>
+
+        <ArchivedBanner entity={milestone} />
 
         <MarkdownJsx
           markdown={milestone.description}

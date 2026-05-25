@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Action item schema
@@ -71,7 +75,7 @@ export const MeetingSchema = z.object({
   relatedMeetings: z.array(z.string()).optional().openapi({
     description: "IDs of related meetings (undirected graph)",
   }),
-}).merge(AuditFieldsSchema).openapi("Meeting");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Meeting");
 
 export type Meeting = z.infer<typeof MeetingSchema>;
 

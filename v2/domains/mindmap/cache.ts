@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -25,6 +30,7 @@ export function rowToMindmap(
     nodes: parseJson<MindmapNode[]>(row.nodes) ?? [],
     project: (row.project as string) ?? "",
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -52,6 +58,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MINDMAP_TABLE} (
   flat_nodes TEXT,
   project TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -66,8 +73,8 @@ function insertRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${MINDMAP_TABLE} (id, title, nodes, flat_nodes,
-       project, notes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project, notes, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.title),
@@ -75,6 +82,7 @@ function insertRow(
       flattenNodes(m.nodes),
       val(m.project),
       val(m.notes),
+      ...archiveVals(m),
       ...auditVals(m),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -86,6 +94,9 @@ export function registerMindmapEntity(repo: MindmapRepository): void {
   const entity: EntityDef = {
     table: MINDMAP_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(MINDMAP_TABLE),
+    ],
     fts: {
       type: "mindmap",
       columns: ["id", "title", "flat_nodes", "notes"],

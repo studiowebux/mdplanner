@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -29,6 +34,7 @@ export function rowToMoscow(
     wont: parseJson<string[]>(row.wont) ?? [],
     project: row.project as string | undefined,
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -46,6 +52,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MOSCOW_TABLE} (
   wont TEXT,
   project TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -61,8 +68,8 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${MOSCOW_TABLE} (id, title, date,
        must, should, could, wont,
-       project, notes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project, notes, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.title),
@@ -73,6 +80,7 @@ function insertRow(
       json(m.wont),
       val(m.project),
       val(m.notes),
+      ...archiveVals(m),
       ...auditVals(m),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -84,6 +92,9 @@ export function registerMoscowEntity(repo: MoscowRepository): void {
   const entity: EntityDef = {
     table: MOSCOW_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(MOSCOW_TABLE),
+    ],
     fts: {
       type: "moscow",
       columns: [

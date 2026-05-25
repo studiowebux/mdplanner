@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -37,7 +41,7 @@ export const MoscowSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("Moscow");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Moscow");
 
 export type Moscow = z.infer<typeof MoscowSchema>;
 

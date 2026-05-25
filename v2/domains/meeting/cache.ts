@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -29,6 +34,7 @@ export function rowToMeeting(
     actions: parseJson<MeetingAction[]>(row.actions_json) ?? [],
     project: row.project as string | undefined,
     relatedMeetings: parseJson<string[]>(row.related_meetings_json) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -57,6 +63,7 @@ const MEETING_SCHEMA = `CREATE TABLE IF NOT EXISTS ${MEETING_TABLE} (
   project TEXT,
   related_meetings_json TEXT,
   search_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -73,8 +80,8 @@ function insertMeetingRow(
     `INSERT OR REPLACE INTO ${MEETING_TABLE} (id, title, date,
        attendees_json, agenda, notes, actions_json, project,
        related_meetings_json, search_text,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.title),
@@ -86,6 +93,7 @@ function insertMeetingRow(
       val(m.project),
       jsonVal(m.relatedMeetings ?? []),
       meetingToText(m),
+      ...archiveVals(m),
       ...auditVals(m),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -102,6 +110,7 @@ export function registerMeetingEntity(repo: MeetingRepository): void {
       `ALTER TABLE ${MEETING_TABLE} ADD COLUMN related_meetings_json TEXT`,
       `CREATE INDEX IF NOT EXISTS idx_meetings_project ON ${MEETING_TABLE} (project)`,
       `CREATE INDEX IF NOT EXISTS idx_meetings_date ON ${MEETING_TABLE} (date)`,
+      ...archiveMigrations(MEETING_TABLE),
     ],
     fts: {
       type: "meeting",
