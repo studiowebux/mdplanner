@@ -9,6 +9,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -241,8 +242,11 @@ export const CustomerDetailView: FC<
             id={customer.id}
             title={customer.name}
             formContainerId="customers-form-container"
+            archived={customer.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={customer} />
 
         {/* -- Contact info ----------------------------------------------- */}
         {hasContact && (

@@ -16,6 +16,7 @@ export class CustomerRepository extends CachedMarkdownRepository<
   UpdateCustomer
 > {
   protected readonly tableName = CUSTOMER_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

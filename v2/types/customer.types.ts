@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Billing address sub-schema
@@ -65,7 +65,7 @@ export const CustomerSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Customer notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("Customer");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Customer");
 
 export type Customer = z.infer<typeof CustomerSchema>;
 
