@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -32,6 +37,7 @@ export function rowToBrief(row: Record<string, string | number | null>): Brief {
     culture: parseJson<string[]>(row.culture),
     changeCapacity: parseJson<string[]>(row.change_capacity),
     guidingPrinciples: parseJson<string[]>(row.guiding_principles),
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -65,6 +71,7 @@ const BRIEF_SCHEMA = `CREATE TABLE IF NOT EXISTS ${BRIEF_TABLE} (
   change_capacity TEXT,
   guiding_principles TEXT,
   sections_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -82,8 +89,9 @@ function insertBriefRow(
        summary, mission, responsible, accountable, consulted, informed,
        high_level_budget, high_level_timeline, culture, change_capacity,
        guiding_principles, sections_text,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
       val(b.title),
@@ -100,6 +108,7 @@ function insertBriefRow(
       jsonVal(b.changeCapacity),
       jsonVal(b.guidingPrinciples),
       sectionsToText(b),
+      ...archiveVals(b),
       ...auditVals(b),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -117,6 +126,9 @@ export function registerBriefEntity(repo: BriefRepository): void {
       titleCol: "title",
       contentCol: "sections_text",
     },
+    migrations: [
+      ...archiveMigrations(BRIEF_TABLE),
+    ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();
       for (const b of items) insertBriefRow(db, b, syncedAt);

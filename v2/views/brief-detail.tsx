@@ -6,6 +6,7 @@ import type { Brief } from "../types/brief.types.ts";
 import { BRIEF_SECTIONS } from "../types/brief.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { BRIEF_RACI_KEYS } from "../domains/brief/constants.ts";
@@ -74,8 +75,11 @@ export const BriefDetailView: FC<
             id={brief.id}
             title={brief.title}
             formContainerId="briefs-form-container"
+            archived={brief.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={brief} />
 
         {/* -- Info ------------------------------------------------------- */}
         {brief.date && (

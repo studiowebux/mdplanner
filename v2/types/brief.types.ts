@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -56,7 +60,7 @@ export const BriefSchema = z.object({
   guidingPrinciples: stringArray.nullable().optional().openapi({
     description: "Guiding principles",
   }),
-}).merge(AuditFieldsSchema).openapi("Brief");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Brief");
 
 export type Brief = z.infer<typeof BriefSchema>;
 
