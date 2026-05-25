@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -29,6 +34,7 @@ export function rowToContact(
     type: (row.type as ContactType | null) ?? undefined,
     notes: row.notes as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -46,6 +52,7 @@ const CONTACT_SCHEMA = `CREATE TABLE IF NOT EXISTS ${CONTACT_TABLE} (
   type TEXT,
   notes TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -61,8 +68,9 @@ export function insertContactRow(
   db.execute(
     `INSERT OR REPLACE INTO ${CONTACT_TABLE} (id, name, email, phone, role,
        company, type, notes, tags,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(c.id),
       val(c.name),
@@ -73,6 +81,7 @@ export function insertContactRow(
       val(c.type),
       val(c.notes),
       json(c.tags ?? []),
+      ...archiveVals(c),
       ...auditVals(c),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -87,6 +96,7 @@ export function registerContactEntity(repo: ContactRepository): void {
     migrations: [
       `CREATE INDEX IF NOT EXISTS idx_contacts_company ON ${CONTACT_TABLE} (company)`,
       `CREATE INDEX IF NOT EXISTS idx_contacts_type ON ${CONTACT_TABLE} (type)`,
+      ...archiveMigrations(CONTACT_TABLE),
     ],
     fts: {
       type: "contact",

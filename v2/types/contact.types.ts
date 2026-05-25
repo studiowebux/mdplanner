@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Relationship type enum
@@ -59,7 +63,7 @@ export const ContactSchema = z.object({
     description: "Tags for grouping/filtering",
     example: ["vip", "q1-2026"],
   }),
-}).merge(AuditFieldsSchema).openapi("Contact");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Contact");
 
 export type Contact = z.infer<typeof ContactSchema>;
 

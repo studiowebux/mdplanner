@@ -24,6 +24,7 @@ export class ContactRepository extends CachedMarkdownRepository<
   UpdateContact
 > {
   protected readonly tableName = CONTACT_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
