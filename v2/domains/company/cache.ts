@@ -1,6 +1,11 @@
 // Company entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -33,6 +38,7 @@ export function rowToCompany(
     address: row.address as string | undefined,
     notes: row.notes as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -52,6 +58,7 @@ const COMPANY_SCHEMA = `CREATE TABLE IF NOT EXISTS ${COMPANY_TABLE} (
   address TEXT,
   notes TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -67,8 +74,9 @@ export function insertCompanyRow(
   db.execute(
     `INSERT OR REPLACE INTO ${COMPANY_TABLE} (id, name, website, industry, size,
        type, phone, email, address, notes, tags,
+       ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(c.id),
       val(c.name),
@@ -81,6 +89,7 @@ export function insertCompanyRow(
       val(c.address),
       val(c.notes),
       json(c.tags ?? []),
+      ...archiveVals(c),
       ...auditVals(c),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -97,6 +106,9 @@ export function registerCompanyEntity(repo: CompanyRepository): void {
       titleCol: "name",
       contentCol: "notes",
     },
+    migrations: [
+      ...archiveMigrations(COMPANY_TABLE),
+    ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();
       for (const c of items) insertCompanyRow(db, c, syncedAt);

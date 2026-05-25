@@ -6,6 +6,7 @@ import type { Company } from "../types/company.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -53,8 +54,11 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
             id={company.id}
             title={company.name}
             formContainerId="companies-form-container"
+            archived={company.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={company} />
 
         {hasInfo && (
           <div class="detail-section detail-info-row">
