@@ -4,7 +4,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -39,7 +43,7 @@ export const RetrospectiveSchema = z.object({
   participants: stringArray.openapi({
     description: "People who attended the retrospective",
   }),
-}).merge(AuditFieldsSchema).openapi("Retrospective");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Retrospective");
 
 export type Retrospective = z.infer<typeof RetrospectiveSchema>;
 

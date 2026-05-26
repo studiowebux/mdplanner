@@ -12,6 +12,7 @@ export class SafeRepository extends CachedMarkdownRepository<
   UpdateSafe
 > {
   protected readonly tableName = SAFE_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
@@ -95,6 +96,9 @@ export class SafeRepository extends CachedMarkdownRepository<
     fm.updated_at = item.updatedAt;
     if (item.createdBy) fm.created_by = item.createdBy;
     if (item.updatedBy) fm.updated_by = item.updatedBy;
+    if (item.archived) fm.archived = item.archived;
+    if (item.archivedAt) fm.archived_at = item.archivedAt;
+    if (item.archivedBy) fm.archived_by = item.archivedBy;
 
     const body = `# ${item.investor} — $${item.amount.toLocaleString()} SAFE`;
 

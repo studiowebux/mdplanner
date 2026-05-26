@@ -9,6 +9,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { QuadrantEditGrid } from "./components/quadrant-edit-grid.tsx";
 
 // ---------------------------------------------------------------------------
@@ -69,6 +70,7 @@ export const RetrospectiveDetailView: FC<
             id={retro.id}
             title={retro.title}
             formContainerId="retrospectives-form-container"
+            archived={retro.archived === true}
           >
             {editing
               ? (
@@ -89,6 +91,8 @@ export const RetrospectiveDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={retro} />
 
         {/* -- Info ------------------------------------------------------- */}
         {retro.date && (

@@ -21,6 +21,7 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
   UpdateRetrospective
 > {
   protected readonly tableName = RETROSPECTIVE_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

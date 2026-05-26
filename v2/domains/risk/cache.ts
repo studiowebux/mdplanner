@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -29,6 +34,7 @@ export function rowToRisk(row: Record<string, string | number | null>): Risk {
     owner: row.owner as string | undefined,
     project: row.project as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -48,6 +54,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${RISK_TABLE} (
   owner TEXT,
   project TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -59,8 +66,8 @@ function insertRow(db: CacheDatabase, r: Risk, syncedAt?: string): void {
   db.execute(
     `INSERT OR REPLACE INTO ${RISK_TABLE} (id, title, description,
        category, likelihood, impact, status, mitigation, owner, project, tags,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.title),
@@ -73,6 +80,7 @@ function insertRow(db: CacheDatabase, r: Risk, syncedAt?: string): void {
       val(r.owner),
       val(r.project),
       json(r.tags),
+      ...archiveVals(r),
       ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -84,6 +92,9 @@ export function registerRiskEntity(repo: RiskRepository): void {
   const entity: EntityDef = {
     table: RISK_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(RISK_TABLE),
+    ],
     fts: {
       type: "risk",
       columns: ["id", "title", "description", "mitigation", "owner"],

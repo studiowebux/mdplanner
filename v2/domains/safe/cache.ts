@@ -1,6 +1,11 @@
 // SAFe entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -24,6 +29,7 @@ export function rowToSafe(row: Record<string, string | number | null>): Safe {
     date: (row.date as string) ?? "",
     status: (row.status as Safe["status"]) ?? "draft",
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -41,6 +47,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${SAFE_TABLE} (
   date TEXT,
   status TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -51,8 +58,8 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${SAFE_TABLE} (
 function insertRow(db: CacheDatabase, s: Safe, syncedAt?: string): void {
   db.execute(
     `INSERT OR REPLACE INTO ${SAFE_TABLE} (id, investor, amount, valuation_cap,
-       discount, type, date, status, notes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       discount, type, date, status, notes, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(s.id),
       val(s.investor),
@@ -63,6 +70,7 @@ function insertRow(db: CacheDatabase, s: Safe, syncedAt?: string): void {
       val(s.date),
       val(s.status),
       val(s.notes),
+      ...archiveVals(s),
       ...auditVals(s),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -74,6 +82,9 @@ export function registerSafeEntity(repo: SafeRepository): void {
   const entity: EntityDef = {
     table: SAFE_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(SAFE_TABLE),
+    ],
     fts: {
       type: "safe",
       columns: ["id", "investor", "notes"],

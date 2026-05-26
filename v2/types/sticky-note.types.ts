@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -60,7 +64,7 @@ export const StickyNoteSchema = z.object({
     description: "Board this note belongs to (default: 'default')",
     example: "default",
   }),
-}).merge(AuditFieldsSchema).openapi("StickyNote");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("StickyNote");
 
 export type StickyNote = z.infer<typeof StickyNoteSchema>;
 
@@ -129,7 +133,7 @@ export const StickyBoardSchema = z.object({
   projects: stringArray.openapi({
     description: "Linked portfolio item IDs",
   }),
-}).merge(AuditFieldsSchema).openapi("StickyBoard");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("StickyBoard");
 
 export type StickyBoard = z.infer<typeof StickyBoardSchema>;
 

@@ -18,6 +18,7 @@ export class StickyBoardRepository extends CachedMarkdownRepository<
   UpdateStickyBoard
 > {
   protected readonly tableName = STICKY_BOARD_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
@@ -84,6 +85,9 @@ export class StickyBoardRepository extends CachedMarkdownRepository<
     fm.updated_at = board.updatedAt;
     if (board.createdBy) fm.created_by = board.createdBy;
     if (board.updatedBy) fm.updated_by = board.updatedBy;
+    if (board.archived) fm.archived = board.archived;
+    if (board.archivedAt) fm.archived_at = board.archivedAt;
+    if (board.archivedBy) fm.archived_by = board.archivedBy;
 
     return serializeFrontmatter(fm, "");
   }

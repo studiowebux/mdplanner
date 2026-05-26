@@ -10,6 +10,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { RISK_STATUS_VARIANTS } from "../domains/risk/constants.tsx";
 
@@ -60,8 +61,11 @@ export const RiskDetailView: FC<ViewProps & { item: Risk }> = (
             id={risk.id}
             title={risk.title}
             formContainerId="risks-form-container"
+            archived={risk.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={risk} />
 
         {/* -- Info row -------------------------------------------------- */}
         <div class="detail-section detail-info-row">

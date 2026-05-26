@@ -20,6 +20,7 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
   UpdateStickyNote
 > {
   protected readonly tableName = STICKY_NOTE_TABLE;
+  protected override readonly supportsArchive = true;
   private readonly boardId: string;
 
   constructor(projectDir: string, boardId = "default") {

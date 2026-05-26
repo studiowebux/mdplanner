@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -35,6 +40,7 @@ export function rowToStickyNote(
       }
       : undefined,
     boardId: (row.board_id as string) ?? "default",
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -51,6 +57,7 @@ export function rowToStickyBoard(
     title: (row.title as string) ?? "",
     description: row.description as string | undefined,
     projects: parseJson<string[]>(row.projects) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -67,6 +74,7 @@ const STICKY_NOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${STICKY_NOTE_TABLE} (
   size_width REAL,
   size_height REAL,
   board_id TEXT NOT NULL DEFAULT 'default',
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -79,6 +87,7 @@ const STICKY_BOARD_SCHEMA = `CREATE TABLE IF NOT EXISTS ${STICKY_BOARD_TABLE} (
   title TEXT NOT NULL,
   description TEXT,
   projects TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -94,8 +103,8 @@ function insertStickyNoteRow(
   db.execute(
     `INSERT OR REPLACE INTO ${STICKY_NOTE_TABLE} (
        id, content, color, position_x, position_y, size_width, size_height, board_id,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(note.id),
       val(note.content),
@@ -105,6 +114,7 @@ function insertStickyNoteRow(
       note.size?.width ?? null,
       note.size?.height ?? null,
       val(note.boardId),
+      ...archiveVals(note),
       ...auditVals(note),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -118,13 +128,14 @@ function insertStickyBoardRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${STICKY_BOARD_TABLE} (
-       id, title, description, projects, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       id, title, description, projects, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(board.id),
       val(board.title),
       val(board.description),
       json(board.projects),
+      ...archiveVals(board),
       ...auditVals(board),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -138,6 +149,7 @@ export function registerStickyNoteEntity(repo: StickyNoteRepository): void {
     schema: STICKY_NOTE_SCHEMA,
     migrations: [
       `ALTER TABLE ${STICKY_NOTE_TABLE} ADD COLUMN board_id TEXT NOT NULL DEFAULT 'default'`,
+      ...archiveMigrations(STICKY_NOTE_TABLE),
     ],
     fts: {
       type: "sticky_note",
@@ -162,6 +174,9 @@ export function registerStickyBoardEntity(
   const boardEntity: EntityDef = {
     table: STICKY_BOARD_TABLE,
     schema: STICKY_BOARD_SCHEMA,
+    migrations: [
+      ...archiveMigrations(STICKY_BOARD_TABLE),
+    ],
     fts: {
       type: "sticky_board",
       columns: ["id", "title", "description"],

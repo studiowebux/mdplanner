@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -28,6 +33,7 @@ export function rowToRetrospective(
     stop: parseJson<string[]>(row.stop_items) ?? [],
     start: parseJson<string[]>(row.start_items) ?? [],
     participants: parseJson<string[]>(row.participants_json) ?? [],
+    ...archiveFieldsFromRow(row as Record<string, string | number | null>),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -56,6 +62,7 @@ const RETROSPECTIVE_SCHEMA =
   start_items TEXT,
   participants_json TEXT,
   sections_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -71,8 +78,8 @@ function insertRetrospectiveRow(
   db.execute(
     `INSERT OR REPLACE INTO ${RETROSPECTIVE_TABLE} (id, title, date, status,
        continue_items, stop_items, start_items, participants_json, sections_text,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.title),
@@ -83,6 +90,7 @@ function insertRetrospectiveRow(
       jsonVal(r.start),
       jsonVal(r.participants),
       sectionsToText(r),
+      ...archiveVals(r),
       ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -96,6 +104,9 @@ export function registerRetrospectiveEntity(
   const entity: EntityDef = {
     table: RETROSPECTIVE_TABLE,
     schema: RETROSPECTIVE_SCHEMA,
+    migrations: [
+      ...archiveMigrations(RETROSPECTIVE_TABLE),
+    ],
     fts: {
       type: "retrospective",
       columns: ["id", "title", "sections_text"],

@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -53,7 +53,7 @@ export const SafeSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes",
   }),
-}).merge(AuditFieldsSchema).openapi("Safe");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Safe");
 
 export type Safe = z.infer<typeof SafeSchema>;
 

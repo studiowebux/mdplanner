@@ -8,6 +8,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { SAFE_STATUS_VARIANTS } from "../domains/safe/constants.tsx";
 
@@ -50,8 +51,11 @@ export const SafeDetailView: FC<ViewProps & { item: Safe }> = (
             id={safe.id}
             title={safe.investor}
             formContainerId="safe-form-container"
+            archived={safe.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={safe} />
 
         {/* -- Info row -------------------------------------------------- */}
         <div class="detail-section detail-info-row">
