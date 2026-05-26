@@ -458,6 +458,12 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
   const runId = c.req.param("runId");
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) return c.notFound();
+  if (item.archived === true) {
+    return c.text(
+      "Portfolio item is archived — restore before editing",
+      422,
+    );
+  }
   try {
     await getGitHubService().cancelRun(item.githubRepo, Number(runId));
   } catch (err) {
@@ -486,6 +492,12 @@ portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
   const runId = c.req.param("runId");
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) return c.notFound();
+  if (item.archived === true) {
+    return c.text(
+      "Portfolio item is archived — restore before editing",
+      422,
+    );
+  }
   try {
     await getGitHubService().rerunRun(item.githubRepo, Number(runId));
   } catch (err) {
@@ -516,6 +528,12 @@ portfolioRouter.post(
     const runId = c.req.param("runId");
     const item = await getPortfolioService().getById(id);
     if (!item?.githubRepo) return c.notFound();
+    if (item.archived === true) {
+      return c.text(
+        "Portfolio item is archived — restore before editing",
+        422,
+      );
+    }
     try {
       await getGitHubService().rerunFailedJobs(
         item.githubRepo,
@@ -583,9 +601,45 @@ portfolioRouter.get("/:id", async (c) => {
   );
 });
 
+// Restore an archived portfolio item — drops the three archive frontmatter
+// fields. Publish `portfolio.updated` so the detail page re-renders without
+// the banner; per soft-delete arch note, never publish `portfolio.archived`.
+portfolioRouter.post("/:id/restore", async (c) => {
+  const id = c.req.param("id");
+  const ok = await getPortfolioService().restore(id);
+  if (!ok) return c.notFound();
+  publish("portfolio.updated");
+  c.header("HX-Trigger", hxTrigger("success", "Portfolio item restored"));
+  c.header("HX-Redirect", `/portfolio/${id}`);
+  return new Response(null, { status: 204 });
+});
+
+// Permanently delete a portfolio item — removes the file from disk; cascades
+// to embedded status updates. No recovery.
+portfolioRouter.post("/:id/destroy", async (c) => {
+  const id = c.req.param("id");
+  const ok = await getPortfolioService().hardDelete(id);
+  if (!ok) return c.notFound();
+  publish("portfolio.deleted");
+  c.header(
+    "HX-Trigger",
+    hxTrigger("success", "Portfolio item permanently deleted"),
+  );
+  c.header("HX-Redirect", `/portfolio`);
+  return new Response(null, { status: 204 });
+});
+
 // Add status update — returns HTML fragment, htmx prepends to list
 portfolioRouter.post("/:id/status-updates", async (c) => {
   const id = c.req.param("id");
+  const existing = await getPortfolioService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text(
+      "Portfolio item is archived — restore before editing",
+      422,
+    );
+  }
   const body = await c.req.parseBody();
   const message = String(body.message || "").trim();
   if (!message) return new Response(null, { status: 400 });
@@ -601,6 +655,14 @@ portfolioRouter.post("/:id/status-updates", async (c) => {
 portfolioRouter.post("/:id/status-updates/:updateId", async (c) => {
   const id = c.req.param("id");
   const updateId = c.req.param("updateId");
+  const existing = await getPortfolioService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text(
+      "Portfolio item is archived — restore before editing",
+      422,
+    );
+  }
   const body = await c.req.parseBody();
   const message = String(body.message || "").trim();
   if (!message) return new Response(null, { status: 400 });
@@ -640,6 +702,14 @@ portfolioRouter.get("/:id/status-updates/:updateId/row", async (c) => {
 portfolioRouter.delete("/:id/status-updates/:updateId", async (c) => {
   const id = c.req.param("id");
   const updateId = c.req.param("updateId");
+  const existing = await getPortfolioService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text(
+      "Portfolio item is archived — restore before editing",
+      422,
+    );
+  }
   await getPortfolioService().deleteStatusUpdate(id, updateId);
   publish("portfolio.updated");
   return new Response(null, {
@@ -656,6 +726,12 @@ portfolioRouter.patch("/:id/github/issues/:number", async (c) => {
   const number = Number(c.req.param("number"));
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) return c.notFound();
+  if (item.archived === true) {
+    return c.text(
+      "Portfolio item is archived — restore before editing",
+      422,
+    );
+  }
   const body = await c.req.json<{ state?: string }>();
   const state = body.state === "closed" ? "closed" : "open";
   try {

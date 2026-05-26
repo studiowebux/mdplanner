@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { stringArray } from "./shared.types.ts";
+import { ArchiveFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // TeamMember — structured team entry with optional role label
@@ -178,7 +178,7 @@ export const PortfolioItemSchema = z.object({
   updatedBy: z.string().nullable().optional().openapi({
     description: "Person ID of the last updater",
   }),
-}).openapi("PortfolioItem");
+}).merge(ArchiveFieldsSchema).openapi("PortfolioItem");
 
 export type PortfolioItem = z.infer<typeof PortfolioItemSchema>;
 export type PortfolioKpi = z.infer<typeof PortfolioKpiSchema>;

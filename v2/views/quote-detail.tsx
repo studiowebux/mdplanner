@@ -17,6 +17,7 @@ import { QuoteLineItemsSection } from "./components/quote-line-items-editor.tsx"
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 
 // ---------------------------------------------------------------------------
@@ -74,6 +75,7 @@ export const QuoteDetailView: FC<
               id={quote.id}
               title={quote.title}
               formContainerId="quotes-form-container"
+              archived={quote.archived === true}
             />
             {quote.status === "draft" && (
               <button
@@ -155,6 +157,8 @@ export const QuoteDetailView: FC<
             )}
           </div>
         </header>
+
+        <ArchivedBanner entity={quote} />
 
         {/* -- Info ------------------------------------------------------- */}
         <div class="detail-section detail-info-row">

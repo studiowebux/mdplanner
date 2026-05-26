@@ -16,6 +16,7 @@ import { PROJECT_VALUE_BOARD_SECTION_META } from "../domains/project-value-board
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 
 // ---------------------------------------------------------------------------
 // Section block
@@ -151,6 +152,7 @@ export const ProjectValueBoardDetailView: FC<
             id={board.id}
             title={board.title}
             formContainerId="project-value-form-container"
+            archived={board.archived === true}
           >
             {editing
               ? (
@@ -171,6 +173,8 @@ export const ProjectValueBoardDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={board} />
 
         {/* -- Project ------------------------------------------------------- */}
         {board.project && (

@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 
 export const ReflectionTemplateDetailView: FC<
   ViewProps & { item: ReflectionTemplate }
@@ -61,8 +62,11 @@ export const ReflectionTemplateDetailView: FC<
             id={template.id}
             title={template.name}
             formContainerId="reflection-templates-form-container"
+            archived={template.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={template} />
 
         {/* -- Description ----------------------------------------------- */}
         {template.description && (

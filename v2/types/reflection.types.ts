@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 export const REFLECTION_PERIODS = [
   "weekly",
@@ -44,7 +48,7 @@ export const ReflectionSchema = z.object({
     description: "Reflection body (markdown)",
   }),
   tags: stringArray.nullable().optional(),
-}).merge(AuditFieldsSchema).openapi("Reflection");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Reflection");
 
 export type Reflection = z.infer<typeof ReflectionSchema>;
 

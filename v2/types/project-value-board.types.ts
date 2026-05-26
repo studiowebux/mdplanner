@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -32,7 +36,9 @@ export const ProjectValueBoardSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("ProjectValueBoard");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi(
+  "ProjectValueBoard",
+);
 
 export type ProjectValueBoard = z.infer<typeof ProjectValueBoardSchema>;
 

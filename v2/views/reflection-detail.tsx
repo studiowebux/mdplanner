@@ -12,6 +12,7 @@ import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { REFLECTION_PERIOD_VARIANTS } from "../domains/reflection/constants.tsx";
 
@@ -119,6 +120,7 @@ export const ReflectionDetailView: FC<
               id={reflection.id}
               title={reflection.title}
               formContainerId="reflections-form-container"
+              archived={reflection.archived === true}
             >
               <EditModeToggle
                 href={`/reflections/${reflection.id}`}
@@ -127,6 +129,8 @@ export const ReflectionDetailView: FC<
             </DetailActions>
           </div>
         </header>
+
+        <ArchivedBanner entity={reflection} />
 
         <div class="detail-section detail-info-row">
           <InfoItem label="Period">

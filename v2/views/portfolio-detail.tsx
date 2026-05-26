@@ -18,6 +18,7 @@ import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
 import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -132,6 +133,8 @@ export const PortfolioDetailView: FC<Props> = (
         />
         <BackButton href="/portfolio" label="Back to portfolio" />
 
+        <ArchivedBanner entity={item} />
+
         <header class="detail-section detail-header portfolio-detail__header">
           <div class="detail-title-row portfolio-detail__title-row">
             {item.logo && (
@@ -151,6 +154,7 @@ export const PortfolioDetailView: FC<Props> = (
             id={item.id}
             title={item.name}
             formContainerId="portfolio-form-container"
+            archived={item.archived === true}
           />
           <p class="portfolio-detail__meta">
             {item.category}

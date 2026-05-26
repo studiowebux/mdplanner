@@ -25,6 +25,11 @@ export class PortfolioRepository {
   private dir: string;
   private writer = new SafeWriter();
   private cacheDb: CacheDatabase | null = null;
+  // Set after archive/restore/hardDelete so the next list read bypasses the
+  // (now-stale) cache and falls through to disk. Cleared by `markClean`,
+  // wired to `EntityDef.onSyncComplete` in registerPortfolioEntity. Matches
+  // the canonical CachedMarkdownRepository pattern.
+  private listDirty = false;
 
   constructor(projectDir: string) {
     this.dir = join(projectDir, "portfolio");
@@ -34,13 +39,20 @@ export class PortfolioRepository {
     this.cacheDb = db;
   }
 
+  /** Called by EntityDef.onSyncComplete after fullSync — re-enables list cache. */
+  markClean(): void {
+    this.listDirty = false;
+  }
+
   async findAll(): Promise<PortfolioItem[]> {
-    if (this.cacheDb) {
+    if (this.cacheDb && !this.listDirty) {
       try {
         const count = this.cacheDb.count(PORTFOLIO_TABLE);
         if (count > 0) {
           return this.cacheDb.query<QueryResult>(
-            `SELECT * FROM "${PORTFOLIO_TABLE}" ORDER BY category, name`,
+            `SELECT * FROM "${PORTFOLIO_TABLE}"
+             WHERE archived IS NULL OR archived = 0
+             ORDER BY category, name`,
           ).map(rowToPortfolioItem);
         }
       } catch (err) {
@@ -50,7 +62,9 @@ export class PortfolioRepository {
     return this.findAllFromDisk();
   }
 
-  /** Always read from disk — used by cache sync. */
+  /** Always read from disk — used by cache sync. Archived items are excluded;
+   * cache sync receives the full set via `findArchived` separately when
+   * needed. Matches the canonical pattern: `findAll` is the default view. */
   async findAllFromDisk(): Promise<PortfolioItem[]> {
     const items: PortfolioItem[] = [];
     try {
@@ -58,7 +72,26 @@ export class PortfolioRepository {
         if (!entry.isFile || !entry.name.endsWith(".md")) continue;
         const content = await Deno.readTextFile(join(this.dir, entry.name));
         const item = this.parse(entry.name, content);
-        if (item) items.push(item);
+        if (item && item.archived !== true) items.push(item);
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return items.sort((a, b) =>
+      a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+    );
+  }
+
+  /** Disk-only list of archived items. Mirror of `findAllFromDisk` for the
+   * archived-view route and `BaseService.listArchived`. */
+  async findArchived(): Promise<PortfolioItem[]> {
+    const items: PortfolioItem[] = [];
+    try {
+      for await (const entry of Deno.readDir(this.dir)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        const content = await Deno.readTextFile(join(this.dir, entry.name));
+        const item = this.parse(entry.name, content);
+        if (item && item.archived === true) items.push(item);
       }
     } catch (err) {
       if (!(err instanceof Deno.errors.NotFound)) throw err;
@@ -170,12 +203,107 @@ export class PortfolioRepository {
     );
   }
 
+  /** Default delete = soft delete (archive). Hard removal requires an
+   * explicit `hardDelete(id)` call. See
+   * `[architecture] MD Planner — Soft-delete (archive) pattern`. */
   async delete(id: string): Promise<boolean> {
-    try {
-      await Deno.remove(join(this.dir, `${id}.md`));
+    return this.archive(id);
+  }
+
+  /**
+   * Soft-delete: flip `archived` to true and stamp `archived_at` /
+   * `archived_by` directly into the file's frontmatter. Bypasses
+   * `serialize()` on purpose — direct frontmatter mutation guarantees
+   * archive flags round-trip even when serialize() rebuilds the body from
+   * description. Mirrors `BaseMarkdownRepository.archive`. Idempotent.
+   */
+  async archive(id: string, by?: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      const found = await this.findRawFile(id);
+      if (!found) return false;
+      const now = new Date().toISOString();
+      const fm = { ...found.frontmatter };
+      fm.archived = true;
+      fm.archived_at = now;
+      if (by !== undefined) fm.archived_by = by;
+      fm.updated_at = now;
+      await atomicWrite(found.filePath, serializeFrontmatter(fm, found.body));
       return true;
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /** Restore an archived item: drop the three archive frontmatter fields. */
+  async restore(id: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      const found = await this.findRawFile(id);
+      if (!found) return false;
+      const fm = { ...found.frontmatter };
+      delete fm.archived;
+      delete fm.archived_at;
+      delete fm.archived_by;
+      fm.updated_at = new Date().toISOString();
+      await atomicWrite(found.filePath, serializeFrontmatter(fm, found.body));
+      return true;
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /** Permanent delete — removes the file from disk. No recovery. Cascades
+   * to embedded status updates (they live inside the same file). */
+  async hardDelete(id: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      try {
+        await Deno.remove(join(this.dir, `${id}.md`));
+        return true;
+      } catch (err) {
+        if (err instanceof Deno.errors.NotFound) return false;
+        throw err;
+      }
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /** Evict the row from the cache and mark the list cache stale. Called
+   * by archive/restore/hardDelete since those paths skip `PortfolioService`'s
+   * cacheUpsert. */
+  private invalidate(id: string): void {
+    this.listDirty = true;
+    if (!this.cacheDb) return;
+    try {
+      this.cacheDb.execute(
+        `DELETE FROM "${PORTFOLIO_TABLE}" WHERE id = ?`,
+        [id],
+      );
     } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return false;
+      log.error(`[cache] failed to remove portfolio/${id}:`, err);
+    }
+  }
+
+  /**
+   * Locate a file by id and return its raw frontmatter + body. Used by
+   * `archive`/`restore` so they can mutate frontmatter without going
+   * through `serialize()` (which rebuilds the body from description).
+   */
+  private async findRawFile(
+    id: string,
+  ): Promise<
+    {
+      frontmatter: Record<string, unknown>;
+      body: string;
+      filePath: string;
+    } | null
+  > {
+    const filePath = join(this.dir, `${id}.md`);
+    try {
+      const content = await Deno.readTextFile(filePath);
+      const parsed = parseFrontmatter(content);
+      return { ...parsed, filePath };
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return null;
       throw err;
     }
   }
@@ -297,6 +425,9 @@ export class PortfolioRepository {
       updatedAt: fm.updatedAt != null ? String(fm.updatedAt) : undefined,
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      archived: fm.archived === true ? true : undefined,
+      archivedAt: fm.archived_at != null ? String(fm.archived_at) : undefined,
+      archivedBy: fm.archived_by != null ? String(fm.archived_by) : undefined,
     };
   }
 
@@ -337,6 +468,9 @@ export class PortfolioRepository {
     if (item.updatedAt) raw.updatedAt = item.updatedAt;
     if (item.createdBy) raw.createdBy = item.createdBy;
     if (item.updatedBy) raw.updatedBy = item.updatedBy;
+    if (item.archived) raw.archived = item.archived;
+    if (item.archivedAt) raw.archivedAt = item.archivedAt;
+    if (item.archivedBy) raw.archivedBy = item.archivedBy;
 
     const fm = mapKeysToFm(raw);
     const body = `# ${item.name}\n\n${item.description ?? ""}`.trimEnd();

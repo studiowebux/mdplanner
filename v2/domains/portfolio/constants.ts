@@ -1,5 +1,7 @@
 // Portfolio cache table name and schema constants.
 
+import { ARCHIVE_COLS_DDL } from "../../database/sqlite/mod.ts";
+
 export const PORTFOLIO_TABLE = "portfolio";
 
 export const PORTFOLIO_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PORTFOLIO_TABLE} (
@@ -25,6 +27,7 @@ export const PORTFOLIO_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PORTFOLIO_TABLE} (
   kpis TEXT,
   urls TEXT,
   status_updates TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,

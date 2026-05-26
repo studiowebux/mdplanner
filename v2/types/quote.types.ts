@@ -5,7 +5,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { LineItemSchema } from "./billing.types.ts";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -139,7 +139,7 @@ export const QuoteSchema = z.object({
   approvalNotes: z.string().nullable().optional().openapi({
     description: "Notes from the approver (visible internally)",
   }),
-}).merge(AuditFieldsSchema).openapi("Quote");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Quote");
 
 export type Quote = z.infer<typeof QuoteSchema>;
 

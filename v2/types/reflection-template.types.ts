@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -35,7 +35,9 @@ export const ReflectionTemplateSchema = z.object({
   prompts: z.array(z.string()).openapi({
     description: "Ordered list of reflection prompts",
   }),
-}).merge(AuditFieldsSchema).openapi("ReflectionTemplate");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi(
+  "ReflectionTemplate",
+);
 
 export type ReflectionTemplate = z.infer<typeof ReflectionTemplateSchema>;
 

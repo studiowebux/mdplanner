@@ -1,6 +1,11 @@
 // Reflection entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -25,6 +30,7 @@ export function rowToReflection(
     templateId: row.template_id as string | undefined,
     content: row.content as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -40,6 +46,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${REFLECTION_TABLE} (
   template_id TEXT,
   content TEXT,
   tags TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -54,8 +61,8 @@ function insertRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${REFLECTION_TABLE} (id, title, period, date,
-       template_id, content, tags, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       template_id, content, tags, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.title),
@@ -64,6 +71,7 @@ function insertRow(
       val(r.templateId),
       val(r.content),
       json(r.tags),
+      ...archiveVals(r),
       ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -74,6 +82,9 @@ export function registerReflectionEntity(repo: ReflectionRepository): void {
   const entity: EntityDef = {
     table: REFLECTION_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(REFLECTION_TABLE),
+    ],
     fts: {
       type: "reflection",
       columns: ["id", "title", "content"],

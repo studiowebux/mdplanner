@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -41,6 +46,7 @@ export function rowToQuote(row: Record<string, string | number | null>): Quote {
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     sentAt: row.sent_at as string | undefined,
     acceptedAt: row.accepted_at as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdBy: row.created_by as string | undefined,
     updatedBy: row.updated_by as string | undefined,
   };
@@ -64,10 +70,11 @@ const QUOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${QUOTE_TABLE} (
   footer TEXT,
   revision INTEGER,
   converted_to_invoice TEXT,
-  created_at TEXT,
-  updated_at TEXT,
   sent_at TEXT,
   accepted_at TEXT,
+  ${ARCHIVE_COLS_DDL},
+  created_at TEXT,
+  updated_at TEXT,
   created_by TEXT,
   updated_by TEXT,
   synced_at TEXT
@@ -83,8 +90,8 @@ function insertQuoteRow(
        status, currency, expires_at, line_items, payment_schedule,
        subtotal, tax, tax_rate, total, notes, footer, revision,
        converted_to_invoice, sent_at, accepted_at,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(q.id),
       val(q.number),
@@ -105,6 +112,7 @@ function insertQuoteRow(
       val(q.convertedToInvoice),
       val(q.sentAt),
       val(q.acceptedAt),
+      ...archiveVals(q),
       ...auditVals(q),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -119,6 +127,7 @@ export function registerQuoteEntity(repo: QuoteRepository): void {
     migrations: [
       "ALTER TABLE quotes ADD COLUMN line_items TEXT",
       "ALTER TABLE quotes ADD COLUMN payment_schedule TEXT",
+      ...archiveMigrations(QUOTE_TABLE),
     ],
     fts: {
       type: "quote",

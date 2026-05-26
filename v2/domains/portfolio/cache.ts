@@ -2,6 +2,10 @@
 // Called by initServices() after repos are created.
 
 import {
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -20,7 +24,7 @@ import { PORTFOLIO_SCHEMA, PORTFOLIO_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a PortfolioItem. */
 export function rowToPortfolioItem(
-  row: Record<string, unknown>,
+  row: Record<string, string | number | null>,
 ): PortfolioItem {
   const item: PortfolioItem = {
     id: row.id as string,
@@ -60,6 +64,10 @@ export function rowToPortfolioItem(
     row.status_updates,
   );
   if (statusUpdates) item.statusUpdates = statusUpdates;
+  const archive = archiveFieldsFromRow(row);
+  if (archive.archived !== undefined) item.archived = archive.archived;
+  if (archive.archivedAt !== undefined) item.archivedAt = archive.archivedAt;
+  if (archive.archivedBy !== undefined) item.archivedBy = archive.archivedBy;
   if (row.created_at != null) item.createdAt = row.created_at as string;
   if (row.updated_at != null) item.updatedAt = row.updated_at as string;
   if (row.created_by != null) item.createdBy = row.created_by as string;
@@ -78,8 +86,8 @@ export function insertPortfolioRow(
        description, client, revenue, expenses, progress, start_date, end_date,
        team, tech_stack, logo, license, github_repo, billing_customer_id,
        brain_managed, linked_goals, kpis, urls, status_updates,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -103,6 +111,7 @@ export function insertPortfolioRow(
       json(p.kpis),
       json(p.urls),
       json(p.statusUpdates),
+      ...archiveVals(p),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -117,6 +126,7 @@ export function registerPortfolioEntity(repo: PortfolioRepository): void {
     migrations: [
       "ALTER TABLE portfolio ADD COLUMN github_repo TEXT",
       "ALTER TABLE portfolio ADD COLUMN billing_customer_id TEXT",
+      ...archiveMigrations(PORTFOLIO_TABLE),
     ],
     fts: {
       type: "portfolio",
@@ -129,6 +139,7 @@ export function registerPortfolioEntity(repo: PortfolioRepository): void {
       for (const p of items) insertPortfolioRow(db, p, syncedAt);
       return items.length;
     },
+    onSyncComplete: () => repo.markClean(),
   };
   ENTITIES.push(entity);
 }

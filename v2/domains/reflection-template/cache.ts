@@ -1,6 +1,11 @@
 // ReflectionTemplate entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -25,6 +30,7 @@ export function rowToReflectionTemplate(
     period: row.period as string | null | undefined,
     categories: parseJson<string[]>(row.categories),
     prompts: parseJson<string[]>(row.prompts) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -41,6 +47,7 @@ const REFLECTION_TEMPLATE_SCHEMA =
   categories TEXT,
   prompts TEXT,
   prompts_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -56,8 +63,8 @@ function insertReflectionTemplateRow(
   db.execute(
     `INSERT OR REPLACE INTO ${REFLECTION_TEMPLATE_TABLE} (id, name, description,
        period, categories, prompts, prompts_text,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(t.id),
       val(t.name),
@@ -66,6 +73,7 @@ function insertReflectionTemplateRow(
       jsonVal(t.categories),
       json(t.prompts),
       t.prompts.join(" "),
+      ...archiveVals(t),
       ...auditVals(t),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -78,6 +86,9 @@ export function registerReflectionTemplateEntity(
   const entity: EntityDef = {
     table: REFLECTION_TEMPLATE_TABLE,
     schema: REFLECTION_TEMPLATE_SCHEMA,
+    migrations: [
+      ...archiveMigrations(REFLECTION_TEMPLATE_TABLE),
+    ],
     fts: {
       type: "reflection_template",
       columns: ["id", "name", "prompts_text"],

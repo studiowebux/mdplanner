@@ -19,6 +19,7 @@ export class ReflectionTemplateRepository extends CachedMarkdownRepository<
   UpdateReflectionTemplate
 > {
   protected readonly tableName = REFLECTION_TEMPLATE_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

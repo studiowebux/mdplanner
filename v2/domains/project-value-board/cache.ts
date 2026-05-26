@@ -1,6 +1,11 @@
 // Project Value Board entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -27,6 +32,7 @@ export function rowToProjectValueBoard(
     benefit: parseJson<string[]>(row.benefit) ?? [],
     project: row.project as string | undefined,
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -44,6 +50,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${PROJECT_VALUE_BOARD_TABLE} (
   benefit TEXT,
   project TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -59,8 +66,8 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${PROJECT_VALUE_BOARD_TABLE}
        (id, title, date, customer_segments, problem, solution, benefit,
-        project, notes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        project, notes, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
       val(b.title),
@@ -71,6 +78,7 @@ function insertRow(
       json(b.benefit),
       val(b.project),
       val(b.notes),
+      ...archiveVals(b),
       ...auditVals(b),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -83,6 +91,9 @@ export function registerProjectValueBoardEntity(
   const entity: EntityDef = {
     table: PROJECT_VALUE_BOARD_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(PROJECT_VALUE_BOARD_TABLE),
+    ],
     fts: {
       type: "project_value",
       columns: ["id", "title", "notes"],

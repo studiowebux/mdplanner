@@ -49,6 +49,7 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
   UpdateProjectValueBoard
 > {
   protected readonly tableName = PROJECT_VALUE_BOARD_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
@@ -177,6 +178,9 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
     fm.updated_at = item.updatedAt;
     if (item.createdBy) fm.created_by = item.createdBy;
     if (item.updatedBy) fm.updated_by = item.updatedBy;
+    if (item.archived) fm.archived = item.archived;
+    if (item.archivedAt) fm.archived_at = item.archivedAt;
+    if (item.archivedBy) fm.archived_by = item.archivedBy;
 
     const bodyLines: string[] = [`# ${item.title}`];
 
