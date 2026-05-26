@@ -125,14 +125,31 @@ Deno.test("NoteRepository - update returns null for non-existent ID", async () =
 
 // === delete ===
 
-Deno.test("NoteRepository - delete removes entity", async () => {
+Deno.test("NoteRepository - delete soft-archives entity", async () => {
+  // delete() is aliased to archive() per the soft-delete pattern. The file
+  // stays on disk and findById still resolves it (cross-domain refs); only
+  // findAll filters it out. Use hardDelete to remove the file.
   const { repo, dir } = await setup();
   try {
     const note = await repo.create({ title: "Ephemeral note", content: "" });
-    const deleted = await repo.delete(note.id);
-    assertEquals(deleted, true);
-    const found = await repo.findById(note.id);
-    assertStrictEquals(found, null);
+    const archived = await repo.delete(note.id);
+    assertEquals(archived, true);
+
+    const stillThere = await repo.findById(note.id);
+    assertExists(stillThere);
+    assertEquals(stillThere!.archived, true);
+
+    const all = await repo.findAll();
+    assertEquals(
+      all.some((n) => n.id === note.id),
+      false,
+      "archived note is hidden from findAll",
+    );
+
+    const removed = await repo.hardDelete(note.id);
+    assertEquals(removed, true);
+    const gone = await repo.findById(note.id);
+    assertStrictEquals(gone, null);
   } finally {
     await cleanup(dir);
   }

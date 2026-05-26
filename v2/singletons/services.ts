@@ -372,6 +372,7 @@ export function initServices(
     taskRepo.setCacheDb(cacheDb);
     portfolioRepo.setCacheDb(cacheDb);
     peopleRepo.setCacheDb(cacheDb);
+    noteRepo.setCacheDb(cacheDb);
     goalRepo.setCacheDb(cacheDb);
     ideaRepo.setCacheDb(cacheDb);
     dnsRepo.setCacheDb(cacheDb);

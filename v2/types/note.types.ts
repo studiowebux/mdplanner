@@ -1,5 +1,9 @@
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Paragraph types — text blocks and code fences
@@ -134,7 +138,7 @@ export const NoteSchema = z.object({
     description: "Project scope",
     example: "MD Planner",
   }),
-}).merge(AuditFieldsSchema).openapi("Note");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Note");
 
 export type Note = z.infer<typeof NoteSchema>;
 

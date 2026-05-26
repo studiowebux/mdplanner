@@ -188,16 +188,22 @@ export class SearchEngine {
 
       const titleCol = fts?.titleCol ?? "name";
       const hasProjectCol = entity.schema.includes("project TEXT");
+      const hasArchivedCol = entity.schema.includes("archived INTEGER");
       if (project && !hasProjectCol) continue;
 
       try {
         let sql = `SELECT id, "${titleCol}" as _title FROM "${table}"`;
         const params: BindValue[] = [];
+        const where: string[] = [];
 
         if (project && hasProjectCol) {
-          sql += ` WHERE LOWER(project) = LOWER(?)`;
+          where.push(`LOWER(project) = LOWER(?)`);
           params.push(project);
         }
+        if (hasArchivedCol) {
+          where.push(`(archived IS NULL OR archived = 0)`);
+        }
+        if (where.length > 0) sql += ` WHERE ${where.join(" AND ")}`;
 
         sql += ` LIMIT ?`;
         params.push(limit);
@@ -231,6 +237,7 @@ export class SearchEngine {
     if (!fts) return [];
 
     const hasProjectCol = entity.schema.includes("project TEXT");
+    const hasArchivedCol = entity.schema.includes("archived INTEGER");
     if (project && !hasProjectCol) return [];
 
     const contentColIdx = fts.columns.indexOf(fts.contentCol);
@@ -246,6 +253,13 @@ export class SearchEngine {
         sql +=
           ` AND id IN (SELECT id FROM "${table}" WHERE LOWER(project) = LOWER(?))`;
         params.push(project);
+      }
+      // Soft-delete: archived rows are excluded from keyword search so they
+      // mirror `findAll` semantics. Cross-domain ID lookups (`searchById`/
+      // `searchBySuffix`) intentionally still resolve archived items.
+      if (hasArchivedCol) {
+        sql +=
+          ` AND id IN (SELECT id FROM "${table}" WHERE archived IS NULL OR archived = 0)`;
       }
 
       sql += ` ORDER BY score LIMIT ?`;

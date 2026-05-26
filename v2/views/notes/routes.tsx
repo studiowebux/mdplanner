@@ -16,6 +16,11 @@ export const notesRouter = createDomainRoutes(noteConfig);
 // PUT /:id — note-editor.js save (JSON body: paragraphs + customSections)
 notesRouter.put("/:id", async (c) => {
   const id = c.req.param("id")!;
+  const existing = await getNoteService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text("Note is archived — restore before editing", 422);
+  }
   const body = await c.req.json<
     { paragraphs?: unknown[]; customSections?: unknown[] }
   >();
@@ -36,6 +41,11 @@ notesRouter.get("/:id", async (c) => {
 // Update title — inline edit via htmx
 notesRouter.post("/:id/title", async (c) => {
   const id = c.req.param("id");
+  const existing = await getNoteService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text("Note is archived — restore before editing", 422);
+  }
   const body = await c.req.parseBody();
   const title = String(body.title || "").trim();
   if (!title) return c.text("Title required", 400);
@@ -48,12 +58,39 @@ notesRouter.post("/:id/title", async (c) => {
 // Update project — htmx autocomplete hidden input triggers this
 notesRouter.post("/:id/project", async (c) => {
   const id = c.req.param("id");
+  const existing = await getNoteService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text("Note is archived — restore before editing", 422);
+  }
   const body = await c.req.parseBody();
   const project = body.project ? String(body.project) : null;
   const note = await getNoteService().update(id, { project });
   if (!note) return c.notFound();
   c.header("HX-Trigger", hxTrigger("success", "Project updated"));
   return c.html(<NoteDetailView {...viewProps(c, "/notes")} note={note} />);
+});
+
+// Restore an archived note — drops `archived` / `archived_at` / `archived_by`.
+notesRouter.post("/:id/restore", async (c) => {
+  const id = c.req.param("id");
+  const ok = await getNoteService().restore(id);
+  if (!ok) return c.notFound();
+  publish("note.updated");
+  c.header("HX-Trigger", hxTrigger("success", "Note restored"));
+  c.header("HX-Redirect", `/notes/${id}`);
+  return new Response(null, { status: 204 });
+});
+
+// Permanently delete a note — removes the file from disk. No recovery.
+notesRouter.post("/:id/destroy", async (c) => {
+  const id = c.req.param("id");
+  const ok = await getNoteService().hardDelete(id);
+  if (!ok) return c.notFound();
+  publish("note.deleted");
+  c.header("HX-Trigger", hxTrigger("success", "Note permanently deleted"));
+  c.header("HX-Redirect", `/notes`);
+  return new Response(null, { status: 204 });
 });
 
 // Preview a single block — returns rendered markdown HTML fragment
