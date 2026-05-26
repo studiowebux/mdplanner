@@ -13,6 +13,7 @@ export class VacationRepository extends CachedMarkdownRepository<
   UpdateVacationRequest
 > {
   protected readonly tableName = VACATION_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

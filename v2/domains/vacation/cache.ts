@@ -1,4 +1,9 @@
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -21,6 +26,7 @@ export function rowToVacation(
     type: (row.type as VacationRequest["type"]) ?? "vacation",
     status: (row.status as VacationRequest["status"]) ?? "pending",
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -36,6 +42,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${VACATION_TABLE} (
   type TEXT,
   status TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -51,8 +58,8 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${VACATION_TABLE} (id, person_id,
        start_date, end_date, type, status, notes,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.personId),
@@ -61,6 +68,7 @@ function insertRow(
       val(r.type),
       val(r.status),
       val(r.notes),
+      ...archiveVals(r),
       ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -71,6 +79,9 @@ export function registerVacationEntity(repo: VacationRepository): void {
   const entity: EntityDef = {
     table: VACATION_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(VACATION_TABLE),
+    ],
     fts: {
       type: "vacation",
       columns: ["id", "person_id", "notes"],

@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 export const VACATION_TYPES = [
   "vacation",
@@ -45,7 +45,9 @@ export const VacationRequestSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Optional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("VacationRequest");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi(
+  "VacationRequest",
+);
 
 export type VacationRequest = z.infer<typeof VacationRequestSchema>;
 

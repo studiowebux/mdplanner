@@ -10,6 +10,17 @@ vacationRouter.post("/:id/approve", async (c) => {
   const id = c.req.param("id");
   const item = await getVacationService().getById(id);
   if (!item) return c.notFound();
+  if (item.archived === true) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger(
+          "error",
+          "Archived requests cannot be approved",
+        ),
+      },
+    });
+  }
   if (item.status !== "pending") {
     return new Response(null, {
       status: 422,
@@ -33,6 +44,17 @@ vacationRouter.post("/:id/reject", async (c) => {
   const id = c.req.param("id");
   const item = await getVacationService().getById(id);
   if (!item) return c.notFound();
+  if (item.archived === true) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger(
+          "error",
+          "Archived requests cannot be rejected",
+        ),
+      },
+    });
+  }
   if (item.status !== "pending") {
     return new Response(null, {
       status: 422,
