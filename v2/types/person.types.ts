@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { WEEKDAYS } from "../constants/mod.ts";
-import { stringArray } from "./shared.types.ts";
+import { ArchiveFieldsSchema, stringArray } from "./shared.types.ts";
 import type { ViewMode } from "./app.ts";
 
 // ---------------------------------------------------------------------------
@@ -173,7 +173,7 @@ export const PersonSchema = z.object({
   updatedBy: z.string().nullable().optional().openapi({
     description: "Person ID of the last updater",
   }),
-}).openapi("Person");
+}).merge(ArchiveFieldsSchema).openapi("Person");
 
 export type Person = z.infer<typeof PersonSchema>;
 

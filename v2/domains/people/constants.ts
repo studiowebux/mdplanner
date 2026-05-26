@@ -1,5 +1,7 @@
 // People domain constants.
 
+import { ARCHIVE_COLS_DDL } from "../../database/sqlite/mod.ts";
+
 /** Keys stored in the markdown body, not in frontmatter. */
 export const PEOPLE_BODY_KEYS = ["name", "notes"] as const;
 
@@ -26,6 +28,7 @@ export const PEOPLE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PEOPLE_TABLE} (
   last_seen TEXT,
   current_task_id TEXT,
   accounts TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,

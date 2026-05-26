@@ -5,6 +5,7 @@ import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { OnboardingTemplate } from "../types/onboarding-template.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
@@ -58,8 +59,11 @@ export const OnboardingTemplateDetailView: FC<
           id={tmpl.id}
           title={tmpl.name}
           formContainerId="onboarding-templates-form-container"
+          archived={tmpl.archived === true}
         />
       </header>
+
+      <ArchivedBanner entity={tmpl} />
 
       {/* -- Description --------------------------------------------------- */}
       {tmpl.description && (

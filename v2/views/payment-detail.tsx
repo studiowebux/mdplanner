@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { PAYMENT_METHOD_VARIANTS } from "../domains/payment/constants.tsx";
@@ -54,8 +55,11 @@ export const PaymentDetailView: FC<
             id={payment.id}
             title={payment.reference ?? payment.id}
             formContainerId="payments-form-container"
+            archived={payment.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={payment} />
 
         {/* -- Amount ---------------------------------------------------- */}
         <div class="detail-section payment-detail__amount-section">

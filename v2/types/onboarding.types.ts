@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Step
@@ -78,7 +78,7 @@ export const OnboardingSchema = z.object({
   steps: z.array(OnboardingStepSchema).openapi({
     description: "Ordered list of onboarding steps",
   }),
-}).merge(AuditFieldsSchema).openapi("Onboarding");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Onboarding");
 
 export type Onboarding = z.infer<typeof OnboardingSchema>;
 

@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -25,6 +30,7 @@ export function rowToPayment(
     method: row.method as Payment["method"] | undefined,
     reference: row.reference as string | undefined,
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -40,6 +46,7 @@ const PAYMENT_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PAYMENT_TABLE} (
   method TEXT,
   reference TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -55,8 +62,8 @@ function insertPaymentRow(
   db.execute(
     `INSERT OR REPLACE INTO ${PAYMENT_TABLE} (id, invoice_id, amount, date,
        method, reference, notes,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.invoiceId),
@@ -65,6 +72,7 @@ function insertPaymentRow(
       val(p.method),
       val(p.reference),
       val(p.notes),
+      ...archiveVals(p),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -76,6 +84,9 @@ export function registerPaymentEntity(repo: PaymentRepository): void {
   const entity: EntityDef = {
     table: PAYMENT_TABLE,
     schema: PAYMENT_SCHEMA,
+    migrations: [
+      ...archiveMigrations(PAYMENT_TABLE),
+    ],
     fts: {
       type: "payment",
       columns: ["id", "reference", "notes"],

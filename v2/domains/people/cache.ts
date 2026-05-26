@@ -2,6 +2,10 @@
 // Called by initServices() after repos are created.
 
 import {
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -55,6 +59,10 @@ export function rowToPerson(
   if (accounts) person.accounts = accounts;
   const preferences = parseJson<Person["preferences"]>(row.preferences);
   if (preferences) person.preferences = preferences;
+  const archive = archiveFieldsFromRow(row);
+  if (archive.archived !== undefined) person.archived = archive.archived;
+  if (archive.archivedAt !== undefined) person.archivedAt = archive.archivedAt;
+  if (archive.archivedBy !== undefined) person.archivedBy = archive.archivedBy;
   if (row.created_at != null) person.createdAt = row.created_at as string;
   if (row.updated_at != null) person.updatedAt = row.updated_at as string;
   if (row.created_by != null) person.createdBy = row.created_by as string;
@@ -73,8 +81,8 @@ export function insertPersonRow(
        departments, reports_to, email, phone, start_date, hours_per_day,
        working_days, notes, agent_type, skills, models, system_prompt,
        status, last_seen, current_task_id, accounts, preferences,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -97,6 +105,7 @@ export function insertPersonRow(
       val(p.currentTaskId),
       json(p.accounts),
       json(p.preferences),
+      ...archiveVals(p),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -112,6 +121,7 @@ export function registerPeopleEntity(repo: PeopleRepository): void {
       "ALTER TABLE people ADD COLUMN reports_to TEXT",
       "ALTER TABLE people ADD COLUMN accounts TEXT",
       "ALTER TABLE people ADD COLUMN preferences TEXT",
+      ...archiveMigrations(PEOPLE_TABLE),
     ],
     fts: {
       type: "person",

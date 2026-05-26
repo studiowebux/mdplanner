@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -52,7 +52,7 @@ export const PaymentSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Payment notes",
   }),
-}).merge(AuditFieldsSchema).openapi("Payment");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Payment");
 
 export type Payment = z.infer<typeof PaymentSchema>;
 

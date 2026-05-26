@@ -1,6 +1,11 @@
 // Onboarding entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -29,6 +34,7 @@ export function rowToOnboarding(
     personId: row.person_id as string | null | undefined,
     notes: row.notes as string | null | undefined,
     steps: parseJson<OnboardingStep[]>(row.steps) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -45,6 +51,7 @@ const ONBOARDING_SCHEMA = `CREATE TABLE IF NOT EXISTS ${ONBOARDING_TABLE} (
   notes TEXT,
   steps TEXT,
   steps_text TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -60,8 +67,8 @@ function insertOnboardingRow(
   db.execute(
     `INSERT OR REPLACE INTO ${ONBOARDING_TABLE} (id, employee_name, role,
        start_date, person_id, notes, steps, steps_text,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(item.id),
       val(item.employeeName),
@@ -71,6 +78,7 @@ function insertOnboardingRow(
       val(item.notes ?? null),
       json(item.steps),
       item.steps.map((s) => s.title).join(" "),
+      ...archiveVals(item),
       ...auditVals(item),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -83,6 +91,9 @@ export function registerOnboardingEntity(
   const entity: EntityDef = {
     table: ONBOARDING_TABLE,
     schema: ONBOARDING_SCHEMA,
+    migrations: [
+      ...archiveMigrations(ONBOARDING_TABLE),
+    ],
     fts: {
       type: "onboarding",
       columns: ["id", "employee_name", "steps_text"],

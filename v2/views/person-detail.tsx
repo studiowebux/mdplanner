@@ -13,6 +13,7 @@ import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import {
   PERSON_STATUS_VARIANTS,
@@ -121,8 +122,11 @@ export const PersonDetailView: FC<Props> = (
               title={person.name}
               formContainerId="people-form-container"
               onDeleteRedirect="/people"
+              archived={person.archived === true}
             />
           </header>
+
+          <ArchivedBanner entity={person} />
 
           <dl class="person-detail__meta">
             {person.role && (

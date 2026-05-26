@@ -20,6 +20,7 @@ export class OnboardingRepository extends CachedMarkdownRepository<
   UpdateOnboarding
 > {
   protected readonly tableName = ONBOARDING_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {

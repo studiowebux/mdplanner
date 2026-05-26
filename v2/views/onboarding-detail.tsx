@@ -5,6 +5,7 @@ import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Onboarding } from "../types/onboarding.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import {
@@ -67,8 +68,11 @@ export const OnboardingDetailView: FC<
             id={item.id}
             title={item.employeeName}
             formContainerId="onboarding-form-container"
+            archived={item.archived === true}
           />
         </header>
+
+        <ArchivedBanner entity={item} />
 
         {/* -- Meta row -------------------------------------------------- */}
         <div class="detail-section onboarding-detail__meta">

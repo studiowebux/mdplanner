@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 import { ONBOARDING_STEP_CATEGORIES } from "./onboarding.types.ts";
 
 // ---------------------------------------------------------------------------
@@ -54,7 +54,9 @@ export const OnboardingTemplateSchema = z.object({
   steps: z.array(OnboardingTemplateStepSchema).openapi({
     description: "Ordered list of template steps",
   }),
-}).merge(AuditFieldsSchema).openapi("OnboardingTemplate");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi(
+  "OnboardingTemplate",
+);
 
 export type OnboardingTemplate = z.infer<typeof OnboardingTemplateSchema>;
 

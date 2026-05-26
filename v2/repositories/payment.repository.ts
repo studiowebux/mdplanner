@@ -15,6 +15,7 @@ export class PaymentRepository extends CachedMarkdownRepository<
   UpdatePayment
 > {
   protected readonly tableName = PAYMENT_TABLE;
+  protected override readonly supportsArchive = true;
 
   constructor(projectDir: string) {
     super(projectDir, {
