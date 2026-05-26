@@ -1,6 +1,11 @@
 // Strategic Levels entity registration for SQLite cache.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -27,6 +32,7 @@ export function rowToStrategicLevelsBuilder(
     title: (row.title as string) ?? "",
     date: (row.date as string) ?? new Date().toISOString().slice(0, 10),
     levels: parseJson<StrategicLevel[]>(row.levels) ?? [],
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -39,6 +45,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${STRATEGIC_LEVELS_TABLE} (
   title TEXT NOT NULL,
   date TEXT,
   levels TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -53,13 +60,14 @@ function insertRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${STRATEGIC_LEVELS_TABLE} (id, title, date, levels,
-       ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.title),
       val(r.date),
       json(r.levels),
+      ...archiveVals(r),
       ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -73,6 +81,9 @@ export function registerStrategicLevelsEntity(
   const entity: EntityDef = {
     table: STRATEGIC_LEVELS_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(STRATEGIC_LEVELS_TABLE),
+    ],
     fts: {
       type: "strategic_builder",
       columns: ["id", "title"],

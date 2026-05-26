@@ -3,7 +3,11 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+import {
+  ArchiveFieldsSchema,
+  AuditFieldsSchema,
+  stringArray,
+} from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -37,7 +41,7 @@ export const SwotSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-}).merge(AuditFieldsSchema).openapi("Swot");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Swot");
 
 export type Swot = z.infer<typeof SwotSchema>;
 

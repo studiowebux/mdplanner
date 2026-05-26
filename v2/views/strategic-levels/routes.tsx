@@ -44,6 +44,9 @@ strategicLevelsRouter.post("/:id/levels/:levelType", async (c) => {
 
   const builder = await getStrategicLevelsService().getById(id);
   if (!builder) return c.notFound();
+  if (builder.archived === true) {
+    return c.json({ error: "Builder is archived" }, 422);
+  }
 
   const description = String(body.description ?? "").trim() || undefined;
   const maxOrder = builder.levels
@@ -79,6 +82,9 @@ strategicLevelsRouter.put("/:id/levels/:levelId", async (c) => {
 
   const builder = await getStrategicLevelsService().getById(id);
   if (!builder) return c.notFound();
+  if (builder.archived === true) {
+    return c.json({ error: "Builder is archived" }, 422);
+  }
 
   const levels = builder.levels.map((l) => {
     if (l.id !== levelId) return l;
@@ -100,6 +106,9 @@ strategicLevelsRouter.delete("/:id/levels/:levelId", async (c) => {
 
   const builder = await getStrategicLevelsService().getById(id);
   if (!builder) return c.notFound();
+  if (builder.archived === true) {
+    return c.json({ error: "Builder is archived" }, 422);
+  }
 
   const levels = builder.levels.filter((l) => l.id !== levelId);
   await getStrategicLevelsService().update(id, { levels });

@@ -2,6 +2,11 @@
 // Called by initServices() after repos are created.
 
 import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
   auditCols,
   auditVals,
   ENTITIES,
@@ -27,6 +32,7 @@ export function rowToSwot(row: Record<string, string | number | null>): Swot {
     threats: parseJson<string[]>(row.threats) ?? [],
     project: row.project as string | undefined,
     notes: row.notes as string | undefined,
+    ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -44,6 +50,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${SWOT_TABLE} (
   threats TEXT,
   project TEXT,
   notes TEXT,
+  ${ARCHIVE_COLS_DDL},
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,
@@ -59,8 +66,8 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${SWOT_TABLE} (id, title, date,
        strengths, weaknesses, opportunities, threats,
-       project, notes, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project, notes, ${archiveCols()}, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(s.id),
       val(s.title),
@@ -71,6 +78,7 @@ function insertRow(
       json(s.threats),
       val(s.project),
       val(s.notes),
+      ...archiveVals(s),
       ...auditVals(s),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -82,6 +90,9 @@ export function registerSwotEntity(repo: SwotRepository): void {
   const entity: EntityDef = {
     table: SWOT_TABLE,
     schema: SCHEMA,
+    migrations: [
+      ...archiveMigrations(SWOT_TABLE),
+    ],
     fts: {
       type: "swot",
       columns: [

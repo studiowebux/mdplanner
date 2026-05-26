@@ -16,6 +16,7 @@ import {
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { QuadrantEditGrid } from "./components/quadrant-edit-grid.tsx";
 
 // ---------------------------------------------------------------------------
@@ -66,6 +67,7 @@ export const SwotDetailView: FC<
             id={swot.id}
             title={swot.title}
             formContainerId="swot-form-container"
+            archived={swot.archived === true}
           >
             {editing
               ? (
@@ -86,6 +88,8 @@ export const SwotDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={swot} />
 
         {/* -- Project --------------------------------------------------- */}
         {swot.project && (

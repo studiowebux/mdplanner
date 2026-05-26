@@ -130,6 +130,9 @@ export function registerStrategicLevelsTools(server: McpServer): void {
       if (!builder) {
         return err(`Strategic Levels builder '${builder_id}' not found`);
       }
+      if (builder.archived === true) {
+        return err(`Strategic Levels builder '${builder_id}' is archived`);
+      }
       const maxOrder = builder.levels.reduce(
         (max, l) => Math.max(max, l.order),
         -1,
@@ -185,6 +188,9 @@ export function registerStrategicLevelsTools(server: McpServer): void {
       if (!builder) {
         return err(`Strategic Levels builder '${builder_id}' not found`);
       }
+      if (builder.archived === true) {
+        return err(`Strategic Levels builder '${builder_id}' is archived`);
+      }
       const idx = builder.levels.findIndex((l) => l.id === level_id);
       if (idx === -1) {
         return err(
@@ -222,6 +228,9 @@ export function registerStrategicLevelsTools(server: McpServer): void {
       const builder = await service.getById(builder_id);
       if (!builder) {
         return err(`Strategic Levels builder '${builder_id}' not found`);
+      }
+      if (builder.archived === true) {
+        return err(`Strategic Levels builder '${builder_id}' is archived`);
       }
       const levels = builder.levels.filter((l) => l.id !== level_id);
       if (levels.length === builder.levels.length) {

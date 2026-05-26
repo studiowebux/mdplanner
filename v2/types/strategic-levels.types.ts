@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { ArchiveFieldsSchema, AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -65,7 +65,9 @@ export const StrategicLevelsBuildersSchema = z.object({
   levels: z.array(StrategicLevelSchema).openapi({
     description: "All level items across all types",
   }),
-}).merge(AuditFieldsSchema).openapi("StrategicLevelsBuilder");
+}).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi(
+  "StrategicLevelsBuilder",
+);
 
 export type StrategicLevelsBuilder = z.infer<
   typeof StrategicLevelsBuildersSchema

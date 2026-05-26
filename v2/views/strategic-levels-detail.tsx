@@ -8,6 +8,7 @@ import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { LEVEL_LABELS } from "../domains/strategic-levels/cache.ts";
 
 export const StrategicLevelsDetailView: FC<
@@ -57,6 +58,7 @@ export const StrategicLevelsDetailView: FC<
             id={builder.id}
             title={builder.title}
             formContainerId="strategic-levels-form-container"
+            archived={builder.archived === true}
           >
             {editing
               ? (
@@ -77,6 +79,8 @@ export const StrategicLevelsDetailView: FC<
               )}
           </DetailActions>
         </header>
+
+        <ArchivedBanner entity={builder} />
 
         <div class="detail-section sl-detail__groups">
           {LEVEL_ORDER.map((levelType) => {
