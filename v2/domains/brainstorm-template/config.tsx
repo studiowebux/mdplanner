@@ -39,6 +39,8 @@ export const brainstormTemplateConfig: DomainConfig<
   stateKeys: ["view", "category", "q", "sort", "order"],
   columns: BRAINSTORM_TEMPLATE_TABLE_COLUMNS,
   formFields: BRAINSTORM_TEMPLATE_FORM_FIELDS,
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description"],
 
   filters: [],
 

@@ -19,6 +19,46 @@ import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
+// Notes — read (markdown) or in-place editable (contenteditable + Save).
+// ---------------------------------------------------------------------------
+
+const NotesSection: FC<{ bmc: BusinessModel }> = ({ bmc }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={bmc.notes ?? ""}
+      data-inline-target="bmc-notes-value"
+      data-inline-save-btn="bmc-notes-save"
+    >
+      {bmc.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="bmc-notes-value"
+      name="notes"
+      value={bmc.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="bmc-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/business-models/${bmc.id}/notes?editing=true`}
+        hx-include="#bmc-notes-value"
+        hx-target="#bmc-detail-root"
+        hx-select="#bmc-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+// ---------------------------------------------------------------------------
 // Section block
 // ---------------------------------------------------------------------------
 
@@ -102,6 +142,7 @@ export const BusinessModelDetailView: FC<
       title={bmc.title}
       {...viewProps}
       styles={["/css/views/lean-canvases.css", "/css/views/business-model.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
         getUrl={"/business-models/" + bmc.id + editSuffix}
@@ -187,7 +228,9 @@ export const BusinessModelDetailView: FC<
         </div>
 
         {/* -- Notes --------------------------------------------------------- */}
-        <MarkdownSection title="Notes" markdown={bmc.notes} />
+        {editing
+          ? <NotesSection bmc={bmc} />
+          : <MarkdownSection title="Notes" markdown={bmc.notes} />}
 
         <AuditMeta
           createdAt={bmc.createdAt}

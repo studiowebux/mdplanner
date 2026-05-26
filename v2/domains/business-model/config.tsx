@@ -34,6 +34,9 @@ export const businessModelConfig: DomainConfig<
   stateKeys: ["view", "project", "q", "sort", "order"],
   columns: BUSINESS_MODEL_TABLE_COLUMNS,
   formFields: BUSINESS_MODEL_FORM_FIELDS,
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // Quadrant sections use their own inline section editor (see routes).
+  inlineEditFields: ["notes"],
 
   filters: [{ name: "project", label: "All projects", options: [] }],
 

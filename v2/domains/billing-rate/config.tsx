@@ -37,6 +37,8 @@ export const billingRateConfig: DomainConfig<
   ],
   columns: BILLING_RATE_TABLE_COLUMNS,
   formFields: BILLING_RATE_FORM_FIELDS,
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
 
   toRow: billingRateToRow,
 

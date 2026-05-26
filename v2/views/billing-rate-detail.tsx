@@ -11,30 +11,75 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { formatRate, UNIT_LABELS } from "../domains/billing-rate/constants.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+// ---------------------------------------------------------------------------
+// Notes — read (markdown) or in-place editable (contenteditable + Save).
+// ---------------------------------------------------------------------------
+
+const NotesSection: FC<{ rate: BillingRate }> = ({ rate }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={rate.notes ?? ""}
+      data-inline-target="billing-rate-notes-value"
+      data-inline-save-btn="billing-rate-notes-save"
+    >
+      {rate.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="billing-rate-notes-value"
+      name="notes"
+      value={rate.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="billing-rate-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/billing-rates/${rate.id}/notes?editing=true`}
+        hx-include="#billing-rate-notes-value"
+        hx-target="#billing-rate-detail-root"
+        hx-select="#billing-rate-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const BillingRateDetailView: FC<
-  ViewProps & { item: BillingRate }
+  ViewProps & { item: BillingRate; editing?: boolean }
 > = (
-  { item: rate, ...viewProps },
+  { item: rate, editing = false, ...viewProps },
 ) => {
   return (
     <MainLayout
       title={rate.name}
       {...viewProps}
       styles={["/css/views/billing-rates.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/billing-rates/" + rate.id}
+        getUrl={"/billing-rates/" + rate.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:billing-rate.updated"
         targetId="billing-rate-detail-root"
       />
       <main
         id="billing-rate-detail-root"
-        class="detail-view billing-rate-detail"
+        class={`detail-view billing-rate-detail${
+          editing ? " billing-rate-detail--editing" : ""
+        }`}
       >
         <Breadcrumb
           items={[
@@ -56,7 +101,12 @@ export const BillingRateDetailView: FC<
             title={rate.name}
             formContainerId="billing-rates-form-container"
             archived={rate.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/billing-rates/${rate.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={rate} />
@@ -80,7 +130,9 @@ export const BillingRateDetailView: FC<
         </div>
 
         {/* -- Notes ------------------------------------------------------ */}
-        <MarkdownSection title="Notes" markdown={rate.notes} />
+        {editing
+          ? <NotesSection rate={rate} />
+          : <MarkdownSection title="Notes" markdown={rate.notes} />}
 
         {/* -- Meta ------------------------------------------------------- */}
         <AuditMeta

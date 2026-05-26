@@ -8,10 +8,53 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+// ---------------------------------------------------------------------------
+// Description — read or in-place editable (contenteditable + Save).
+// ---------------------------------------------------------------------------
+
+const DescriptionSection: FC<{ template: BrainstormTemplate }> = ({
+  template,
+}) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Description</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={template.description ?? ""}
+      data-inline-target="btemplate-description-value"
+      data-inline-save-btn="btemplate-description-save"
+    >
+      {template.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="btemplate-description-value"
+      name="description"
+      value={template.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="btemplate-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/brainstorm-templates/${template.id}/description?editing=true`}
+        hx-include="#btemplate-description-value"
+        hx-target="#btemplate-detail-root"
+        hx-select="#btemplate-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 export const BrainstormTemplateDetailView: FC<
-  ViewProps & { item: BrainstormTemplate }
-> = ({ item: template, ...viewProps }) => {
+  ViewProps & { item: BrainstormTemplate; editing?: boolean }
+> = ({ item: template, editing = false, ...viewProps }) => {
   const hasCategories = template.categories && template.categories.length > 0;
 
   return (
@@ -19,13 +62,20 @@ export const BrainstormTemplateDetailView: FC<
       title={template.name}
       {...viewProps}
       styles={["/css/views/brainstorm-templates.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/brainstorm-templates/" + template.id}
+        getUrl={"/brainstorm-templates/" + template.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:btemplate.updated"
         targetId="btemplate-detail-root"
       />
-      <main id="btemplate-detail-root" class="detail-view btemplate-detail">
+      <main
+        id="btemplate-detail-root"
+        class={`detail-view btemplate-detail${
+          editing ? " btemplate-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Brainstorm Templates", href: "/brainstorm-templates" },
@@ -59,17 +109,24 @@ export const BrainstormTemplateDetailView: FC<
             title={template.name}
             formContainerId="brainstorm-templates-form-container"
             archived={template.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/brainstorm-templates/${template.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={template} />
 
         {/* -- Description ----------------------------------------------- */}
-        {template.description && (
-          <div class="detail-section">
-            <p class="detail-description">{template.description}</p>
-          </div>
-        )}
+        {editing
+          ? <DescriptionSection template={template} />
+          : template.description && (
+            <div class="detail-section">
+              <p class="detail-description">{template.description}</p>
+            </div>
+          )}
 
         {/* -- Questions ------------------------------------------------- */}
         <section class="detail-section btemplate-detail__questions">
