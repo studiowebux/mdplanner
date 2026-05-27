@@ -28,6 +28,8 @@ export const dealConfig: DomainConfig<Deal, CreateDeal, UpdateDeal> = {
   stateKeys: ["view", "stage", "assignee", "company", "q", "sort", "order"],
   columns: DEAL_TABLE_COLUMNS,
   formFields: DEAL_FORM_FIELDS,
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description"],
 
   filters: [
     {

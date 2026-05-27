@@ -1,5 +1,8 @@
 // Customer view routes — factory-generated list/create/edit + custom detail route.
+// Structured fields edit via the factory sidenav (GET/POST /:id/edit);
+// `notes` edits in-place via "Edit Mode" (?editing=true, PUT /:id/notes).
 
+import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { customerConfig } from "../../domains/customer/config.tsx";
 import {
@@ -9,11 +12,11 @@ import {
 } from "../../singletons/services.ts";
 import { CustomerDetailView } from "../customer-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
+import { publish } from "../../singletons/event-bus.ts";
 
 export const customersRouter = createDomainRoutes(customerConfig);
 
-customersRouter.get("/:id", async (c) => {
-  const id = c.req.param("id");
+async function renderDetail(c: AppContext, id: string) {
   const customer = await getCustomerService().getById(id);
   if (!customer) return c.notFound();
 
@@ -28,12 +31,28 @@ customersRouter.get("/:id", async (c) => {
     displayStatus: invoiceService.displayStatus(inv),
   }));
 
+  const editing = c.req.query("editing") === "true";
   return c.html(
     <CustomerDetailView
       {...viewProps(c, "/customers")}
       item={customer}
       quotes={quotes}
       invoices={invoicesWithStatus}
+      editing={editing}
     />,
   );
+}
+
+customersRouter.get(
+  "/:id",
+  (c: AppContext) => renderDetail(c, c.req.param("id")!),
+);
+
+customersRouter.put("/:id/notes", async (c: AppContext) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getCustomerService().update(id, { notes });
+  publish("customer.updated");
+  return renderDetail(c, id);
 });

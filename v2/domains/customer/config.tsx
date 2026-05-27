@@ -67,6 +67,8 @@ export const customerConfig: DomainConfig<
   ],
   columns: CUSTOMER_TABLE_COLUMNS,
   formFields: CUSTOMER_FORM_FIELDS,
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
 
   toRow: customerToRow,
 

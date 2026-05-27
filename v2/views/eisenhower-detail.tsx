@@ -18,6 +18,42 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
+const NotesSection: FC<{ e: Eisenhower }> = ({ e }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={e.notes ?? ""}
+      data-inline-target="eisenhower-notes-value"
+      data-inline-save-btn="eisenhower-notes-save"
+    >
+      {e.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="eisenhower-notes-value"
+      name="notes"
+      value={e.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="eisenhower-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/eisenhower/${e.id}/notes?editing=true`}
+        hx-include="#eisenhower-notes-value"
+        hx-target="#eisenhower-detail-root"
+        hx-select="#eisenhower-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
 export const EisenhowerDetailView: FC<
   ViewProps & { item: Eisenhower; editing?: boolean }
 > = ({ item: e, editing = false, ...viewProps }) => {
@@ -28,7 +64,7 @@ export const EisenhowerDetailView: FC<
       title={e.title}
       {...viewProps}
       styles={["/css/views/eisenhower.css"]}
-      scripts={["/js/quadrant-edit.js"]}
+      scripts={["/js/quadrant-edit.js", "/js/inline-edit.js"]}
     >
       <SseRefresh
         getUrl={`/eisenhower/${e.id}${editSuffix}`}
@@ -180,7 +216,9 @@ export const EisenhowerDetailView: FC<
         </div>
 
         {/* -- Notes ----------------------------------------------------- */}
-        <MarkdownSection title="Notes" markdown={e.notes} />
+        {editing
+          ? <NotesSection e={e} />
+          : <MarkdownSection title="Notes" markdown={e.notes} />}
 
         <AuditMeta
           createdAt={e.createdAt}

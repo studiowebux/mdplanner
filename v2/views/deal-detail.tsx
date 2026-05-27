@@ -14,9 +14,48 @@ import { InfoItem } from "./components/info-item.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { DEAL_STAGE_VARIANTS } from "../domains/deal/constants.tsx";
 import { formatDate } from "../utils/time.ts";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
-export const DealDetailView: FC<ViewProps & { item: Deal }> = (
-  { item: deal, ...viewProps },
+const DescriptionSection: FC<{ deal: Deal }> = ({ deal }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Description</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={deal.description ?? ""}
+      data-inline-target="deal-description-value"
+      data-inline-save-btn="deal-description-save"
+    >
+      {deal.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="deal-description-value"
+      name="description"
+      value={deal.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="deal-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/deals/${deal.id}/description?editing=true`}
+        hx-include="#deal-description-value"
+        hx-target="#deal-detail-root"
+        hx-select="#deal-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const DealDetailView: FC<
+  ViewProps & { item: Deal; editing?: boolean }
+> = (
+  { item: deal, editing = false, ...viewProps },
 ) => {
   const tags = deal.tags ?? [];
 
@@ -25,13 +64,19 @@ export const DealDetailView: FC<ViewProps & { item: Deal }> = (
       title={deal.title}
       {...viewProps}
       styles={["/css/views/deals.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={`/deals/${deal.id}`}
+        getUrl={`/deals/${deal.id}${editing ? "?editing=true" : ""}`}
         trigger="sse:deal.updated"
         targetId="deal-detail-root"
       />
-      <main id="deal-detail-root" class="detail-view deal-detail">
+      <main
+        id="deal-detail-root"
+        class={`detail-view deal-detail${
+          editing ? " deal-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Deals", href: "/deals" },
@@ -53,7 +98,9 @@ export const DealDetailView: FC<ViewProps & { item: Deal }> = (
             title={deal.title}
             formContainerId="deals-form-container"
             archived={deal.archived === true}
-          />
+          >
+            <EditModeToggle href={`/deals/${deal.id}`} editing={editing} />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={deal} />
@@ -94,7 +141,9 @@ export const DealDetailView: FC<ViewProps & { item: Deal }> = (
           </section>
         )}
 
-        <MarkdownSection title="Description" markdown={deal.description} />
+        {editing
+          ? <DescriptionSection deal={deal} />
+          : <MarkdownSection title="Description" markdown={deal.description} />}
 
         <AuditMeta
           createdAt={deal.createdAt}

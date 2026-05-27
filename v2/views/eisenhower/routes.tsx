@@ -35,6 +35,17 @@ eisenhowerRouter.get("/:id", async (c) => {
   return renderDetail(c, id);
 });
 
+// In-place notes save (Edit Mode). Registered before the wildcard `:quadrant`
+// route so the literal "/notes" path is not intercepted.
+eisenhowerRouter.put("/:id/notes", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getEisenhowerService().update(id, { notes });
+  publish("eisenhower.updated");
+  return renderDetail(c, id);
+});
+
 // Inline add: POST /eisenhower/:id/:quadrant
 eisenhowerRouter.post("/:id/:quadrant", async (c) => {
   const id = c.req.param("id");

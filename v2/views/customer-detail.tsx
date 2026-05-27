@@ -17,6 +17,43 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { CUSTOMER_BILLING_MAX_ROWS } from "../domains/customer/constants.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const NotesSection: FC<{ customer: Customer }> = ({ customer }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={customer.notes ?? ""}
+      data-inline-target="customer-notes-value"
+      data-inline-save-btn="customer-notes-save"
+    >
+      {customer.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="customer-notes-value"
+      name="notes"
+      value={customer.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="customer-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/customers/${customer.id}/notes?editing=true`}
+        hx-include="#customer-notes-value"
+        hx-target="#customer-detail-root"
+        hx-select="#customer-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Billing section — quotes + invoices for this customer
@@ -203,9 +240,10 @@ export const CustomerDetailView: FC<
     item: Customer;
     quotes: Quote[];
     invoices: InvoiceWithDisplay[];
+    editing?: boolean;
   }
 > = (
-  { item: customer, quotes, invoices, ...viewProps },
+  { item: customer, quotes, invoices, editing = false, ...viewProps },
 ) => {
   const addr = customer.billingAddress;
   const hasContact = customer.email || customer.phone || customer.company;
@@ -217,13 +255,19 @@ export const CustomerDetailView: FC<
       title={customer.name}
       {...viewProps}
       styles={["/css/views/customers.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/customers/" + customer.id}
+        getUrl={"/customers/" + customer.id + (editing ? "?editing=true" : "")}
         trigger="sse:customer.updated"
         targetId="customer-detail-root"
       />
-      <main id="customer-detail-root" class="detail-view customer-detail">
+      <main
+        id="customer-detail-root"
+        class={`detail-view customer-detail${
+          editing ? " customer-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Customers", href: "/customers" },
@@ -243,7 +287,12 @@ export const CustomerDetailView: FC<
             title={customer.name}
             formContainerId="customers-form-container"
             archived={customer.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/customers/${customer.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={customer} />
@@ -290,7 +339,9 @@ export const CustomerDetailView: FC<
         )}
 
         {/* -- Notes ------------------------------------------------------ */}
-        <MarkdownSection title="Notes" markdown={customer.notes} />
+        {editing
+          ? <NotesSection customer={customer} />
+          : <MarkdownSection title="Notes" markdown={customer.notes} />}
 
         {/* -- Billing ---------------------------------------------------- */}
         <BillingSection

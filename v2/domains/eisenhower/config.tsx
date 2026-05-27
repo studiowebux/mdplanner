@@ -34,6 +34,9 @@ export const eisenhowerConfig: DomainConfig<
   stateKeys: ["view", "project", "q", "sort", "order"],
   columns: EISENHOWER_TABLE_COLUMNS,
   formFields: EISENHOWER_FORM_FIELDS,
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // Quadrants use their own inline editor.
+  inlineEditFields: ["notes"],
 
   filters: [
     {
