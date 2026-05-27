@@ -11,22 +11,68 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { SAFE_STATUS_VARIANTS } from "../domains/safe/constants.tsx";
+import { MarkdownSection } from "./components/markdown-section.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
-export const SafeDetailView: FC<ViewProps & { item: Safe }> = (
-  { item: safe, ...viewProps },
+const NotesSection: FC<{ safe: Safe }> = ({ safe }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={safe.notes ?? ""}
+      data-inline-target="safe-notes-value"
+      data-inline-save-btn="safe-notes-save"
+    >
+      {safe.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="safe-notes-value"
+      name="notes"
+      value={safe.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="safe-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/safe/${safe.id}/notes?editing=true`}
+        hx-include="#safe-notes-value"
+        hx-target="#safe-detail-root"
+        hx-select="#safe-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const SafeDetailView: FC<
+  ViewProps & { item: Safe; editing?: boolean }
+> = (
+  { item: safe, editing = false, ...viewProps },
 ) => {
   return (
     <MainLayout
       title={safe.investor}
       {...viewProps}
       styles={["/css/views/safe.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/safe/" + safe.id}
+        getUrl={"/safe/" + safe.id + (editing ? "?editing=true" : "")}
         trigger="sse:safe.updated"
         targetId="safe-detail-root"
       />
-      <main id="safe-detail-root" class="detail-view safe-detail">
+      <main
+        id="safe-detail-root"
+        class={`detail-view safe-detail${
+          editing ? " safe-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "SAFEs", href: "/safe" },
@@ -52,7 +98,9 @@ export const SafeDetailView: FC<ViewProps & { item: Safe }> = (
             title={safe.investor}
             formContainerId="safe-form-container"
             archived={safe.archived === true}
-          />
+          >
+            <EditModeToggle href={`/safe/${safe.id}`} editing={editing} />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={safe} />
@@ -68,12 +116,9 @@ export const SafeDetailView: FC<ViewProps & { item: Safe }> = (
         </div>
 
         {/* -- Notes ----------------------------------------------------- */}
-        {safe.notes && (
-          <div class="detail-section">
-            <h2 class="section-heading">Notes</h2>
-            <p class="safe-detail__notes">{safe.notes}</p>
-          </div>
-        )}
+        {editing
+          ? <NotesSection safe={safe} />
+          : <MarkdownSection title="Notes" markdown={safe.notes} />}
 
         <AuditMeta
           createdAt={safe.createdAt}

@@ -6,18 +6,32 @@ import { safeConfig } from "../../domains/safe/config.tsx";
 import { getSafeService } from "../../singletons/services.ts";
 import { SafeDetailView } from "../safe-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
+import { publish } from "../../singletons/event-bus.ts";
 
 export const safeRouter = createDomainRoutes(safeConfig);
 
+/** Render the detail page; `?editing=true` enables in-place notes editing. */
 async function renderDetail(c: AppContext, id: string) {
   const item = await getSafeService().getById(id);
   if (!item) return c.notFound();
+  const editing = c.req.query("editing") === "true";
   return c.html(
-    <SafeDetailView {...viewProps(c, "/safe")} item={item} />,
+    <SafeDetailView
+      {...viewProps(c, "/safe")}
+      item={item}
+      editing={editing}
+    />,
   );
 }
 
-safeRouter.get("/:id", async (c) => {
+safeRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
+
+// In-place notes save (Edit Mode). Factory provides edit/delete routes.
+safeRouter.put("/:id/notes", async (c) => {
   const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getSafeService().update(id, { notes });
+  publish("safe.updated");
   return renderDetail(c, id);
 });

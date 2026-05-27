@@ -18,6 +18,43 @@ import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { QuadrantEditGrid } from "./components/quadrant-edit-grid.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const NotesSection: FC<{ swot: Swot }> = ({ swot }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={swot.notes ?? ""}
+      data-inline-target="swot-notes-value"
+      data-inline-save-btn="swot-notes-save"
+    >
+      {swot.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="swot-notes-value"
+      name="notes"
+      value={swot.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="swot-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/swot/${swot.id}/notes?editing=true`}
+        hx-include="#swot-notes-value"
+        hx-target="#swot-detail-root"
+        hx-select="#swot-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -35,7 +72,7 @@ export const SwotDetailView: FC<
       title={swot.title}
       {...viewProps}
       styles={["/css/views/swot.css"]}
-      scripts={["/js/quadrant-edit.js"]}
+      scripts={["/js/quadrant-edit.js", "/js/inline-edit.js"]}
     >
       <SseRefresh
         getUrl={"/swot/" + swot.id + editSuffix}
@@ -69,23 +106,7 @@ export const SwotDetailView: FC<
             formContainerId="swot-form-container"
             archived={swot.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/swot/${swot.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/swot/${swot.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle href={`/swot/${swot.id}`} editing={editing} />
           </DetailActions>
         </header>
 
@@ -122,7 +143,9 @@ export const SwotDetailView: FC<
         />
 
         {/* -- Notes ----------------------------------------------------- */}
-        <MarkdownSection title="Notes" markdown={swot.notes} />
+        {editing
+          ? <NotesSection swot={swot} />
+          : <MarkdownSection title="Notes" markdown={swot.notes} />}
 
         <AuditMeta
           createdAt={swot.createdAt}

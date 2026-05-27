@@ -22,6 +22,9 @@ export const safeConfig: DomainConfig<Safe, CreateSafe, UpdateSafe> = {
   emptyMessage: "No SAFE agreements yet. Create one to get started.",
   defaultView: "table",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
+
   stateKeys: ["view", "q", "status", "type", "sort", "order"],
   columns: SAFE_TABLE_COLUMNS,
   formFields: SAFE_FORM_FIELDS,

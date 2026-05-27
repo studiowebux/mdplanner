@@ -24,6 +24,9 @@ export const riskConfig: DomainConfig<Risk, CreateRisk, UpdateRisk> = {
   emptyMessage: "No risks yet. Create one to get started.",
   defaultView: "table",
 
+  // `description` and `mitigation` edit in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description", "mitigation"],
+
   stateKeys: [
     "view",
     "category",

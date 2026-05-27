@@ -22,6 +22,11 @@ export const swotConfig: DomainConfig<Swot, CreateSwot, UpdateSwot> = {
   emptyMessage: "No SWOT analyses yet. Create one to get started.",
   defaultView: "card",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // (Quadrant items use the shared `quadrant-card__inline-edit` editor via
+  // `registerSectionEditRoutes`.)
+  inlineEditFields: ["notes"],
+
   stateKeys: [
     "view",
     "project",
