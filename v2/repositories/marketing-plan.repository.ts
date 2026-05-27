@@ -111,7 +111,7 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
       budgetCurrency: fm.budgetCurrency != null
         ? String(fm.budgetCurrency)
         : undefined,
-      startDate: fm.start_date != null ? String(fm.start_date) : undefined,
+      startDate: fm.startDate != null ? String(fm.startDate) : undefined,
       endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       targetAudiences: this.parseArray<MarketingTargetAudience>(
         fm.targetAudiences,
