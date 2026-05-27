@@ -33,6 +33,8 @@ export const contactConfig: DomainConfig<
   stateKeys: ["view", "type", "company", "q", "sort", "order"],
   columns: CONTACT_TABLE_COLUMNS,
   formFields: CONTACT_FORM_FIELDS,
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
 
   filters: [
     {

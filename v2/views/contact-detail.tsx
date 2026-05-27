@@ -12,9 +12,48 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { CONTACT_TYPE_VARIANTS } from "../domains/contact/constants.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
-export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
-  { item: contact, ...viewProps },
+const NotesSection: FC<{ contact: Contact }> = ({ contact }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={contact.notes ?? ""}
+      data-inline-target="contact-notes-value"
+      data-inline-save-btn="contact-notes-save"
+    >
+      {contact.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="contact-notes-value"
+      name="notes"
+      value={contact.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="contact-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/contacts/${contact.id}/notes?editing=true`}
+        hx-include="#contact-notes-value"
+        hx-target="#contact-detail-root"
+        hx-select="#contact-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const ContactDetailView: FC<
+  ViewProps & { item: Contact; editing?: boolean }
+> = (
+  { item: contact, editing = false, ...viewProps },
 ) => {
   const hasContact = contact.email || contact.phone || contact.role ||
     contact.company;
@@ -25,13 +64,19 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
       title={contact.name}
       {...viewProps}
       styles={["/css/views/contacts.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={`/contacts/${contact.id}`}
+        getUrl={`/contacts/${contact.id}${editing ? "?editing=true" : ""}`}
         trigger="sse:contact.updated"
         targetId="contact-detail-root"
       />
-      <main id="contact-detail-root" class="detail-view contact-detail">
+      <main
+        id="contact-detail-root"
+        class={`detail-view contact-detail${
+          editing ? " contact-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Contacts", href: "/contacts" },
@@ -55,7 +100,12 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
             title={contact.name}
             formContainerId="contacts-form-container"
             archived={contact.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/contacts/${contact.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={contact} />
@@ -96,7 +146,9 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
           </section>
         )}
 
-        <MarkdownSection title="Notes" markdown={contact.notes} />
+        {editing
+          ? <NotesSection contact={contact} />
+          : <MarkdownSection title="Notes" markdown={contact.notes} />}
 
         <AuditMeta
           createdAt={contact.createdAt}

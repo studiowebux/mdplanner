@@ -34,6 +34,8 @@ export const companyConfig: DomainConfig<
   stateKeys: ["view", "type", "industry", "q", "sort", "order"],
   columns: COMPANY_TABLE_COLUMNS,
   formFields: COMPANY_FORM_FIELDS,
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
 
   filters: [
     {

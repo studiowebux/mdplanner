@@ -12,9 +12,48 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { COMPANY_TYPE_VARIANTS } from "../domains/company/constants.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
-export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
-  { item: company, ...viewProps },
+const NotesSection: FC<{ company: Company }> = ({ company }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={company.notes ?? ""}
+      data-inline-target="company-notes-value"
+      data-inline-save-btn="company-notes-save"
+    >
+      {company.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="company-notes-value"
+      name="notes"
+      value={company.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="company-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/companies/${company.id}/notes?editing=true`}
+        hx-include="#company-notes-value"
+        hx-target="#company-detail-root"
+        hx-select="#company-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const CompanyDetailView: FC<
+  ViewProps & { item: Company; editing?: boolean }
+> = (
+  { item: company, editing = false, ...viewProps },
 ) => {
   const hasInfo = company.website || company.phone || company.email ||
     company.industry || company.size || company.address;
@@ -25,13 +64,19 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
       title={company.name}
       {...viewProps}
       styles={["/css/views/companies.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={`/companies/${company.id}`}
+        getUrl={`/companies/${company.id}${editing ? "?editing=true" : ""}`}
         trigger="sse:company.updated"
         targetId="company-detail-root"
       />
-      <main id="company-detail-root" class="detail-view company-detail">
+      <main
+        id="company-detail-root"
+        class={`detail-view company-detail${
+          editing ? " company-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Companies", href: "/companies" },
@@ -55,7 +100,12 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
             title={company.name}
             formContainerId="companies-form-container"
             archived={company.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/companies/${company.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={company} />
@@ -104,7 +154,9 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
           </section>
         )}
 
-        <MarkdownSection title="Notes" markdown={company.notes} />
+        {editing
+          ? <NotesSection company={company} />
+          : <MarkdownSection title="Notes" markdown={company.notes} />}
 
         <AuditMeta
           createdAt={company.createdAt}
