@@ -55,22 +55,14 @@ export class SafeRepository extends CachedMarkdownRepository<
       id,
       investor: fm.investor ? String(fm.investor) : "Unknown Investor",
       amount: fm.amount != null ? Number(fm.amount) : 0,
-      valuation_cap: fm.valuation_cap != null ? Number(fm.valuation_cap) : 0,
+      valuation_cap: fm.valuationCap != null ? Number(fm.valuationCap) : 0,
       discount: fm.discount != null ? Number(fm.discount) : 0,
       type: (fm.type as Safe["type"]) ?? "post-money",
       date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
       status: (fm.status as Safe["status"]) ?? "draft",
       notes: fm.notes != null ? String(fm.notes) : undefined,
-      createdAt: fm.createdAt
-        ? String(fm.createdAt)
-        : fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updatedAt
-        ? String(fm.updatedAt)
-        : fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
