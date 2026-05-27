@@ -89,16 +89,8 @@ export class FishboneRepository extends CachedMarkdownRepository<
       description: fm.description != null ? String(fm.description) : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       causes,
-      createdAt: fm.createdAt
-        ? String(fm.createdAt)
-        : fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updatedAt
-        ? String(fm.updatedAt)
-        : fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
