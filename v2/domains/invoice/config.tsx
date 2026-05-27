@@ -21,6 +21,7 @@ import {
 let _customerNames: Map<string, string> = new Map();
 import { InvoiceCard } from "../../views/components/invoice-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
+import { buildRateNameById } from "../billing/rate-display.ts";
 
 export const invoiceConfig: DomainConfig<
   Invoice,
@@ -87,6 +88,17 @@ export const invoiceConfig: DomainConfig<
     });
     if (data.taxRate != null) data.taxRate = Number(data.taxRate);
     return data as Partial<UpdateInvoice>;
+  },
+
+  // Resolve rate IDs to rate names for the lineItems[] array-table autocomplete.
+  // Unresolved IDs produce an empty search input — user re-picks.
+  resolveArrayDisplayValues: async (item) => {
+    const rateName = await buildRateNameById(item.lineItems ?? []);
+    return {
+      lineItems: (item.lineItems ?? []).map((li) => ({
+        rateId: (li.rateId && rateName[li.rateId]) || "",
+      })),
+    };
   },
 
   getService: () => getInvoiceService(),

@@ -21,7 +21,7 @@ import {
 let _customerNames: Map<string, string> = new Map();
 import { QuoteCard } from "../../views/components/quote-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
-import { buildRateNameById } from "./rate-display.ts";
+import { buildRateNameById } from "../billing/rate-display.ts";
 
 export const quoteConfig: DomainConfig<Quote, CreateQuote, UpdateQuote> = {
   name: "quotes",
