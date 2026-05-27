@@ -69,7 +69,7 @@ export class CustomerRepository extends CachedMarkdownRepository<
     }
 
     let billingAddress: BillingAddress | undefined;
-    if (fm.billingAddress && typeof fm.billing_address === "object") {
+    if (fm.billingAddress && typeof fm.billingAddress === "object") {
       const a = fm.billingAddress as Record<string, unknown>;
       billingAddress = {
         street: a.street != null ? String(a.street) : undefined,
