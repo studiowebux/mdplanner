@@ -117,3 +117,43 @@ Deno.test("RetrospectiveRepository - parses a slug-named file with id/title only
     await cleanup(dir);
   }
 });
+
+Deno.test("RetrospectiveRepository - update of slug-named file preserves filename and does not duplicate", async () => {
+  const { repo, dir } = await setup();
+  try {
+    // v1 fixture: slug filename ≠ frontmatter id.
+    await Deno.mkdir(`${dir}/retrospectives`, { recursive: true });
+    const slugPath = `${dir}/retrospectives/onboarding-revamp.md`;
+    const idPath = `${dir}/retrospectives/retro_onboarding_revamp.md`;
+    await Deno.writeTextFile(
+      slugPath,
+      "---\nid: retro_onboarding_revamp\nstatus: open\n---\n# Onboarding Revamp\n\n## Continue (Went Well)\n\n- Pairing sessions\n",
+    );
+
+    const updated = await repo.update("retro_onboarding_revamp", {
+      status: "closed",
+    });
+    assertExists(updated);
+    assertEquals(updated!.status, "closed");
+
+    // Slug file still exists, no ID-named duplicate was created.
+    const slugStat = await Deno.stat(slugPath);
+    assertEquals(slugStat.isFile, true);
+    let idFileExists = true;
+    try {
+      await Deno.stat(idPath);
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) idFileExists = false;
+      else throw err;
+    }
+    assertEquals(idFileExists, false);
+
+    // Re-read by id still resolves and carries the update.
+    const fetched = await repo.findById("retro_onboarding_revamp");
+    assertExists(fetched);
+    assertEquals(fetched!.status, "closed");
+    assertEquals(fetched!.continue, ["Pairing sessions"]);
+  } finally {
+    await cleanup(dir);
+  }
+});

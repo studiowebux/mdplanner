@@ -211,20 +211,13 @@ export abstract class BaseMarkdownRepository<
     );
     (updated as Record<string, unknown>).updatedAt = new Date().toISOString();
 
-    const expectedPath = join(this.dir, `${id}.md`);
+    // Write back to the file's existing path — never force-rename to <id>.md.
+    // v1 slug-named files (e.g. `dev-agency.md` with fm id `customer_agency`)
+    // must keep their filename so external references stay valid.
     await this.writer.write(
       id,
-      () => atomicWrite(expectedPath, this.serialize(updated)),
+      () => atomicWrite(resolved.filePath, this.serialize(updated)),
     );
-
-    // Remove orphan file when the entity had a mismatched filename.
-    if (resolved.filePath !== expectedPath) {
-      try {
-        await Deno.remove(resolved.filePath);
-      } catch (err) {
-        if (!(err instanceof Deno.errors.NotFound)) throw err;
-      }
-    }
 
     return updated;
   }
@@ -256,15 +249,7 @@ export abstract class BaseMarkdownRepository<
       fm.archived_at = now;
       if (by !== undefined) fm.archived_by = by;
       fm.updated_at = now;
-      const expectedPath = join(this.dir, `${id}.md`);
-      await atomicWrite(expectedPath, serializeFrontmatter(fm, found.body));
-      if (found.filePath !== expectedPath) {
-        try {
-          await Deno.remove(found.filePath);
-        } catch (err) {
-          if (!(err instanceof Deno.errors.NotFound)) throw err;
-        }
-      }
+      await atomicWrite(found.filePath, serializeFrontmatter(fm, found.body));
       return true;
     });
   }
@@ -283,15 +268,7 @@ export abstract class BaseMarkdownRepository<
       delete fm.archived_at;
       delete fm.archived_by;
       fm.updated_at = new Date().toISOString();
-      const expectedPath = join(this.dir, `${id}.md`);
-      await atomicWrite(expectedPath, serializeFrontmatter(fm, found.body));
-      if (found.filePath !== expectedPath) {
-        try {
-          await Deno.remove(found.filePath);
-        } catch (err) {
-          if (!(err instanceof Deno.errors.NotFound)) throw err;
-        }
-      }
+      await atomicWrite(found.filePath, serializeFrontmatter(fm, found.body));
       return true;
     });
   }
