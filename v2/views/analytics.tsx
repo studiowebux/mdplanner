@@ -165,12 +165,7 @@ const MilestoneBar: FC<
       <span class="analytics__milestone-name">{name}</span>
       <span class="analytics__milestone-count">{done}/{total}</span>
     </div>
-    <div class="progress-bar">
-      <div
-        class="progress-bar__fill"
-        data-pct={progress}
-      />
-    </div>
+    <progress class="progress-bar" value={progress} max={100} />
   </div>
 );
 
@@ -472,12 +467,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                         <div class="analytics__util-row">
                           <span>{pct(p.utilizationPct)}</span>
                           {p.utilizationPct != null && (
-                            <div class="progress-bar analytics__util-bar">
-                              <div
-                                class="progress-bar__fill"
-                                data-pct={Math.min(p.utilizationPct, 100)}
-                              />
-                            </div>
+                            <progress
+                              class="progress-bar analytics__util-bar"
+                              value={Math.min(p.utilizationPct, 100)}
+                              max={100}
+                            />
                           )}
                         </div>
                       </td>
@@ -777,7 +771,6 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       {...vp}
       activePath="/analytics"
       styles={["/css/views/analytics.css"]}
-      scripts={["/js/kpi-gauge.js"]}
     >
       <div id="analytics-sidenav-container" />
       <AnalyticsBody
