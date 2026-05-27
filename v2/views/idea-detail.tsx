@@ -18,6 +18,43 @@ import {
 } from "../domains/idea/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const DescriptionSection: FC<{ idea: Idea }> = ({ idea }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Description</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={idea.description ?? ""}
+      data-inline-target="idea-description-value"
+      data-inline-save-btn="idea-description-save"
+    >
+      {idea.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="idea-description-value"
+      name="description"
+      value={idea.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="idea-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/ideas/${idea.id}/description?editing=true`}
+        hx-include="#idea-description-value"
+        hx-target="#idea-detail-root"
+        hx-select="#idea-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -29,6 +66,7 @@ export const IdeaDetailView: FC<
     linkedIdeas?: { id: string; title: string }[];
     backlinks?: { id: string; title: string }[];
     submittedByPerson?: { id: string; name: string } | null;
+    editing?: boolean;
   }
 > = (
   {
@@ -36,6 +74,7 @@ export const IdeaDetailView: FC<
     linkedIdeas = [],
     backlinks = [],
     submittedByPerson = null,
+    editing = false,
     ...viewProps
   },
 ) => {
@@ -54,13 +93,19 @@ export const IdeaDetailView: FC<
       title={idea.title}
       {...viewProps}
       styles={["/css/views/ideas.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/ideas/" + idea.id}
+        getUrl={"/ideas/" + idea.id + (editing ? "?editing=true" : "")}
         trigger="sse:idea.updated"
         targetId="idea-detail-root"
       />
-      <main id="idea-detail-root" class="detail-view idea-detail">
+      <main
+        id="idea-detail-root"
+        class={`detail-view idea-detail${
+          editing ? " idea-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Ideas", href: "/ideas" },
@@ -88,7 +133,9 @@ export const IdeaDetailView: FC<
             title={idea.title}
             formContainerId="ideas-form-container"
             archived={idea.archived === true}
-          />
+          >
+            <EditModeToggle href={`/ideas/${idea.id}`} editing={editing} />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={idea} />
@@ -193,7 +240,9 @@ export const IdeaDetailView: FC<
         )}
 
         {/* -- Description ----------------------------------------------- */}
-        <MarkdownSection title="Description" markdown={idea.description} />
+        {editing
+          ? <DescriptionSection idea={idea} />
+          : <MarkdownSection title="Description" markdown={idea.description} />}
 
         {/* -- Meta ------------------------------------------------------ */}
         <AuditMeta

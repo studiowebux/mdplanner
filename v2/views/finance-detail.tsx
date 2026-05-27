@@ -15,9 +15,48 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { FINANCE_TYPE_VARIANTS } from "../domains/finance/constants.tsx";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
-export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
-  { item: finance, ...viewProps },
+const NotesSection: FC<{ finance: Finance }> = ({ finance }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={finance.description ?? ""}
+      data-inline-target="finance-description-value"
+      data-inline-save-btn="finance-description-save"
+    >
+      {finance.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="finance-description-value"
+      name="description"
+      value={finance.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="finance-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/finances/${finance.id}/description?editing=true`}
+        hx-include="#finance-description-value"
+        hx-target="#finance-detail-root"
+        hx-select="#finance-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const FinanceDetailView: FC<
+  ViewProps & { item: Finance; editing?: boolean }
+> = (
+  { item: finance, editing = false, ...viewProps },
 ) => {
   const tags = finance.tags ?? [];
 
@@ -26,13 +65,19 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
       title={finance.title}
       {...viewProps}
       styles={["/css/views/finances.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={`/finances/${finance.id}`}
+        getUrl={`/finances/${finance.id}${editing ? "?editing=true" : ""}`}
         trigger="sse:finance.updated"
         targetId="finance-detail-root"
       />
-      <main id="finance-detail-root" class="detail-view finance-detail">
+      <main
+        id="finance-detail-root"
+        class={`detail-view finance-detail${
+          editing ? " finance-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Finances", href: "/finances" },
@@ -54,7 +99,12 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
             title={finance.title}
             formContainerId="finances-form-container"
             archived={finance.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/finances/${finance.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={finance} />
@@ -82,7 +132,9 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
           </section>
         )}
 
-        <MarkdownSection title="Notes" markdown={finance.description} />
+        {editing
+          ? <NotesSection finance={finance} />
+          : <MarkdownSection title="Notes" markdown={finance.description} />}
 
         <AuditMeta
           createdAt={finance.createdAt}

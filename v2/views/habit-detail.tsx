@@ -15,23 +15,71 @@ import { HabitStats } from "./habits/components/habit-stats.tsx";
 import { HabitCompletionLog } from "./habits/components/habit-completion-log.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
-export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
-  { item: habit, ...viewProps },
+const NotesSection: FC<{ habit: Habit }> = ({ habit }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={habit.description ?? ""}
+      data-inline-target="habit-description-value"
+      data-inline-save-btn="habit-description-save"
+    >
+      {habit.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="habit-description-value"
+      name="description"
+      value={habit.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="habit-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/habits/${habit.id}/description?editing=true`}
+        hx-include="#habit-description-value"
+        hx-target="#habit-detail-root"
+        hx-select="#habit-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const HabitDetailView: FC<
+  ViewProps & { item: Habit; editing?: boolean }
+> = (
+  { item: habit, editing = false, ...viewProps },
 ) => {
   return (
     <MainLayout
       title={habit.title}
       {...viewProps}
       styles={["/css/views/habits.css"]}
-      scripts={["/js/habits-heatmap.js", "/js/habits-toggle.js"]}
+      scripts={[
+        "/js/habits-heatmap.js",
+        "/js/habits-toggle.js",
+        "/js/inline-edit.js",
+      ]}
     >
       <SseRefresh
-        getUrl={"/habits/" + habit.id}
+        getUrl={"/habits/" + habit.id + (editing ? "?editing=true" : "")}
         trigger="sse:habit.updated"
         targetId="habit-detail-root"
       />
-      <main id="habit-detail-root" class="detail-view habit-detail">
+      <main
+        id="habit-detail-root"
+        class={`detail-view habit-detail${
+          editing ? " habit-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Habits", href: "/habits" },
@@ -62,7 +110,9 @@ export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
             formContainerId="habits-form-container"
             onDeleteRedirect="/habits"
             archived={habit.archived === true}
-          />
+          >
+            <EditModeToggle href={`/habits/${habit.id}`} editing={editing} />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={habit} />
@@ -76,7 +126,9 @@ export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
         {/* Completion log */}
         <HabitCompletionLog habit={habit} />
 
-        <MarkdownSection title="Notes" markdown={habit.description} />
+        {editing
+          ? <NotesSection habit={habit} />
+          : <MarkdownSection title="Notes" markdown={habit.description} />}
 
         <AuditMeta
           createdAt={habit.createdAt}

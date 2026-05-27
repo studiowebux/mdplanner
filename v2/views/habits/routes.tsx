@@ -51,13 +51,27 @@ async function renderDetail(c: AppContext, id: string) {
   const scope = await resolveUserScope(c);
   const item = await getHabitService().getForUser(id, scope);
   if (!item) return c.notFound();
+  const editing = c.req.query("editing") === "true";
   return c.html(
-    <HabitDetailView {...viewProps(c, "/habits")} item={item} />,
+    <HabitDetailView
+      {...viewProps(c, "/habits")}
+      item={item}
+      editing={editing}
+    />,
   );
 }
 
 habitRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
+  return renderDetail(c, id);
+});
+
+habitRouter.put("/:id/description", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const description = String(body.description ?? "").trim() || undefined;
+  await getHabitService().update(id, { description });
+  publish("habit.updated");
   return renderDetail(c, id);
 });
 

@@ -41,6 +41,8 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   ],
   columns: GOAL_TABLE_COLUMNS,
   formFields: GOAL_FORM_FIELDS,
+  // `description` and `notes` are edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description", "notes"],
 
   filters: [
     {

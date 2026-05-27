@@ -58,6 +58,8 @@ export const financeConfig: DomainConfig<
   stateKeys: ["view", "type", "tag", "q", "sort", "order", "from", "to"],
   columns: FINANCE_TABLE_COLUMNS,
   formFields: FINANCE_FORM_FIELDS,
+  // `description` (rendered as "Notes") is edited in-place on the detail page.
+  inlineEditFields: ["description"],
 
   filters: [
     {

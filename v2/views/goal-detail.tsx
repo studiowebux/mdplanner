@@ -21,6 +21,47 @@ import {
   GOAL_TYPE_VARIANTS,
 } from "../domains/goal/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const InlineEditSection: FC<{
+  goal: Goal;
+  field: "description" | "notes";
+  title: string;
+}> = ({ goal, field, title }) => {
+  const value = (goal[field] ?? "") as string;
+  const inputId = `goal-${field}-value`;
+  const btnId = `goal-${field}-save`;
+  return (
+    <section class="detail-section">
+      <h2 class="section-heading">{title}</h2>
+      <div
+        class="inline-editable"
+        contenteditable
+        data-inline-edit
+        data-inline-original={value}
+        data-inline-target={inputId}
+        data-inline-save-btn={btnId}
+      >
+        {value}
+      </div>
+      <input type="hidden" id={inputId} name={field} value={value} />
+      <div class="inline-editable__actions">
+        <button
+          type="button"
+          id={btnId}
+          class="btn btn--primary btn--sm is-hidden"
+          hx-put={`/goals/${goal.id}/${field}?editing=true`}
+          hx-include={`#${inputId}`}
+          hx-target="#goal-detail-root"
+          hx-select="#goal-detail-root"
+          hx-swap="outerHTML"
+        >
+          Save
+        </button>
+      </div>
+    </section>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // SMART criteria — server-rendered assessment
@@ -143,6 +184,7 @@ export const GoalDetailView: FC<
     linkedMilestones?: MilestoneBase[];
     childGoals?: Goal[];
     personByName?: Record<string, string>;
+    editing?: boolean;
   }
 > = (
   {
@@ -152,6 +194,7 @@ export const GoalDetailView: FC<
     linkedMilestones = [],
     childGoals = [],
     personByName = {},
+    editing = false,
     ...viewProps
   },
 ) => {
@@ -185,14 +228,19 @@ export const GoalDetailView: FC<
       title={goal.title}
       {...viewProps}
       styles={["/css/views/goals.css"]}
-      scripts={["/js/kpi-gauge.js"]}
+      scripts={["/js/kpi-gauge.js", "/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/goals/" + goal.id}
+        getUrl={"/goals/" + goal.id + (editing ? "?editing=true" : "")}
         trigger="sse:goal.updated"
         targetId="goal-detail-root"
       />
-      <main id="goal-detail-root" class="detail-view goal-detail">
+      <main
+        id="goal-detail-root"
+        class={`detail-view goal-detail${
+          editing ? " goal-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Goals", href: "/goals" },
@@ -232,7 +280,9 @@ export const GoalDetailView: FC<
             title={goal.title}
             formContainerId="goals-form-container"
             archived={goal.archived === true}
-          />
+          >
+            <EditModeToggle href={`/goals/${goal.id}`} editing={editing} />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={goal} />
@@ -366,10 +416,20 @@ export const GoalDetailView: FC<
         )}
 
         {/* ── Description ────────────────────────────────────────── */}
-        <MarkdownSection title="Description" markdown={goal.description} />
+        {editing
+          ? (
+            <InlineEditSection
+              goal={goal}
+              field="description"
+              title="Description"
+            />
+          )
+          : <MarkdownSection title="Description" markdown={goal.description} />}
 
         {/* ── Notes ──────────────────────────────────────────────── */}
-        <MarkdownSection title="Notes" markdown={goal.notes} />
+        {editing
+          ? <InlineEditSection goal={goal} field="notes" title="Notes" />
+          : <MarkdownSection title="Notes" markdown={goal.notes} />}
 
         {/* ── Sub-Goals ──────────────────────────────────────────── */}
         {childGoals.length > 0 && (

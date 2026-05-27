@@ -32,6 +32,8 @@ export const habitConfig: DomainConfig<Habit, CreateHabit, UpdateHabit> = {
   stateKeys: ["view", "frequency", "q", "sort", "order"],
   columns: HABIT_TABLE_COLUMNS,
   formFields: HABIT_FORM_FIELDS,
+  // `description` (rendered as "Notes") is edited in-place on the detail page.
+  inlineEditFields: ["description"],
 
   filters: [
     {

@@ -41,6 +41,8 @@ export const ideaConfig: DomainConfig<Idea, CreateIdea, UpdateIdea> = {
   ],
   columns: IDEA_TABLE_COLUMNS,
   formFields: IDEA_FORM_FIELDS,
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description"],
 
   filters: [
     {
