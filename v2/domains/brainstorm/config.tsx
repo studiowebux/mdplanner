@@ -6,7 +6,10 @@ import type {
   CreateBrainstorm,
   UpdateBrainstorm,
 } from "../../types/brainstorm.types.ts";
-import { getBrainstormService } from "../../singletons/services.ts";
+import {
+  getBrainstormService,
+  getBrainstormTemplateService,
+} from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
   BRAINSTORM_FORM_FIELDS,
@@ -48,6 +51,20 @@ export const brainstormConfig: DomainConfig<
     }) as Partial<UpdateBrainstorm>,
 
   getService: () => getBrainstormService(),
+
+  // Edit form: resolve templateId (an ID) to the template name so the
+  // autocomplete search input shows the readable label. The hidden input
+  // still carries the ID for submit.
+  resolveFormValues: async (values) => {
+    const resolved = { ...values };
+    if (values.templateId) {
+      const tpl = await getBrainstormTemplateService().getById(
+        values.templateId,
+      );
+      if (tpl) resolved.templateId = tpl.name;
+    }
+    return resolved;
+  },
 
   searchPredicate: createSearchPredicate<Brainstorm>([
     { type: "string", get: (b) => b.title },

@@ -59,6 +59,13 @@ export const BRAINSTORM_FORM_FIELDS: FieldDef[] = [
     maxLength: 200,
   },
   {
+    type: "autocomplete",
+    name: "templateId",
+    label: "Template",
+    source: "brainstorm-templates-by-id",
+    placeholder: "Search templates...",
+  },
+  {
     type: "tags",
     name: "tags",
     label: "Tags",

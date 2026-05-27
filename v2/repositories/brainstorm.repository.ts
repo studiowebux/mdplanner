@@ -83,6 +83,7 @@ export class BrainstormRepository extends CachedMarkdownRepository<
       linkedGoals: Array.isArray(fm.linkedGoals)
         ? (fm.linkedGoals as unknown[]).map(String)
         : undefined,
+      templateId: fm.templateId != null ? String(fm.templateId) : undefined,
       questions,
       createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
       updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),

@@ -52,6 +52,9 @@ export const BrainstormSchema = z.object({
   linkedGoals: stringArray.nullable().optional().openapi({
     description: "Linked goal IDs",
   }),
+  templateId: z.string().nullable().optional().openapi({
+    description: "ID of the brainstorm template the session was created from",
+  }),
   questions: z.array(BrainstormQuestionSchema).openapi({
     description: "Ordered Q&A pairs",
   }),
@@ -69,12 +72,14 @@ export const CreateBrainstormSchema = BrainstormSchema.pick({
   linkedProjects: true,
   linkedTasks: true,
   linkedGoals: true,
+  templateId: true,
   questions: true,
 }).partial({
   tags: true,
   linkedProjects: true,
   linkedTasks: true,
   linkedGoals: true,
+  templateId: true,
   questions: true,
 }).openapi("CreateBrainstorm");
 

@@ -35,6 +35,7 @@ export function rowToBrainstorm(
     linkedProjects: parseJson<string[]>(row.linked_projects),
     linkedTasks: parseJson<string[]>(row.linked_tasks),
     linkedGoals: parseJson<string[]>(row.linked_goals),
+    templateId: row.template_id as string | undefined,
     questions: parseJson<BrainstormQuestion[]>(row.questions) ?? [],
     ...archiveFieldsFromRow(row),
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
@@ -58,6 +59,7 @@ const BRAINSTORM_SCHEMA = `CREATE TABLE IF NOT EXISTS ${BRAINSTORM_TABLE} (
   linked_projects TEXT,
   linked_tasks TEXT,
   linked_goals TEXT,
+  template_id TEXT,
   questions TEXT,
   questions_text TEXT,
   ${ARCHIVE_COLS_DDL},
@@ -75,11 +77,11 @@ function insertBrainstormRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${BRAINSTORM_TABLE} (id, title, tags,
-       linked_projects, linked_tasks, linked_goals,
+       linked_projects, linked_tasks, linked_goals, template_id,
        questions, questions_text,
        ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
       val(b.title),
@@ -87,6 +89,7 @@ function insertBrainstormRow(
       jsonVal(b.linkedProjects),
       jsonVal(b.linkedTasks),
       jsonVal(b.linkedGoals),
+      val(b.templateId),
       json(b.questions),
       questionsToText(b.questions),
       ...archiveVals(b),
@@ -109,6 +112,7 @@ export function registerBrainstormEntity(repo: BrainstormRepository): void {
     },
     migrations: [
       ...archiveMigrations(BRAINSTORM_TABLE),
+      `ALTER TABLE ${BRAINSTORM_TABLE} ADD COLUMN template_id TEXT`,
     ],
     sync: async (db, syncedAt) => {
       const items = await repo.findAllFromDisk();

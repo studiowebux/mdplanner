@@ -9,6 +9,7 @@ import type {
 } from "../types/brainstorm.types.ts";
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
+import { getBrainstormTemplateService } from "../singletons/services.ts";
 
 export class BrainstormService extends BaseService<
   Brainstorm,
@@ -18,6 +19,23 @@ export class BrainstormService extends BaseService<
 > {
   constructor(brainstormRepo: BrainstormRepository) {
     super(brainstormRepo);
+  }
+
+  override async create(data: CreateBrainstorm): Promise<Brainstorm> {
+    if (data.templateId) {
+      const tpl = await getBrainstormTemplateService().getById(data.templateId);
+      if (tpl) {
+        const seeded = tpl.questions.map((q) => ({
+          question: q,
+          answer: null,
+        }));
+        return super.create({
+          ...data,
+          questions: [...seeded, ...(data.questions ?? [])],
+        });
+      }
+    }
+    return super.create(data);
   }
 
   protected applyFilters(

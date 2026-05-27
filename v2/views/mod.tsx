@@ -79,6 +79,7 @@ import { SETTINGS_FORM_FIELDS } from "./settings/tabs/shortcuts-tab.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
   getBillingRateService,
+  getBrainstormTemplateService,
   getCustomerService,
   getGoalService,
   getIdeaService,
@@ -303,6 +304,16 @@ registerAutocompleteSource("reflection-templates-by-id", {
   list: () => getReflectionTemplateService().list({}),
   search: async (q) => {
     const all = await getReflectionTemplateService().list({});
+    return all.filter((t) => ciIncludes(t.name, q));
+  },
+  displayKey: "name",
+  valueKey: "id",
+});
+
+registerAutocompleteSource("brainstorm-templates-by-id", {
+  list: () => getBrainstormTemplateService().list({}),
+  search: async (q) => {
+    const all = await getBrainstormTemplateService().list({});
     return all.filter((t) => ciIncludes(t.name, q));
   },
   displayKey: "name",
