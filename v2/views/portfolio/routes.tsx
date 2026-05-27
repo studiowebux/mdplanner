@@ -1,5 +1,6 @@
 // Portfolio routes — factory-generated + custom detail and status update routes.
 
+import type { AppContext } from "../../types/app.ts";
 import { log } from "../../singletons/logger.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { portfolioConfig } from "../../domains/portfolio/config.tsx";
@@ -563,9 +564,8 @@ portfolioRouter.post(
   },
 );
 
-// Detail view
-portfolioRouter.get("/:id", async (c) => {
-  const id = c.req.param("id");
+/** Render the detail page; `?editing=true` enables in-place description editing. */
+async function renderDetail(c: AppContext, id: string) {
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
 
@@ -588,6 +588,7 @@ portfolioRouter.get("/:id", async (c) => {
   for (const p of allPeople) {
     if (teamIds.has(p.id)) personById[p.id] = p.name;
   }
+  const editing = c.req.query("editing") === "true";
 
   return c.html(
     <PortfolioDetailView
@@ -597,8 +598,27 @@ portfolioRouter.get("/:id", async (c) => {
       personById={personById}
       customer={customer ?? null}
       clientCustomer={clientCustomer ?? null}
+      editing={editing}
     />,
   );
+}
+
+// Detail view
+portfolioRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
+
+// In-place description save (Edit Mode). Factory provides edit/delete routes.
+portfolioRouter.put("/:id/description", async (c) => {
+  const id = c.req.param("id");
+  const existing = await getPortfolioService().getById(id);
+  if (!existing) return c.notFound();
+  if (existing.archived === true) {
+    return c.text("Portfolio item is archived — restore before editing", 422);
+  }
+  const body = await c.req.parseBody();
+  const description = String(body.description ?? "").trim() || undefined;
+  await getPortfolioService().update(id, { description });
+  publish("portfolio.updated");
+  return renderDetail(c, id);
 });
 
 // Restore an archived portfolio item — drops the three archive frontmatter

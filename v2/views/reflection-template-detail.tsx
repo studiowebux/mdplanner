@@ -8,10 +8,48 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
+import { MarkdownSection } from "./components/markdown-section.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const DescriptionSection: FC<{ item: ReflectionTemplate }> = ({ item }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Description</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={item.description ?? ""}
+      data-inline-target="rtemplate-description-value"
+      data-inline-save-btn="rtemplate-description-save"
+    >
+      {item.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="rtemplate-description-value"
+      name="description"
+      value={item.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="rtemplate-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/reflection-templates/${item.id}/description?editing=true`}
+        hx-include="#rtemplate-description-value"
+        hx-target="#rtemplate-detail-root"
+        hx-select="#rtemplate-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 export const ReflectionTemplateDetailView: FC<
-  ViewProps & { item: ReflectionTemplate }
-> = ({ item: template, ...viewProps }) => {
+  ViewProps & { item: ReflectionTemplate; editing?: boolean }
+> = ({ item: template, editing = false, ...viewProps }) => {
   const hasCategories = template.categories && template.categories.length > 0;
 
   return (
@@ -19,13 +57,20 @@ export const ReflectionTemplateDetailView: FC<
       title={template.name}
       {...viewProps}
       styles={["/css/views/reflection-templates.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/reflection-templates/" + template.id}
+        getUrl={"/reflection-templates/" + template.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:rtemplate.updated"
         targetId="rtemplate-detail-root"
       />
-      <main id="rtemplate-detail-root" class="detail-view rtemplate-detail">
+      <main
+        id="rtemplate-detail-root"
+        class={`detail-view rtemplate-detail${
+          editing ? " rtemplate-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Reflection Templates", href: "/reflection-templates" },
@@ -63,16 +108,22 @@ export const ReflectionTemplateDetailView: FC<
             title={template.name}
             formContainerId="reflection-templates-form-container"
             archived={template.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/reflection-templates/${template.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={template} />
 
         {/* -- Description ----------------------------------------------- */}
-        {template.description && (
-          <div class="detail-section">
-            <p class="detail-description">{template.description}</p>
-          </div>
+        {editing ? <DescriptionSection item={template} /> : (
+          <MarkdownSection
+            title="Description"
+            markdown={template.description}
+          />
         )}
 
         {/* -- Prompts --------------------------------------------------- */}

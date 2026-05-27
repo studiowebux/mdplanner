@@ -19,6 +19,51 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+// ---------------------------------------------------------------------------
+// Shared inline-editable section for `notes` and `footer`.
+// ---------------------------------------------------------------------------
+
+const InlineEditSection: FC<{
+  quote: Quote;
+  field: "notes" | "footer";
+  title: string;
+}> = ({ quote, field, title }) => {
+  const value = (quote[field] ?? "") as string;
+  const inputId = `quote-${field}-value`;
+  const btnId = `quote-${field}-save`;
+  return (
+    <section class="detail-section">
+      <h2 class="section-heading">{title}</h2>
+      <div
+        class="inline-editable"
+        contenteditable
+        data-inline-edit
+        data-inline-original={value}
+        data-inline-target={inputId}
+        data-inline-save-btn={btnId}
+      >
+        {value}
+      </div>
+      <input type="hidden" id={inputId} name={field} value={value} />
+      <div class="inline-editable__actions">
+        <button
+          type="button"
+          id={btnId}
+          class="btn btn--primary btn--sm is-hidden"
+          hx-put={`/quotes/${quote.id}/${field}?editing=true`}
+          hx-include={`#${inputId}`}
+          hx-target="#quote-detail-root"
+          hx-select="#quote-detail-root"
+          hx-swap="outerHTML"
+        >
+          Save
+        </button>
+      </div>
+    </section>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -29,9 +74,10 @@ export const QuoteDetailView: FC<
     item: Quote;
     billingConfig: ProjectConfig;
     revisions: QuoteRevision[];
+    editing?: boolean;
   }
 > = (
-  { item: quote, billingConfig, revisions, ...viewProps },
+  { item: quote, billingConfig, revisions, editing = false, ...viewProps },
 ) => {
   const hasSchedule = quote.paymentSchedule && quote.paymentSchedule.length > 0;
 
@@ -40,13 +86,19 @@ export const QuoteDetailView: FC<
       title={`${quote.number} — ${quote.title}`}
       {...viewProps}
       styles={["/css/views/quotes.css", "/css/views/billing.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/quotes/" + quote.id}
+        getUrl={"/quotes/" + quote.id + (editing ? "?editing=true" : "")}
         trigger="sse:quote.updated"
         targetId="quote-detail-root"
       />
-      <main id="quote-detail-root" class="detail-view quote-detail">
+      <main
+        id="quote-detail-root"
+        class={`detail-view quote-detail${
+          editing ? " quote-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Quotes", href: "/quotes" },
@@ -76,7 +128,9 @@ export const QuoteDetailView: FC<
               title={quote.title}
               formContainerId="quotes-form-container"
               archived={quote.archived === true}
-            />
+            >
+              <EditModeToggle href={`/quotes/${quote.id}`} editing={editing} />
+            </DetailActions>
             {quote.status === "draft" && (
               <button
                 class="btn btn--primary btn--sm"
@@ -226,15 +280,19 @@ export const QuoteDetailView: FC<
         )}
 
         {/* -- Footer ---------------------------------------------------- */}
-        {(quote.footer || billingConfig.billingDefaultFooter) && (
-          <section class="detail-section quote-detail__footer">
-            <h2 class="section-heading">Terms</h2>
-            <p>{quote.footer || billingConfig.billingDefaultFooter}</p>
-          </section>
-        )}
+        {editing
+          ? <InlineEditSection quote={quote} field="footer" title="Terms" />
+          : (quote.footer || billingConfig.billingDefaultFooter) && (
+            <section class="detail-section quote-detail__footer">
+              <h2 class="section-heading">Terms</h2>
+              <p>{quote.footer || billingConfig.billingDefaultFooter}</p>
+            </section>
+          )}
 
         {/* -- Notes ------------------------------------------------------ */}
-        <MarkdownSection title="Notes" markdown={quote.notes} />
+        {editing
+          ? <InlineEditSection quote={quote} field="notes" title="Notes" />
+          : <MarkdownSection title="Notes" markdown={quote.notes} />}
 
         {/* -- Approval info --------------------------------------------- */}
         {(quote.submittedForApprovalAt || quote.approvedBy ||

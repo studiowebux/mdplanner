@@ -19,6 +19,7 @@ import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -28,7 +29,44 @@ type Props = ViewProps & {
   personById?: Record<string, string>;
   customer?: Customer | null;
   clientCustomer?: Customer | null;
+  editing?: boolean;
 };
+
+const DescriptionSection: FC<{ item: PortfolioItem }> = ({ item }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Description</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={item.description ?? ""}
+      data-inline-target="portfolio-description-value"
+      data-inline-save-btn="portfolio-description-save"
+    >
+      {item.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="portfolio-description-value"
+      name="description"
+      value={item.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="portfolio-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/portfolio/${item.id}/description?editing=true`}
+        hx-include="#portfolio-description-value"
+        hx-target="#portfolio-detail-root"
+        hx-select="#portfolio-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 /** Single status update row — reused by detail page and fragment routes. */
 export const StatusUpdateRow: FC<{
@@ -98,6 +136,7 @@ export const PortfolioDetailView: FC<Props> = (
     personById = {},
     customer = null,
     clientCustomer = null,
+    editing = false,
     ...viewProps
   },
 ) => {
@@ -117,14 +156,20 @@ export const PortfolioDetailView: FC<Props> = (
       scripts={[
         ...(item.githubRepo ? ["/js/github-tabs.js"] : []),
         ...(goals.length || item.githubRepo ? ["/js/kpi-gauge.js"] : []),
+        "/js/inline-edit.js",
       ]}
     >
       <SseRefresh
-        getUrl={"/portfolio/" + item.id}
+        getUrl={"/portfolio/" + item.id + (editing ? "?editing=true" : "")}
         trigger="sse:portfolio.updated, sse:portfolio.deleted"
         targetId="portfolio-detail-root"
       />
-      <main id="portfolio-detail-root" class="detail-view portfolio-detail">
+      <main
+        id="portfolio-detail-root"
+        class={`detail-view portfolio-detail${
+          editing ? " portfolio-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Portfolio", href: "/portfolio" },
@@ -155,7 +200,9 @@ export const PortfolioDetailView: FC<Props> = (
             title={item.name}
             formContainerId="portfolio-form-container"
             archived={item.archived === true}
-          />
+          >
+            <EditModeToggle href={`/portfolio/${item.id}`} editing={editing} />
+          </DetailActions>
           <p class="portfolio-detail__meta">
             {item.category}
             {(clientCustomer || item.client) && (
@@ -231,7 +278,9 @@ export const PortfolioDetailView: FC<Props> = (
           </div>
         )}
 
-        <MarkdownSection title="Description" markdown={item.description} />
+        {editing
+          ? <DescriptionSection item={item} />
+          : <MarkdownSection title="Description" markdown={item.description} />}
 
         {item.techStack && item.techStack.length > 0 && (
           <section class="detail-section portfolio-detail__section">

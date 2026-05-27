@@ -35,6 +35,9 @@ export const paymentConfig: DomainConfig<
   emptyMessage: "No payments yet. Record one to get started.",
   defaultView: "table",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
+
   stateKeys: [
     "view",
     "invoiceId",

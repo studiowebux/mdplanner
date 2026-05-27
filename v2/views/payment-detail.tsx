@@ -13,28 +13,71 @@ import { InfoItem } from "./components/info-item.tsx";
 import { PAYMENT_METHOD_VARIANTS } from "../domains/payment/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const NotesSection: FC<{ payment: Payment }> = ({ payment }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={payment.notes ?? ""}
+      data-inline-target="payment-notes-value"
+      data-inline-save-btn="payment-notes-save"
+    >
+      {payment.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="payment-notes-value"
+      name="notes"
+      value={payment.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="payment-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/payments/${payment.id}/notes?editing=true`}
+        hx-include="#payment-notes-value"
+        hx-target="#payment-detail-root"
+        hx-select="#payment-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const PaymentDetailView: FC<
-  ViewProps & { item: Payment }
+  ViewProps & { item: Payment; editing?: boolean }
 > = (
-  { item: payment, ...viewProps },
+  { item: payment, editing = false, ...viewProps },
 ) => {
   return (
     <MainLayout
       title={`Payment — ${payment.reference ?? payment.id}`}
       {...viewProps}
       styles={["/css/views/payments.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/payments/" + payment.id}
+        getUrl={"/payments/" + payment.id + (editing ? "?editing=true" : "")}
         trigger="sse:payment.updated"
         targetId="payment-detail-root"
       />
-      <main id="payment-detail-root" class="detail-view payment-detail">
+      <main
+        id="payment-detail-root"
+        class={`detail-view payment-detail${
+          editing ? " payment-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Payments", href: "/payments" },
@@ -56,7 +99,12 @@ export const PaymentDetailView: FC<
             title={payment.reference ?? payment.id}
             formContainerId="payments-form-container"
             archived={payment.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/payments/${payment.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={payment} />
@@ -89,7 +137,9 @@ export const PaymentDetailView: FC<
         </div>
 
         {/* -- Notes ------------------------------------------------------ */}
-        <MarkdownSection title="Notes" markdown={payment.notes} />
+        {editing
+          ? <NotesSection payment={payment} />
+          : <MarkdownSection title="Notes" markdown={payment.notes} />}
 
         {/* -- Meta ------------------------------------------------------- */}
         <AuditMeta

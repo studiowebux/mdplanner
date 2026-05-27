@@ -108,6 +108,10 @@ export const portfolioConfig: DomainConfig<
   styles: ["/css/views/portfolio.css"],
   emptyMessage: "No portfolio items yet. Create one to get started.",
 
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  // (Status updates use their own bespoke per-row inline editor.)
+  inlineEditFields: ["description"],
+
   stateKeys: [
     "view",
     "status",

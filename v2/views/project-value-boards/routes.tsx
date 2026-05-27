@@ -37,6 +37,17 @@ projectValueBoardRouter.get("/:id", async (c) => {
   return renderDetail(c, id);
 });
 
+// In-place notes save (Edit Mode). Registered before /:id/:section wildcards
+// as a defensive habit (segment counts differ — no actual conflict).
+projectValueBoardRouter.put("/:id/notes", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getProjectValueBoardService().update(id, { notes });
+  publish("project-value-board.updated");
+  return renderDetail(c, id);
+});
+
 // Inline add: POST /project-value/:id/:section — append item to section.
 projectValueBoardRouter.post("/:id/:section", async (c) => {
   const id = c.req.param("id");

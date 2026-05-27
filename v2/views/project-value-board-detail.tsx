@@ -17,6 +17,43 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const NotesSection: FC<{ board: ProjectValueBoard }> = ({ board }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={board.notes ?? ""}
+      data-inline-target="pv-notes-value"
+      data-inline-save-btn="pv-notes-save"
+    >
+      {board.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="pv-notes-value"
+      name="notes"
+      value={board.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="pv-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/project-value/${board.id}/notes?editing=true`}
+        hx-include="#pv-notes-value"
+        hx-target="#pv-detail-root"
+        hx-select="#pv-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Section block
@@ -122,7 +159,7 @@ export const ProjectValueBoardDetailView: FC<
       title={board.title}
       {...viewProps}
       styles={["/css/views/project-value-boards.css"]}
-      scripts={["/js/quadrant-edit.js"]}
+      scripts={["/js/quadrant-edit.js", "/js/inline-edit.js"]}
     >
       <SseRefresh
         getUrl={"/project-value/" + board.id + editSuffix}
@@ -154,23 +191,10 @@ export const ProjectValueBoardDetailView: FC<
             formContainerId="project-value-form-container"
             archived={board.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/project-value/${board.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/project-value/${board.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle
+              href={`/project-value/${board.id}`}
+              editing={editing}
+            />
           </DetailActions>
         </header>
 
@@ -208,7 +232,9 @@ export const ProjectValueBoardDetailView: FC<
         </div>
 
         {/* -- Notes --------------------------------------------------------- */}
-        <MarkdownSection title="Notes" markdown={board.notes} />
+        {editing
+          ? <NotesSection board={board} />
+          : <MarkdownSection title="Notes" markdown={board.notes} />}
 
         <AuditMeta
           createdAt={board.createdAt}

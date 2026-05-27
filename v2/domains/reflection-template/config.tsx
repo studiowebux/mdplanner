@@ -45,6 +45,9 @@ export const reflectionTemplateConfig: DomainConfig<
   emptyMessage: "No reflection templates yet. Create one to get started.",
   defaultView: "table",
 
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description"],
+
   stateKeys: ["view", "category", "period", "q", "sort", "order"],
   columns: REFLECTION_TEMPLATE_TABLE_COLUMNS,
   formFields: REFLECTION_TEMPLATE_FORM_FIELDS,

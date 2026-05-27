@@ -31,6 +31,10 @@ export const projectValueBoardConfig: DomainConfig<
   emptyMessage: "No project value boards yet. Create one to get started.",
   defaultView: "card",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // (Section items use the bespoke `quadrant-card__inline-edit` editor.)
+  inlineEditFields: ["notes"],
+
   stateKeys: ["view", "project", "q", "sort", "order"],
   columns: PROJECT_VALUE_BOARD_TABLE_COLUMNS,
   formFields: PROJECT_VALUE_BOARD_FORM_FIELDS,
