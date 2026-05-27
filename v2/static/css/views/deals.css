@@ -41,8 +41,8 @@
   min-width: var(--deal-pipeline-col-w);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
-  border: var(--border-width) solid var(--color-border);
-  border-top: var(--border-width-thick) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
+  border-top: var(--border-width-thick) solid var(--color-border-default);
   display: flex;
   flex-direction: column;
 }
@@ -69,7 +69,7 @@
 
 .deal-pipeline__column-header {
   padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -150,7 +150,7 @@
 
 .deal-pipeline__card {
   background: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-md);
   transition:
     border-color var(--transition-fast),
@@ -240,7 +240,7 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-full);
   padding: var(--badge-padding);
 }
@@ -249,7 +249,7 @@
   display: flex;
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border-default);
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
@@ -263,7 +263,7 @@
   padding: var(--space-xs);
   font-size: var(--font-size-xs);
   background: transparent;
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   cursor: pointer;

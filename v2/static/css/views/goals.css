@@ -192,7 +192,7 @@
   gap: var(--space-xs);
   padding: var(--space-sm) var(--space-md);
   margin-bottom: var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
   position: sticky;
   top: 0;
   z-index: var(--z-toolbar);
@@ -203,7 +203,7 @@
 
 .goal-tree-group {
   scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: visible;
 }
@@ -220,7 +220,7 @@
   letter-spacing: var(--letter-spacing-wide);
   margin: 0;
   padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
 }
 
 .goal-tree-group > .goal-tree {
@@ -252,7 +252,7 @@
   top: 0;
   bottom: var(--space-md);
   width: var(--border-width);
-  background: var(--color-border);
+  background: var(--color-border-default);
 }
 
 .goal-tree__item {
@@ -268,7 +268,7 @@
   top: calc(var(--space-sm) + var(--font-size-sm));
   width: calc(var(--space-xl) - var(--space-md));
   height: var(--border-width);
-  background: var(--color-border);
+  background: var(--color-border-default);
 }
 
 /* Root items — card nodes */
@@ -337,7 +337,7 @@
 
 .smart-hints {
   padding: var(--space-md);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border-default);
 }
 
 .smart-hints__title {

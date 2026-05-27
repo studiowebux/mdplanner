@@ -61,7 +61,7 @@
 }
 
 .quadrant-card[data-quadrant="wont"] {
-  border-top-color: var(--color-border);
+  border-top-color: var(--color-border-default);
 }
 
 .quadrant-card[data-quadrant="wont"] .quadrant-card__title {
@@ -96,5 +96,5 @@
   color: var(--color-text-muted);
   margin-top: var(--space-lg);
   padding-top: var(--space-md);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border-default);
 }

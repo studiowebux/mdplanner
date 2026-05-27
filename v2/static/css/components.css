@@ -1099,7 +1099,7 @@ a.badge:hover {
   gap: var(--space-sm);
   align-items: flex-start;
   padding: var(--space-sm);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-md);
   background: var(--color-bg-secondary);
 }
@@ -1979,7 +1979,7 @@ a.badge:hover {
 
 .quadrant-card {
   background: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
@@ -2008,7 +2008,7 @@ a.badge:hover {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -2092,7 +2092,7 @@ a.badge:hover {
   flex: 1;
   min-width: 0;
   border: none;
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
   border-radius: 0;
   padding: var(--space-xxs) 0;
   font-size: var(--font-size-sm);
@@ -2107,7 +2107,7 @@ a.badge:hover {
 
 .quadrant-card__add {
   padding: var(--space-sm) var(--space-md);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border-default);
 }
 
 .quadrant-card__input {
@@ -2190,7 +2190,7 @@ a.badge:hover {
 .mention--person {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  border: var(--border-width) var(--border-style) var(--color-border);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
 }
 
 .mention--commit {
@@ -2219,7 +2219,7 @@ a.badge:hover {
   margin: 0;
   padding: var(--space-xs) 0;
   background: var(--color-bg-primary);
-  border: var(--border-width) var(--border-style) var(--color-border);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   z-index: var(--z-dropdown);

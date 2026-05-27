@@ -21,7 +21,7 @@
 .portfolio-progress__bar {
   flex: 1;
   height: var(--space-sm);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
 }
 
 .portfolio-progress__label {
@@ -153,14 +153,14 @@
   gap: var(--space-sm);
   align-items: flex-start;
   padding: var(--space-sm) 0;
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
 }
 
 .portfolio-detail__update {
   display: flex;
   gap: var(--space-sm);
   padding: var(--space-sm) 0;
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
 }
 
 .portfolio-detail__update:last-child {

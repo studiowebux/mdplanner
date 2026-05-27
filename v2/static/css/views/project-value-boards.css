@@ -43,7 +43,7 @@
 
 .pv-board__cell {
   background: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
@@ -75,7 +75,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
   flex-shrink: 0;
 }
 

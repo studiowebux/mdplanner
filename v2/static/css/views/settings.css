@@ -622,7 +622,7 @@ html.sidebar-collapsed .settings-page__form-actions {
 .settings-data__section {
   margin-bottom: var(--settings-data-section-gap);
   padding-bottom: var(--settings-data-section-gap);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
 }
 
 .settings-data__section:last-child {

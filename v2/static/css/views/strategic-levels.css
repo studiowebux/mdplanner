@@ -24,8 +24,8 @@
   align-items: baseline;
   gap: var(--space-sm);
   padding: var(--space-xs) 0 var(--space-xs) var(--space-sm);
-  border-bottom: var(--border-width) solid var(--color-border);
-  border-left: var(--sl-border-accent-w) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  border-left: var(--sl-border-accent-w) solid var(--color-border-default);
 }
 
 .sl-group:last-child {
@@ -99,7 +99,7 @@
 .sl-item__input {
   flex: 1;
   border: none;
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border-default);
   border-radius: 0;
   background: transparent;
   font-size: var(--font-size-sm);
@@ -152,7 +152,7 @@
 
 .sl-group__add {
   padding: var(--space-sm) 0;
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border-default);
 }
 
 .sl-group__add-input {

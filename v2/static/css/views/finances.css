@@ -15,8 +15,8 @@
   flex: 1;
   min-width: var(--finance-summary-tile-min-w);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border);
-  border-top: var(--border-width-thick) solid var(--color-border);
+  border: var(--border-width) solid var(--color-border-default);
+  border-top: var(--border-width-thick) solid var(--color-border-default);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
   display: flex;

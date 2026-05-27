@@ -770,7 +770,8 @@ html.focus-mode .focus-mode-exit {
   display: flex;
   gap: var(--space-xs);
   margin-top: var(--space-xs);
-  border-top: var(--border-width) var(--border-style) var(--color-border);
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
   padding-top: var(--space-sm);
 }
 
