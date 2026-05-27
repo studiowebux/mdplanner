@@ -167,16 +167,8 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
       ...sections,
       project: fm.project != null ? String(fm.project) : undefined,
       notes,
-      createdAt: fm.createdAt
-        ? String(fm.createdAt)
-        : fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updatedAt
-        ? String(fm.updatedAt)
-        : fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
