@@ -89,18 +89,13 @@ export const meetingConfig: DomainConfig<
     }) as Partial<UpdateMeeting>,
 
   // Resolve person IDs to names for the action-items array-table autocomplete.
-  // Returns `{ owner: <name> }` only for IDs that resolve — legacy free-text
-  // owners and deleted-person IDs are omitted, so AutocompleteWidget's
-  // `displayValue ?? value ?? ""` fallback shows the raw stored value.
+  // Unresolved owners produce an empty search input — user re-picks.
   resolveArrayDisplayValues: async (item) => {
     const personById = await buildActionPersonById(item.actions);
     return {
-      actions: item.actions.map((a) => {
-        const row: Record<string, string> = {};
-        const name = a.owner ? personById[a.owner] : undefined;
-        if (name) row.owner = name;
-        return row;
-      }),
+      actions: item.actions.map((a) => ({
+        owner: (a.owner && personById[a.owner]) || "",
+      })),
     };
   },
 
