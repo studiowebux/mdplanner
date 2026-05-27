@@ -17,6 +17,8 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { MarkdownSection } from "./components/markdown-section.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -133,23 +135,69 @@ export const DnsRecordForm: FC<{
 };
 
 // ---------------------------------------------------------------------------
+// Notes — in-place editable (contenteditable + Save when dirty).
+// ---------------------------------------------------------------------------
+
+const NotesSection: FC<{ domain: DnsDomain }> = ({ domain }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={domain.notes ?? ""}
+      data-inline-target="dns-notes-value"
+      data-inline-save-btn="dns-notes-save"
+    >
+      {domain.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="dns-notes-value"
+      name="notes"
+      value={domain.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="dns-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/dns/${domain.id}/notes?editing=true`}
+        hx-include="#dns-notes-value"
+        hx-target="#dns-detail-root"
+        hx-select="#dns-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+// ---------------------------------------------------------------------------
 // DNS domain detail view
 // ---------------------------------------------------------------------------
 
-export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
-  { item: domain, ...viewProps },
+export const DnsDetailView: FC<
+  ViewProps & { item: DnsDomain; editing?: boolean }
+> = (
+  { item: domain, editing = false, ...viewProps },
 ) => (
   <MainLayout
     title={domain.domain}
     {...viewProps}
     styles={["/css/views/dns.css"]}
+    scripts={["/js/inline-edit.js"]}
   >
     <SseRefresh
-      getUrl={"/dns/" + domain.id}
+      getUrl={"/dns/" + domain.id + (editing ? "?editing=true" : "")}
       trigger="sse:dns.updated, sse:dns.synced"
       targetId="dns-detail-root"
     />
-    <main id="dns-detail-root" class="detail-view dns-detail">
+    <main
+      id="dns-detail-root"
+      class={`detail-view dns-detail${editing ? " dns-detail--editing" : ""}`}
+    >
       <Breadcrumb
         items={[
           { label: "DNS", href: "/dns" },
@@ -176,7 +224,9 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
           title={domain.domain}
           formContainerId="dns-form-container"
           archived={domain.archived === true}
-        />
+        >
+          <EditModeToggle href={`/dns/${domain.id}`} editing={editing} />
+        </DetailActions>
       </header>
 
       <ArchivedBanner entity={domain} />
@@ -216,12 +266,9 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         )}
       </div>
 
-      {domain.notes && (
-        <section class="detail-section dns-detail__section">
-          <h2 class="section-heading">Notes</h2>
-          <p class="dns-detail__notes">{domain.notes}</p>
-        </section>
-      )}
+      {editing
+        ? <NotesSection domain={domain} />
+        : <MarkdownSection title="Notes" markdown={domain.notes} />}
 
       <DnsRecordsTable domain={domain} />
       <AuditMeta

@@ -1,5 +1,6 @@
 // Invoice view routes — factory-generated list/create/edit + custom detail route.
 
+import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { invoiceConfig } from "../../domains/invoice/config.tsx";
 import {
@@ -14,6 +15,26 @@ import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const invoicesRouter = createDomainRoutes(invoiceConfig);
+
+/** Render the detail page; `?editing=true` enables in-place notes/footer editing. */
+async function renderDetail(c: AppContext, id: string) {
+  const service = getInvoiceService();
+  const [invoice, billingConfig] = await Promise.all([
+    service.getById(id),
+    getProjectService().getConfig(),
+  ]);
+  if (!invoice) return c.notFound();
+  const editing = c.req.query("editing") === "true";
+  return c.html(
+    <InvoiceDetailView
+      {...viewProps(c, "/invoices")}
+      item={invoice}
+      displayStatus={service.displayStatus(invoice)}
+      billingConfig={billingConfig}
+      editing={editing}
+    />,
+  );
+}
 
 invoicesRouter.post("/:id/send", async (c) => {
   const id = c.req.param("id")!;
@@ -49,23 +70,26 @@ invoicesRouter.post("/:id/send", async (c) => {
   });
 });
 
-invoicesRouter.get("/:id", async (c) => {
-  const id = c.req.param("id");
-  const service = getInvoiceService();
-  const [invoice, billingConfig] = await Promise.all([
-    service.getById(id),
-    getProjectService().getConfig(),
-  ]);
-  if (!invoice) return c.notFound();
+invoicesRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
 
-  return c.html(
-    <InvoiceDetailView
-      {...viewProps(c, "/invoices")}
-      item={invoice}
-      displayStatus={service.displayStatus(invoice)}
-      billingConfig={billingConfig}
-    />,
-  );
+// In-place notes save (Edit Mode). Factory provides edit/delete routes.
+invoicesRouter.put("/:id/notes", async (c) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getInvoiceService().update(id, { notes });
+  publish("invoice.updated");
+  return renderDetail(c, id);
+});
+
+// In-place footer (Terms) save (Edit Mode).
+invoicesRouter.put("/:id/footer", async (c) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.parseBody();
+  const footer = String(body.footer ?? "").trim() || undefined;
+  await getInvoiceService().update(id, { footer });
+  publish("invoice.updated");
+  return renderDetail(c, id);
 });
 
 invoicesRouter.get("/:id/print", async (c) => {

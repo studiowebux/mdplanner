@@ -30,6 +30,9 @@ export const meetingConfig: DomainConfig<
   emptyMessage: "No meetings yet. Create one to get started.",
   defaultView: "table",
 
+  // `agenda` and `notes` edit in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["agenda", "notes"],
+
   stateKeys: [
     "view",
     "q",

@@ -35,6 +35,9 @@ export const invoiceConfig: DomainConfig<
   emptyMessage: "No invoices yet. Create one to get started.",
   defaultView: "table",
 
+  // `notes` and `footer` edit in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes", "footer"],
+
   stateKeys: [
     "view",
     "status",

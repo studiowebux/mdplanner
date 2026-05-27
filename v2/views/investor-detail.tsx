@@ -10,6 +10,7 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import {
   INVESTOR_STAGE_VARIANTS,
@@ -19,21 +20,66 @@ import {
   INVESTOR_TYPE_VARIANTS,
 } from "../domains/investor/constants.tsx";
 
-export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
-  { item: investor, ...viewProps },
+const NotesSection: FC<{ investor: Investor }> = ({ investor }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={investor.notes ?? ""}
+      data-inline-target="investor-notes-value"
+      data-inline-save-btn="investor-notes-save"
+    >
+      {investor.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="investor-notes-value"
+      name="notes"
+      value={investor.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="investor-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/investors/${investor.id}/notes?editing=true`}
+        hx-include="#investor-notes-value"
+        hx-target="#investor-detail-root"
+        hx-select="#investor-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+export const InvestorDetailView: FC<
+  ViewProps & { item: Investor; editing?: boolean }
+> = (
+  { item: investor, editing = false, ...viewProps },
 ) => {
   return (
     <MainLayout
       title={investor.name}
       {...viewProps}
       styles={["/css/views/investors.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/investors/" + investor.id}
+        getUrl={"/investors/" + investor.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:investor.updated"
         targetId="investor-detail-root"
       />
-      <main id="investor-detail-root" class="detail-view investor-detail">
+      <main
+        id="investor-detail-root"
+        class={`detail-view investor-detail${
+          editing ? " investor-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Investors", href: "/investors" },
@@ -69,7 +115,12 @@ export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
             title={investor.name}
             formContainerId="investors-form-container"
             archived={investor.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/investors/${investor.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={investor} />
@@ -87,7 +138,9 @@ export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
           </InfoItem>
         </div>
 
-        <MarkdownSection title="Notes" markdown={investor.notes} />
+        {editing
+          ? <NotesSection investor={investor} />
+          : <MarkdownSection title="Notes" markdown={investor.notes} />}
 
         <AuditMeta
           createdAt={investor.createdAt}

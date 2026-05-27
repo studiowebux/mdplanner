@@ -17,7 +17,7 @@ import {
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
-import type { AppVariables } from "../../types/app.ts";
+import type { AppContext, AppVariables } from "../../types/app.ts";
 
 const MeetingForm = createDomainForm({
   domain: "meetings",
@@ -28,9 +28,8 @@ const MeetingForm = createDomainForm({
 // Factory router (handles list, CRUD forms, card view, etc.)
 const domainRouter = createDomainRoutes(meetingConfig);
 
-// Custom detail route added to the domain router
-domainRouter.get("/:id", async (c) => {
-  const id = c.req.param("id");
+/** Render the detail page; `?editing=true` enables in-place agenda/notes editing. */
+async function renderDetail(c: AppContext, id: string) {
   const item = await getMeetingService().getById(id);
   if (!item) return c.notFound();
 
@@ -39,6 +38,7 @@ domainRouter.get("/:id", async (c) => {
   );
   const relatedItems = resolved.filter((m): m is Meeting => m !== null);
   const personById = await buildActionPersonById(item.actions);
+  const editing = c.req.query("editing") === "true";
 
   return c.html(
     <MeetingDetailView
@@ -46,8 +46,32 @@ domainRouter.get("/:id", async (c) => {
       item={item}
       relatedItems={relatedItems}
       personById={personById}
+      editing={editing}
     />,
   );
+}
+
+// Custom detail route added to the domain router
+domainRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
+
+// In-place agenda save (Edit Mode). Factory provides edit/delete routes.
+domainRouter.put("/:id/agenda", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const agenda = String(body.agenda ?? "").trim() || undefined;
+  await getMeetingService().update(id, { agenda });
+  publish("meeting.updated");
+  return renderDetail(c, id);
+});
+
+// In-place notes save (Edit Mode).
+domainRouter.put("/:id/notes", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getMeetingService().update(id, { notes });
+  publish("meeting.updated");
+  return renderDetail(c, id);
 });
 
 // POST /:id/actions — add action item, return updated actions table fragment

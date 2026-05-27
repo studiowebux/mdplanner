@@ -33,6 +33,9 @@ export const investorConfig: DomainConfig<
   emptyMessage: "No investors yet. Create one to get started.",
   defaultView: "table",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
+
   stateKeys: ["view", "type", "stage", "status", "tag", "q", "sort", "order"],
   columns: INVESTOR_TABLE_COLUMNS,
   formFields: INVESTOR_FORM_FIELDS,

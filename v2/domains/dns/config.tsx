@@ -61,6 +61,9 @@ export const dnsConfig: DomainConfig<
   emptyMessage: "No DNS domains yet. Add one or sync from Cloudflare.",
   defaultView: "table",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["notes"],
+
   stateKeys: ["view", "provider", "q", "sort", "order"],
   columns: DNS_TABLE_COLUMNS,
   formFields: FORM_FIELDS,

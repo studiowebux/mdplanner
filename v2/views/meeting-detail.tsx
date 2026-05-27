@@ -18,6 +18,51 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+// ---------------------------------------------------------------------------
+// Shared inline-editable section for `agenda` and `notes`.
+// ---------------------------------------------------------------------------
+
+const InlineEditSection: FC<{
+  meeting: Meeting;
+  field: "agenda" | "notes";
+  title: string;
+}> = ({ meeting, field, title }) => {
+  const value = (meeting[field] ?? "") as string;
+  const inputId = `meeting-${field}-value`;
+  const btnId = `meeting-${field}-save`;
+  return (
+    <section class="detail-section">
+      <h2 class="section-heading">{title}</h2>
+      <div
+        class="inline-editable"
+        contenteditable
+        data-inline-edit
+        data-inline-original={value}
+        data-inline-target={inputId}
+        data-inline-save-btn={btnId}
+      >
+        {value}
+      </div>
+      <input type="hidden" id={inputId} name={field} value={value} />
+      <div class="inline-editable__actions">
+        <button
+          type="button"
+          id={btnId}
+          class="btn btn--primary btn--sm is-hidden"
+          hx-put={`/meetings/${meeting.id}/${field}?editing=true`}
+          hx-include={`#${inputId}`}
+          hx-target="#meeting-detail-root"
+          hx-select="#meeting-detail-root"
+          hx-swap="outerHTML"
+        >
+          Save
+        </button>
+      </div>
+    </section>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Action item row
@@ -348,9 +393,10 @@ export const MeetingDetailView: FC<
     item: Meeting;
     relatedItems: Meeting[];
     personById: Record<string, string>;
+    editing?: boolean;
   }
 > = (
-  { item: meeting, relatedItems, personById, ...viewProps },
+  { item: meeting, relatedItems, personById, editing = false, ...viewProps },
 ) => {
   const attendees = meeting.attendees ?? [];
 
@@ -359,13 +405,19 @@ export const MeetingDetailView: FC<
       title={meeting.title}
       {...viewProps}
       styles={["/css/views/meetings.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/meetings/" + meeting.id}
+        getUrl={"/meetings/" + meeting.id + (editing ? "?editing=true" : "")}
         trigger="sse:meeting.updated"
         targetId="meeting-detail-root"
       />
-      <main id="meeting-detail-root" class="detail-view meeting-detail">
+      <main
+        id="meeting-detail-root"
+        class={`detail-view meeting-detail${
+          editing ? " meeting-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Meetings", href: "/meetings" },
@@ -385,7 +437,12 @@ export const MeetingDetailView: FC<
             title={meeting.title}
             formContainerId="meetings-form-container"
             archived={meeting.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/meetings/${meeting.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={meeting} />
@@ -421,10 +478,20 @@ export const MeetingDetailView: FC<
         )}
 
         {/* -- Agenda ----------------------------------------------------- */}
-        <MarkdownSection title="Agenda" markdown={meeting.agenda} />
+        {editing
+          ? (
+            <InlineEditSection
+              meeting={meeting}
+              field="agenda"
+              title="Agenda"
+            />
+          )
+          : <MarkdownSection title="Agenda" markdown={meeting.agenda} />}
 
         {/* -- Notes ------------------------------------------------------ */}
-        <MarkdownSection title="Notes" markdown={meeting.notes} />
+        {editing
+          ? <InlineEditSection meeting={meeting} field="notes" title="Notes" />
+          : <MarkdownSection title="Notes" markdown={meeting.notes} />}
 
         {/* -- Action items ----------------------------------------------- */}
         <ActionsTableComponent meeting={meeting} personById={personById} />
