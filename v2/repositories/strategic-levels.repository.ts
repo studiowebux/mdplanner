@@ -109,16 +109,8 @@ export class StrategicLevelsRepository extends CachedMarkdownRepository<
       title,
       date: fm.date ? String(fm.date) : now.slice(0, 10),
       levels,
-      createdAt: fm.createdAt
-        ? String(fm.createdAt)
-        : fm.created_at
-        ? String(fm.created_at)
-        : now,
-      updatedAt: fm.updatedAt
-        ? String(fm.updatedAt)
-        : fm.updated_at
-        ? String(fm.updated_at)
-        : now,
+      createdAt: fm.createdAt ? String(fm.createdAt) : now,
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : now,
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
