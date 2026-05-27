@@ -29,6 +29,9 @@ export const onboardingTemplateConfig: DomainConfig<
   emptyMessage: "No onboarding templates yet. Create one to get started.",
   defaultView: "table",
 
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description"],
+
   stateKeys: ["view", "q", "sort", "order"],
   columns: ONBOARDING_TEMPLATE_TABLE_COLUMNS,
   formFields: ONBOARDING_TEMPLATE_FORM_FIELDS,

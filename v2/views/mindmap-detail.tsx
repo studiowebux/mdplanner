@@ -10,8 +10,45 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { countAllNodes } from "../domains/mindmap/constants.tsx";
 import { serializeBulletTree } from "../repositories/mindmap.repository.ts";
+
+const NotesSection: FC<{ item: Mindmap }> = ({ item }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={item.notes ?? ""}
+      data-inline-target="mindmap-notes-value"
+      data-inline-save-btn="mindmap-notes-save"
+    >
+      {item.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="mindmap-notes-value"
+      name="notes"
+      value={item.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="mindmap-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/mindmaps/${item.id}/notes?editing=true`}
+        hx-include="#mindmap-notes-value"
+        hx-target="#mindmap-detail-root"
+        hx-select="#mindmap-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 export const MindmapDetailView: FC<
   ViewProps & { item: Mindmap; editing?: boolean; rawBody?: string }
@@ -26,7 +63,7 @@ export const MindmapDetailView: FC<
       {...viewProps}
       styles={["/css/views/mindmaps.css"]}
       scripts={editing
-        ? ["/js/mindmap.js", "/js/mindmap-editor.js"]
+        ? ["/js/mindmap.js", "/js/mindmap-editor.js", "/js/inline-edit.js"]
         : ["/js/mindmap.js"]}
     >
       <SseRefresh
@@ -34,7 +71,12 @@ export const MindmapDetailView: FC<
         trigger="sse:mindmap.updated"
         targetId="mindmap-detail-root"
       />
-      <main id="mindmap-detail-root" class="detail-view mindmap-detail">
+      <main
+        id="mindmap-detail-root"
+        class={`detail-view mindmap-detail${
+          editing ? " mindmap-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Mindmaps", href: "/mindmaps" },
@@ -60,7 +102,9 @@ export const MindmapDetailView: FC<
             title={item.title}
             formContainerId="mindmaps-form-container"
             archived={item.archived === true}
-          />
+          >
+            <EditModeToggle href={`/mindmaps/${item.id}`} editing={editing} />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={item} />
@@ -117,12 +161,6 @@ export const MindmapDetailView: FC<
                 >
                   Zoom in
                 </button>
-                <a
-                  class="btn btn--secondary btn--sm mindmap-detail__toolbar-end"
-                  href={`/mindmaps/${item.id}?editing=true`}
-                >
-                  Edit
-                </a>
               </div>
 
               <div
@@ -133,7 +171,9 @@ export const MindmapDetailView: FC<
             </>
           )}
 
-        <MarkdownSection title="Notes" markdown={item.notes} />
+        {editing
+          ? <NotesSection item={item} />
+          : <MarkdownSection title="Notes" markdown={item.notes} />}
 
         <AuditMeta
           createdAt={item.createdAt}

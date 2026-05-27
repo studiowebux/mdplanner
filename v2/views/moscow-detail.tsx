@@ -16,6 +16,43 @@ import {
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+
+const NotesSection: FC<{ item: Moscow }> = ({ item }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={item.notes ?? ""}
+      data-inline-target="moscow-notes-value"
+      data-inline-save-btn="moscow-notes-save"
+    >
+      {item.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="moscow-notes-value"
+      name="notes"
+      value={item.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="moscow-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/moscow/${item.id}/notes?editing=true`}
+        hx-include="#moscow-notes-value"
+        hx-target="#moscow-detail-root"
+        hx-select="#moscow-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -33,7 +70,7 @@ export const MoscowDetailView: FC<
       title={moscow.title}
       {...viewProps}
       styles={["/css/views/moscow.css"]}
-      scripts={["/js/quadrant-edit.js"]}
+      scripts={["/js/quadrant-edit.js", "/js/inline-edit.js"]}
     >
       <SseRefresh
         getUrl={"/moscow/" + moscow.id + editSuffix}
@@ -69,23 +106,7 @@ export const MoscowDetailView: FC<
             formContainerId="moscow-form-container"
             archived={moscow.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/moscow/${moscow.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/moscow/${moscow.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle href={`/moscow/${moscow.id}`} editing={editing} />
           </DetailActions>
         </header>
 
@@ -182,7 +203,9 @@ export const MoscowDetailView: FC<
         </div>
 
         {/* -- Notes ----------------------------------------------------- */}
-        <MarkdownSection title="Notes" markdown={moscow.notes} />
+        {editing
+          ? <NotesSection item={moscow} />
+          : <MarkdownSection title="Notes" markdown={moscow.notes} />}
 
         {/* -- Meta ------------------------------------------------------ */}
         <AuditMeta

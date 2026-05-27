@@ -55,6 +55,10 @@ export const onboardingConfig: DomainConfig<
   emptyMessage: "No onboarding records yet. Create one to get started.",
   defaultView: "table",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // (Step titles use their own always-on inline editor — bespoke exception.)
+  inlineEditFields: ["notes"],
+
   stateKeys: ["view", "q", "sort", "order"],
   columns: ONBOARDING_TABLE_COLUMNS,
   formFields: ONBOARDING_FORM_FIELDS,

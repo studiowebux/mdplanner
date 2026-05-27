@@ -36,6 +36,11 @@ export const mindmapConfig: DomainConfig<
   emptyMessage: "No mindmaps yet. Create one to get started.",
   defaultView: "card",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // (The bullet-tree itself uses a bespoke textarea editor — that's the
+  // agreed exception per the canonical edit-mode pattern.)
+  inlineEditFields: ["notes"],
+
   stateKeys: ["view", "project", "q", "sort", "order"],
   columns: MINDMAP_TABLE_COLUMNS,
   formFields: MINDMAP_FORM_FIELDS,

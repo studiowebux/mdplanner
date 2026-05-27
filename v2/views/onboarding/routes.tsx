@@ -15,17 +15,19 @@ import { publish } from "../../singletons/event-bus.ts";
 
 export const onboardingRouter = createDomainRoutes(onboardingConfig);
 
-/** Render the onboarding detail page. */
+/** Render the onboarding detail page; `?editing=true` toggles notes Edit Mode. */
 async function renderDetail(c: AppContext, id: string) {
   const item = await getOnboardingService().getById(id);
   if (!item) return c.notFound();
   const people = await getPeopleService().list();
   const peopleById = new Map(people.map((p) => [p.id, p.name]));
+  const editing = c.req.query("editing") === "true";
   return c.html(
     <OnboardingDetailView
       {...viewProps(c, "/onboarding")}
       item={item}
       peopleById={peopleById}
+      editing={editing}
     />,
   );
 }
@@ -34,6 +36,16 @@ onboardingRouter.get(
   "/:id",
   (c: AppContext) => renderDetail(c, c.req.param("id")!),
 );
+
+// In-place notes save (Edit Mode). Step toggle/title edits use POST /:id/steps/*.
+onboardingRouter.put("/:id/notes", async (c: AppContext) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getOnboardingService().update(id, { notes });
+  publish("onboarding.updated");
+  return renderDetail(c, id);
+});
 
 // Toggle a step's completion (complete <-> not_started).
 onboardingRouter.post("/:id/steps/:stepId/toggle", async (c: AppContext) => {

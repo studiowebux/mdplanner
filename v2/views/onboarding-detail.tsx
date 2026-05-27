@@ -8,15 +8,57 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { MarkdownSection } from "./components/markdown-section.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import {
   STEP_CATEGORY_LABELS,
   STEP_STATUS_LABELS,
 } from "../domains/onboarding/constants.tsx";
 
+const NotesSection: FC<{ item: Onboarding }> = ({ item }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={item.notes ?? ""}
+      data-inline-target="onboarding-notes-value"
+      data-inline-save-btn="onboarding-notes-save"
+    >
+      {item.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="onboarding-notes-value"
+      name="notes"
+      value={item.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="onboarding-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/onboarding/${item.id}/notes?editing=true`}
+        hx-include="#onboarding-notes-value"
+        hx-target="#onboarding-detail-root"
+        hx-select="#onboarding-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
 export const OnboardingDetailView: FC<
-  ViewProps & { item: Onboarding; peopleById?: Map<string, string> }
+  ViewProps & {
+    item: Onboarding;
+    peopleById?: Map<string, string>;
+    editing?: boolean;
+  }
 > = (
-  { item, peopleById, ...viewProps },
+  { item, peopleById, editing = false, ...viewProps },
 ) => {
   const onboardeeName = item.personId
     ? (peopleById?.get(item.personId) ?? item.personId)
@@ -42,11 +84,16 @@ export const OnboardingDetailView: FC<
       scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/onboarding/" + item.id}
+        getUrl={"/onboarding/" + item.id + (editing ? "?editing=true" : "")}
         trigger="sse:onboarding.updated"
         targetId="onboarding-detail-root"
       />
-      <main id="onboarding-detail-root" class="detail-view onboarding-detail">
+      <main
+        id="onboarding-detail-root"
+        class={`detail-view onboarding-detail${
+          editing ? " onboarding-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Onboarding", href: "/onboarding" },
@@ -69,7 +116,12 @@ export const OnboardingDetailView: FC<
             title={item.employeeName}
             formContainerId="onboarding-form-container"
             archived={item.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/onboarding/${item.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={item} />
@@ -108,12 +160,9 @@ export const OnboardingDetailView: FC<
         )}
 
         {/* -- Notes ------------------------------------------------------ */}
-        {item.notes && (
-          <div class="detail-section onboarding-detail__notes">
-            <h2 class="section-heading">Notes</h2>
-            <p class="onboarding-detail__notes-text">{item.notes}</p>
-          </div>
-        )}
+        {editing
+          ? <NotesSection item={item} />
+          : <MarkdownSection title="Notes" markdown={item.notes} />}
 
         {/* -- Steps ------------------------------------------------------ */}
         {item.steps.length > 0 && (

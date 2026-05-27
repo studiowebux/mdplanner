@@ -26,6 +26,11 @@ export const moscowConfig: DomainConfig<Moscow, CreateMoscow, UpdateMoscow> = {
   emptyMessage: "No MoSCoW analyses yet. Create one to get started.",
   defaultView: "card",
 
+  // `notes` is edited in-place on the detail page via "Edit Mode".
+  // (Quadrant items use the bespoke `quadrant-card__inline-edit` editor —
+  // the agreed exception per the canonical pattern.)
+  inlineEditFields: ["notes"],
+
   stateKeys: [
     "view",
     "project",

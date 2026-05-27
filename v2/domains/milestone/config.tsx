@@ -71,6 +71,9 @@ export const milestoneConfig: DomainConfig<
   styles: ["/css/views/milestones.css"],
   emptyMessage: "No milestones yet. Create one to get started.",
 
+  // `description` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["description"],
+
   stateKeys: [
     "view",
     "status",

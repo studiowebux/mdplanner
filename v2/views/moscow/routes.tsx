@@ -36,6 +36,17 @@ moscowRouter.get("/:id", async (c) => {
   return renderDetail(c, id);
 });
 
+// In-place notes save (Edit Mode). Registered BEFORE the /:id/:quadrant
+// wildcards as a defensive habit (segment counts differ — no actual conflict).
+moscowRouter.put("/:id/notes", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getMoscowService().update(id, { notes });
+  publish("moscow.updated");
+  return renderDetail(c, id);
+});
+
 // Inline add: POST /moscow/:id/:quadrant — add item to quadrant.
 moscowRouter.post("/:id/:quadrant", async (c) => {
   const id = c.req.param("id");

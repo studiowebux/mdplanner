@@ -1,5 +1,6 @@
 // Mindmap view routes — factory-generated list + custom detail/edit handlers.
 
+import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { mindmapConfig } from "../../domains/mindmap/config.tsx";
 import { getMindmapService } from "../../singletons/services.ts";
@@ -10,8 +11,10 @@ import { publish } from "../../singletons/event-bus.ts";
 
 export const mindmapRouter = createDomainRoutes(mindmapConfig);
 
-mindmapRouter.get("/:id", async (c) => {
-  const item = await getMindmapService().getById(c.req.param("id"));
+/** Render the detail page; `?editing=true` swaps the canvas for the bullet-tree
+ *  editor AND turns notes into an inline-editable section. */
+async function renderDetail(c: AppContext, id: string) {
+  const item = await getMindmapService().getById(id);
   if (!item) return c.notFound();
   const editing = c.req.query("editing") === "true";
   return c.html(
@@ -21,6 +24,18 @@ mindmapRouter.get("/:id", async (c) => {
       editing={editing}
     />,
   );
+}
+
+mindmapRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
+
+// In-place notes save (Edit Mode). Bullet-tree edits use POST /:id/body.
+mindmapRouter.put("/:id/notes", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const notes = String(body.notes ?? "").trim() || undefined;
+  await getMindmapService().update(id, { notes });
+  publish("mindmap.updated");
+  return renderDetail(c, id);
 });
 
 mindmapRouter.post("/:id/body", async (c) => {
