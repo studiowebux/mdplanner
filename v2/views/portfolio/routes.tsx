@@ -9,11 +9,11 @@ import {
   getGitHubService,
   getGoalService,
   getMilestoneService,
-  getPeopleService,
   getPortfolioService,
   getProjectService,
   getTaskService,
 } from "../../singletons/services.ts";
+import { buildTeamPersonById } from "../../domains/portfolio/owners.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import {
   PortfolioDetailView,
@@ -569,10 +569,8 @@ async function renderDetail(c: AppContext, id: string) {
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
 
-  const teamIds = new Set((item.team ?? []).map((m) => m.personId));
-  const [allGoals, allPeople, customer, clientCustomer] = await Promise.all([
+  const [allGoals, customer, clientCustomer] = await Promise.all([
     getGoalService().list(),
-    teamIds.size > 0 ? getPeopleService().list() : Promise.resolve([]),
     item.billingCustomerId
       ? getCustomerService().getById(item.billingCustomerId)
       : Promise.resolve(null),
@@ -584,10 +582,7 @@ async function renderDetail(c: AppContext, id: string) {
   const goals = allGoals.filter((g) =>
     linkedById.has(g.id) || g.project === item.name
   );
-  const personById: Record<string, string> = {};
-  for (const p of allPeople) {
-    if (teamIds.has(p.id)) personById[p.id] = p.name;
-  }
+  const personById = await buildTeamPersonById(item.team ?? []);
   const editing = c.req.query("editing") === "true";
 
   return c.html(

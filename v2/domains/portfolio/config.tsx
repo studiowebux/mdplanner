@@ -13,6 +13,7 @@ import { PortfolioCard } from "../../views/components/portfolio-card.tsx";
 import { PORTFOLIO_TABLE_COLUMNS, portfolioToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
+import { buildTeamPersonById } from "./owners.ts";
 
 export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
@@ -147,6 +148,17 @@ export const portfolioConfig: DomainConfig<
     parseFormBody(PORTFOLIO_FORM_FIELDS, body, { clearEmpty: true }) as Partial<
       UpdatePortfolioItem
     >,
+
+  // Resolve person IDs to names for the team[] array-table autocomplete.
+  // Unresolved IDs produce an empty search input — user re-picks.
+  resolveArrayDisplayValues: async (item) => {
+    const personById = await buildTeamPersonById(item.team ?? []);
+    return {
+      team: (item.team ?? []).map((m) => ({
+        personId: (m.personId && personById[m.personId]) || "",
+      })),
+    };
+  },
 
   getService: () => getPortfolioService(),
 
