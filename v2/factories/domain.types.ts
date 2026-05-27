@@ -147,6 +147,19 @@ export type DomainConfig<T extends Entity, C, U> = {
   ) => Promise<Record<string, string>>;
 
   /**
+   * Resolve per-row display values for nested array-table autocomplete fields
+   * (e.g. action[].owner stored as person IDs → person names). Return a map
+   * keyed by the array-table field name; value is the per-row
+   * `{ fieldName → displayString }` array, index-aligned with the entity's
+   * row array. Unresolved entries should omit the field (or be undefined) so
+   * `AutocompleteWidget` falls back to the raw stored value.
+   * Called from the `/:id/edit` route only — not used when prefilling a create form.
+   */
+  resolveArrayDisplayValues?: (
+    item: T,
+  ) => Promise<Record<string, Record<string, string>[]>>;
+
+  /**
    * Override edit-form values after the factory's default item-to-string
    * mapping. Use when a public entity shape (e.g. `string[]`) needs reshaping
    * into the wire shape a form field expects (e.g. `array-table` JSON).

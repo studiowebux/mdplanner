@@ -496,9 +496,15 @@ export function createDomainRoutes<T extends Entity, C, U>(
       }
       displayValues = await cfg.resolveFormValues(raw);
     }
+    const arrayDisplayValues = await cfg.resolveArrayDisplayValues?.(item);
     const dynamicOptions = await cfg.extractFormOptions?.();
     return c.html(
-      DomainForm({ item, displayValues, dynamicOptions }) as unknown as string,
+      DomainForm({
+        item,
+        displayValues,
+        arrayDisplayValues,
+        dynamicOptions,
+      }) as unknown as string,
     );
   });
 

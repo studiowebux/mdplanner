@@ -912,10 +912,11 @@ export function createDomainForm<T extends Entity>(cfg: {
   const DomainForm: FC<{
     item?: T;
     displayValues?: Record<string, string>;
+    arrayDisplayValues?: Record<string, Record<string, string>[]>;
     dynamicOptions?: Record<string, { value: string; label: string }[]>;
     prefillValues?: Record<string, string>;
   }> = (
-    { item, displayValues, dynamicOptions, prefillValues },
+    { item, displayValues, arrayDisplayValues, dynamicOptions, prefillValues },
   ) => {
     const isEdit = !!item;
     const id = isEdit ? item[cfg.idField ?? "id"] : undefined;
@@ -968,6 +969,7 @@ export function createDomainForm<T extends Entity>(cfg: {
         fields={fields}
         values={isEdit ? values : prefillValues}
         displayValues={displayValues}
+        arrayDisplayValues={arrayDisplayValues}
         action={isEdit ? `/${cfg.domain}/${id}/edit` : `/${cfg.domain}/new`}
         method="post"
         open

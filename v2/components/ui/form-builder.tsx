@@ -107,6 +107,13 @@ type Props = {
   values?: Record<string, string>;
   /** Display overrides for autocomplete search inputs (show name, store ID). */
   displayValues?: Record<string, string>;
+  /**
+   * Per-row display overrides for nested array-table autocomplete fields.
+   * Keyed by the array-table field's `name`; value is the per-row map
+   * (`{ fieldName → displayString }[]`) index-aligned with the row array.
+   * Out-of-range rows fall back to an empty displayValue.
+   */
+  arrayDisplayValues?: Record<string, Record<string, string>[]>;
   submitLabel?: string;
   action: string;
   method: "post" | "put";
@@ -120,8 +127,15 @@ const fieldId = (formId: string, name: string) => `${formId}-${name}`;
 // ---------------------------------------------------------------------------
 
 const ArrayTableRowField: FC<
-  { section: string; idx: number; field: ArrayTableItemField; value?: string }
-> = ({ section, idx, field, value }) => {
+  {
+    section: string;
+    idx: number;
+    field: ArrayTableItemField;
+    value?: string;
+    /** Display override for the autocomplete search input (show name, store ID). */
+    displayValue?: string;
+  }
+> = ({ section, idx, field, value, displayValue }) => {
   const name = `${section}[${idx}].${field.name}`;
   if (field.type === "hidden") {
     return <input type="hidden" name={name} value={value ?? ""} />;
@@ -184,6 +198,7 @@ const ArrayTableRowField: FC<
           name={name}
           source={field.source}
           value={value}
+          displayValue={displayValue}
           placeholder={field.placeholder}
           autofillMap={field.autofill}
         />
@@ -198,8 +213,10 @@ const ArrayTableRow: FC<
     idx: number;
     itemFields: ArrayTableItemField[];
     rowData?: Record<string, unknown>;
+    /** Per-field display overrides for autocomplete search inputs in this row. */
+    rowDisplayData?: Record<string, string>;
   }
-> = ({ section, idx, itemFields, rowData }) => (
+> = ({ section, idx, itemFields, rowData, rowDisplayData }) => (
   <div class="array-table__row">
     <div class="array-table__row-fields">
       {itemFields.map((field) => (
@@ -209,6 +226,7 @@ const ArrayTableRow: FC<
           idx={idx}
           field={field}
           value={rowData ? String(rowData[field.name] ?? "") : ""}
+          displayValue={rowDisplayData?.[field.name]}
         />
       ))}
     </div>
@@ -231,8 +249,10 @@ const ArrayTable: FC<
     rows: Record<string, unknown>[];
     rowsId: string;
     addLabel: string;
+    /** Per-row display overrides, index-aligned with `rows`. */
+    rowsDisplayData?: Record<string, string>[];
   }
-> = ({ section, itemFields, rows, rowsId, addLabel }) => (
+> = ({ section, itemFields, rows, rowsId, addLabel, rowsDisplayData }) => (
   <div class="array-table" data-array-table={section}>
     <div class="array-table__rows" id={rowsId}>
       {rows.map((rowData, idx) => (
@@ -242,6 +262,7 @@ const ArrayTable: FC<
           idx={idx}
           itemFields={itemFields}
           rowData={rowData}
+          rowDisplayData={rowsDisplayData?.[idx]}
         />
       ))}
     </div>
@@ -262,9 +283,16 @@ const ArrayTable: FC<
 export { ArrayTable, ArrayTableRow, ArrayTableRowField };
 
 const Field: FC<
-  { formId: string; def: FieldDef; value?: string; displayValue?: string }
+  {
+    formId: string;
+    def: FieldDef;
+    value?: string;
+    displayValue?: string;
+    /** Per-row display overrides for nested array-table autocomplete fields. */
+    arrayDisplayRows?: Record<string, string>[];
+  }
 > = (
-  { formId, def, value, displayValue },
+  { formId, def, value, displayValue, arrayDisplayRows },
 ) => {
   const id = fieldId(formId, def.name);
 
@@ -424,6 +452,7 @@ const Field: FC<
           rows={parseJson<Record<string, unknown>[]>(value) ?? []}
           rowsId={`${id}-rows`}
           addLabel={def.addLabel ?? `Add ${def.label}`}
+          rowsDisplayData={arrayDisplayRows}
         />
       )}
     </div>
@@ -437,6 +466,7 @@ export const FormBuilder: FC<Props> = (
     fields,
     values,
     displayValues,
+    arrayDisplayValues,
     submitLabel,
     action,
     method,
@@ -457,6 +487,7 @@ export const FormBuilder: FC<Props> = (
           def={def}
           value={values?.[def.name]}
           displayValue={displayValues?.[def.name]}
+          arrayDisplayRows={arrayDisplayValues?.[def.name]}
         />
       ))}
       <div class="form__actions">
