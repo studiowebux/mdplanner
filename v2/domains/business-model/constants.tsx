@@ -94,6 +94,12 @@ export const BUSINESS_MODEL_TABLE_COLUMNS: ColumnDef[] = [
 // Form fields
 // ---------------------------------------------------------------------------
 
+// The 9 canvas section fields (keyPartners, keyActivities, keyResources,
+// valueProposition, customerRelationships, channels, customerSegments,
+// costStructure, revenueStreams) are edited in-place on the detail page
+// (?editing=true). They are intentionally absent from this sidenav — saving
+// them as raw textarea strings corrupts the data into single-character bullets
+// (same root cause as the Lean Canvas fix in commit 47f4cf4).
 export const BUSINESS_MODEL_FORM_FIELDS: FieldDef[] = [
   {
     type: "text",
@@ -109,60 +115,6 @@ export const BUSINESS_MODEL_FORM_FIELDS: FieldDef[] = [
     label: "Project",
     source: "portfolio",
     placeholder: "Search projects...",
-  },
-  {
-    type: "textarea",
-    name: "keyPartners",
-    label: "Key Partners",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "keyActivities",
-    label: "Key Activities",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "keyResources",
-    label: "Key Resources",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "valueProposition",
-    label: "Value Proposition",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "customerRelationships",
-    label: "Customer Relationships",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "channels",
-    label: "Channels",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "customerSegments",
-    label: "Customer Segments",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "costStructure",
-    label: "Cost Structure",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "revenueStreams",
-    label: "Revenue Streams",
-    rows: 3,
   },
   { type: "textarea", name: "notes", label: "Notes", rows: 3 },
 ];
