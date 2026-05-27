@@ -69,30 +69,20 @@ export class InvestorRepository extends CachedMarkdownRepository<
       type: (fm.type as Investor["type"]) ?? "vc",
       stage: (fm.stage as Investor["stage"]) ?? "lead",
       status: (fm.status as Investor["status"]) ?? "not_started",
-      amountTarget: fm.amount_target != null
-        ? Number(fm.amount_target)
+      amountTarget: fm.amountTarget != null
+        ? Number(fm.amountTarget)
         : undefined,
       contact: fm.contact != null ? String(fm.contact) : undefined,
-      introDate: fm.intro_date != null ? String(fm.intro_date) : undefined,
-      lastContact: fm.last_contact != null
-        ? String(fm.last_contact)
-        : undefined,
+      introDate: fm.introDate != null ? String(fm.introDate) : undefined,
+      lastContact: fm.lastContact != null ? String(fm.lastContact) : undefined,
       notes,
       tags: Array.isArray(fm.tags)
         ? fm.tags.map(String)
         : fm.tags != null
         ? [String(fm.tags)]
         : [],
-      createdAt: fm.createdAt
-        ? String(fm.createdAt)
-        : fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updatedAt
-        ? String(fm.updatedAt)
-        : fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
