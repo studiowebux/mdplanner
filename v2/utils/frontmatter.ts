@@ -34,23 +34,44 @@ export function parseFrontmatter(
 }
 
 /**
- * Minimal YAML parser — handles flat key: value, arrays, and nested objects.
- * Covers the subset used by MDPlanner frontmatter. Not a full YAML parser.
+ * Minimal YAML parser — handles flat key: value, arrays, and arbitrarily
+ * nested objects. Covers the subset used by MDPlanner frontmatter (no
+ * anchors, no tagged scalars, no flow-style maps beyond `{}`).
  */
 function parseYaml(yaml: string): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
   const lines = yaml.split("\n");
-  let i = 0;
+  const { value } = parseMap(lines, 0, 0);
+  return value;
+}
+
+/**
+ * Parse a YAML map starting at `start`, where every key is indented exactly
+ * `indent` columns. Returns the map and the next line index outside the
+ * block (i.e. the first line with indent < `indent`).
+ */
+function parseMap(
+  lines: string[],
+  start: number,
+  indent: number,
+): { value: Record<string, unknown>; next: number } {
+  const result: Record<string, unknown> = {};
+  let i = start;
 
   while (i < lines.length) {
     const line = lines[i];
-    const trimmed = line.trim();
-
-    if (!trimmed || trimmed.startsWith("#")) {
+    if (!line.trim() || line.trim().startsWith("#")) {
+      i++;
+      continue;
+    }
+    const currentIndent = leadingSpaces(line);
+    if (currentIndent < indent) break;
+    if (currentIndent > indent) {
+      // Stray deeper line with no parent — skip defensively.
       i++;
       continue;
     }
 
+    const trimmed = line.trim();
     const colonIdx = trimmed.indexOf(":");
     if (colonIdx === -1) {
       i++;
@@ -60,7 +81,7 @@ function parseYaml(yaml: string): Record<string, unknown> {
     const key = trimmed.slice(0, colonIdx).trim();
     const rawValue = trimmed.slice(colonIdx + 1).trim();
 
-    // Inline array: [a, b, c]
+    // Inline array: key: [a, b, c]
     if (rawValue.startsWith("[") && rawValue.endsWith("]")) {
       const inner = rawValue.slice(1, -1);
       result[key] = inner
@@ -70,84 +91,40 @@ function parseYaml(yaml: string): Record<string, unknown> {
       continue;
     }
 
-    // Block array (next lines start with -)
-    if (rawValue === "") {
-      const arr: unknown[] = [];
-      let j = i + 1;
-      while (j < lines.length && lines[j].match(/^\s+-/)) {
-        const item = lines[j].replace(/^\s+-\s*/, "").trim();
-        // Check if this array item is an object (next lines are indented key: value)
-        const nextIndent = lines[j].match(/^(\s+)/)?.[1]?.length ?? 0;
-        let k = j + 1;
-        const obj: Record<string, unknown> = {};
-        let isObj = false;
-        while (
-          k < lines.length &&
-          !lines[k].match(/^\s+-/) &&
-          lines[k].trim() !== "" &&
-          (lines[k].match(/^(\s+)/)?.[1]?.length ?? 0) > nextIndent
-        ) {
-          const objLine = lines[k].trim();
-          const objColon = objLine.indexOf(":");
-          if (objColon !== -1) {
-            isObj = true;
-            const objKey = objLine.slice(0, objColon).trim();
-            const objVal = objLine.slice(objColon + 1).trim();
-            obj[objKey] = parseScalar(objVal);
-          }
-          k++;
-        }
-        const itemIsObj = item.includes(":") && !item.startsWith('"') &&
-          !item.startsWith("'");
-        if (isObj || itemIsObj) {
-          if (itemIsObj) {
-            const fc = item.indexOf(":");
-            obj[item.slice(0, fc).trim()] = parseScalar(
-              item.slice(fc + 1).trim(),
-            );
-          }
-          arr.push(obj);
-          j = k;
-        } else {
-          arr.push(parseScalar(item));
-          j++;
-        }
-      }
-      if (arr.length > 0) {
-        result[key] = arr;
-        i = j;
-        continue;
-      }
+    // Inline empty map: key: {}
+    if (rawValue === "{}") {
+      result[key] = {};
+      i++;
+      continue;
+    }
 
-      // Nested map: indented key: value lines
-      const map: Record<string, unknown> = {};
-      let m = i + 1;
-      while (
-        m < lines.length &&
-        lines[m].trim() !== "" &&
-        (lines[m].match(/^(\s+)/)?.[1]?.length ?? 0) > 0
-      ) {
-        const mapLine = lines[m].trim();
-        const mc = mapLine.indexOf(":");
-        if (mc !== -1) {
-          const mk = mapLine.slice(0, mc).trim();
-          const mv = mapLine.slice(mc + 1).trim();
-          if (mv.startsWith("[") && mv.endsWith("]")) {
-            const inner = mv.slice(1, -1);
-            map[mk] = inner
-              ? inner.split(",").map((s) => parseScalar(s.trim()))
-              : [];
-          } else {
-            map[mk] = parseScalar(mv);
-          }
-        }
-        m++;
-      }
-      if (Object.keys(map).length > 0) {
-        result[key] = map;
-        i = m;
+    // Block value (next lines indented deeper)
+    if (rawValue === "") {
+      const childStart = nextNonEmpty(lines, i + 1);
+      if (childStart === -1) {
+        i++;
         continue;
       }
+      const childIndent = leadingSpaces(lines[childStart]);
+      if (childIndent <= indent) {
+        // No children at all — leave key unset.
+        i++;
+        continue;
+      }
+      if (lines[childStart].trim().startsWith("-")) {
+        const { value, next } = parseBlockArray(
+          lines,
+          childStart,
+          childIndent,
+        );
+        result[key] = value;
+        i = next;
+        continue;
+      }
+      const { value, next } = parseMap(lines, childStart, childIndent);
+      result[key] = value;
+      i = next;
+      continue;
     }
 
     // Scalar value
@@ -155,7 +132,121 @@ function parseYaml(yaml: string): Record<string, unknown> {
     i++;
   }
 
-  return result;
+  return { value: result, next: i };
+}
+
+/**
+ * Parse a YAML block sequence where each item begins with `- ` at exactly
+ * `indent` columns. Items may be scalars, inline `- key: value` objects
+ * (whose remaining fields appear on deeper-indented continuation lines), or
+ * deeper nested maps.
+ */
+function parseBlockArray(
+  lines: string[],
+  start: number,
+  indent: number,
+): { value: unknown[]; next: number } {
+  const items: unknown[] = [];
+  let i = start;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) {
+      i++;
+      continue;
+    }
+    const currentIndent = leadingSpaces(line);
+    if (currentIndent < indent) break;
+    if (currentIndent > indent || !line.trim().startsWith("-")) {
+      // Continuation belonging to the previous item — handled inline below.
+      break;
+    }
+
+    const afterDash = line.slice(currentIndent + 1).replace(/^\s+/, "");
+    const colonIdx = afterDash.indexOf(":");
+
+    if (colonIdx === -1) {
+      items.push(parseScalar(afterDash.trim()));
+      i++;
+      continue;
+    }
+
+    const obj: Record<string, unknown> = {};
+    const firstKey = afterDash.slice(0, colonIdx).trim();
+    const firstVal = afterDash.slice(colonIdx + 1).trim();
+    if (firstVal !== "") obj[firstKey] = parseScalar(firstVal);
+    i++;
+
+    // Continuation lines for this object: indented strictly deeper than the dash.
+    while (i < lines.length) {
+      const cline = lines[i];
+      if (!cline.trim() || cline.trim().startsWith("#")) {
+        i++;
+        continue;
+      }
+      const cIndent = leadingSpaces(cline);
+      if (cIndent <= indent) break;
+      if (cline.trim().startsWith("-")) break;
+      const ctrim = cline.trim();
+      const cc = ctrim.indexOf(":");
+      if (cc === -1) {
+        i++;
+        continue;
+      }
+      const ck = ctrim.slice(0, cc).trim();
+      const cv = ctrim.slice(cc + 1).trim();
+      if (cv === "") {
+        const grandStart = nextNonEmpty(lines, i + 1);
+        if (grandStart !== -1) {
+          const grandIndent = leadingSpaces(lines[grandStart]);
+          if (grandIndent > cIndent) {
+            if (lines[grandStart].trim().startsWith("-")) {
+              const { value, next } = parseBlockArray(
+                lines,
+                grandStart,
+                grandIndent,
+              );
+              obj[ck] = value;
+              i = next;
+              continue;
+            }
+            const { value, next } = parseMap(lines, grandStart, grandIndent);
+            obj[ck] = value;
+            i = next;
+            continue;
+          }
+        }
+        i++;
+        continue;
+      }
+      if (cv.startsWith("[") && cv.endsWith("]")) {
+        const inner = cv.slice(1, -1);
+        obj[ck] = inner
+          ? inner.split(",").map((s) => parseScalar(s.trim()))
+          : [];
+      } else {
+        obj[ck] = parseScalar(cv);
+      }
+      i++;
+    }
+
+    items.push(obj);
+  }
+
+  return { value: items, next: i };
+}
+
+function leadingSpaces(line: string): number {
+  const m = line.match(/^( *)/);
+  return m ? m[1].length : 0;
+}
+
+function nextNonEmpty(lines: string[], from: number): number {
+  for (let i = from; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t && !t.startsWith("#")) return i;
+  }
+  return -1;
 }
 
 /**
@@ -183,50 +274,68 @@ function parseScalar(value: string): unknown {
 
 /**
  * Serialize a frontmatter object back to YAML string (for writing).
+ * Handles arbitrarily nested objects, arrays of scalars, arrays of objects,
+ * and arrays nested inside objects.
  */
 export function serializeFrontmatter(
   frontmatter: Record<string, unknown>,
   body: string,
 ): string {
-  const yaml = Object.entries(frontmatter)
-    .filter(([_, v]) => v !== undefined && v !== null)
-    .map(([k, v]) => {
-      if (Array.isArray(v)) {
-        if (v.length === 0) return `${k}: []`;
-        if (typeof v[0] === "object") {
-          const items = v.map((item) => {
-            const entries = Object.entries(item as Record<string, unknown>)
-              .filter(([_, rv]) => rv !== undefined && rv !== null);
-            const first = entries[0];
-            const rest = entries.slice(1);
-            let s = `  - ${first[0]}: ${serializeScalar(first[1])}`;
-            for (const [rk, rv] of rest) {
-              s += `\n    ${rk}: ${serializeScalar(rv)}`;
-            }
-            return s;
-          });
-          return `${k}:\n${items.join("\n")}`;
-        }
-        return `${k}: [${v.map(serializeScalar).join(", ")}]`;
-      }
-      if (typeof v === "object") {
-        const entries = Object.entries(v as Record<string, unknown>);
-        if (entries.length === 0) return `${k}: {}`;
-        const nested = entries.map(([nk, nv]) => {
-          if (Array.isArray(nv)) {
-            return `  ${nk}: [${
-              (nv as unknown[]).map(serializeScalar).join(", ")
-            }]`;
-          }
-          return `  ${nk}: ${serializeScalar(nv)}`;
-        });
-        return `${k}:\n${nested.join("\n")}`;
-      }
-      return `${k}: ${serializeScalar(v)}`;
-    })
-    .join("\n");
+  const lines: string[] = [];
+  for (const [k, v] of Object.entries(frontmatter)) {
+    if (v === undefined || v === null) continue;
+    appendValue(lines, k, v, 0);
+  }
+  return `---\n${lines.join("\n")}\n---\n\n${body}`;
+}
 
-  return `---\n${yaml}\n---\n\n${body}`;
+function appendValue(
+  lines: string[],
+  key: string,
+  value: unknown,
+  indent: number,
+): void {
+  const pad = "  ".repeat(indent);
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      lines.push(`${pad}${key}: []`);
+      return;
+    }
+    if (typeof value[0] === "object" && value[0] !== null) {
+      lines.push(`${pad}${key}:`);
+      const itemPad = "  ".repeat(indent + 1);
+      for (const item of value) {
+        const entries = Object.entries(item as Record<string, unknown>)
+          .filter(([_, rv]) => rv !== undefined && rv !== null);
+        if (entries.length === 0) continue;
+        const [fk, fv] = entries[0];
+        lines.push(`${itemPad}- ${fk}: ${serializeScalar(fv)}`);
+        for (const [rk, rv] of entries.slice(1)) {
+          lines.push(`${itemPad}  ${rk}: ${serializeScalar(rv)}`);
+        }
+      }
+      return;
+    }
+    lines.push(`${pad}${key}: [${value.map(serializeScalar).join(", ")}]`);
+    return;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([_, rv]) => rv !== undefined && rv !== null);
+    if (entries.length === 0) {
+      lines.push(`${pad}${key}: {}`);
+      return;
+    }
+    lines.push(`${pad}${key}:`);
+    for (const [nk, nv] of entries) {
+      appendValue(lines, nk, nv, indent + 1);
+    }
+    return;
+  }
+
+  lines.push(`${pad}${key}: ${serializeScalar(value)}`);
 }
 
 function serializeScalar(value: unknown): string {

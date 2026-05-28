@@ -73,9 +73,6 @@ Deno.test("PeopleRepository - create stores file and returns entity", async () =
 });
 
 Deno.test("PeopleRepository - findById round-trips every persisted field", async () => {
-  // `preferences` is intentionally omitted — serializeFrontmatter cannot
-  // round-trip depth-2 nested objects (see bug task_1779925621473_tv1h).
-  // `accounts` (flat Record) is exercised here as the depth-1 representative.
   const { repo, dir } = await setupRepo();
   try {
     const created = await repo.create({
@@ -96,6 +93,13 @@ Deno.test("PeopleRepository - findById round-trips every persisted field", async
       ],
       systemPrompt: "You are a helpful assistant",
       accounts: { github: "octocat", asana: "rt" },
+      preferences: {
+        viewPrefs: { tasks: "board", goals: "grid" },
+        pinnedNav: ["/tasks", "/goals"],
+        filterDefaults: {
+          tasks: { section: "In Progress" },
+        },
+      },
     });
     const found = await repo.findById(created.id);
     assertExists(found);
@@ -114,6 +118,13 @@ Deno.test("PeopleRepository - findById round-trips every persisted field", async
     ]);
     assertEquals(found!.systemPrompt, "You are a helpful assistant");
     assertEquals(found!.accounts, { github: "octocat", asana: "rt" });
+    assertEquals(found!.preferences, {
+      viewPrefs: { tasks: "board", goals: "grid" },
+      pinnedNav: ["/tasks", "/goals"],
+      filterDefaults: {
+        tasks: { section: "In Progress" },
+      },
+    });
   } finally {
     await cleanup(dir);
   }
@@ -531,13 +542,58 @@ Deno.test("PeopleService - getWorkload returns workload subset; null for missing
 });
 
 // =============================================================================
+// PeopleService — updatePreferences (deep-merge)
+// =============================================================================
+
+Deno.test("PeopleService - updatePreferences deep-merges object sub-keys and replaces arrays", async () => {
+  const { service, dir } = await setupService();
+  try {
+    const p = await service.create({
+      name: "Pref User",
+      preferences: {
+        viewPrefs: { tasks: "board", goals: "grid" },
+        pinnedNav: ["/tasks"],
+        filterDefaults: { tasks: { section: "Todo" } },
+      },
+    });
+
+    const merged = await service.updatePreferences(p.id, {
+      viewPrefs: { tasks: "list" },
+      pinnedNav: ["/goals", "/notes"],
+      filterDefaults: { goals: { status: "active" } },
+    });
+    assertExists(merged);
+    assertEquals(merged!.preferences, {
+      viewPrefs: { tasks: "list", goals: "grid" },
+      pinnedNav: ["/goals", "/notes"],
+      filterDefaults: {
+        tasks: { section: "Todo" },
+        goals: { status: "active" },
+      },
+    });
+
+    const reread = await service.getById(p.id);
+    assertEquals(reread!.preferences, merged!.preferences);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PeopleService - updatePreferences returns null for missing person", async () => {
+  const { service, dir } = await setupService();
+  try {
+    const result = await service.updatePreferences("person_missing", {
+      viewPrefs: { tasks: "board" },
+    });
+    assertStrictEquals(result, null);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+// =============================================================================
 // PeopleService — heartbeat
 // =============================================================================
-//
-// `updatePreferences` is NOT covered here — the deep-merge logic is correct,
-// but persistence of `preferences` requires depth-2 nested-object frontmatter
-// support. Blocked by bug `task_1779925621473_tv1h` (serializeFrontmatter
-// drops 2+-level nesting). Re-add coverage once that ticket lands.
 
 Deno.test("PeopleService - heartbeat updates lastSeen, status, and currentTaskId", async () => {
   const { service, dir } = await setupService();
