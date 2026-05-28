@@ -356,3 +356,20 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   dashboard: "/portfolio/dashboard",
   me: "/me",
 };
+
+// ---------------------------------------------------------------------------
+// Search result type maps — superset of ENTITY_TYPE_* that includes
+// searchable-but-not-feature FTS types (e.g. sticky_board, registered by the
+// sticky-note domain alongside sticky_note). Settings keeps using the
+// ENTITY_TYPE_* maps for its feature toggle list so no bogus entries appear.
+// ---------------------------------------------------------------------------
+
+export const SEARCH_TYPE_LABELS: Record<string, string> = {
+  ...ENTITY_TYPE_LABELS,
+  sticky_board: "Sticky Board",
+};
+
+export const SEARCH_TYPE_ROUTES: Record<string, string> = {
+  ...ENTITY_TYPE_ROUTES,
+  sticky_board: "/sticky-notes",
+};

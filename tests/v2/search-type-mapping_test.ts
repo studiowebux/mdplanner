@@ -17,23 +17,31 @@
  * so there is no CacheDatabase signal-listener to leak.
  */
 
-import { assert, assertExists } from "@std/assert";
+import { assert, assertEquals, assertExists } from "@std/assert";
 import { ENTITIES } from "../../v2/database/sqlite/entities.ts";
 import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPE_ROUTES,
+  SEARCH_TYPE_LABELS,
+  SEARCH_TYPE_ROUTES,
 } from "../../v2/constants/mod.ts";
 import { registerBillingRateEntity } from "../../v2/domains/billing-rate/cache.ts";
 import { registerC4Entity } from "../../v2/domains/c4/cache.ts";
 import { registerJournalEntity } from "../../v2/domains/journal/cache.ts";
 import { registerLeanCanvasEntity } from "../../v2/domains/lean-canvas/cache.ts";
 import { registerProjectValueBoardEntity } from "../../v2/domains/project-value-board/cache.ts";
+import {
+  registerStickyBoardEntity,
+  registerStickyNoteEntity,
+} from "../../v2/domains/sticky-note/cache.ts";
 import { registerStrategicLevelsEntity } from "../../v2/domains/strategic-levels/cache.ts";
 import { BillingRateRepository } from "../../v2/repositories/billing-rate.repository.ts";
 import { C4Repository } from "../../v2/repositories/c4.repository.ts";
 import { JournalRepository } from "../../v2/repositories/journal.repository.ts";
 import { LeanCanvasRepository } from "../../v2/repositories/lean-canvas.repository.ts";
 import { ProjectValueBoardRepository } from "../../v2/repositories/project-value-board.repository.ts";
+import { StickyBoardRepository } from "../../v2/repositories/sticky-board.repository.ts";
+import { StickyNoteRepository } from "../../v2/repositories/sticky-note.repository.ts";
 import { StrategicLevelsRepository } from "../../v2/repositories/strategic-levels.repository.ts";
 
 Deno.test("search entity type mapping", async (t) => {
@@ -55,6 +63,10 @@ Deno.test("search entity type mapping", async (t) => {
   registerJournalEntity(new JournalRepository(dir));
   registerLeanCanvasEntity(new LeanCanvasRepository(dir));
   registerProjectValueBoardEntity(new ProjectValueBoardRepository(dir));
+  registerStickyNoteEntity(new StickyNoteRepository(dir));
+  registerStickyBoardEntity(() =>
+    new StickyBoardRepository(dir).findAllFromDisk()
+  );
   registerStrategicLevelsEntity(new StrategicLevelsRepository(dir));
 
   try {
@@ -78,6 +90,37 @@ Deno.test("search entity type mapping", async (t) => {
         );
       });
     }
+
+    // sticky-note registers TWO fts.types: sticky_note (per-note) and
+    // sticky_board (per-board). sticky_board is searchable-but-not-a-feature
+    // — it must resolve via SEARCH_TYPE_* (the search dialog's map) but stay
+    // out of ENTITY_TYPE_LABELS, which settings.tsx renders as the feature
+    // toggle list. Bug: task_1779431472589_ahze.
+    await t.step("sticky-note emits both sticky_note and sticky_board", () => {
+      assert(ftsTypes.has("sticky_note"));
+      assert(ftsTypes.has("sticky_board"));
+    });
+
+    await t.step("sticky_board resolves via SEARCH_TYPE_* maps", () => {
+      assertEquals(SEARCH_TYPE_LABELS["sticky_board"], "Sticky Board");
+      assertEquals(SEARCH_TYPE_ROUTES["sticky_board"], "/sticky-notes");
+    });
+
+    await t.step(
+      "sticky_board stays out of ENTITY_TYPE_* (no bogus feature toggle)",
+      () => {
+        assertEquals(
+          ENTITY_TYPE_LABELS["sticky_board"],
+          undefined,
+          "Adding sticky_board to ENTITY_TYPE_LABELS would render a bogus toggle in Settings",
+        );
+        assertEquals(
+          ENTITY_TYPE_ROUTES["sticky_board"],
+          undefined,
+          "Adding sticky_board to ENTITY_TYPE_ROUTES would route to the feature index",
+        );
+      },
+    );
   } finally {
     await Deno.remove(dir, { recursive: true });
   }

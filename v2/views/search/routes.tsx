@@ -3,8 +3,8 @@ import { SearchView } from "../search.tsx";
 import { getSearchEngine } from "../../singletons/services.ts";
 import {
   buildNavLinks,
-  ENTITY_TYPE_LABELS,
-  ENTITY_TYPE_ROUTES,
+  SEARCH_TYPE_LABELS,
+  SEARCH_TYPE_ROUTES,
 } from "../../constants/mod.ts";
 import { escapeHtml, escapeSnippetHtml } from "../../utils/html.ts";
 import { viewProps } from "../../middleware/view-props.ts";
@@ -135,9 +135,9 @@ searchRouter.get("/results", (c) => {
   const resultsHtml = results.length > 0
     ? `<li class="search-dialog__section-label">Results</li>` +
       results.map((r) => {
-        const label = escapeHtml(ENTITY_TYPE_LABELS[r.type] ?? r.type);
+        const label = escapeHtml(SEARCH_TYPE_LABELS[r.type] ?? r.type);
         const title = escapeHtml(r.title);
-        const route = ENTITY_TYPE_ROUTES[r.type];
+        const route = SEARCH_TYPE_ROUTES[r.type];
         const href = route ? `${route}/${escapeHtml(r.id)}` : "";
         const snippet = r.snippet && r.snippet !== "null"
           ? escapeSnippetHtml(r.snippet)
