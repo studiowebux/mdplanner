@@ -106,3 +106,44 @@ export function mapArrayToFm(
 ): Record<string, unknown>[] {
   return items.map((item) => mapKeysToFm(item, overrides));
 }
+
+// ---------------------------------------------------------------------------
+// Audit field reader — single helper, used by every domain's parse()
+// ---------------------------------------------------------------------------
+
+/** Audit fields extracted from raw frontmatter (only set when non-null). */
+export interface ParsedAuditFields {
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+}
+
+/**
+ * Extract the four audit fields from raw frontmatter, handling both
+ * snake_case (disk shape — standalone repos that bypass mapKeysFromFm) and
+ * camelCase (post-mapKeysFromFm shape — cached repos extending
+ * BaseMarkdownRepository). Snake_case wins when both are present.
+ *
+ * Use in every domain's parse() — spread into the returned entity:
+ *
+ *   return { id, name, ..., ...parseAuditFields(fm) };
+ *
+ * Eliminates the 4-line per-module duplication that historically drifted
+ * between snake_case and camelCase reads. Investigation note
+ * `note_1779855618481_n2klqz` identified 14 affected modules.
+ */
+export function parseAuditFields(
+  fm: Record<string, unknown>,
+): ParsedAuditFields {
+  const result: ParsedAuditFields = {};
+  const createdAt = fm.created_at ?? fm.createdAt;
+  if (createdAt != null) result.createdAt = String(createdAt);
+  const updatedAt = fm.updated_at ?? fm.updatedAt;
+  if (updatedAt != null) result.updatedAt = String(updatedAt);
+  const createdBy = fm.created_by ?? fm.createdBy;
+  if (createdBy != null) result.createdBy = String(createdBy);
+  const updatedBy = fm.updated_by ?? fm.updatedBy;
+  if (updatedBy != null) result.updatedBy = String(updatedBy);
+  return result;
+}

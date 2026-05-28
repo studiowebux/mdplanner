@@ -7,7 +7,7 @@ import {
 import { toKebab } from "../utils/slug.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
+import { mapKeysToFm, parseAuditFields } from "../utils/frontmatter-mapper.ts";
 import type {
   CreatePortfolioItem,
   PortfolioItem,
@@ -418,13 +418,10 @@ export class PortfolioRepository {
         : undefined,
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
-      statusUpdates: Array.isArray(fm.statusUpdates)
-        ? fm.statusUpdates
+      statusUpdates: Array.isArray(fm.status_updates ?? fm.statusUpdates)
+        ? ((fm.status_updates ?? fm.statusUpdates) as PortfolioStatusUpdate[])
         : undefined,
-      createdAt: fm.createdAt != null ? String(fm.createdAt) : undefined,
-      updatedAt: fm.updatedAt != null ? String(fm.updatedAt) : undefined,
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      ...parseAuditFields(fm),
       archived: fm.archived === true ? true : undefined,
       archivedAt: fm.archived_at != null ? String(fm.archived_at) : undefined,
       archivedBy: fm.archived_by != null ? String(fm.archived_by) : undefined,

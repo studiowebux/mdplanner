@@ -3,16 +3,6 @@
  * CachedMarkdownRepository) and PortfolioService.
  *
  * Disk-only — no cache attached.
- *
- * NOTE: Two narrow round-trip gaps intentionally skipped here, blocked on
- * bug `task_1779926246910_1470`:
- * 1. `statusUpdates` not round-tripped via findById (serialize writes
- *    snake_case, parse reads camelCase).
- * 2. Audit fields (createdAt/updatedAt/createdBy/updatedBy) — same root cause.
- *
- * `addStatusUpdate`'s in-memory return value IS covered (creation path does
- * not re-read from disk). `updateStatusUpdate` / `deleteStatusUpdate` cannot
- * be covered until the parse fix lands — they depend on the broken round-trip.
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
@@ -306,7 +296,6 @@ Deno.test("PortfolioRepository - hardDelete returns false for non-existent ID", 
 // =============================================================================
 
 Deno.test("PortfolioRepository - round-trips domain fields via findById", async () => {
-  // Excludes statusUpdates + audit fields — blocked on task_1779926246910_1470.
   const { repo, dir } = await setupRepo();
   try {
     const created = await repo.create({
@@ -369,6 +358,29 @@ Deno.test("PortfolioRepository - round-trips domain fields via findById", async 
   }
 });
 
+Deno.test("PortfolioRepository - round-trips audit fields via findById after update", async () => {
+  const { repo, dir } = await setupRepo();
+  try {
+    const created = await repo.create({ name: "Audit Round Trip" });
+    // Write audit fields via upsertEntity so serialize() emits them.
+    await repo.upsertEntity({
+      ...created,
+      createdAt: "2026-01-15T10:00:00.000Z",
+      updatedAt: "2026-02-20T14:30:00.000Z",
+      createdBy: "person_creator",
+      updatedBy: "person_editor",
+    });
+    const found = await repo.findById(created.id);
+    assertExists(found);
+    assertEquals(found!.createdAt, "2026-01-15T10:00:00.000Z");
+    assertEquals(found!.updatedAt, "2026-02-20T14:30:00.000Z");
+    assertEquals(found!.createdBy, "person_creator");
+    assertEquals(found!.updatedBy, "person_editor");
+  } finally {
+    await cleanup(dir);
+  }
+});
+
 // =============================================================================
 // PortfolioRepository — findByName + search
 // =============================================================================
@@ -411,13 +423,10 @@ Deno.test("PortfolioRepository - search filters by case-insensitive name substri
 });
 
 // =============================================================================
-// PortfolioRepository — status updates (in-memory return only)
+// PortfolioRepository — status updates
 // =============================================================================
 
-Deno.test("PortfolioRepository - addStatusUpdate returns new update in memory", async () => {
-  // The round-trip via findById is blocked on task_1779926246910_1470 — but
-  // addStatusUpdate's IMMEDIATE return value is computed in-memory and not
-  // affected by the parse drop. Exercises the creation path only.
+Deno.test("PortfolioRepository - addStatusUpdate returns new update and round-trips via findById", async () => {
   const { repo, dir } = await setupRepo();
   try {
     const item = await repo.create({ name: "With Updates" });
@@ -430,6 +439,33 @@ Deno.test("PortfolioRepository - addStatusUpdate returns new update in memory", 
     assertEquals(update!.message, "First milestone shipped");
     // Date defaults to today (YYYY-MM-DD)
     assertEquals(update!.date.length, 10);
+
+    const found = await repo.findById(item.id);
+    assertExists(found);
+    assertEquals(found!.statusUpdates?.length, 1);
+    assertEquals(found!.statusUpdates?.[0].id, update!.id);
+    assertEquals(found!.statusUpdates?.[0].message, "First milestone shipped");
+    assertEquals(found!.statusUpdates?.[0].date, update!.date);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PortfolioRepository - addStatusUpdate prepends to existing statusUpdates", async () => {
+  const { repo, dir } = await setupRepo();
+  try {
+    const item = await repo.create({ name: "Multi Updates" });
+    const first = await repo.addStatusUpdate(item.id, "First");
+    const second = await repo.addStatusUpdate(item.id, "Second");
+    assertExists(first);
+    assertExists(second);
+
+    const found = await repo.findById(item.id);
+    assertExists(found);
+    assertEquals(found!.statusUpdates?.length, 2);
+    // Newest first.
+    assertEquals(found!.statusUpdates?.[0].id, second!.id);
+    assertEquals(found!.statusUpdates?.[1].id, first!.id);
   } finally {
     await cleanup(dir);
   }
@@ -440,6 +476,85 @@ Deno.test("PortfolioRepository - addStatusUpdate returns null for missing item",
   try {
     const result = await repo.addStatusUpdate("ghost-id", "x");
     assertStrictEquals(result, null);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PortfolioRepository - updateStatusUpdate round-trips new message via findById", async () => {
+  const { repo, dir } = await setupRepo();
+  try {
+    const item = await repo.create({ name: "Editable Updates" });
+    const created = await repo.addStatusUpdate(item.id, "Initial message");
+    assertExists(created);
+
+    const updated = await repo.updateStatusUpdate(
+      item.id,
+      created!.id,
+      "Edited message",
+    );
+    assertExists(updated);
+    assertEquals(updated!.message, "Edited message");
+
+    const found = await repo.findById(item.id);
+    assertExists(found);
+    assertEquals(found!.statusUpdates?.length, 1);
+    assertEquals(found!.statusUpdates?.[0].id, created!.id);
+    assertEquals(found!.statusUpdates?.[0].message, "Edited message");
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PortfolioRepository - updateStatusUpdate returns null for missing item or update", async () => {
+  const { repo, dir } = await setupRepo();
+  try {
+    const missingItem = await repo.updateStatusUpdate("ghost-id", "x", "y");
+    assertStrictEquals(missingItem, null);
+
+    const item = await repo.create({ name: "No Updates" });
+    const missingUpdate = await repo.updateStatusUpdate(
+      item.id,
+      "ghost-update",
+      "y",
+    );
+    assertStrictEquals(missingUpdate, null);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PortfolioRepository - deleteStatusUpdate removes the update and round-trips via findById", async () => {
+  const { repo, dir } = await setupRepo();
+  try {
+    const item = await repo.create({ name: "Deletable Updates" });
+    const a = await repo.addStatusUpdate(item.id, "Keep");
+    const b = await repo.addStatusUpdate(item.id, "Delete");
+    assertExists(a);
+    assertExists(b);
+
+    const ok = await repo.deleteStatusUpdate(item.id, b!.id);
+    assertEquals(ok, true);
+
+    const found = await repo.findById(item.id);
+    assertExists(found);
+    assertEquals(found!.statusUpdates?.length, 1);
+    assertEquals(found!.statusUpdates?.[0].id, a!.id);
+    assertEquals(found!.statusUpdates?.[0].message, "Keep");
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PortfolioRepository - deleteStatusUpdate returns false for missing item or update", async () => {
+  const { repo, dir } = await setupRepo();
+  try {
+    const missingItem = await repo.deleteStatusUpdate("ghost-id", "x");
+    assertEquals(missingItem, false);
+
+    const item = await repo.create({ name: "No Updates To Delete" });
+    const missingUpdate = await repo.deleteStatusUpdate(item.id, "ghost-id");
+    assertEquals(missingUpdate, false);
   } finally {
     await cleanup(dir);
   }
