@@ -16,6 +16,7 @@
   grid-template-areas:
     "problem    solution   uvp        unfair    customer"
     "problem    metrics    uvp        channels  customer"
+    "existAlt   metrics    highLvl    channels  earlyAdopt"
     "cost       cost       revenue    revenue   revenue";
   gap: var(--space-sm);
   margin: var(--space-md) 0;
@@ -37,19 +38,19 @@
   grid-area: customer;
 }
 .lc-canvas__cell--existingAlternatives {
-  grid-area: problem;
+  grid-area: existAlt;
 }
 .lc-canvas__cell--keyMetrics {
   grid-area: metrics;
 }
 .lc-canvas__cell--highLevelConcept {
-  grid-area: channels;
+  grid-area: highLvl;
 }
 .lc-canvas__cell--channels {
   grid-area: channels;
 }
 .lc-canvas__cell--earlyAdopters {
-  grid-area: customer;
+  grid-area: earlyAdopt;
 }
 .lc-canvas__cell--costStructure {
   grid-area: cost;
@@ -182,19 +183,14 @@
 @media (max-width: 1100px) {
   /* intentional deviation: canvas wide-layout collapse (not a mobile breakpoint) */
   .lc-canvas {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "problem    solution   uvp"
-      "unfair     customer   uvp"
-      "metrics    channels   earlyAdopters"
-      "cost       cost       revenue";
-  }
-
-  .lc-canvas__cell--existingAlternatives {
-    display: none;
-  }
-  .lc-canvas__cell--highLevelConcept {
-    display: none;
+      "problem    solution"
+      "existAlt   metrics"
+      "uvp        unfair"
+      "highLvl    channels"
+      "customer   earlyAdopt"
+      "cost       revenue";
   }
 }
 
@@ -204,23 +200,16 @@
     grid-template-columns: 1fr;
     grid-template-areas:
       "problem"
+      "existAlt"
       "solution"
-      "uvp"
-      "unfair"
-      "customer"
       "metrics"
+      "uvp"
+      "highLvl"
+      "unfair"
       "channels"
+      "customer"
+      "earlyAdopt"
       "cost"
       "revenue";
-  }
-
-  .lc-canvas__cell--existingAlternatives {
-    display: none;
-  }
-  .lc-canvas__cell--highLevelConcept {
-    display: none;
-  }
-  .lc-canvas__cell--earlyAdopters {
-    display: none;
   }
 }
