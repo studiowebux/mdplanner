@@ -10,7 +10,7 @@ import {
 import { generateId } from "../utils/id.ts";
 import { findFileById, mergeFields } from "../utils/repo-helpers.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
+import { mapKeysToFm, parseAuditFields } from "../utils/frontmatter-mapper.ts";
 import { ciEquals } from "../utils/string.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import type {
@@ -262,18 +262,19 @@ export class NoteRepository {
     const bodyContent = lines.slice(contentStartIndex).join("\n").trim();
     const { paragraphs, customSections } = this.parseEnhanced(bodyContent);
 
+    const audit = parseAuditFields(fm);
     return {
       id: String(fm.id),
       title,
       content: bodyContent,
       paragraphs,
       customSections,
-      createdAt: String(fm.createdAt ?? ""),
-      updatedAt: String(fm.updatedAt ?? ""),
       revision: Number(fm.revision ?? 1),
       project: fm.project != null ? String(fm.project) : undefined,
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: audit.createdAt ?? "",
+      updatedAt: audit.updatedAt ?? "",
+      createdBy: audit.createdBy,
+      updatedBy: audit.updatedBy,
       archived: fm.archived === true ? true : undefined,
       archivedAt: fm.archived_at != null ? String(fm.archived_at) : undefined,
       archivedBy: fm.archived_by != null ? String(fm.archived_by) : undefined,

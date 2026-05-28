@@ -181,3 +181,31 @@ Deno.test("NoteRepository - persists project field through round-trip", async ()
     await cleanup(dir);
   }
 });
+
+Deno.test("NoteRepository - audit fields round-trip (createdAt/updatedAt/createdBy/updatedBy)", async () => {
+  // Regression: parse() previously read camelCase keys while serialize()
+  // wrote snake_case via mapKeysToFm — every audit field was silently
+  // dropped on round-trip. Fixed by routing parse() through the shared
+  // parseAuditFields helper (architecture note_1779938474585_vmbgx7).
+  const { repo, dir } = await setup();
+  try {
+    const created = await repo.create({ title: "Audited", content: "" });
+    const stamped = await repo.upsertEntity({
+      ...created,
+      createdAt: "2026-01-01T10:00:00.000Z",
+      updatedAt: "2026-05-28T12:34:56.789Z",
+      createdBy: "person_creator_id",
+      updatedBy: "person_updater_id",
+    });
+    assertEquals(stamped.createdAt, "2026-01-01T10:00:00.000Z");
+
+    const found = await repo.findById(created.id);
+    assertExists(found);
+    assertEquals(found!.createdAt, "2026-01-01T10:00:00.000Z");
+    assertEquals(found!.updatedAt, "2026-05-28T12:34:56.789Z");
+    assertEquals(found!.createdBy, "person_creator_id");
+    assertEquals(found!.updatedBy, "person_updater_id");
+  } finally {
+    await cleanup(dir);
+  }
+});
