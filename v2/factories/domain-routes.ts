@@ -73,6 +73,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
         }
       } else if (key === "hideCompleted") {
         if (state.hideCompleted) params.set("hideCompleted", "true");
+      } else if (key === "archived") {
+        if (state.archived === "true") params.set("archived", "true");
+      } else if (key === "showHidden") {
+        if (state.showHidden === "true" || state.showHidden === true) {
+          params.set("showHidden", "true");
+        }
       } else if (key === "order") {
         if (state.order && state.order !== "asc") {
           params.set("order", state.order);
@@ -279,8 +285,22 @@ export function createDomainRoutes<T extends Entity, C, U>(
     for (const key of stateKeys) {
       params[key] = c.req.query(key);
     }
-    if (isHtmx && params.hideCompleted === undefined) {
-      params.hideCompleted = "false";
+    // Boolean toolbar toggles (hideCompleted / archived / showHidden) submit
+    // via htmx form-include. An unchecked checkbox is OMITTED from the form
+    // per the HTML spec, so mergeParams would otherwise fall back to the
+    // saved cookie value and the toggle would stay stuck "on". Force the
+    // absent key to "false" for htmx requests so the uncheck round-trips.
+    // Only inject the key when the domain actually renders that toggle.
+    if (isHtmx) {
+      if (cfg.hideCompleted && params.hideCompleted === undefined) {
+        params.hideCompleted = "false";
+      }
+      if (archiveEnabled && params.archived === undefined) {
+        params.archived = "false";
+      }
+      if (cfg.showHiddenToggle && params.showHidden === undefined) {
+        params.showHidden = "false";
+      }
     }
     const merged = mergeParams(params, saved);
 
