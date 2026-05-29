@@ -25,3 +25,36 @@ Paste the output into your `.env` or service config as `MDPLANNER_SECRET_KEY=<ou
 Without this key, integration tokens (Cloudflare API key, GitHub PAT) are stored
 in plaintext in `project.md`. Acceptable for local single-user installs; always
 set the key for shared or networked deployments.
+
+## Migration from v1
+
+v1 had 15 `MDPLANNER_*` env vars. v2 has 5 (4 named above plus `PORT`). The
+remainder were renamed or removed.
+
+### Renamed
+
+| v1                    | v2          |
+| --------------------- | ----------- |
+| `MDPLANNER_PORT`      | `PORT`      |
+| `MDPLANNER_CACHE`     | `CACHE`     |
+| `MDPLANNER_MCP_TOKEN` | `MCP_TOKEN` |
+
+`MDPLANNER_SECRET_KEY` is unchanged.
+
+### Removed (no v2 equivalent)
+
+- `MDPLANNER_READ_ONLY`
+- `MDPLANNER_BACKUP_DIR`
+- `MDPLANNER_BACKUP_INTERVAL`
+- `MDPLANNER_BACKUP_PUBLIC_KEY`
+- `MDPLANNER_CERVEAU_DIR`
+- `MDPLANNER_CORS_ORIGIN`
+- `MDPLANNER_API_TOKEN`
+- `MDPLANNER_MAX_BODY_SIZE`
+- `MDPLANNER_RATE_LIMIT`
+
+### Pending re-add
+
+`MDPLANNER_WEBDAV`, `MDPLANNER_WEBDAV_USER`, `MDPLANNER_WEBDAV_PASS` are not in
+v2 yet. WebDAV support is tracked as a separate v2 port task; this section will
+be updated when it lands.
