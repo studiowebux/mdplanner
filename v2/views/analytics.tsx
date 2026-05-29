@@ -110,6 +110,27 @@ const CustomizePanel: FC<{ hiddenSections: string[] }> = (
   </details>
 );
 
+const AnalyticsJumpBar: FC<{ hiddenSections: string[] }> = (
+  { hiddenSections },
+) => {
+  const visible = ALL_SECTIONS.filter((s) => !hiddenSections.includes(s.key));
+  if (visible.length === 0) return null;
+  return (
+    <nav class="analytics__jump-bar" aria-label="Analytics sections">
+      {visible.map(({ key, label }) => (
+        <a
+          key={key}
+          href={`#analytics-${key}`}
+          class="analytics__jump-link"
+          data-jump-anchor={key}
+        >
+          {label}
+        </a>
+      ))}
+    </nav>
+  );
+};
+
 const SectionHeader: FC<{
   title: string;
   sectionKey: string;
@@ -282,9 +303,15 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
         people={people}
       />
 
+      <AnalyticsJumpBar hiddenSections={hiddenSections} />
+
       {/* Tasks */}
       {visible("tasks") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-tasks"
+          data-jump-target="tasks"
+        >
           <SectionHeader
             title="Tasks"
             sectionKey="tasks"
@@ -326,7 +353,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Goals */}
       {visible("goals") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-goals"
+          data-jump-target="goals"
+        >
           <SectionHeader
             title="Goals"
             sectionKey="goals"
@@ -363,7 +394,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Milestones */}
       {visible("milestones") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-milestones"
+          data-jump-target="milestones"
+        >
           <SectionHeader
             title="Milestones"
             sectionKey="milestones"
@@ -395,7 +430,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Time Entries */}
       {visible("timeEntries") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-timeEntries"
+          data-jump-target="timeEntries"
+        >
           <SectionHeader
             title="Time Tracking"
             sectionKey="timeEntries"
@@ -436,7 +475,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Capacity */}
       {visible("capacity") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-capacity"
+          data-jump-target="capacity"
+        >
           <SectionHeader
             title="Capacity Plans"
             sectionKey="capacity"
@@ -485,7 +528,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Invoices */}
       {visible("invoices") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-invoices"
+          data-jump-target="invoices"
+        >
           <SectionHeader
             title="Invoices"
             sectionKey="invoices"
@@ -514,7 +561,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Quotes */}
       {visible("quotes") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-quotes"
+          data-jump-target="quotes"
+        >
           <SectionHeader
             title="Quotes"
             sectionKey="quotes"
@@ -543,7 +594,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Meetings */}
       {visible("meetings") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-meetings"
+          data-jump-target="meetings"
+        >
           <SectionHeader
             title="Meetings"
             sectionKey="meetings"
@@ -564,7 +619,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Customers */}
       {visible("customers") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-customers"
+          data-jump-target="customers"
+        >
           <SectionHeader
             title="Customers"
             sectionKey="customers"
@@ -579,7 +638,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Notes */}
       {visible("notes") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-notes"
+          data-jump-target="notes"
+        >
           <SectionHeader
             title="Notes"
             sectionKey="notes"
@@ -616,7 +679,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Investors */}
       {visible("investors") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-investors"
+          data-jump-target="investors"
+        >
           <SectionHeader
             title="Investors"
             sectionKey="investors"
@@ -646,7 +713,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Finances */}
       {visible("finances") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-finances"
+          data-jump-target="finances"
+        >
           <SectionHeader
             title="Finances"
             sectionKey="finances"
@@ -672,7 +743,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Deals */}
       {visible("deals") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-deals"
+          data-jump-target="deals"
+        >
           <SectionHeader
             title="Deals"
             sectionKey="deals"
@@ -702,7 +777,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Habits */}
       {visible("habits") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-habits"
+          data-jump-target="habits"
+        >
           <SectionHeader
             title="Habits"
             sectionKey="habits"
@@ -723,7 +802,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Journal */}
       {visible("journal") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-journal"
+          data-jump-target="journal"
+        >
           <SectionHeader
             title="Journal"
             sectionKey="journal"
@@ -744,7 +827,11 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       {/* Reflections */}
       {visible("reflections") && (
-        <section class="analytics__section">
+        <section
+          class="analytics__section"
+          id="analytics-reflections"
+          data-jump-target="reflections"
+        >
           <SectionHeader
             title="Reflections"
             sectionKey="reflections"
@@ -771,6 +858,7 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       {...vp}
       activePath="/analytics"
       styles={["/css/views/analytics.css"]}
+      scripts={["/js/analytics-jump-bar.js"]}
     >
       <div id="analytics-sidenav-container" />
       <AnalyticsBody
