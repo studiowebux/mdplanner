@@ -36,6 +36,7 @@ import {
   badRequest,
   ErrorSchema,
   IdParam,
+  invalidState,
   notFound,
   payloadTooLarge,
 } from "../../../types/api.ts";
@@ -49,6 +50,14 @@ import {
 } from "../../../services/task.service.ts";
 
 export const tasksRouter = new OpenAPIHono<{ Variables: AppVariables }>();
+
+/** Canonical 422 payload for archived-task mutations. */
+const taskArchived = (id: string) => invalidState(`Task ${id} is archived`);
+
+/** Canonical 422 response schema shared by every guarded mutation route.
+ * Inlined per-route to keep OpenAPIHono's literal-type inference happy —
+ * a spread loses the 422 literal across the createRoute boundary. */
+const ARCHIVED_RESPONSE_DESC = "Task is archived";
 
 // GET /
 tasksRouter.openapi(
@@ -153,9 +162,29 @@ tasksRouter.openapi(
     },
   }),
   async (c) => {
-    const result = await getTaskService().batchUpdate(c.req.valid("json"));
+    // Per-id archive guard: archived ids fail with a clear error; the rest
+    // flow through service.batchUpdate normally. Mirrors the MCP
+    // batch_update_tasks behavior.
+    const items = c.req.valid("json");
+    const svc = getTaskService();
+    const archivedFailures: { id: string; error: string }[] = [];
+    const live: typeof items = [];
+    for (const u of items) {
+      const current = await svc.getById(u.id);
+      if (current && current.archived === true) {
+        archivedFailures.push({ id: u.id, error: `Task ${u.id} is archived` });
+      } else {
+        live.push(u);
+      }
+    }
+    const result = live.length > 0
+      ? await svc.batchUpdate(live)
+      : { succeeded: [], failed: [] };
     publish("task.updated");
-    return c.json(result, 200);
+    return c.json({
+      succeeded: result.succeeded,
+      failed: [...result.failed, ...archivedFailures],
+    }, 200);
   },
 );
 
@@ -245,6 +274,10 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Revision conflict or claim guard",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
@@ -253,6 +286,9 @@ tasksRouter.openapi(
       ? Number(c.req.header("X-Expected-Revision"))
       : undefined;
     const agentId = c.req.header("X-Agent-Id") ?? undefined;
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     try {
       const task = await getTaskService().update(
         id,
@@ -294,10 +330,17 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const ok = await getTaskService().delete(id);
     if (!ok) {
       return c.json(notFound("TASK", id), 404);
@@ -335,11 +378,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Claim conflict",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const { assignee, expectedSection } = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     try {
       const task = await getTaskService().claimTask(
         id,
@@ -387,11 +437,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const { section } = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const task = await getTaskService().moveTask(id, section);
     if (!task) {
       return c.json(notFound("TASK", id), 404);
@@ -425,6 +482,10 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
@@ -435,6 +496,7 @@ tasksRouter.openapi(
     if (!task) {
       return c.json(notFound("TASK", id), 404);
     }
+    if (task.archived === true) return c.json(taskArchived(id), 422);
 
     // Build the current display order for the section, then splice the
     // dragged task to the position indicated by afterId.
@@ -502,11 +564,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const { body, author, metadata } = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
 
     const names = parseMentions(body);
     let resolvedMetadata = metadata;
@@ -567,6 +636,10 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
@@ -576,6 +649,7 @@ tasksRouter.openapi(
     if (!task) {
       return c.json(notFound("TASK", id), 404);
     }
+    if (task.archived === true) return c.json(taskArchived(id), 422);
     const comment = task.comments?.find((cm) => cm.id === commentId);
     if (!comment) {
       return c.json(notFound("COMMENT", commentId), 404);
@@ -605,6 +679,10 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
@@ -613,6 +691,7 @@ tasksRouter.openapi(
     if (!task) {
       return c.json(notFound("TASK", id), 404);
     }
+    if (task.archived === true) return c.json(taskArchived(id), 422);
     if (!task.comments?.find((cm) => cm.id === commentId)) {
       return c.json(notFound("COMMENT", commentId), 404);
     }
@@ -647,11 +726,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const { paths } = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const task = await getTaskService().addAttachments(id, paths);
     if (!task) {
       return c.json(notFound("TASK", id), 404);
@@ -685,6 +771,10 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
@@ -692,6 +782,9 @@ tasksRouter.openapi(
     const { requestedBy, summary, commitHash, artifactUrls } = c.req.valid(
       "json",
     );
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const task = await getTaskService().requestApproval(
       id,
       requestedBy,
@@ -731,11 +824,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const { decidedBy, feedback } = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const task = await getTaskService().approveTask(id, decidedBy, feedback);
     if (!task) {
       return c.json(notFound("TASK", id), 404);
@@ -769,11 +869,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const { decidedBy, feedback, rejectionType } = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const task = await getTaskService().rejectTask(
       id,
       decidedBy,
@@ -818,11 +925,18 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id } = c.req.valid("param");
     const data = c.req.valid("json");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const entry = await getTaskService().addTimeEntry(id, data);
     if (!entry) {
       return c.json(notFound("TASK", id), 404);
@@ -847,10 +961,17 @@ tasksRouter.openapi(
         content: { "application/json": { schema: ErrorSchema } },
         description: "Not found",
       },
+      422: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: ARCHIVED_RESPONSE_DESC,
+      },
     },
   }),
   async (c) => {
     const { id, entryId } = c.req.valid("param");
+    const existing = await getTaskService().getById(id);
+    if (!existing) return c.json(notFound("TASK", id), 404);
+    if (existing.archived === true) return c.json(taskArchived(id), 422);
     const ok = await getTaskService().deleteTimeEntry(id, entryId);
     if (!ok) {
       return c.json(notFound("TIME_ENTRY", entryId), 404);
@@ -873,6 +994,7 @@ tasksRouter.post("/:id/upload", async (c) => {
   if (!task) {
     return c.json(notFound("TASK", id), 404);
   }
+  if (task.archived === true) return c.json(taskArchived(id), 422);
   const body = await c.req.parseBody();
   const file = body["file"];
   if (!file || typeof file === "string") {
@@ -920,6 +1042,9 @@ tasksRouter.get("/:id/upload/:filename", async (c) => {
 tasksRouter.delete("/:id/upload/:filename", async (c) => {
   const id = c.req.param("id");
   const filename = c.req.param("filename");
+  const existing = await getTaskService().getById(id);
+  if (!existing) return c.json(notFound("TASK", id), 404);
+  if (existing.archived === true) return c.json(taskArchived(id), 422);
   const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   const filePath = `${getProjectDir()}/uploads/${id}/${safeName}`;
   try {
