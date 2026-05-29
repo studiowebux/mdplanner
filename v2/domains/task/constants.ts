@@ -11,6 +11,7 @@ export const TASK_FM_OVERRIDES: Readonly<Record<string, string>> = {
   planned_end: "planned_end",
   blocked_by: "blocked_by",
   time_entries: "time_entries",
+  approval_request: "approval_request",
 };
 
 /** Keys stored in the markdown body, not in frontmatter. */

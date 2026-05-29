@@ -786,18 +786,7 @@ Deno.test("TaskService.requestApproval moves task to Pending Review with an appr
   }
 });
 
-Deno.test("TaskService.approveTask moves to Done, sets completed, clears claim (KNOWN BUG: verdict not stamped — TaskBuilder reads wrong fm key)", async () => {
-  // Documents bug discovered while writing this test file:
-  // `TaskBuilder` (v2/builders/task.builder.ts:68) reads `fm.approval_request`
-  // (snake_case), but `mapKeysFromFm` runs over the frontmatter BEFORE the
-  // builder and converts the key to `approvalRequest` (camelCase) because
-  // `approval_request` is NOT in `TASK_FM_OVERRIDES`. Result: every `findById`
-  // loses `approvalRequest`. `approveTask`/`rejectTask` therefore read
-  // `task.approvalRequest === undefined`, skip the verdict-merging branch,
-  // and write `approvalRequest: null`. The status transition still happens,
-  // but the verdict is silently dropped. Filed as a Backlog ticket.
-  // Fix: add `approval_request: "approval_request"` to TASK_FM_OVERRIDES.
-  // Locking current behaviour here so the regression surfaces when fixed.
+Deno.test("TaskService.approveTask moves to Done, sets completed, clears claim, stamps verdict", async () => {
   const { service, dir } = await setup();
   try {
     const t = await service.create({ title: "Approve me", section: "Todo" });
@@ -809,17 +798,21 @@ Deno.test("TaskService.approveTask moves to Done, sets completed, clears claim (
     assertEquals(after!.completed, true);
     assertStrictEquals(after!.claimedBy, undefined);
     assertStrictEquals(after!.claimedAt, undefined);
-    // Bug: verdict not stamped because findById can't read approvalRequest
-    // back. Once TASK_FM_OVERRIDES is fixed, flip these to assert verdict.
-    assertStrictEquals(after!.approvalRequest, undefined);
+    assertExists(after!.approvalRequest);
+    assertExists(after!.approvalRequest!.verdict);
+    assertEquals(after!.approvalRequest!.verdict!.decision, "approved");
+    assertEquals(after!.approvalRequest!.verdict!.decidedBy, "tommy");
+    assertEquals(after!.approvalRequest!.verdict!.feedback, "Good work");
+    assertEquals(
+      typeof after!.approvalRequest!.verdict!.decidedAt,
+      "string",
+    );
   } finally {
     await cleanup(dir);
   }
 });
 
-Deno.test("TaskService.rejectTask sends back to In Progress, clears claim (KNOWN BUG: verdict not stamped — same as approveTask)", async () => {
-  // Same TaskBuilder bug as approveTask above. Section transition + claim
-  // cleanup happen; verdict is silently dropped.
+Deno.test("TaskService.rejectTask sends back to In Progress, clears claim, stamps verdict", async () => {
   const { service, dir } = await setup();
   try {
     const t = await service.create({ title: "Reject me", section: "Todo" });
@@ -834,7 +827,15 @@ Deno.test("TaskService.rejectTask sends back to In Progress, clears claim (KNOWN
     assertExists(after);
     assertEquals(after!.section, "In Progress");
     assertStrictEquals(after!.claimedBy, undefined);
-    assertStrictEquals(after!.approvalRequest, undefined);
+    assertExists(after!.approvalRequest);
+    assertExists(after!.approvalRequest!.verdict);
+    assertEquals(after!.approvalRequest!.verdict!.decision, "rejected");
+    assertEquals(after!.approvalRequest!.verdict!.decidedBy, "tommy");
+    assertEquals(
+      after!.approvalRequest!.verdict!.feedback,
+      "Needs more polish",
+    );
+    assertEquals(after!.approvalRequest!.verdict!.rejectionType, "incomplete");
   } finally {
     await cleanup(dir);
   }
