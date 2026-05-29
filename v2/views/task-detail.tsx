@@ -28,6 +28,7 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { type MentionOpts, parseMentions } from "../utils/mentions.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
 import { MentionText } from "./components/mention-text.tsx";
+import { resolveLinkedItems } from "../utils/resolve-links.ts";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -63,11 +64,7 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
     await Promise.all([
       task.assignee ? peopleSvc.getById(task.assignee) : null,
       task.milestone ? milestoneSvc.getByName(task.milestone) : null,
-      task.blocked_by?.length
-        ? Promise.all(
-          task.blocked_by.map((id) => taskSvc.getById(id)),
-        ).then((results) => results.filter(Boolean) as Task[])
-        : [],
+      resolveLinkedItems(task.blocked_by, (id) => taskSvc.getById(id)),
       peopleSvc.list(),
     ]);
 
