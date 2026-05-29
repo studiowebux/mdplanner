@@ -1,5 +1,7 @@
 // Task domain constants.
 
+import { ARCHIVE_COLS_DDL } from "../../database/sqlite/mod.ts";
+
 /**
  * Frontmatter key overrides for task markdown files.
  * Task domain fields use snake_case in both frontmatter and TypeScript types,
@@ -59,5 +61,6 @@ export const TASK_SCHEMA = `CREATE TABLE IF NOT EXISTS ${TASK_TABLE} (
   children TEXT,
   created_by TEXT,
   updated_by TEXT,
+  ${ARCHIVE_COLS_DDL},
   synced_at TEXT
 )`;

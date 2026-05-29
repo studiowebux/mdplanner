@@ -122,12 +122,19 @@ Deno.test("TaskService.getSlim strips comments + time_entries + approvalRequest"
   }
 });
 
-Deno.test("TaskService.delete removes the task", async () => {
-  const { service, dir } = await setup();
+Deno.test("TaskService.delete soft-archives the task", async () => {
+  const { service, repo, dir } = await setup();
   try {
     const t = await service.create({ title: "To delete", section: "Todo" });
     assertEquals(await service.delete(t.id), true);
-    assertStrictEquals(await service.getById(t.id), null);
+    // delete = archive: row stays on disk + findById, archived=true; default
+    // list (findAll) drops it. See `[architecture] MD Planner — Soft-delete
+    // (archive) pattern`.
+    const archived = await service.getById(t.id);
+    assertExists(archived);
+    assertStrictEquals(archived!.archived, true);
+    const list = await repo.findAll();
+    assertEquals(list.length, 0);
   } finally {
     await cleanup(dir);
   }

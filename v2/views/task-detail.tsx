@@ -24,6 +24,7 @@ import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { type MentionOpts, parseMentions } from "../utils/mentions.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
 import { MentionText } from "./components/mention-text.tsx";
@@ -411,6 +412,8 @@ export const TaskDetailView: FC<Props> = (
           ]}
         />
         <BackButton href="/tasks" label="Back to tasks" />
+
+        <ArchivedBanner entity={task} />
 
         {/* Quick actions bar — move, assign, then mark complete last */}
         <div class="task-detail__quick-actions">

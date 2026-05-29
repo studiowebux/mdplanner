@@ -28,6 +28,9 @@ export class TaskBuilder {
     this.str(fm, "updatedAt");
     this.str(fm, "createdBy");
     this.str(fm, "updatedBy");
+    this.str(fm, "archivedAt");
+    this.str(fm, "archivedBy");
+    if (fm.archived === true) this.task.archived = true;
     this.str(fm, "due_date");
     this.str(fm, "assignee");
     this.str(fm, "milestone");

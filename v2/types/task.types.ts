@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { stringArray } from "./shared.types.ts";
+import { ArchiveFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Rejection types for approval workflow
@@ -197,7 +197,7 @@ export const TaskSchema = z.object({
   updatedBy: z.string().nullable().optional().openapi({
     description: "Person ID of the last updater",
   }),
-}).openapi("Task");
+}).merge(ArchiveFieldsSchema).openapi("Task");
 
 export type Task = {
   id: string;
@@ -234,6 +234,9 @@ export type Task = {
   files?: string[];
   createdBy?: string;
   updatedBy?: string;
+  archived?: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
 };
 
 // ---------------------------------------------------------------------------
