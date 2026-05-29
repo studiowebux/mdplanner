@@ -124,7 +124,7 @@ export class InvoiceService extends BaseService<
       paidAmount < invoice.total && invoice.status === "paid"
     ) {
       updates.status = "sent";
-      updates.paidAt = undefined;
+      updates.paidAt = null;
     }
 
     return this.invoiceRepo.update(invoiceId, updates as UpdateInvoice);

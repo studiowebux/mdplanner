@@ -520,17 +520,7 @@ Deno.test("InvoiceService.updatePaidAmount transitions sent → paid when paid >
   }
 });
 
-Deno.test("InvoiceService.updatePaidAmount transitions paid → sent when paid < total (KNOWN BUG: paidAt is NOT cleared)", async () => {
-  // Documents bug discovered while writing this test file:
-  // `InvoiceService.updatePaidAmount` (v2/services/invoice.service.ts:127)
-  // sets `updates.paidAt = undefined` intending to clear the timestamp on
-  // paid→sent, but the underlying `mergeFields` (v2/utils/repo-helpers.ts:82)
-  // SKIPS undefined source values (`if (source[key] !== undefined)`).
-  // Result: paidAt stays at the original paid-transition timestamp even
-  // though status correctly reverts to "sent". Filed as a Backlog ticket.
-  // Fix is to pass `null` instead of `undefined` so the `?? undefined`
-  // coercion clears the field. Locking current behaviour so the regression
-  // surfaces if silently "fixed" without updating this test.
+Deno.test("InvoiceService.updatePaidAmount transitions paid → sent when paid < total and clears paidAt", async () => {
   const { service, repo, dir } = await setup();
   try {
     const inv = await service.create({
@@ -549,17 +539,13 @@ Deno.test("InvoiceService.updatePaidAmount transitions paid → sent when paid <
     // Fully paid first.
     await repo.update(inv.id, { status: "sent" });
     const paidResult = await service.updatePaidAmount(inv.id, 500);
-    const setPaidAt = paidResult!.paidAt;
-    assertExists(setPaidAt);
+    assertExists(paidResult!.paidAt);
     // Refund / underpayment: drop below total.
     const result = await service.updatePaidAmount(inv.id, 100);
     assertExists(result);
     assertEquals(result!.status, "sent");
     assertEquals(result!.paidAmount, 100);
-    // Bug: paidAt stays at the original paid-transition stamp instead of
-    // clearing. Once fixed, this assertion should flip to
-    // `assertStrictEquals(result!.paidAt, undefined)`.
-    assertEquals(result!.paidAt, setPaidAt);
+    assertStrictEquals(result!.paidAt, undefined);
   } finally {
     await cleanup(dir);
   }
