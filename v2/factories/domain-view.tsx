@@ -267,7 +267,7 @@ function FilterCountBadge(
     <span
       id={`${domain}-filter-count`}
       class={`badge badge--accent${count > 0 ? "" : " is-hidden"}`}
-      {...(oob ? { "hx-swap-oob": "true" } : {})}
+      {...(oob ? { "hx-swap-oob": "morph" } : {})}
     >
       {count > 0 ? String(count) : ""}
     </span>
@@ -503,7 +503,7 @@ export function createDomainViewContainer<T extends Entity>(
           <span
             id={`${cfg.name}-count`}
             class="domain-page__count"
-            {...{ "hx-swap-oob": "true" }}
+            {...{ "hx-swap-oob": "morph" }}
           >
             {totalCount !== undefined &&
                 (filteredCount ?? items.length) !== totalCount
@@ -515,7 +515,7 @@ export function createDomainViewContainer<T extends Entity>(
           <ViewToggleButtons
             domain={cfg.name}
             view={state.view}
-            oobSwap="true"
+            oobSwap="morph"
             extraModes={cfg.extraViewModes}
             hideDefault={cfg.hideDefaultViews}
             hideGrid={cfg.hideGridView}
@@ -524,7 +524,7 @@ export function createDomainViewContainer<T extends Entity>(
         {fragment && (
           <div
             id={`${cfg.name}-column-toggle-wrapper`}
-            {...{ "hx-swap-oob": "true" }}
+            {...{ "hx-swap-oob": "morph" }}
           >
             <ColumnToggle
               domain={cfg.name}
