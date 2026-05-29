@@ -15,7 +15,6 @@ export const IdentityView: FC<Props> = ({ people }) => {
         <title>{`Who are you? — ${APP_NAME}`}</title>
         <link rel="stylesheet" href="/css/index.css" />
         <link rel="stylesheet" href="/css/views/identity.css" />
-        <script src="/js/vendor/htmx-2.0.8.min.js" defer />
       </head>
       <body class="identity-page">
         <div class="identity-card">
@@ -27,15 +26,16 @@ export const IdentityView: FC<Props> = ({ people }) => {
             {people.map((person) => (
               <form
                 key={person.id}
-                hx-post="/settings/identity"
-                hx-swap="none"
+                action="/settings/identity"
+                method="post"
+                class="identity-form"
               >
                 <input type="hidden" name="personId" value={person.id} />
                 <button type="submit" class="identity-btn">
                   <span class="identity-btn__avatar">
                     {person.name.charAt(0).toUpperCase()}
                   </span>
-                  <span>
+                  <span class="identity-btn__meta">
                     <span class="identity-btn__name">{person.name}</span>
                     {person.title && (
                       <span class="identity-btn__role">{person.title}</span>

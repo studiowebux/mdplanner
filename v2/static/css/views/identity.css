@@ -38,6 +38,17 @@
   gap: var(--space-sm);
 }
 
+.identity-form {
+  margin: 0;
+}
+
+.identity-btn__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
 .identity-btn {
   display: flex;
   align-items: center;
@@ -84,18 +95,4 @@
 .identity-btn__role {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-}
-
-.identity-error {
-  margin-top: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  background-color: var(--color-danger-subtle);
-  color: var(--color-danger);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  display: none;
-}
-
-.identity-error.is-visible {
-  display: block;
 }

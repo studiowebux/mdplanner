@@ -392,8 +392,14 @@ settingsViewRouter.post("/identity", async (c) => {
     setCookie(c, IDENTITY_COOKIE, value, cookieOpts);
   }
 
-  // Send preferences in HX-Trigger so the client caches them in sessionStorage
-  // before the page refresh — zero extra network round-trip.
+  // Plain form POST (identity selector page, no htmx) → 302 to root, the
+  // identity-guard now lets the cookie-bearing follow-up through.
+  if (c.req.header("HX-Request") !== "true") {
+    return c.redirect("/", 303);
+  }
+
+  // htmx (topbar person switcher) → 204 + HX-Refresh; preferences ride along
+  // in HX-Trigger so the client caches them before the reload.
   c.header(
     "HX-Trigger",
     JSON.stringify({ preferencesLoaded: preferences }),
