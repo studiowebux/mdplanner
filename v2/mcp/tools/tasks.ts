@@ -35,12 +35,26 @@ import { err, ok } from "../utils.ts";
 export function registerTaskTools(server: McpServer): void {
   const service = getTaskService();
 
+  // Resolve a task and guard against archived state. Mutation tools call
+  // this before touching the task; archived rows return an err result so
+  // callers can route to Restore/HardDelete instead. Matches the canonical
+  // pattern (Strategic Levels reference).
+  const requireLiveTask = async (id: string) => {
+    const task = await service.getById(id);
+    if (!task) return { err: err(`Task '${id}' not found`) };
+    if (task.archived === true) {
+      return { err: err(`Task '${id}' is archived`) };
+    }
+    return { task };
+  };
+
   // ── list_tasks ──────────────────────────────────────────────────────────
   server.registerTool(
     "list_tasks",
     {
       description:
         "List all tasks in the project. Filter by section, project, or milestone. " +
+        "Archived tasks are excluded by default — pass archived: true to list archived only. " +
         "Pass slim: true when browsing to pick the next task — returns id, title, section, priority, tags, milestone, assignee only, cutting token usage by ~90%.",
       inputSchema: {
         ...ListTaskOptionsSchema.shape,
@@ -50,13 +64,18 @@ export function registerTaskTools(server: McpServer): void {
         completed: z.boolean().optional().describe(
           "Filter by completion state (false = open only, true = completed only)",
         ),
+        archived: z.boolean().optional().describe(
+          "When true, return archived tasks only. When false or omitted, archived tasks are excluded.",
+        ),
         slim: z.boolean().optional().describe(
           "Return minimal fields only: id, title, section, priority, tags, milestone, assignee. Use when browsing tasks to pick the next one.",
         ),
       },
     },
-    async ({ priority, completed, slim, ...options }) => {
-      let tasks = await service.list(options);
+    async ({ priority, completed, archived, slim, ...options }) => {
+      let tasks = archived
+        ? await service.listArchived(options)
+        : await service.list(options);
       if (priority !== undefined) {
         tasks = tasks.filter((t) => t.priority === priority);
       }
@@ -207,6 +226,8 @@ export function registerTaskTools(server: McpServer): void {
     async (
       { id, description, expected_revision, agent_id, withResult, ...fields },
     ) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       try {
         const data = {
           ...fields,
@@ -240,10 +261,13 @@ export function registerTaskTools(server: McpServer): void {
   server.registerTool(
     "delete_task",
     {
-      description: "Delete a task by its ID.",
+      description:
+        "Soft-delete (archive) a task by its ID. Archived tasks are excluded from list_tasks by default. To list them pass `archived: true`. Already-archived tasks return an err — use a future hard-delete tool for permanent removal.",
       inputSchema: { id: TaskSchema.shape.id.describe("Task ID") },
     },
     async ({ id }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const success = await service.delete(id);
       if (!success) return err(`Task '${id}' not found`);
       return ok({ success: true });
@@ -273,13 +297,15 @@ export function registerTaskTools(server: McpServer): void {
     async (
       { id, assignee, expectedSection, expected_revision, withResult },
     ) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       try {
         if (expected_revision !== undefined) {
-          const current = await service.getById(id);
-          if (!current) return err(`Task '${id}' not found`);
-          if (current.revision !== expected_revision) {
+          if (guard.task!.revision !== expected_revision) {
             return err(
-              `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${current.revision}`,
+              `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${
+                guard.task!.revision
+              }`,
             );
           }
         }
@@ -306,6 +332,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, section }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const task = await service.moveTask(id, section);
       if (!task) return err(`Task '${id}' not found`);
       return ok({ success: true });
@@ -328,7 +356,26 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ updates }) => {
-      const result = await service.batchUpdate(updates);
+      // Per-id archive guard: archived rows fail with a clear error;
+      // non-archived rows go through service.batchUpdate normally.
+      const archivedFailures: { id: string; success: false; error: string }[] =
+        [];
+      const liveUpdates: typeof updates = [];
+      for (const u of updates) {
+        const current = await service.getById(u.id);
+        if (current && current.archived === true) {
+          archivedFailures.push({
+            id: u.id,
+            success: false,
+            error: `Task '${u.id}' is archived`,
+          });
+        } else {
+          liveUpdates.push(u);
+        }
+      }
+      const result = liveUpdates.length > 0
+        ? await service.batchUpdate(liveUpdates)
+        : { succeeded: [], failed: [] };
       return ok({
         updated: result.succeeded.length,
         total: updates.length,
@@ -339,6 +386,7 @@ export function registerTaskTools(server: McpServer): void {
             success: false,
             error: f.error,
           })),
+          ...archivedFailures,
         ],
       });
     },
@@ -360,6 +408,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, comment, author, metadata }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const result = await service.addComment(
         id,
         comment,
@@ -382,6 +432,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, paths }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const task = await service.addAttachments(id, paths);
       if (!task) return err(`Task '${id}' not found`);
       return ok({ success: true });
@@ -453,6 +505,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, requestedBy, summary, commitHash, artifactUrls }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const task = await service.requestApproval(
         id,
         requestedBy,
@@ -477,6 +531,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, decidedBy, feedback }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const task = await service.approveTask(id, decidedBy, feedback);
       if (!task) return err(`Task '${id}' not found`);
       return ok({ success: true, taskId: id, section: "Done" });
@@ -496,6 +552,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, decidedBy, feedback, rejectionType }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const task = await service.rejectTask(
         id,
         decidedBy,
@@ -556,6 +614,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, date, hours, person, description }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const entry = await service.addTimeEntry(id, {
         date,
         hours,
@@ -578,6 +638,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, entryId }) => {
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const success = await service.deleteTimeEntry(id, entryId);
       if (!success) {
         return err(`Time entry '${entryId}' not found on task '${id}'`);
@@ -646,8 +708,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, githubRepo, issueNumber, prNumber }) => {
-      const task = await service.getById(id);
-      if (!task) return err(`Task '${id}' not found`);
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const updates: Record<string, unknown> = {
         githubRepo,
         githubIssue: issueNumber,
@@ -674,8 +736,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, githubRepo, prNumber }) => {
-      const task = await service.getById(id);
-      if (!task) return err(`Task '${id}' not found`);
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       await service.update(id, { githubRepo, githubPR: prNumber });
       return ok({ id, githubRepo, githubPR: prNumber });
     },
@@ -691,8 +753,8 @@ export function registerTaskTools(server: McpServer): void {
       },
     },
     async ({ id, unlinkIssue, unlinkPR }) => {
-      const task = await service.getById(id);
-      if (!task) return err(`Task '${id}' not found`);
+      const guard = await requireLiveTask(id);
+      if (guard.err) return guard.err;
       const updates: Record<string, unknown> = {};
       if (unlinkIssue !== false) updates.githubIssue = undefined;
       if (unlinkPR !== false) updates.githubPR = undefined;

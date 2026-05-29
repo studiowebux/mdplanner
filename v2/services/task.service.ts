@@ -80,38 +80,55 @@ export class TaskService {
   // -------------------------------------------------------------------------
 
   async list(options?: ListTaskOptions): Promise<Task[]> {
-    let tasks = await this.taskRepo.findAll();
+    const tasks = await this.taskRepo.findAll();
+    return this.applyFilters(tasks, options);
+  }
 
+  /**
+   * List archived tasks only. Mirror of `list` for callers that opt in to
+   * archived rows (MCP `list_tasks { archived: true }` etc.). Filters from
+   * `list` apply identically to the archived set. See
+   * `[architecture] MD Planner — Soft-delete (archive) pattern`.
+   */
+  async listArchived(options?: ListTaskOptions): Promise<Task[]> {
+    const tasks = await this.taskRepo.findArchived();
+    return this.applyFilters(tasks, options);
+  }
+
+  private applyFilters(
+    tasks: Task[],
+    options?: ListTaskOptions,
+  ): Task[] {
+    let result = tasks;
     if (options?.section) {
-      tasks = tasks.filter((t) => ciEquals(t.section, options.section));
+      result = result.filter((t) => ciEquals(t.section, options.section));
     }
     if (options?.project) {
-      tasks = tasks.filter((t) => ciEquals(t.project, options.project));
+      result = result.filter((t) => ciEquals(t.project, options.project));
     }
     if (options?.milestone) {
-      tasks = tasks.filter((t) => ciEquals(t.milestone, options.milestone));
+      result = result.filter((t) => ciEquals(t.milestone, options.milestone));
     }
     if (options?.assignee) {
-      tasks = tasks.filter((t) => t.assignee === options.assignee);
+      result = result.filter((t) => t.assignee === options.assignee);
     }
     if (options?.tags?.length) {
       const required = options.tags.map((t) => t.toLowerCase());
-      tasks = tasks.filter((t) => {
+      result = result.filter((t) => {
         const taskTags = (t.tags ?? []).map((tg) => tg.toLowerCase());
         return required.every((r) => taskTags.includes(r));
       });
     }
     if (options?.ready) {
-      tasks = tasks.filter((t) => {
+      result = result.filter((t) => {
         if (!t.blocked_by?.length) return true;
         return t.blocked_by.every((bid) => {
-          const blocker = tasks.find((bt) => bt.id === bid);
+          const blocker = result.find((bt) => bt.id === bid);
           return !blocker || blocker.completed;
         });
       });
     }
-
-    return tasks;
+    return result;
   }
 
   async getById(id: string): Promise<Task | null> {
