@@ -5,8 +5,8 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { createDomainForm } from "../../factories/domain-view.tsx";
 import { meetingConfig } from "../../domains/meeting/config.tsx";
 import { MEETING_FORM_FIELDS } from "../../domains/meeting/constants.tsx";
-import type { Meeting } from "../../types/meeting.types.ts";
 import { getMeetingService } from "../../singletons/services.ts";
+import { resolveLinkedItems } from "../../utils/resolve-links.ts";
 import { generateId } from "../../utils/id.ts";
 import { buildActionPersonById } from "../../domains/meeting/owners.ts";
 import {
@@ -33,10 +33,10 @@ async function renderDetail(c: AppContext, id: string) {
   const item = await getMeetingService().getById(id);
   if (!item) return c.notFound();
 
-  const resolved = await Promise.all(
-    (item.relatedMeetings ?? []).map((rid) => getMeetingService().getById(rid)),
+  const relatedItems = await resolveLinkedItems(
+    item.relatedMeetings,
+    (rid) => getMeetingService().getById(rid),
   );
-  const relatedItems = resolved.filter((m): m is Meeting => m !== null);
   const personById = await buildActionPersonById(item.actions);
   const editing = c.req.query("editing") === "true";
 
@@ -113,12 +113,10 @@ domainRouter.post("/:id/links", async (c) => {
   const result = await getMeetingService().linkMeetings(id, linkedId);
   if (!result) return c.notFound();
   publish("meeting.updated");
-  const resolved = await Promise.all(
-    (result.a.relatedMeetings ?? []).map((rid) =>
-      getMeetingService().getById(rid)
-    ),
+  const relatedItems = await resolveLinkedItems(
+    result.a.relatedMeetings,
+    (rid) => getMeetingService().getById(rid),
   );
-  const relatedItems = resolved.filter((m): m is Meeting => m !== null);
   return new Response(renderRelatedSection(result.a, relatedItems), {
     status: 200,
     headers: { "Content-Type": "text/html" },
@@ -160,12 +158,10 @@ domainRouter.delete("/:id/links/:linkedId", async (c) => {
   const result = await getMeetingService().unlinkMeetings(id, linkedId);
   if (!result) return c.notFound();
   publish("meeting.updated");
-  const resolved = await Promise.all(
-    (result.a.relatedMeetings ?? []).map((rid) =>
-      getMeetingService().getById(rid)
-    ),
+  const relatedItems = await resolveLinkedItems(
+    result.a.relatedMeetings,
+    (rid) => getMeetingService().getById(rid),
   );
-  const relatedItems = resolved.filter((m): m is Meeting => m !== null);
   return new Response(renderRelatedSection(result.a, relatedItems), {
     status: 200,
     headers: { "Content-Type": "text/html" },
