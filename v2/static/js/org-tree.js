@@ -364,8 +364,12 @@
       return;
     }
 
+    // Only fit on the transition into org view (initial mount or switch from
+    // another view). SSE-driven refreshes morph the DOM in place and must
+    // preserve the user's zoom/pan — refit would reset it and cause a flash.
+    var wasActive = isOrgActive;
     isOrgActive = true;
-    fitToViewport();
+    if (!wasActive) fitToViewport();
   }
 
   function syncOrgViewDeferred() {
