@@ -103,6 +103,16 @@ app.use("/js/*", async (c, next) => {
 });
 app.use("/css/*", serveStatic({ root: staticRoot }));
 app.use("/js/*", serveStatic({ root: staticRoot }));
+
+// Browsers auto-request /favicon.ico regardless of <link rel="icon">.
+// Serve the SVG bytes with image/svg+xml so the request returns 200 and
+// modern clients render the icon without 404 console noise.
+const faviconSvg = await Deno.readTextFile(join(staticRoot, "favicon.svg"));
+app.get("/favicon.ico", (c) => {
+  c.header("Content-Type", "image/svg+xml");
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.body(faviconSvg);
+});
 app.use("/favicon*", serveStatic({ root: staticRoot }));
 
 log.info(`${APP_NAME} v${APP_VERSION}`);
