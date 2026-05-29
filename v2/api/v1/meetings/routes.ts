@@ -3,7 +3,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getMeetingService } from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
-import type { Meeting } from "../../../types/meeting.types.ts";
+import { resolveLinkedItems } from "../../../utils/resolve-links.ts";
 import {
   ActionIdParam,
   AddMeetingActionSchema,
@@ -349,12 +349,10 @@ meetingsRouter.openapi(
     const result = await getMeetingService().linkMeetings(id, linkedId);
     if (!result) return c.json(notFound("MEETING", id), 404);
     publish("meeting.updated");
-    const resolved = await Promise.all(
-      (result.a.relatedMeetings ?? []).map((rid) =>
-        getMeetingService().getById(rid)
-      ),
+    const relatedItems = await resolveLinkedItems(
+      result.a.relatedMeetings,
+      (rid) => getMeetingService().getById(rid),
     );
-    const relatedItems = resolved.filter((m): m is Meeting => m !== null);
     return c.html(renderRelatedSection(result.a, relatedItems), 200);
   },
 );
@@ -384,12 +382,10 @@ meetingsRouter.openapi(
     const result = await getMeetingService().unlinkMeetings(id, linkedId);
     if (!result) return c.json(notFound("MEETING", id), 404);
     publish("meeting.updated");
-    const resolved = await Promise.all(
-      (result.a.relatedMeetings ?? []).map((rid) =>
-        getMeetingService().getById(rid)
-      ),
+    const relatedItems = await resolveLinkedItems(
+      result.a.relatedMeetings,
+      (rid) => getMeetingService().getById(rid),
     );
-    const relatedItems = resolved.filter((m): m is Meeting => m !== null);
     return c.html(renderRelatedSection(result.a, relatedItems), 200);
   },
 );
