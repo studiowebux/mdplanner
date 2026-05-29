@@ -170,10 +170,6 @@ Deno.test("PVBRepository - update preserves sibling fields", async () => {
       title: "Sibling Board",
       date: "2026-03-01",
       project: "ProjectX",
-      // `notes` intentionally omitted here — there is a known round-trip bug
-      // where `notes` is written to the body without a `## Notes` heading and
-      // the parser only captures content after an unrecognised heading. A
-      // dedicated test documents that limitation below. See bug note.
       customerSegments: ["a"],
       problem: ["b"],
       solution: ["c"],
@@ -292,28 +288,36 @@ Deno.test("PVBService - list with q filter matches title (case-insensitive)", as
   }
 });
 
-Deno.test("PVBRepository - KNOWN BUG: notes does not round-trip through serialize/parse", async () => {
-  // Documents the bug discovered while writing this test file:
-  // - `serialize()` writes notes to the body without a `## Notes` heading.
-  // - `parse()` only captures plain text after an UNRECOGNISED heading
-  //   (`pastSections = true`); trailing text inside the last known section
-  //   falls through without being appended to `extraLines`.
-  // Result: a board created with notes returns `notes: undefined` on the
-  // very next `findById`. Filed as a Backlog bug ticket — fix is to either
-  // (a) write notes to frontmatter, or (b) prefix the body with `## Notes`
-  // in serialize() and add `notes` as a recognised section in parse().
-  // Locking the current behaviour here so the regression surfaces if the
-  // bug is silently "fixed" without updating this test.
+Deno.test("PVBRepository - notes round-trips through serialize/parse", async () => {
   const { repo, dir } = await setup();
   try {
     const created = await repo.create({
-      title: "Notes Bug Repro",
-      notes: "These notes will be lost on the next read.",
+      title: "Notes Round-Trip",
+      notes: "Sticky reminder for the next review.",
     });
-    assertEquals(created.notes, "These notes will be lost on the next read.");
+    assertEquals(created.notes, "Sticky reminder for the next review.");
     const fetched = await repo.findById(created.id);
     assertExists(fetched);
-    assertStrictEquals(fetched!.notes, undefined);
+    assertEquals(fetched!.notes, "Sticky reminder for the next review.");
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("PVBService - list with q filter matches notes (case-insensitive)", async () => {
+  const { repo, service, dir } = await setup();
+  try {
+    await repo.create({
+      title: "Board A",
+      notes: "Customer requires SOC2 compliance.",
+    });
+    await repo.create({
+      title: "Board B",
+      notes: "Standard quarterly review.",
+    });
+    const matches = await service.list({ q: "soc2" });
+    assertEquals(matches.length, 1);
+    assertEquals(matches[0].title, "Board A");
   } finally {
     await cleanup(dir);
   }

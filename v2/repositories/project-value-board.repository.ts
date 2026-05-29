@@ -104,8 +104,6 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
       benefit: [],
     };
     let currentSection: ProjectValueBoardSectionKey | null = null;
-    const extraLines: string[] = [];
-    let pastSections = false;
 
     for (const line of lines) {
       if (line.startsWith("# ")) {
@@ -115,32 +113,15 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
 
       const h2Match = line.match(/^##\s+(.+)$/);
       if (h2Match) {
-        const key = matchSection(h2Match[1]);
-        if (key) {
-          currentSection = key;
-          pastSections = false;
-        } else {
-          currentSection = null;
-          pastSections = true;
-          extraLines.push(line);
-        }
+        currentSection = matchSection(h2Match[1]);
         continue;
       }
 
       const listMatch = line.match(/^[-*]\s+(.+)$/);
-      if (listMatch && currentSection && !pastSections) {
+      if (listMatch && currentSection) {
         sections[currentSection].push(listMatch[1].trim());
-        continue;
-      }
-
-      if (pastSections) {
-        extraLines.push(line);
       }
     }
-
-    const bodyNotes = extraLines.join("\n").trim();
-    const fmNotes = fm.notes != null ? String(fm.notes) : "";
-    const notes = bodyNotes || fmNotes || undefined;
 
     return {
       id,
@@ -148,7 +129,7 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
       date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
       ...sections,
       project: fm.project != null ? String(fm.project) : undefined,
-      notes,
+      notes: fm.notes != null ? String(fm.notes) : undefined,
       createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
       updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
@@ -166,6 +147,7 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
     fm.title = item.title;
     fm.date = item.date;
     if (item.project) fm.project = item.project;
+    if (item.notes) fm.notes = item.notes;
     fm.created_at = item.createdAt;
     fm.updated_at = item.updatedAt;
     if (item.createdBy) fm.created_by = item.createdBy;
@@ -183,11 +165,6 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
       for (const entry of item[key]) {
         bodyLines.push(`- ${entry}`);
       }
-    }
-
-    if (item.notes) {
-      bodyLines.push("");
-      bodyLines.push(item.notes);
     }
 
     return serializeFrontmatter(fm, bodyLines.join("\n").trimEnd());
