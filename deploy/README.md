@@ -26,13 +26,16 @@ Open `http://localhost:8080` (through Caddy) or `http://localhost:8003`
 
 Copy `deploy/.env.example` to `deploy/.env` and set values before starting.
 
-| Variable               | Default | Required | Description                                                                                          |
-| ---------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `PROJECT_DIR`          | —       | Yes      | Absolute path to the data directory inside the container. Use `/data` with the default volume mount. |
-| `PORT`                 | `8003`  | No       | HTTP port the server listens on inside the container.                                                |
-| `CACHE`                | `true`  | No       | Set to `false` to disable the SQLite FTS cache. Full-text search requires `true`.                    |
-| `MCP_TOKEN`            | —       | No       | Bearer token for MCP API requests (`Authorization: Bearer <token>`). Leave empty to disable auth.    |
-| `MDPLANNER_SECRET_KEY` | —       | No       | AES-256-GCM key for encrypting integration secrets stored in `project.md`.                           |
+| Variable               | Default | Required  | Description                                                                                                      |
+| ---------------------- | ------- | --------- | ---------------------------------------------------------------------------------------------------------------- |
+| `PROJECT_DIR`          | —       | Yes       | Absolute path to the data directory inside the container. Use `/data` with the default volume mount.             |
+| `PORT`                 | `8003`  | No        | HTTP port the server listens on inside the container.                                                            |
+| `CACHE`                | `true`  | No        | Set to `false` to disable the SQLite FTS cache. Full-text search requires `true`.                                |
+| `MCP_TOKEN`            | —       | No        | Bearer token for MCP API requests (`Authorization: Bearer <token>`). Leave empty to disable auth.                |
+| `MDPLANNER_SECRET_KEY` | —       | No        | AES-256-GCM key for encrypting integration secrets stored in `project.md`.                                       |
+| `WEBDAV`               | —       | No        | Set to `true` to mount `PROJECT_DIR` as a WebDAV volume at `/webdav/`. Requires `WEBDAV_USER` and `WEBDAV_PASS`. |
+| `WEBDAV_USER`          | —       | If WEBDAV | Basic-Auth username for the WebDAV endpoint.                                                                     |
+| `WEBDAV_PASS`          | —       | If WEBDAV | Basic-Auth password for the WebDAV endpoint.                                                                     |
 
 Generate a secret key:
 

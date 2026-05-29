@@ -9,6 +9,7 @@ import { subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
 import { views } from "./views/mod.tsx";
 import { createMcpHonoRouter } from "./mcp/mod.ts";
+import { registerWebDav } from "./api/v1/webdav/routes.ts";
 import { contextMiddleware } from "./middleware/context.ts";
 import { identityGuard } from "./middleware/identity-guard.ts";
 import {
@@ -84,6 +85,9 @@ app.get("/sse", () => {
 const mcpToken = Deno.env.get("MCP_TOKEN");
 app.route("/mcp", createMcpHonoRouter({ token: mcpToken }));
 app.route("/api", api);
+
+await registerWebDav(app, projectDir);
+
 app.route("/", views);
 
 const staticRoot = join(__dirname, "static");

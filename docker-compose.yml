@@ -8,11 +8,12 @@ services:
       - ./data:/data
       - ./backups:/backups
     environment:
-      - MDPLANNER_CACHE=${MDPLANNER_CACHE:-}
-      - MDPLANNER_WEBDAV=${MDPLANNER_WEBDAV:-1}
-      - MDPLANNER_WEBDAV_USER=${MDPLANNER_WEBDAV_USER:-}
-      - MDPLANNER_WEBDAV_PASS=${MDPLANNER_WEBDAV_PASS:-}
-      - MDPLANNER_MCP_TOKEN=${MDPLANNER_MCP_TOKEN:-}
+      - CACHE=${CACHE:-true}
+      - PORT=${PORT:-8003}
+      - WEBDAV=${WEBDAV:-}
+      - WEBDAV_USER=${WEBDAV_USER:-}
+      - WEBDAV_PASS=${WEBDAV_PASS:-}
+      - MCP_TOKEN=${MCP_TOKEN:-}
       - MDPLANNER_READ_ONLY=${MDPLANNER_READ_ONLY:-}
       # Encryption key for integration secrets (e.g. Cloudflare API token stored in project.md).
       # Generate with: mdplanner keygen-secret

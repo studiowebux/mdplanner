@@ -13,6 +13,9 @@ All v2 runtime configuration is done via environment variables. There are no CLI
 | `CACHE`                | `true`  | No       | Set to `false` to disable the SQLite FTS cache. Full-text search requires `true`. |
 | `MCP_TOKEN`            | —       | No       | Bearer token for MCP API requests (`Authorization: Bearer <token>`). Leave empty to disable auth. |
 | `MDPLANNER_SECRET_KEY` | —       | No       | AES-256-GCM key for encrypting integration secrets stored in `project.md`.        |
+| `WEBDAV`               | —       | No       | Set to `true` to mount `PROJECT_DIR` as a WebDAV volume at `/webdav/`. Requires `WEBDAV_USER` and `WEBDAV_PASS`. |
+| `WEBDAV_USER`          | —       | If `WEBDAV` | Basic-Auth username for the WebDAV endpoint.                                  |
+| `WEBDAV_PASS`          | —       | If `WEBDAV` | Basic-Auth password for the WebDAV endpoint.                                  |
 
 ## Generating a secret key
 
@@ -33,11 +36,14 @@ remainder were renamed or removed.
 
 ### Renamed
 
-| v1                    | v2          |
-| --------------------- | ----------- |
-| `MDPLANNER_PORT`      | `PORT`      |
-| `MDPLANNER_CACHE`     | `CACHE`     |
-| `MDPLANNER_MCP_TOKEN` | `MCP_TOKEN` |
+| v1                     | v2            |
+| ---------------------- | ------------- |
+| `MDPLANNER_PORT`       | `PORT`        |
+| `MDPLANNER_CACHE`      | `CACHE`       |
+| `MDPLANNER_MCP_TOKEN`  | `MCP_TOKEN`   |
+| `MDPLANNER_WEBDAV`     | `WEBDAV`      |
+| `MDPLANNER_WEBDAV_USER`| `WEBDAV_USER` |
+| `MDPLANNER_WEBDAV_PASS`| `WEBDAV_PASS` |
 
 `MDPLANNER_SECRET_KEY` is unchanged.
 
@@ -53,8 +59,14 @@ remainder were renamed or removed.
 - `MDPLANNER_MAX_BODY_SIZE`
 - `MDPLANNER_RATE_LIMIT`
 
-### Pending re-add
+## WebDAV
 
-`MDPLANNER_WEBDAV`, `MDPLANNER_WEBDAV_USER`, `MDPLANNER_WEBDAV_PASS` are not in
-v2 yet. WebDAV support is tracked as a separate v2 port task; this section will
-be updated when it lands.
+Setting `WEBDAV=true` mounts `PROJECT_DIR` as a WebDAV volume at `/webdav/`.
+Basic Auth credentials (`WEBDAV_USER` + `WEBDAV_PASS`) are required when
+enabled — the server refuses to start without them. Useful for Obsidian
+remote vaults, macOS Finder, and Windows Explorer.
+
+Limitation: WebDAV writes go directly to disk and bypass the v2 repository
+layer + SQLite FTS cache. Full-text search and the entity cache will lag
+after a DAV write until the next sync. Use the WebDAV endpoint for
+file-level access; use the HTTP API / UI for entity-level edits.

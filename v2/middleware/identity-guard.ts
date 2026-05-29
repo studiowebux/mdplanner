@@ -12,6 +12,7 @@ const EXEMPT_PREFIXES = [
   "/css/",
   "/js/",
   "/favicon",
+  "/webdav",
 ];
 
 export const identityGuard: MiddlewareHandler<{
