@@ -767,7 +767,7 @@ html.font-mono {
   --lc-section-edit-max-h: 40vh;
 
   /* Deals pipeline */
-  --deal-pipeline-col-w: 18rem;
+  --deal-pipeline-col-w: 16rem;
 
   /* GitHub view */
   --github-table-num-w: 3rem;

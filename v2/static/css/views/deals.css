@@ -34,6 +34,10 @@
   padding-bottom: var(--space-lg);
   align-items: flex-start;
   min-height: 24rem;
+  /* Always-visible thin scrollbar signals horizontal scroll affordance
+     when columns overflow the viewport. CSP-safe, no JS. */
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
 .deal-pipeline__column {
@@ -69,7 +73,10 @@
 
 .deal-pipeline__column-header {
   padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
+  background: var(--color-bg-primary);
   border-bottom: var(--border-width) solid var(--color-border-default);
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -84,7 +91,7 @@
 }
 
 .deal-pipeline__column-title {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
@@ -164,7 +171,7 @@
 
 .deal-pipeline__card-link {
   display: block;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-md);
   text-decoration: none;
   color: var(--color-text-primary);
 }
@@ -172,7 +179,7 @@
 .deal-pipeline__card-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-2xs);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -181,27 +188,29 @@
 .deal-pipeline__card-value {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-xs);
+  color: var(--color-accent);
+  margin-bottom: var(--space-sm);
 }
 
 .deal-pipeline__card-currency {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-normal);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .deal-pipeline__card-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-xs);
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-sm);
 }
 
 .deal-pipeline__card-company {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -209,7 +218,8 @@
 
 .deal-pipeline__card-contact {
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -221,8 +231,8 @@
   color: var(--color-text-secondary);
   background: var(--color-bg-tertiary);
   border-radius: var(--radius-full);
-  padding: var(--badge-padding);
-  margin-top: var(--space-xs);
+  padding: var(--space-2xs) var(--space-sm);
+  margin-top: var(--space-2xs);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -233,16 +243,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
-  padding-top: var(--space-xs);
 }
 
 .deal-pipeline__card-tag {
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  padding: var(--badge-padding);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2xs) var(--space-xs);
 }
 
 .deal-pipeline__card-actions {
