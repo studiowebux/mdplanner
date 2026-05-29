@@ -1,11 +1,12 @@
 // Identity guard — redirects anonymous SSR requests to /identity.
-// Exempt: /identity, /api/*, /mcp/*, /sse, /css/*, /js/*, /favicon*
+// Exempt: /identity, /settings/identity, /api/*, /mcp/*, /sse, /css/*, /js/*, /favicon*
 
 import type { MiddlewareHandler } from "hono";
 import type { AppVariables } from "../types/app.ts";
 
 const EXEMPT_PREFIXES = [
   "/identity",
+  "/settings/identity",
   "/api/",
   "/mcp/",
   "/sse",
