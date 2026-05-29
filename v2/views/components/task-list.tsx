@@ -20,9 +20,14 @@ import {
 type PeopleOption = { value: string; label: string };
 
 const TaskRow: FC<
-  { task: Task; peopleOptions?: PeopleOption[]; index: number }
+  {
+    task: Task;
+    peopleOptions?: PeopleOption[];
+    index: number;
+    archived?: boolean;
+  }
 > = (
-  { task, peopleOptions, index },
+  { task, peopleOptions, index, archived },
 ) => (
   <div
     class={`task-list__row${
@@ -105,46 +110,87 @@ const TaskRow: FC<
       </div>
     </div>
     <div class="task-list__row-actions">
-      <select
-        class="form__select form__select--sm"
-        hx-post={`/tasks/${task.id}/move`}
-        hx-swap="none"
-        hx-trigger="change"
-        hx-include="this"
-        name="section"
-        aria-label="Move section"
-      >
-        {(getSectionOrder() as readonly string[]).map((s) => (
-          <option key={s} value={s} selected={s === task.section}>{s}</option>
-        ))}
-      </select>
-      <button
-        class="btn btn--secondary btn--sm"
-        type="button"
-        hx-get={`/tasks/${task.id}/edit`}
-        hx-target="#tasks-form-container"
-        hx-swap="innerHTML"
-      >
-        Edit
-      </button>
-      <button
-        class="btn btn--secondary btn--sm"
-        type="button"
-        data-copy
-        data-copy-value={`/tasks/${task.id}`}
-        aria-label="Copy link to task"
-      >
-        Link
-      </button>
-      <button
-        class="btn btn--danger btn--sm"
-        type="button"
-        hx-delete={`/tasks/${task.id}`}
-        hx-confirm={`Delete "${task.title}"? This cannot be undone.`}
-        hx-swap="none"
-      >
-        Delete
-      </button>
+      {archived
+        ? (
+          <>
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              hx-post={`/tasks/${task.id}/restore`}
+              hx-swap="none"
+            >
+              Restore
+            </button>
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              data-copy
+              data-copy-value={`/tasks/${task.id}`}
+              aria-label="Copy link to task"
+            >
+              Link
+            </button>
+            <button
+              class="btn btn--danger btn--sm"
+              type="button"
+              hx-post={`/tasks/${task.id}/destroy`}
+              hx-confirm={`Permanently delete "${task.title}"? This cannot be undone — the file will be removed from disk.`}
+              data-confirm-title="Delete permanently"
+              data-confirm-label="Delete permanently"
+              hx-swap="none"
+            >
+              Delete permanently
+            </button>
+          </>
+        )
+        : (
+          <>
+            <select
+              class="form__select form__select--sm"
+              hx-post={`/tasks/${task.id}/move`}
+              hx-swap="none"
+              hx-trigger="change"
+              hx-include="this"
+              name="section"
+              aria-label="Move section"
+            >
+              {(getSectionOrder() as readonly string[]).map((s) => (
+                <option key={s} value={s} selected={s === task.section}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              hx-get={`/tasks/${task.id}/edit`}
+              hx-target="#tasks-form-container"
+              hx-swap="innerHTML"
+            >
+              Edit
+            </button>
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              data-copy
+              data-copy-value={`/tasks/${task.id}`}
+              aria-label="Copy link to task"
+            >
+              Link
+            </button>
+            <button
+              class="btn btn--danger btn--sm"
+              type="button"
+              hx-delete={`/tasks/${task.id}`}
+              hx-confirm={`Archive "${task.title}"? Archived items can be restored from the archived view.`}
+              data-confirm-title="Archive"
+              data-confirm-label="Archive"
+              hx-swap="none"
+            >
+              Archive
+            </button>
+          </>
+        )}
     </div>
   </div>
 );
@@ -265,10 +311,11 @@ type ListProps = TaskViewProps & {
   sort?: string;
   order?: string;
   peopleOptions?: { value: string; label: string }[];
+  archived?: boolean;
 };
 
 export const TaskListView: FC<ListProps> = (
-  { tasks, sort, order, peopleOptions },
+  { tasks, sort, order, peopleOptions, archived },
 ) => {
   if (tasks.length === 0) {
     return <EmptyState message="No tasks match the current filters." />;
@@ -313,6 +360,7 @@ export const TaskListView: FC<ListProps> = (
                   task={t}
                   peopleOptions={peopleOptions}
                   index={i}
+                  archived={archived}
                 />
               ))}
             </div>

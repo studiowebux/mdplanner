@@ -202,6 +202,31 @@ export class TaskService {
     return deleted;
   }
 
+  /** Soft-delete (archive). Aliased by `delete`. See
+   * `[architecture] MD Planner — Soft-delete (archive) pattern`. */
+  async archive(id: string, by?: string): Promise<boolean> {
+    const ok = await this.taskRepo.archive(id, by);
+    if (ok) this.cacheRemove(id);
+    return ok;
+  }
+
+  /** Restore a soft-deleted task. */
+  async restore(id: string): Promise<boolean> {
+    const ok = await this.taskRepo.restore(id);
+    if (ok) {
+      const restored = await this.taskRepo.findById(id);
+      if (restored) this.cacheUpsert(restored);
+    }
+    return ok;
+  }
+
+  /** Permanently delete the task file from disk. No recovery. */
+  async hardDelete(id: string): Promise<boolean> {
+    const ok = await this.taskRepo.hardDelete(id);
+    if (ok) this.cacheRemove(id);
+    return ok;
+  }
+
   // -------------------------------------------------------------------------
   // Workflow
   // -------------------------------------------------------------------------

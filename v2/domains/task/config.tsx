@@ -260,6 +260,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
           sort={state.sort}
           order={state.order}
           peopleOptions={peopleOptions}
+          archived={state.archived === "true"}
         />
       );
     }

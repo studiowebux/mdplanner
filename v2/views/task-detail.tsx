@@ -503,24 +503,54 @@ export const TaskDetailView: FC<Props> = (
                 Reopen
               </button>
             )}
-          <button
-            class="btn btn--secondary"
-            type="button"
-            hx-get={`/tasks/${task.id}/edit`}
-            hx-target="#tasks-form-container"
-            hx-swap="innerHTML"
-          >
-            Edit
-          </button>
-          <button
-            class="btn btn--danger btn--sm"
-            type="button"
-            hx-delete={`/tasks/${task.id}`}
-            hx-confirm={`Delete "${task.title}"? This cannot be undone.`}
-            hx-swap="none"
-          >
-            Delete
-          </button>
+          {task.archived === true
+            ? (
+              <>
+                <button
+                  class="btn btn--secondary"
+                  type="button"
+                  hx-post={`/tasks/${task.id}/restore`}
+                  hx-swap="none"
+                >
+                  Restore
+                </button>
+                <button
+                  class="btn btn--danger btn--sm"
+                  type="button"
+                  hx-post={`/tasks/${task.id}/destroy`}
+                  hx-confirm={`Permanently delete "${task.title}"? This cannot be undone — the file will be removed from disk.`}
+                  data-confirm-title="Delete permanently"
+                  data-confirm-label="Delete permanently"
+                  hx-swap="none"
+                >
+                  Delete permanently
+                </button>
+              </>
+            )
+            : (
+              <>
+                <button
+                  class="btn btn--secondary"
+                  type="button"
+                  hx-get={`/tasks/${task.id}/edit`}
+                  hx-target="#tasks-form-container"
+                  hx-swap="innerHTML"
+                >
+                  Edit
+                </button>
+                <button
+                  class="btn btn--danger btn--sm"
+                  type="button"
+                  hx-delete={`/tasks/${task.id}`}
+                  hx-confirm={`Archive "${task.title}"? Archived items can be restored from the archived view.`}
+                  data-confirm-title="Archive"
+                  data-confirm-label="Archive"
+                  hx-swap="none"
+                >
+                  Archive
+                </button>
+              </>
+            )}
         </div>
 
         {/* Two-column layout: left = meta, right = description */}
