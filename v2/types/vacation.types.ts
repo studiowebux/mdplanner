@@ -51,6 +51,14 @@ export const VacationRequestSchema = z.object({
 
 export type VacationRequest = z.infer<typeof VacationRequestSchema>;
 
+/**
+ * View model — `personId` resolved to a display name at render time.
+ * Transient: stamped by the domain `customFilter`, never persisted and not
+ * part of the API/OpenAPI schema. `personName` is optional so a plain
+ * `VacationRequest` is assignable wherever a view is expected.
+ */
+export type VacationRequestView = VacationRequest & { personName?: string };
+
 export const CreateVacationRequestSchema = VacationRequestSchema.pick({
   personId: true,
   startDate: true,

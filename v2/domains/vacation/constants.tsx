@@ -1,6 +1,9 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
-import type { VacationRequest } from "../../types/vacation.types.ts";
+import type {
+  VacationRequest,
+  VacationRequestView,
+} from "../../types/vacation.types.ts";
 import {
   VACATION_STATUSES,
   VACATION_TYPES,
@@ -81,7 +84,11 @@ export const VACATION_TABLE_COLUMNS: ColumnDef[] = [
     key: "personId",
     label: "Person",
     sortable: true,
-    render: (v) => <a href={`/people/${v}`}>{String(v)}</a>,
+    render: (_v, row) => (
+      <a href={`/people/${row.personId}`}>
+        {String(row.personName ?? row.personId)}
+      </a>
+    ),
   },
   { key: "startDate", label: "Start", sortable: true },
   { key: "endDate", label: "End", sortable: true },
@@ -146,10 +153,11 @@ export const VACATION_FORM_FIELDS: FieldDef[] = [
 
 export const VACATION_BODY_KEYS = ["notes"] as const;
 
-export function vacationToRow(r: VacationRequest): Record<string, unknown> {
+export function vacationToRow(r: VacationRequestView): Record<string, unknown> {
   return {
     id: r.id,
     personId: r.personId,
+    personName: r.personName,
     startDate: r.startDate,
     endDate: r.endDate,
     type: r.type,

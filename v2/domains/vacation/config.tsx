@@ -3,17 +3,20 @@ import type {
   CreateVacationRequest,
   UpdateVacationRequest,
   VacationRequest,
+  VacationRequestView,
 } from "../../types/vacation.types.ts";
-import { getVacationService } from "../../singletons/services.ts";
+import {
+  getPeopleService,
+  getVacationService,
+} from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
   VACATION_FORM_FIELDS,
-  VACATION_STATUS_VARIANTS,
   VACATION_TABLE_COLUMNS,
   vacationToRow,
 } from "./constants.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
-import { badgeClass } from "../../components/ui/status-badge.tsx";
+import { VacationCard } from "../../views/components/vacation-card.tsx";
 
 export const vacationConfig: DomainConfig<
   VacationRequest,
@@ -82,22 +85,7 @@ export const vacationConfig: DomainConfig<
 
   toRow: vacationToRow,
 
-  Card: ({ item }) => (
-    <div class="vacation-card">
-      <div class="vacation-card__header">
-        <a href={`/people/${item.personId}`} class="vacation-card__person">
-          {item.personId}
-        </a>
-        <span class={badgeClass(VACATION_STATUS_VARIANTS, item.status)}>
-          {item.status}
-        </span>
-      </div>
-      <div class="vacation-card__dates">
-        {item.startDate} → {item.endDate}
-      </div>
-      <div class="vacation-card__type">{item.type}</div>
-    </div>
-  ),
+  Card: ({ item, q }) => <VacationCard item={item} q={q} />,
 
   parseCreate: (body) => {
     const parsed = parseFormBody(
@@ -116,6 +104,18 @@ export const vacationConfig: DomainConfig<
     }) as Partial<UpdateVacationRequest>,
 
   getService: () => getVacationService(),
+
+  // Resolve personId → display name once per request and stamp `personName`
+  // onto each item. This is the single async post-load hook that feeds the
+  // table, card, and calendar render paths uniformly (toRow/Card are sync).
+  customFilter: async (items) => {
+    const people = await getPeopleService().list();
+    const idToName = new Map(people.map((p) => [p.id, p.name]));
+    return items.map((item): VacationRequestView => ({
+      ...item,
+      personName: idToName.get(item.personId),
+    }));
+  },
 
   extractFilterOptions: async () => {
     const items = await getVacationService().list();
@@ -217,6 +217,8 @@ export const vacationConfig: DomainConfig<
                 (((endDay - startDay + 1) / daysInMonth) * 100).toFixed(2) +
                 "%";
               const isConflict = conflictIds.has(r.id);
+              const personLabel = (r as VacationRequestView).personName ??
+                r.personId;
               const barClass = [
                 "vacation-calendar__bar",
                 `vacation-calendar__bar--${r.status}`,
@@ -231,9 +233,9 @@ export const vacationConfig: DomainConfig<
                     class={barClass}
                     data-left={leftPct}
                     data-width={widthPct}
-                    title={`${r.personId} — ${r.startDate} to ${r.endDate}`}
+                    title={`${personLabel} — ${r.startDate} to ${r.endDate}`}
                   >
-                    {r.personId}
+                    {personLabel}
                   </div>
                 </div>
               );
