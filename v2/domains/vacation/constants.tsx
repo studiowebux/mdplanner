@@ -32,9 +32,6 @@ function vacationActionBtns(
 ): unknown {
   return (
     <div class="domain-card__actions">
-      <a class="btn btn--secondary btn--sm" href={`/vacation/${row.id}`}>
-        View
-      </a>
       <button
         class="btn btn--secondary btn--sm"
         type="button"
