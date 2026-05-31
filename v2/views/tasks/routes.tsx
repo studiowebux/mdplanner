@@ -350,6 +350,31 @@ tasksRouter.post("/:id/reorder", async (c) => {
   return new Response(null, { status: 204 });
 });
 
+// POST /batch-delete — htmx bulk soft-delete (archive) for the task-list bulk
+// bar. Reads repeated `taskId` form fields from hx-include of checked row
+// checkboxes, archives each (skipping missing/already-archived), then asks htmx
+// to refresh so the deleted rows drop out of the list.
+tasksRouter.post("/batch-delete", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const raw = body["taskId"];
+  const ids = Array.isArray(raw)
+    ? raw.map(String)
+    : raw != null
+    ? [String(raw)]
+    : [];
+
+  let archived = 0;
+  for (const id of ids) {
+    const task = await getTaskService().getById(id);
+    if (!task || task.archived === true) continue;
+    if (await getTaskService().delete(id)) archived++;
+  }
+
+  if (archived > 0) publish("task.deleted");
+  c.header("HX-Refresh", "true");
+  return c.body(null, 204);
+});
+
 // POST /batch — bulk update tasks (move section, tag add/remove)
 tasksRouter.post("/batch", async (c) => {
   const items = await c.req.json<

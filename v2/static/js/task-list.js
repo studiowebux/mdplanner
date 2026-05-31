@@ -507,36 +507,6 @@
       });
   }
 
-  function bulkDelete() {
-    if (selected.size === 0) return;
-    var n = selected.size;
-    if (
-      !confirm(
-        "Delete " + n + " task" + (n === 1 ? "" : "s") +
-          "? This cannot be undone.",
-      )
-    ) return;
-
-    var ids = Array.from(selected);
-    var chain = Promise.resolve();
-    ids.forEach(function (id) {
-      chain = chain.then(function () {
-        return fetch("/tasks/" + id, { method: "DELETE" });
-      });
-    });
-
-    chain
-      .then(function () {
-        clearSelection();
-      })
-      .catch(function (err) {
-        if (window.toast) {
-          window.toast({ type: "error", message: "Failed to delete tasks." });
-        }
-        console.debug("[task-list] batch delete failed:", err);
-      });
-  }
-
   function bulkTagAction(mode) {
     var tagInput = getTagInput();
     var tag = tagInput ? tagInput.value.trim() : "";
@@ -601,10 +571,6 @@
     var id = e.target.id;
     if (id === "task-bulk-move") {
       bulkMove();
-      return;
-    }
-    if (id === "task-bulk-delete") {
-      bulkDelete();
       return;
     }
     if (id === "task-bulk-clear") {

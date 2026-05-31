@@ -41,6 +41,8 @@ const TaskRow: FC<
     <input
       type="checkbox"
       class="task-list__select"
+      name="taskId"
+      value={task.id}
       aria-label={`Select ${task.title}`}
       data-task-id={task.id}
     />
@@ -396,6 +398,10 @@ export const TaskListView: FC<ListProps> = (
           type="button"
           class="btn btn--danger btn--sm"
           id="task-bulk-delete"
+          hx-post="/tasks/batch-delete"
+          hx-include=".task-list__select:checked"
+          hx-swap="none"
+          hx-confirm="Delete the selected tasks? They can be restored from the archive."
         >
           Delete
         </button>
