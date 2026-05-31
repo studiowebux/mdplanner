@@ -84,6 +84,7 @@ export interface InvoiceStats {
   totalAmount: number;
   byStatus: Record<string, number>;
   amountByStatus: Record<string, number>;
+  revenueByMonth: Array<{ month: string; amount: number }>;
 }
 
 export interface QuoteStats {

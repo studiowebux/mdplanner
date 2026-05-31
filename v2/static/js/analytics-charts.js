@@ -99,7 +99,8 @@ function renderLine(container, items) {
       r: 2.5,
     });
     const title = document.createElementNS(SVG_NS, "title");
-    title.textContent = d.label + ": " + d.value + "h";
+    title.textContent = d.label + ": " +
+      (d.display != null ? d.display : d.value);
     point.appendChild(title);
     svg.appendChild(point);
 

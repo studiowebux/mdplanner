@@ -204,7 +204,7 @@ const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
 // Empty container; v2/static/js/analytics-charts.js reads data-chart-values and
 // builds the SVG. Pure data-attr handoff (CSP-safe), re-rendered on filter swap.
 
-type ChartItem = { label: string; value: number };
+type ChartItem = { label: string; value: number; display?: string };
 
 const AnalyticsChart: FC<
   { kind: "bar" | "line"; items: ChartItem[]; ariaLabel: string }
@@ -561,6 +561,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 items={data.timeEntries.hoursPerDay.map((d) => ({
                   label: d.date.slice(5).replace("-", "/"),
                   value: d.hours,
+                  display: `${d.hours}h`,
                 }))}
               />
             )
@@ -702,15 +703,33 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               value={formatCurrency(data.invoices.totalAmount)}
             />
           </div>
+          {data.invoices.total > 0
+            ? (
+              <AnalyticsChart
+                kind="line"
+                ariaLabel="Monthly revenue, last 12 months"
+                items={data.invoices.revenueByMonth.map((d) => ({
+                  label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
+                  value: d.amount,
+                  display: formatCurrency(d.amount),
+                }))}
+              />
+            )
+            : <EmptyState message="No invoices yet." />}
           {Object.keys(data.invoices.byStatus).length > 0 && (
-            <ByTable
-              rows={Object.entries(data.invoices.byStatus).map(([s, count]) => [
-                capitalize(s),
-                `${count} (${
-                  formatCurrency(data.invoices.amountByStatus[s] ?? 0)
-                })`,
-              ])}
-            />
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">By Status</summary>
+              <ByTable
+                rows={Object.entries(data.invoices.byStatus).map((
+                  [s, count],
+                ) => [
+                  capitalize(s),
+                  `${count} (${
+                    formatCurrency(data.invoices.amountByStatus[s] ?? 0)
+                  })`,
+                ])}
+              />
+            </details>
           )}
         </section>
       )}

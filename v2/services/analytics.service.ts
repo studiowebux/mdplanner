@@ -41,6 +41,31 @@ import { defaultScope, type UserScope } from "../utils/actor.ts";
 
 // Hours-per-day line chart window (last N calendar days, anchored to filters.to).
 const HOURS_PER_DAY_WINDOW = 30;
+// Revenue-per-month line chart window (last N calendar months, anchored to filters.to).
+const REVENUE_MONTH_WINDOW = 12;
+
+// Build a 0-filled monthly series (oldest first) of `window` months ending at
+// `anchorTo` (YYYY-MM-DD) or today, reading summed values from `byMonth` keyed
+// by YYYY-MM. Cursor is pinned to the first of the month (UTC) to avoid
+// end-of-month rollover when stepping back.
+function monthlySeries(
+  byMonth: Record<string, number>,
+  window: number,
+  anchorTo?: string,
+): Array<{ month: string; amount: number }> {
+  const cursor = anchorTo ? new Date(anchorTo) : new Date();
+  cursor.setUTCDate(1);
+  const series: Array<{ month: string; amount: number }> = [];
+  for (let i = 0; i < window; i++) {
+    const month = cursor.toISOString().slice(0, 7); // YYYY-MM
+    series.unshift({
+      month,
+      amount: Math.round((byMonth[month] ?? 0) * 100) / 100,
+    });
+    cursor.setUTCMonth(cursor.getUTCMonth() - 1);
+  }
+  return series;
+}
 
 function inDateRange(
   date: string | null | undefined,
@@ -223,6 +248,7 @@ async function collectInvoiceStats(
   );
   const byStatus: Record<string, number> = {};
   const amountByStatus: Record<string, number> = {};
+  const byMonth: Record<string, number> = {};
   let total = 0;
   let totalAmount = 0;
   for (const inv of invoices) {
@@ -232,6 +258,8 @@ async function collectInvoiceStats(
     byStatus[s] = (byStatus[s] ?? 0) + 1;
     amountByStatus[s] = (amountByStatus[s] ?? 0) + (inv.total ?? 0);
     totalAmount += inv.total ?? 0;
+    const month = inv.createdAt.slice(0, 7); // YYYY-MM (creation = revenue date)
+    byMonth[month] = (byMonth[month] ?? 0) + (inv.total ?? 0);
   }
   return {
     total,
@@ -243,6 +271,7 @@ async function collectInvoiceStats(
         Math.round(v * 100) / 100,
       ]),
     ),
+    revenueByMonth: monthlySeries(byMonth, REVENUE_MONTH_WINDOW, filters.to),
   };
 }
 
