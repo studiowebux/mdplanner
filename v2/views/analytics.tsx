@@ -492,23 +492,44 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           <div class="analytics__stat-grid">
             <StatCard label="Total" value={data.milestones.total} />
           </div>
-          <details class="analytics__details" open>
-            <summary class="analytics__details-summary">
-              {data.milestones.total}{" "}
-              milestone{data.milestones.total !== 1 ? "s" : ""}
-            </summary>
-            <div class="analytics__milestones">
-              {data.milestones.milestones.map((m) => (
-                <MilestoneBar
-                  key={m.id}
-                  name={m.name}
-                  done={m.doneCount}
-                  total={m.taskCount}
-                  progress={m.progress}
-                />
-              ))}
-            </div>
-          </details>
+          {data.milestones.total > 0
+            ? (
+              <div class="analytics__milestones analytics__progress-scroll">
+                {[...data.milestones.milestones]
+                  .sort((a, b) =>
+                    b.progress - a.progress || a.name.localeCompare(b.name)
+                  )
+                  .map((m) => (
+                    <MilestoneBar
+                      key={m.id}
+                      name={m.name}
+                      done={m.doneCount}
+                      total={m.taskCount}
+                      progress={m.progress}
+                    />
+                  ))}
+              </div>
+            )
+            : <EmptyState message="No milestones yet." />}
+          {data.milestones.total > 0 && (
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">
+                {data.milestones.total}{" "}
+                milestone{data.milestones.total !== 1 ? "s" : ""}
+              </summary>
+              <div class="analytics__milestones">
+                {data.milestones.milestones.map((m) => (
+                  <MilestoneBar
+                    key={m.id}
+                    name={m.name}
+                    done={m.doneCount}
+                    total={m.taskCount}
+                    progress={m.progress}
+                  />
+                ))}
+              </div>
+            </details>
+          )}
         </section>
       )}
 

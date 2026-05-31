@@ -287,6 +287,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+.analytics__progress-scroll {
+  max-height: var(--analytics-progress-scroll-max-h);
+  overflow-y: auto;
+}
+
 /* ── utilization chart (capacity) ───────────────────────────────────────── */
 
 .analytics__util-chart {

@@ -453,6 +453,9 @@
   /* Layout */
   --prose-width: 52ch;
 
+  /* Analytics — theme-independent layout dimension (used in both light/dark) */
+  --analytics-progress-scroll-max-h: 18rem;
+
   /* Org chart — initial value overridden by JS at runtime */
   --orgchart-current-zoom: 1;
 
