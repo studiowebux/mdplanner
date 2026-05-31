@@ -343,12 +343,6 @@
   function getCountEl() {
     return document.getElementById("task-bulk-count");
   }
-  function getSectionSelect() {
-    return document.getElementById("task-bulk-section");
-  }
-  function getTagInput() {
-    return document.getElementById("task-bulk-tag");
-  }
 
   // -- Render -----------------------------------------------------------------
 
@@ -480,79 +474,6 @@
 
   // -- Actions (event delegation — survives htmx swaps) ----------------------
 
-  function bulkMove() {
-    var sectionSelect = getSectionSelect();
-    var section = sectionSelect ? sectionSelect.value : "";
-    if (!section || selected.size === 0) return;
-
-    var updates = Array.from(selected).map(function (id) {
-      return { id: id, updates: { section: section } };
-    });
-
-    fetch("/tasks/batch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Batch move failed (" + res.status + ")");
-        clearSelection();
-        if (sectionSelect) sectionSelect.value = "";
-      })
-      .catch(function (err) {
-        if (window.toast) {
-          window.toast({ type: "error", message: "Failed to move tasks." });
-        }
-        console.debug("[task-list] batch move failed:", err);
-      });
-  }
-
-  function bulkTagAction(mode) {
-    var tagInput = getTagInput();
-    var tag = tagInput ? tagInput.value.trim() : "";
-    if (!tag || selected.size === 0) return;
-
-    var updates = Array.from(selected).map(function (id) {
-      var row = document.querySelector(
-        ".task-list__row[data-task-id='" + id + "']",
-      );
-      var current = [];
-      if (row) {
-        try {
-          current = JSON.parse(row.getAttribute("data-tags") || "[]");
-        } catch (_) {
-          current = [];
-        }
-      }
-      var next;
-      if (mode === "add") {
-        next = current.indexOf(tag) === -1 ? current.concat(tag) : current;
-      } else {
-        next = current.filter(function (t) {
-          return t !== tag;
-        });
-      }
-      return { id: id, updates: { tags: next } };
-    });
-
-    fetch("/tasks/batch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Batch tag failed (" + res.status + ")");
-        if (tagInput) tagInput.value = "";
-        clearSelection();
-      })
-      .catch(function (err) {
-        if (window.toast) {
-          window.toast({ type: "error", message: "Failed to update tags." });
-        }
-        console.debug("[task-list] batch tag failed:", err);
-      });
-  }
-
   // Row click-to-select: clicking any non-interactive part of a row toggles its checkbox
   document.addEventListener("click", function (e) {
     var row = e.target.closest(".task-list__row[data-task-id]");
@@ -566,32 +487,12 @@
     updateBar();
   });
 
-  // Single delegated click handler for all bulk bar buttons
+  // Bulk bar: Clear is JS (resets selection state); Move/Tag/Delete are htmx.
   document.addEventListener("click", function (e) {
     var id = e.target.id;
-    if (id === "task-bulk-move") {
-      bulkMove();
-      return;
-    }
     if (id === "task-bulk-clear") {
       clearSelection();
       return;
-    }
-    if (id === "task-bulk-tag-add") {
-      bulkTagAction("add");
-      return;
-    }
-    if (id === "task-bulk-tag-remove") {
-      bulkTagAction("remove");
-      return;
-    }
-  });
-
-  // Tag input Enter key — also delegated
-  document.addEventListener("keydown", function (e) {
-    if (e.target.id === "task-bulk-tag" && e.key === "Enter") {
-      e.preventDefault();
-      bulkTagAction("add");
     }
   });
 

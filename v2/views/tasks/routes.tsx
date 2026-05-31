@@ -350,18 +350,20 @@ tasksRouter.post("/:id/reorder", async (c) => {
   return new Response(null, { status: 204 });
 });
 
+// Parse repeated `taskId` form fields (hx-include of checked row checkboxes)
+// into a string[] — shared by the htmx bulk-bar endpoints below.
+function parseTaskIds(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String);
+  return raw != null ? [String(raw)] : [];
+}
+
 // POST /batch-delete — htmx bulk soft-delete (archive) for the task-list bulk
 // bar. Reads repeated `taskId` form fields from hx-include of checked row
 // checkboxes, archives each (skipping missing/already-archived), then asks htmx
 // to refresh so the deleted rows drop out of the list.
 tasksRouter.post("/batch-delete", async (c) => {
   const body = await c.req.parseBody({ all: true });
-  const raw = body["taskId"];
-  const ids = Array.isArray(raw)
-    ? raw.map(String)
-    : raw != null
-    ? [String(raw)]
-    : [];
+  const ids = parseTaskIds(body["taskId"]);
 
   let archived = 0;
   for (const id of ids) {
@@ -375,42 +377,63 @@ tasksRouter.post("/batch-delete", async (c) => {
   return c.body(null, 204);
 });
 
-// POST /batch — bulk update tasks (move section, tag add/remove)
-tasksRouter.post("/batch", async (c) => {
-  const items = await c.req.json<
-    Array<{ id: string; updates: Record<string, unknown> }>
-  >();
-  if (!Array.isArray(items) || items.length === 0) {
-    return new Response(null, {
-      status: 400,
-      headers: { "HX-Trigger": hxTrigger("error", "No items provided") },
-    });
+// POST /batch-move — htmx bulk section move for the task-list bulk bar.
+// Reads checked `taskId` fields + the target `section`, moves each live task,
+// then refreshes the list.
+tasksRouter.post("/batch-move", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const ids = parseTaskIds(body["taskId"]);
+  const section = String(body["section"] ?? "").trim();
+
+  if (ids.length > 0 && section) {
+    const svc = getTaskService();
+    const updates: Array<{ id: string; updates: { section: string } }> = [];
+    for (const id of ids) {
+      const task = await svc.getById(id);
+      if (!task || task.archived === true) continue;
+      updates.push({ id, updates: { section } });
+    }
+    if (updates.length > 0) {
+      await svc.batchUpdate(updates);
+      publish("task.updated");
+    }
   }
-  // Per-id archive guard: archived ids are dropped from the batch; the
-  // rest flow through batchUpdate. Mirrors the OpenAPI batch route.
-  const svc = getTaskService();
-  const live: typeof items = [];
-  let droppedArchived = 0;
-  for (const u of items) {
-    const current = await svc.getById(u.id);
-    if (current && current.archived === true) droppedArchived++;
-    else live.push(u);
+
+  c.header("HX-Refresh", "true");
+  return c.body(null, 204);
+});
+
+// POST /batch-tag — htmx bulk add/remove a tag for the task-list bulk bar.
+// Reads checked `taskId` fields, the `tag`, and `mode` (add|remove); the next
+// tag set is computed per task server-side, then the list refreshes.
+tasksRouter.post("/batch-tag", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const ids = parseTaskIds(body["taskId"]);
+  const tag = String(body["tag"] ?? "").trim();
+  const mode = String(body["mode"] ?? "add");
+
+  if (ids.length > 0 && tag) {
+    const svc = getTaskService();
+    const updates: Array<{ id: string; updates: { tags: string[] } }> = [];
+    for (const id of ids) {
+      const task = await svc.getById(id);
+      if (!task || task.archived === true) continue;
+      const current = task.tags ?? [];
+      const next = mode === "remove"
+        ? current.filter((t) => t !== tag)
+        : current.includes(tag)
+        ? current
+        : [...current, tag];
+      updates.push({ id, updates: { tags: next } });
+    }
+    if (updates.length > 0) {
+      await svc.batchUpdate(updates);
+      publish("task.updated");
+    }
   }
-  if (live.length > 0) await svc.batchUpdate(live);
-  publish("task.updated");
-  return new Response(null, {
-    status: 204,
-    ...(droppedArchived > 0
-      ? {
-        headers: {
-          "HX-Trigger": hxTrigger(
-            "error",
-            `${droppedArchived} archived task(s) skipped`,
-          ),
-        },
-      }
-      : {}),
-  });
+
+  c.header("HX-Refresh", "true");
+  return c.body(null, 204);
 });
 
 // POST /:id/time-entries — create time entry, reload detail page

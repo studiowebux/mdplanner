@@ -380,6 +380,7 @@ export const TaskListView: FC<ListProps> = (
         <select
           class="form__select form__select--sm"
           id="task-bulk-section"
+          name="section"
           aria-label="Move selected to section"
         >
           <option value="">Move to…</option>
@@ -391,6 +392,9 @@ export const TaskListView: FC<ListProps> = (
           type="button"
           class="btn btn--secondary btn--sm"
           id="task-bulk-move"
+          hx-post="/tasks/batch-move"
+          hx-include=".task-list__select:checked, #task-bulk-section"
+          hx-swap="none"
         >
           Move
         </button>
@@ -410,6 +414,7 @@ export const TaskListView: FC<ListProps> = (
             type="text"
             class="form__input form__input--sm"
             id="task-bulk-tag"
+            name="tag"
             placeholder="Tag…"
             aria-label="Tag to add or remove"
             autocomplete="off"
@@ -418,6 +423,10 @@ export const TaskListView: FC<ListProps> = (
             type="button"
             class="btn btn--secondary btn--sm"
             id="task-bulk-tag-add"
+            hx-post="/tasks/batch-tag"
+            hx-include=".task-list__select:checked, #task-bulk-tag"
+            hx-vals='{"mode": "add"}'
+            hx-swap="none"
           >
             Add tag
           </button>
@@ -425,6 +434,10 @@ export const TaskListView: FC<ListProps> = (
             type="button"
             class="btn btn--secondary btn--sm"
             id="task-bulk-tag-remove"
+            hx-post="/tasks/batch-tag"
+            hx-include=".task-list__select:checked, #task-bulk-tag"
+            hx-vals='{"mode": "remove"}'
+            hx-swap="none"
           >
             Remove tag
           </button>
