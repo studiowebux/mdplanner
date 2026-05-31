@@ -73,6 +73,35 @@
   letter-spacing: var(--letter-spacing-task-badge);
 }
 
+/* ── charts (pure SVG, built by analytics-charts.js) ────────────────────── */
+
+.analytics__chart {
+  width: 100%;
+}
+
+.analytics__chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: var(--analytics-chart-max-h);
+}
+
+.analytics__chart-bar {
+  fill: var(--color-accent);
+}
+
+.analytics__chart-value {
+  fill: var(--color-text-secondary);
+  font-size: var(--analytics-chart-label-size);
+  text-anchor: middle;
+}
+
+.analytics__chart-label {
+  fill: var(--color-text-muted);
+  font-size: var(--analytics-chart-label-size);
+  text-anchor: middle;
+}
+
 /* ── filter bar ─────────────────────────────────────────────────────────── */
 
 .analytics__filter-bar {

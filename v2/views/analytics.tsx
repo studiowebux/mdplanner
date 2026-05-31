@@ -2,6 +2,8 @@
 
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import { EmptyState } from "../components/ui/empty-state.tsx";
+import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
 
 import type { ViewProps } from "../types/app.ts";
 import type {
@@ -197,6 +199,24 @@ const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
   );
 };
 
+// ── charts ──────────────────────────────────────────────────────────────────
+// Empty container; v2/static/js/analytics-charts.js reads data-chart-values and
+// builds the SVG. Pure data-attr handoff (CSP-safe), re-rendered on filter swap.
+
+type ChartItem = { label: string; value: number };
+
+const AnalyticsChart: FC<
+  { kind: "bar"; items: ChartItem[]; ariaLabel: string }
+> = ({ kind, items, ariaLabel }) => (
+  <div
+    class="analytics__chart"
+    data-chart={kind}
+    data-chart-values={JSON.stringify(items)}
+    role="img"
+    aria-label={ariaLabel}
+  />
+);
+
 const ByTable: FC<{ rows: [string, number | string][]; unit?: string }> = (
   { rows, unit = "" },
 ) => (
@@ -362,6 +382,20 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               <StatCard key={sec} label={sec} value={count} />
             ))}
           </div>
+          {data.tasks.total > 0
+            ? (
+              <AnalyticsChart
+                kind="bar"
+                ariaLabel="Tasks by priority"
+                items={Object.entries(data.tasks.byPriority)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([k, v]) => ({
+                    label: TASK_PRIORITY_LABELS[k] ?? `P${k}`,
+                    value: v,
+                  }))}
+              />
+            )
+            : <EmptyState message="No tasks yet." />}
           <div class="analytics__row">
             {Object.keys(data.tasks.byProject).length > 0 && (
               <details class="analytics__details">
@@ -896,7 +930,7 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       {...vp}
       activePath="/analytics"
       styles={["/css/views/analytics.css"]}
-      scripts={["/js/analytics-jump-bar.js"]}
+      scripts={["/js/analytics-jump-bar.js", "/js/analytics-charts.js"]}
     >
       <div id="analytics-sidenav-container" />
       <AnalyticsBody
