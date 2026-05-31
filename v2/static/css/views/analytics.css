@@ -114,6 +114,176 @@
   text-anchor: middle;
 }
 
+/* Palette rotation — fill (SVG bars/arcs), stroke (arcs), background (legend
+   swatches). One class drives all three; only the relevant property applies. */
+.analytics__chart-c0 {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+  background-color: var(--color-accent);
+}
+
+.analytics__chart-c1 {
+  fill: var(--color-success);
+  stroke: var(--color-success);
+  background-color: var(--color-success);
+}
+
+.analytics__chart-c2 {
+  fill: var(--color-warning);
+  stroke: var(--color-warning);
+  background-color: var(--color-warning);
+}
+
+.analytics__chart-c3 {
+  fill: var(--color-danger);
+  stroke: var(--color-danger);
+  background-color: var(--color-danger);
+}
+
+.analytics__chart-c4 {
+  fill: var(--color-info);
+  stroke: var(--color-info);
+  background-color: var(--color-info);
+}
+
+/* Donut */
+.analytics__chart-donut {
+  display: block;
+  width: var(--analytics-donut-size);
+  height: var(--analytics-donut-size);
+  margin: 0 auto;
+}
+
+.analytics__chart-arc {
+  fill: none;
+}
+
+.analytics__chart-donut-total {
+  fill: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-anchor: middle;
+}
+
+/* Funnel — horizontal bars */
+.analytics__chart-hlabel {
+  fill: var(--color-text-on-accent, #fff);
+  font-size: var(--analytics-chart-label-size);
+  text-anchor: start;
+}
+
+.analytics__chart-hvalue {
+  fill: var(--color-text-secondary);
+  font-size: var(--analytics-chart-label-size);
+  text-anchor: end;
+}
+
+/* Chart legend (donut / grouped bar) */
+.analytics__chart-legend {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+  justify-content: center;
+}
+
+.analytics__chart-legend-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.analytics__chart-swatch {
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.analytics__chart-legend-value {
+  color: var(--color-text-muted);
+}
+
+/* Habit completion grid */
+.analytics__habit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--analytics-habit-cell-gap);
+  overflow-x: auto;
+  max-height: var(--analytics-chart-max-h);
+  overflow-y: auto;
+}
+
+.analytics__habit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.analytics__habit-name {
+  flex: 0 0 var(--analytics-habit-name-w);
+  width: var(--analytics-habit-name-w);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.analytics__habit-cells {
+  display: flex;
+  gap: var(--analytics-habit-cell-gap);
+}
+
+.analytics__habit-cell {
+  width: var(--analytics-habit-cell);
+  height: var(--analytics-habit-cell);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-secondary);
+  flex-shrink: 0;
+}
+
+.analytics__habit-cell.is-done {
+  background-color: var(--color-accent);
+}
+
+/* Journal heatmap (90-day contribution grid) */
+.analytics__heatmap {
+  display: grid;
+  grid-template-rows: repeat(7, var(--analytics-heat-cell));
+  grid-auto-flow: column;
+  grid-auto-columns: var(--analytics-heat-cell);
+  gap: var(--analytics-heat-gap);
+  justify-content: start;
+  overflow-x: auto;
+}
+
+.analytics__heat {
+  width: var(--analytics-heat-cell);
+  height: var(--analytics-heat-cell);
+  border-radius: var(--radius-sm);
+}
+
+.analytics__heat--0 {
+  background-color: var(--color-bg-secondary);
+}
+
+.analytics__heat--1 {
+  background-color: var(--color-accent-muted);
+}
+
+.analytics__heat--2 {
+  background-color: var(--color-accent);
+}
+
+.analytics__heat--3 {
+  background-color: var(--color-accent-hover);
+}
+
 /* ── filter bar ─────────────────────────────────────────────────────────── */
 
 .analytics__filter-bar {

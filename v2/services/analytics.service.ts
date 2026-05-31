@@ -43,6 +43,55 @@ import { defaultScope, type UserScope } from "../utils/actor.ts";
 const HOURS_PER_DAY_WINDOW = 30;
 // Revenue-per-month line chart window (last N calendar months, anchored to filters.to).
 const REVENUE_MONTH_WINDOW = 12;
+const REFLECTION_MONTH_WINDOW = 12;
+const FINANCE_MONTH_WINDOW = 6;
+const MEETING_WEEK_WINDOW = 12;
+const JOURNAL_DAY_WINDOW = 90;
+
+// Monday (UTC) of the week containing `d`, as YYYY-MM-DD.
+function weekStartKey(d: Date): string {
+  const monday = new Date(d);
+  const dow = (monday.getUTCDay() + 6) % 7; // 0=Mon
+  monday.setUTCDate(monday.getUTCDate() - dow);
+  return monday.toISOString().slice(0, 10);
+}
+
+// Build a 0-filled weekly series (oldest first) of `window` weeks ending at the
+// week containing `anchorTo` (or today), reading counts from `byWeek` keyed by
+// the Monday YYYY-MM-DD.
+function weeklySeries(
+  byWeek: Record<string, number>,
+  window: number,
+  anchorTo?: string,
+): Array<{ weekStart: string; count: number }> {
+  const cursor = anchorTo ? new Date(anchorTo) : new Date();
+  const dow = (cursor.getUTCDay() + 6) % 7;
+  cursor.setUTCDate(cursor.getUTCDate() - dow); // Monday of anchor week
+  const series: Array<{ weekStart: string; count: number }> = [];
+  for (let i = 0; i < window; i++) {
+    const key = cursor.toISOString().slice(0, 10);
+    series.unshift({ weekStart: key, count: byWeek[key] ?? 0 });
+    cursor.setUTCDate(cursor.getUTCDate() - 7);
+  }
+  return series;
+}
+
+// Build a 0-filled daily series (oldest first) of `window` days ending at
+// `anchorTo` (or today), reading counts from `byDay` keyed by YYYY-MM-DD.
+function dailySeries(
+  byDay: Record<string, number>,
+  window: number,
+  anchorTo?: string,
+): Array<{ date: string; count: number }> {
+  const cursor = anchorTo ? new Date(anchorTo) : new Date();
+  const series: Array<{ date: string; count: number }> = [];
+  for (let i = 0; i < window; i++) {
+    const key = cursor.toISOString().slice(0, 10);
+    series.unshift({ date: key, count: byDay[key] ?? 0 });
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+  return series;
+}
 
 // Build a 0-filled monthly series (oldest first) of `window` months ending at
 // `anchorTo` (YYYY-MM-DD) or today, reading summed values from `byMonth` keyed
@@ -313,12 +362,21 @@ async function collectMeetingStats(
     filters.project ? { project: filters.project } : {},
   );
   const byProject: Record<string, number> = {};
+  const byWeek: Record<string, number> = {};
   for (const m of meetings) {
     if (!inDateRange(m.date, filters.from, filters.to)) continue;
     const p = m.project ?? "Unassigned";
     byProject[p] = (byProject[p] ?? 0) + 1;
+    if (m.date) {
+      const wk = weekStartKey(new Date(m.date));
+      byWeek[wk] = (byWeek[wk] ?? 0) + 1;
+    }
   }
-  return { total: meetings.length, byProject };
+  return {
+    total: meetings.length,
+    byProject,
+    byWeek: weeklySeries(byWeek, MEETING_WEEK_WINDOW, filters.to),
+  };
 }
 
 async function collectCustomerStats(
@@ -349,10 +407,13 @@ async function collectInvestorStats(
 ): Promise<InvestorStats> {
   const investors = await getInvestorService().list();
   const byStatus: Record<string, number> = {};
+  const targetAmountByStatus: Record<string, number> = {};
   let totalTargetAmount = 0;
   for (const inv of investors) {
     const s = inv.status ?? "unknown";
     byStatus[s] = (byStatus[s] ?? 0) + 1;
+    targetAmountByStatus[s] = (targetAmountByStatus[s] ?? 0) +
+      (inv.amountTarget ?? 0);
     if (inv.status !== "passed") {
       totalTargetAmount += inv.amountTarget ?? 0;
     }
@@ -361,6 +422,12 @@ async function collectInvestorStats(
     total: investors.length,
     byStatus,
     totalTargetAmount: Math.round(totalTargetAmount * 100) / 100,
+    targetAmountByStatus: Object.fromEntries(
+      Object.entries(targetAmountByStatus).map(([k, v]) => [
+        k,
+        Math.round(v * 100) / 100,
+      ]),
+    ),
   };
 }
 
@@ -371,6 +438,8 @@ async function collectFinanceStats(
   let totalIncome = 0;
   let totalExpenses = 0;
   const byType: Record<string, number> = {};
+  const incomeByMonth: Record<string, number> = {};
+  const expensesByMonth: Record<string, number> = {};
   for (const f of entries) {
     byType[f.type] = (byType[f.type] ?? 0) + 1;
     if (f.type === "income") {
@@ -378,12 +447,27 @@ async function collectFinanceStats(
     } else {
       totalExpenses += f.amount;
     }
+    if (f.date) {
+      const month = f.date.slice(0, 7);
+      if (f.type === "income") {
+        incomeByMonth[month] = (incomeByMonth[month] ?? 0) + f.amount;
+      } else {
+        expensesByMonth[month] = (expensesByMonth[month] ?? 0) + f.amount;
+      }
+    }
   }
+  const income = monthlySeries(incomeByMonth, FINANCE_MONTH_WINDOW);
+  const expenses = monthlySeries(expensesByMonth, FINANCE_MONTH_WINDOW);
   return {
     totalIncome: Math.round(totalIncome * 100) / 100,
     totalExpenses: Math.round(totalExpenses * 100) / 100,
     balance: Math.round((totalIncome - totalExpenses) * 100) / 100,
     byType,
+    byMonth: income.map((d, i) => ({
+      month: d.month,
+      income: d.amount,
+      expenses: expenses[i].amount,
+    })),
   };
 }
 
@@ -414,25 +498,35 @@ async function collectHabitStats(
   // project default user, which also owns legacy untagged entries.
   const userScope = scope ?? await defaultScope();
   const habits = await getHabitService().listForUser({}, userScope);
-  if (habits.length === 0) return { total: 0, completionRateThisMonth: null };
+  if (habits.length === 0) {
+    return { total: 0, completionRateThisMonth: null, currentMonth: [] };
+  }
 
   const now = new Date();
   const yearMonth = now.toISOString().slice(0, 7); // "YYYY-MM"
   const daysElapsed = now.getDate();
+  const year = Number(yearMonth.slice(0, 4));
+  const month = Number(yearMonth.slice(5, 7));
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
   let totalCompletions = 0;
-  for (const h of habits) {
+  const currentMonth = habits.map((h) => {
+    const completions = new Array(daysInMonth).fill(false);
     for (const entry of h.completedDates ?? []) {
-      if (entry.date.startsWith(yearMonth)) totalCompletions++;
+      if (entry.date.startsWith(yearMonth)) {
+        totalCompletions++;
+        completions[Number(entry.date.slice(8, 10)) - 1] = true;
+      }
     }
-  }
+    return { habitId: h.id, habitName: h.title, completions };
+  });
 
   const possible = habits.length * daysElapsed;
   const completionRateThisMonth = possible > 0
     ? Math.round((totalCompletions / possible) * 100)
     : null;
 
-  return { total: habits.length, completionRateThisMonth };
+  return { total: habits.length, completionRateThisMonth, currentMonth };
 }
 
 async function collectJournalStats(
@@ -452,11 +546,14 @@ async function collectJournalStats(
   let thisMonth = 0;
   let thisWeek = 0;
   const datesWithEntry = new Set<string>();
+  const byDay: Record<string, number> = {};
 
   for (const e of entries) {
     if (e.date.startsWith(yearMonth)) thisMonth++;
     if (e.date >= weekStartStr && e.date <= todayStr) thisWeek++;
     datesWithEntry.add(e.date);
+    const day = e.date.slice(0, 10);
+    byDay[day] = (byDay[day] ?? 0) + 1;
   }
 
   // Streak: consecutive days ending today (or yesterday if no entry today)
@@ -469,7 +566,13 @@ async function collectJournalStats(
     cursor.setDate(cursor.getDate() - 1);
   }
 
-  return { total: entries.length, thisMonth, thisWeek, streak };
+  return {
+    total: entries.length,
+    thisMonth,
+    thisWeek,
+    streak,
+    last90Days: dailySeries(byDay, JOURNAL_DAY_WINDOW),
+  };
 }
 
 async function collectReflectionStats(
@@ -478,10 +581,19 @@ async function collectReflectionStats(
   const reflections = await getReflectionService().list();
   const yearMonth = new Date().toISOString().slice(0, 7);
   let thisMonth = 0;
+  const byMonth: Record<string, number> = {};
   for (const r of reflections) {
     if (r.date.startsWith(yearMonth)) thisMonth++;
+    byMonth[r.date.slice(0, 7)] = (byMonth[r.date.slice(0, 7)] ?? 0) + 1;
   }
-  return { total: reflections.length, thisMonth };
+  return {
+    total: reflections.length,
+    thisMonth,
+    byMonth: monthlySeries(byMonth, REFLECTION_MONTH_WINDOW).map((d) => ({
+      month: d.month,
+      count: d.amount,
+    })),
+  };
 }
 
 export async function getProjectAnalytics(

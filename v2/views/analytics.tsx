@@ -4,6 +4,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
+import { DEAL_STAGE_LABELS, DEAL_STAGES } from "../types/deal.types.ts";
 import { utilizationBand } from "../utils/utilization.ts";
 
 import type { ViewProps } from "../types/app.ts";
@@ -205,9 +206,18 @@ const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
 // builds the SVG. Pure data-attr handoff (CSP-safe), re-rendered on filter swap.
 
 type ChartItem = { label: string; value: number; display?: string };
+type GroupedChartItem = {
+  label: string;
+  values: number[];
+  displays?: string[];
+};
 
 const AnalyticsChart: FC<
-  { kind: "bar" | "line"; items: ChartItem[]; ariaLabel: string }
+  {
+    kind: "bar" | "line" | "donut" | "funnel" | "groupedbar";
+    items: ChartItem[] | GroupedChartItem[];
+    ariaLabel: string;
+  }
 > = ({ kind, items, ariaLabel }) => (
   <div
     class="analytics__chart"
@@ -754,15 +764,29 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               value={formatCurrency(data.quotes.totalAmount)}
             />
           </div>
+          {data.quotes.total > 0
+            ? (
+              <AnalyticsChart
+                kind="donut"
+                ariaLabel="Quotes by stage"
+                items={Object.entries(data.quotes.byStatus).map((
+                  [s, count],
+                ) => ({ label: capitalize(s), value: count }))}
+              />
+            )
+            : <EmptyState message="No quotes yet." />}
           {Object.keys(data.quotes.byStatus).length > 0 && (
-            <ByTable
-              rows={Object.entries(data.quotes.byStatus).map(([s, count]) => [
-                capitalize(s),
-                `${count} (${
-                  formatCurrency(data.quotes.amountByStatus[s] ?? 0)
-                })`,
-              ])}
-            />
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">By Status</summary>
+              <ByTable
+                rows={Object.entries(data.quotes.byStatus).map(([s, count]) => [
+                  capitalize(s),
+                  `${count} (${
+                    formatCurrency(data.quotes.amountByStatus[s] ?? 0)
+                  })`,
+                ])}
+              />
+            </details>
           )}
         </section>
       )}
@@ -783,6 +807,18 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           <div class="analytics__stat-grid">
             <StatCard label="Total" value={data.meetings.total} />
           </div>
+          {data.meetings.total > 0
+            ? (
+              <AnalyticsChart
+                kind="bar"
+                ariaLabel="Meetings per week, last 12 weeks"
+                items={data.meetings.byWeek.map((d) => ({
+                  label: `${d.weekStart.slice(5).replace("-", "/")}`,
+                  value: d.count,
+                }))}
+              />
+            )
+            : <EmptyState message="No meetings yet." />}
           {Object.keys(data.meetings.byProject).length > 0 && (
             <details class="analytics__details">
               <summary class="analytics__details-summary">By Project</summary>
@@ -827,6 +863,17 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           <div class="analytics__stat-grid">
             <StatCard label="Total" value={data.notes.total} />
           </div>
+          {data.notes.total > 0
+            ? (
+              <AnalyticsChart
+                kind="donut"
+                ariaLabel="Notes by type"
+                items={Object.entries(data.notes.byType)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([k, v]) => ({ label: capitalize(k), value: v }))}
+              />
+            )
+            : <EmptyState message="No notes yet." />}
           <div class="analytics__row">
             {Object.keys(data.notes.byType).length > 0 && (
               <details class="analytics__details">
@@ -872,16 +919,31 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               value={formatCurrency(data.investors.totalTargetAmount)}
             />
           </div>
+          {data.investors.total > 0
+            ? (
+              <AnalyticsChart
+                kind="bar"
+                ariaLabel="Target amount by status"
+                items={Object.entries(data.investors.targetAmountByStatus)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([k, v]) => ({
+                    label: capitalize(k),
+                    value: v,
+                    display: formatCurrency(v),
+                  }))}
+              />
+            )
+            : <EmptyState message="No investors yet." />}
           {Object.keys(data.investors.byStatus).length > 0 && (
-            <div class="analytics__col">
-              <h3 class="analytics__col-title">By Status</h3>
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">By Status</summary>
               <ByTable
                 rows={Object.entries(data.investors.byStatus).map(([k, v]) => [
                   capitalize(k),
                   v,
                 ])}
               />
-            </div>
+            </details>
           )}
         </section>
       )}
@@ -913,6 +975,33 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               value={formatCurrency(data.finances.balance)}
             />
           </div>
+          {data.finances.totalIncome + data.finances.totalExpenses > 0
+            ? (
+              <AnalyticsChart
+                kind="groupedbar"
+                ariaLabel="Income vs expenses, last 6 months"
+                items={data.finances.byMonth.map((d) => ({
+                  label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
+                  values: [d.income, d.expenses],
+                  displays: [
+                    formatCurrency(d.income),
+                    formatCurrency(d.expenses),
+                  ],
+                }))}
+              />
+            )
+            : <EmptyState message="No finance entries yet." />}
+          {Object.keys(data.finances.byType).length > 0 && (
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">By Type</summary>
+              <ByTable
+                rows={Object.entries(data.finances.byType).map(([k, v]) => [
+                  capitalize(k),
+                  v,
+                ])}
+              />
+            </details>
+          )}
         </section>
       )}
 
@@ -936,16 +1025,28 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               value={formatCurrency(data.deals.totalValue)}
             />
           </div>
+          {data.deals.total > 0
+            ? (
+              <AnalyticsChart
+                kind="funnel"
+                ariaLabel="Deals by stage"
+                items={DEAL_STAGES.map((stage) => ({
+                  label: DEAL_STAGE_LABELS[stage],
+                  value: data.deals.byStage[stage] ?? 0,
+                }))}
+              />
+            )
+            : <EmptyState message="No deals yet." />}
           {Object.keys(data.deals.byStage).length > 0 && (
-            <div class="analytics__col">
-              <h3 class="analytics__col-title">By Stage</h3>
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">By Stage</summary>
               <ByTable
                 rows={Object.entries(data.deals.byStage).map(([k, v]) => [
                   capitalize(k),
                   v,
                 ])}
               />
-            </div>
+            </details>
           )}
         </section>
       )}
@@ -972,6 +1073,28 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 : "—"}
             />
           </div>
+          {data.habits.total > 0
+            ? (
+              <div class="analytics__habit-grid">
+                {data.habits.currentMonth.map((h) => (
+                  <div class="analytics__habit-row" key={h.habitId}>
+                    <span class="analytics__habit-name">{h.habitName}</span>
+                    <div class="analytics__habit-cells">
+                      {h.completions.map((done, i) => (
+                        <span
+                          key={i}
+                          class={`analytics__habit-cell${
+                            done ? " is-done" : ""
+                          }`}
+                          title={`Day ${i + 1}${done ? " — done" : ""}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+            : <EmptyState message="No habits yet." />}
         </section>
       )}
 
@@ -997,6 +1120,28 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               value={`${data.journal.streak}d`}
             />
           </div>
+          {data.journal.total > 0
+            ? (
+              <div class="analytics__heatmap">
+                {data.journal.last90Days.map((d) => {
+                  const lvl = d.count === 0
+                    ? 0
+                    : d.count === 1
+                    ? 1
+                    : d.count === 2
+                    ? 2
+                    : 3;
+                  return (
+                    <span
+                      key={d.date}
+                      class={`analytics__heat analytics__heat--${lvl}`}
+                      title={`${d.date}: ${d.count}`}
+                    />
+                  );
+                })}
+              </div>
+            )
+            : <EmptyState message="No journal entries yet." />}
         </section>
       )}
 
@@ -1017,6 +1162,18 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             <StatCard label="Total" value={data.reflections.total} />
             <StatCard label="This Month" value={data.reflections.thisMonth} />
           </div>
+          {data.reflections.total > 0
+            ? (
+              <AnalyticsChart
+                kind="bar"
+                ariaLabel="Reflections per month, last 12 months"
+                items={data.reflections.byMonth.map((d) => ({
+                  label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
+                  value: d.count,
+                }))}
+              />
+            )
+            : <EmptyState message="No reflections yet." />}
         </section>
       )}
     </main>

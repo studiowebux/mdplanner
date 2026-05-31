@@ -57,7 +57,8 @@ function renderBar(container, items) {
       height: barH,
       rx: 2,
     }));
-    svg.appendChild(text(d.value, cx, y - 5, "analytics__chart-value"));
+    const valLabel = d.display != null ? d.display : d.value;
+    svg.appendChild(text(valLabel, cx, y - 5, "analytics__chart-value"));
     svg.appendChild(text(d.label, cx, CHART_H - 6, "analytics__chart-label"));
   });
 
@@ -114,7 +115,194 @@ function renderLine(container, items) {
   container.appendChild(svg);
 }
 
-const RENDERERS = { bar: renderBar, line: renderLine };
+// Palette rotation: c0..c4 map to accent/success/warning/danger/info in CSS.
+const PALETTE = 5;
+
+// Shared HTML legend (CSP-safe: classes only, no inline style). `entries` are
+// { cls, label, value } — cls is a palette class like "analytics__chart-c0".
+function legend(container, entries) {
+  const list = document.createElement("ul");
+  list.className = "analytics__chart-legend";
+  entries.forEach((e) => {
+    const row = document.createElement("li");
+    row.className = "analytics__chart-legend-row";
+    const swatch = document.createElement("span");
+    swatch.className = "analytics__chart-swatch " + e.cls;
+    const label = document.createElement("span");
+    label.className = "analytics__chart-legend-label";
+    label.textContent = e.label;
+    const value = document.createElement("span");
+    value.className = "analytics__chart-legend-value";
+    value.textContent = String(e.value);
+    row.appendChild(swatch);
+    row.appendChild(label);
+    row.appendChild(value);
+    list.appendChild(row);
+  });
+  container.appendChild(list);
+}
+
+// Donut: one arc per item (angle ∝ value), center total, HTML legend below.
+function renderDonut(container, items) {
+  const cx = 70, cy = 70, r = 52, sw = 24;
+  const circ = 2 * Math.PI * r;
+  const total = items.reduce((s, d) => s + d.value, 0) || 1;
+
+  const svg = el("svg", {
+    viewBox: "0 0 140 140",
+    class: "analytics__chart-donut",
+    role: "presentation",
+  });
+
+  let accum = 0;
+  items.forEach((d, i) => {
+    const seg = (d.value / total) * circ;
+    const arc = el("circle", {
+      class: "analytics__chart-arc analytics__chart-c" + (i % PALETTE),
+      cx: cx,
+      cy: cy,
+      r: r,
+      "stroke-width": sw,
+      "stroke-dasharray": seg + " " + (circ - seg),
+      "stroke-dashoffset": -accum,
+      transform: "rotate(-90 " + cx + " " + cy + ")",
+    });
+    const title = document.createElementNS(SVG_NS, "title");
+    title.textContent = d.label + ": " +
+      (d.display != null ? d.display : d.value);
+    arc.appendChild(title);
+    svg.appendChild(arc);
+    accum += seg;
+  });
+
+  svg.appendChild(
+    text(
+      items.reduce((s, d) => s + d.value, 0),
+      cx,
+      cy + 5,
+      "analytics__chart-donut-total",
+    ),
+  );
+  container.appendChild(svg);
+
+  legend(
+    container,
+    items.map((d, i) => ({
+      cls: "analytics__chart-c" + (i % PALETTE),
+      label: d.label,
+      value: d.display != null ? d.display : d.value,
+    })),
+  );
+}
+
+// Funnel: horizontal bars in the given order, width ∝ value, left-aligned.
+function renderFunnel(container, items) {
+  const rowH = 22, gap = 8, fullW = 240;
+  const max = items.reduce((m, d) => (d.value > m ? d.value : m), 0) || 1;
+  const height = items.length * (rowH + gap);
+
+  const svg = el("svg", {
+    viewBox: "0 0 " + fullW + " " + height,
+    class: "analytics__chart-svg",
+    role: "presentation",
+  });
+
+  items.forEach((d, i) => {
+    const y = i * (rowH + gap);
+    svg.appendChild(el("rect", {
+      class: "analytics__chart-funnel-bar analytics__chart-c" + (i % PALETTE),
+      x: 0,
+      y: y,
+      width: (d.value / max) * fullW,
+      height: rowH,
+      rx: 2,
+    }));
+    svg.appendChild(
+      text(d.label, 4, y + rowH - 7, "analytics__chart-hlabel"),
+    );
+    svg.appendChild(
+      text(
+        d.display != null ? d.display : d.value,
+        fullW - 4,
+        y + rowH - 7,
+        "analytics__chart-hvalue",
+      ),
+    );
+  });
+
+  container.appendChild(svg);
+}
+
+// Grouped bar: N groups, each with `values[]` sub-bars (series). Used for
+// income-vs-expenses. Series colors come from `seriesClasses` on the container.
+function renderGroupedBar(container, groups) {
+  const seriesCount = groups.reduce(
+    (m, g) => (g.values.length > m ? g.values.length : m),
+    0,
+  );
+  const BAR_W = 18, innerGap = 4, sidePad = 8;
+  const groupW = seriesCount * BAR_W + (seriesCount - 1) * innerGap;
+  const GROUP_SLOT = groupW + 24;
+  const plotH = CHART_H - PAD_TOP - PAD_BOTTOM;
+  const baseline = PAD_TOP + plotH;
+  const width = groups.length * GROUP_SLOT;
+  const max = groups.reduce(
+    (m, g) => Math.max(m, ...g.values),
+    0,
+  ) || 1;
+  const seriesCls = ["analytics__chart-c1", "analytics__chart-c3"];
+
+  const svg = el("svg", {
+    viewBox: "0 0 " + width + " " + CHART_H,
+    class: "analytics__chart-svg",
+    role: "presentation",
+  });
+
+  groups.forEach((g, gi) => {
+    const gx = gi * GROUP_SLOT + (GROUP_SLOT - groupW) / 2;
+    g.values.forEach((v, si) => {
+      const barH = (v / max) * plotH;
+      const x = gx + si * (BAR_W + innerGap);
+      const rect = el("rect", {
+        class: "analytics__chart-bar " +
+          (seriesCls[si] || "analytics__chart-c0"),
+        x: x,
+        y: baseline - barH,
+        width: BAR_W,
+        height: barH,
+        rx: 2,
+      });
+      const title = document.createElementNS(SVG_NS, "title");
+      const disp = g.displays && g.displays[si] != null ? g.displays[si] : v;
+      title.textContent = g.label + " " + (si === 0 ? "income" : "expenses") +
+        ": " + disp;
+      rect.appendChild(title);
+      svg.appendChild(rect);
+    });
+    svg.appendChild(
+      text(
+        g.label,
+        gi * GROUP_SLOT + GROUP_SLOT / 2,
+        CHART_H - 6,
+        "analytics__chart-label",
+      ),
+    );
+  });
+
+  container.appendChild(svg);
+  legend(container, [
+    { cls: "analytics__chart-c1", label: "Income", value: "" },
+    { cls: "analytics__chart-c3", label: "Expenses", value: "" },
+  ]);
+}
+
+const RENDERERS = {
+  bar: renderBar,
+  line: renderLine,
+  donut: renderDonut,
+  funnel: renderFunnel,
+  groupedbar: renderGroupedBar,
+};
 
 function renderChart(container) {
   const kind = container.getAttribute("data-chart");

@@ -97,6 +97,7 @@ export interface QuoteStats {
 export interface MeetingStats {
   total: number;
   byProject: Record<string, number>;
+  byWeek: Array<{ weekStart: string; count: number }>;
 }
 
 export interface CustomerStats {
@@ -113,6 +114,7 @@ export interface InvestorStats {
   total: number;
   byStatus: Record<string, number>;
   totalTargetAmount: number;
+  targetAmountByStatus: Record<string, number>;
 }
 
 export interface FinanceStats {
@@ -120,6 +122,7 @@ export interface FinanceStats {
   totalExpenses: number;
   balance: number;
   byType: Record<string, number>;
+  byMonth: Array<{ month: string; income: number; expenses: number }>;
 }
 
 export interface DealStats {
@@ -131,6 +134,9 @@ export interface DealStats {
 export interface HabitStats {
   total: number;
   completionRateThisMonth: number | null;
+  currentMonth: Array<
+    { habitId: string; habitName: string; completions: boolean[] }
+  >;
 }
 
 export interface JournalStats {
@@ -138,11 +144,13 @@ export interface JournalStats {
   thisMonth: number;
   thisWeek: number;
   streak: number;
+  last90Days: Array<{ date: string; count: number }>;
 }
 
 export interface ReflectionStats {
   total: number;
   thisMonth: number;
+  byMonth: Array<{ month: string; count: number }>;
 }
 
 // ---------------------------------------------------------------------------

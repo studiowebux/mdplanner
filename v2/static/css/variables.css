@@ -468,6 +468,12 @@
   --analytics-by-value-min-w: 8rem;
   --analytics-customize-panel-min-w: var(--analytics-col-min-w);
   --analytics-details-content-pad: var(--space-md);
+  --analytics-donut-size: 9rem;
+  --analytics-habit-name-w: 9rem;
+  --analytics-habit-cell: 1rem;
+  --analytics-habit-cell-gap: 2px;
+  --analytics-heat-cell: 0.85rem;
+  --analytics-heat-gap: 3px;
 
   /* Org chart — initial value overridden by JS at runtime */
   --orgchart-current-zoom: 1;
