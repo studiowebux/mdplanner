@@ -64,7 +64,56 @@ function renderBar(container, items) {
   container.appendChild(svg);
 }
 
-const RENDERERS = { bar: renderBar };
+// Line chart layout (user units; the SVG scales to container width via CSS).
+const POINT_STEP = 20; // horizontal space per data point
+const PAD_X = 8; // left/right room so end dots aren't clipped
+const MAX_X_LABELS = 6; // sampled date labels along the baseline
+
+function renderLine(container, items) {
+  const plotH = CHART_H - PAD_TOP - PAD_BOTTOM;
+  const baseline = PAD_TOP + plotH;
+  const n = items.length;
+  const span = (n - 1) * POINT_STEP;
+  const width = span + PAD_X * 2;
+  const max = items.reduce((m, d) => (d.value > m ? d.value : m), 0) || 1;
+  const x = (i) => PAD_X + (n > 1 ? i * POINT_STEP : span / 2);
+  const y = (v) => baseline - (v / max) * plotH;
+
+  const svg = el("svg", {
+    viewBox: "0 0 " + width + " " + CHART_H,
+    class: "analytics__chart-svg",
+    role: "presentation",
+  });
+
+  svg.appendChild(el("polyline", {
+    class: "analytics__chart-line",
+    points: items.map((d, i) => x(i) + "," + y(d.value)).join(" "),
+  }));
+
+  const labelEvery = Math.ceil(n / MAX_X_LABELS);
+  items.forEach((d, i) => {
+    const point = el("circle", {
+      class: "analytics__chart-point",
+      cx: x(i),
+      cy: y(d.value),
+      r: 2.5,
+    });
+    const title = document.createElementNS(SVG_NS, "title");
+    title.textContent = d.label + ": " + d.value + "h";
+    point.appendChild(title);
+    svg.appendChild(point);
+
+    if (i % labelEvery === 0 || i === n - 1) {
+      svg.appendChild(
+        text(d.label, x(i), CHART_H - 6, "analytics__chart-label"),
+      );
+    }
+  });
+
+  container.appendChild(svg);
+}
+
+const RENDERERS = { bar: renderBar, line: renderLine };
 
 function renderChart(container) {
   const kind = container.getAttribute("data-chart");

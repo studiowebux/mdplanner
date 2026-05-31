@@ -207,7 +207,7 @@ const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
 type ChartItem = { label: string; value: number };
 
 const AnalyticsChart: FC<
-  { kind: "bar"; items: ChartItem[]; ariaLabel: string }
+  { kind: "bar" | "line"; items: ChartItem[]; ariaLabel: string }
 > = ({ kind, items, ariaLabel }) => (
   <div
     class="analytics__chart"
@@ -553,26 +553,38 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             />
             <StatCard label="Entries" value={data.timeEntries.entryCount} />
           </div>
+          {data.timeEntries.totalHours > 0
+            ? (
+              <AnalyticsChart
+                kind="line"
+                ariaLabel="Hours logged per day, last 30 days"
+                items={data.timeEntries.hoursPerDay.map((d) => ({
+                  label: d.date.slice(5).replace("-", "/"),
+                  value: d.hours,
+                }))}
+              />
+            )
+            : <EmptyState message="No time logged yet." />}
           <div class="analytics__row">
             {Object.keys(data.timeEntries.byPerson).length > 0 && (
-              <div class="analytics__col">
-                <h3 class="analytics__col-title">By Person</h3>
+              <details class="analytics__details">
+                <summary class="analytics__details-summary">By Person</summary>
                 <ByTable
                   rows={Object.entries(data.timeEntries.byPerson)
                     .sort(([, a], [, b]) => b - a)
                     .map(([k, v]) => [k, `${v}h`])}
                 />
-              </div>
+              </details>
             )}
             {Object.keys(data.timeEntries.byProject).length > 0 && (
-              <div class="analytics__col">
-                <h3 class="analytics__col-title">By Project</h3>
+              <details class="analytics__details">
+                <summary class="analytics__details-summary">By Project</summary>
                 <ByTable
                   rows={Object.entries(data.timeEntries.byProject)
                     .sort(([, a], [, b]) => b - a)
                     .map(([k, v]) => [k, `${v}h`])}
                 />
-              </div>
+              </details>
             )}
           </div>
         </section>

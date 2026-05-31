@@ -66,6 +66,7 @@ export interface TimeEntryStats {
   byPerson: Record<string, number>;
   byProject: Record<string, number>;
   entryCount: number;
+  hoursPerDay: Array<{ date: string; hours: number }>;
 }
 
 export interface CapacityPlanStats {

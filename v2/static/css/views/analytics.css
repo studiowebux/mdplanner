@@ -90,6 +90,18 @@
   fill: var(--color-accent);
 }
 
+.analytics__chart-line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.analytics__chart-point {
+  fill: var(--color-accent);
+}
+
 .analytics__chart-value {
   fill: var(--color-text-secondary);
   font-size: var(--analytics-chart-label-size);

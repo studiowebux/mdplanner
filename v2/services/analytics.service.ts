@@ -39,6 +39,9 @@ import type {
 } from "../types/analytics.types.ts";
 import { defaultScope, type UserScope } from "../utils/actor.ts";
 
+// Hours-per-day line chart window (last N calendar days, anchored to filters.to).
+const HOURS_PER_DAY_WINDOW = 30;
+
 function inDateRange(
   date: string | null | undefined,
   from?: string,
@@ -109,6 +112,7 @@ async function collectTimeEntryStats(
   );
   const byPerson: Record<string, number> = {};
   const byProject: Record<string, number> = {};
+  const byDay: Record<string, number> = {};
   let totalHours = 0;
   let entryCount = 0;
 
@@ -122,7 +126,22 @@ async function collectTimeEntryStats(
       byPerson[person] = (byPerson[person] ?? 0) + e.hours;
       const proj = t.project ?? "Unassigned";
       byProject[proj] = (byProject[proj] ?? 0) + e.hours;
+      const day = e.date.slice(0, 10);
+      byDay[day] = (byDay[day] ?? 0) + e.hours;
     }
+  }
+
+  // 30-day series ending at the filter's upper bound (or today), oldest first.
+  // Missing days are 0-filled so the line chart stays continuous.
+  const cursor = filters.to ? new Date(filters.to) : new Date();
+  const hoursPerDay: Array<{ date: string; hours: number }> = [];
+  for (let i = 0; i < HOURS_PER_DAY_WINDOW; i++) {
+    const key = cursor.toISOString().slice(0, 10); // YYYY-MM-DD
+    hoursPerDay.unshift({
+      date: key,
+      hours: Math.round((byDay[key] ?? 0) * 100) / 100,
+    });
+    cursor.setDate(cursor.getDate() - 1);
   }
 
   return {
@@ -137,6 +156,7 @@ async function collectTimeEntryStats(
       ]),
     ),
     entryCount,
+    hoursPerDay,
   };
 }
 
