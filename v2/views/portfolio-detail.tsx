@@ -335,11 +335,7 @@ export const PortfolioDetailView: FC<Props> = (
                     Number(kpi.value) >= Number(kpi.target);
                   return (
                     <tr key={kpi.name}>
-                      <td>
-                        <a href={`/kpis?q=${encodeURIComponent(kpi.name)}`}>
-                          {kpi.name}
-                        </a>
-                      </td>
+                      <td>{kpi.name}</td>
                       <td class={met ? "portfolio-detail__kpi-met" : ""}>
                         {kpi.value}
                       </td>
