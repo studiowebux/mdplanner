@@ -348,13 +348,22 @@ settingsViewRouter.post("/cache/rebuild-fts", (c) => {
   }
 });
 
-// -- Global filters — JSON POST, writes globalProjects + globalAssignees into ui_state cookie --
+// -- Global filters — htmx form POST, writes globalProjects + globalAssignees into ui_state cookie --
 settingsViewRouter.post("/global-filters", async (c) => {
-  const body = await c.req.json<{
-    globalProjects?: string[];
-    globalAssignees?: string[];
-  }>();
-  writeGlobalFilters(c, body.globalProjects ?? [], body.globalAssignees ?? []);
+  const body = await c.req.parseBody({ all: true });
+  const toNames = (raw: typeof body[string]): string[] =>
+    Array.isArray(raw)
+      ? raw.map(String)
+      : raw !== undefined
+      ? [String(raw)]
+      : [];
+  writeGlobalFilters(
+    c,
+    toNames(body["globalProjects"]),
+    toNames(body["globalAssignees"]),
+  );
+  // Notify domain-view listeners (hx-trigger "global-filter:changed from:body").
+  c.header("HX-Trigger", "global-filter:changed");
   return c.body(null, 204);
 });
 

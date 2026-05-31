@@ -7,8 +7,6 @@
 // Same pattern repeated for "assignees".
 
 (function () {
-  var ENDPOINT = "/settings/global-filters";
-
   // -------------------------------------------------------------------------
   // Initial state from server-rendered data-active attributes.
   // ui_state cookie is httpOnly — JS cannot read it.
@@ -124,7 +122,9 @@
   }
 
   // -------------------------------------------------------------------------
-  // POST to server
+  // Local UI state on change. The network POST is handled by htmx (hx-post on
+  // the filter wrap); the server replies HX-Trigger: global-filter:changed,
+  // which the domain-view listeners (from:body) use to reload.
   // -------------------------------------------------------------------------
 
   function getCheckedValues(type) {
@@ -138,7 +138,7 @@
     return values;
   }
 
-  function postFilters() {
+  function onFilterChange() {
     var projects = getCheckedValues("projects");
     var assignees = getCheckedValues("assignees");
     updateBadge("projects", projects.length);
@@ -146,18 +146,6 @@
     // Update in-memory state immediately so syncCheckboxes called by any
     // concurrent htmx:afterSettle does not revert the user's selection.
     setMemState(projects, assignees);
-    fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        globalProjects: projects,
-        globalAssignees: assignees,
-      }),
-    }).then(function (res) {
-      if (res.ok && typeof htmx !== "undefined") {
-        htmx.trigger(document.body, "global-filter:changed");
-      }
-    });
   }
 
   // -------------------------------------------------------------------------
@@ -179,8 +167,9 @@
       // Checkboxes inside panels
       var item = e.target.closest("[data-global-filter-item]");
       if (item) {
-        // Let the checkbox change fire naturally, then POST
-        setTimeout(postFilters, 0);
+        // Let the checkbox change fire naturally (htmx posts on change), then
+        // refresh badges + in-memory state.
+        setTimeout(onFilterChange, 0);
         return;
       }
 

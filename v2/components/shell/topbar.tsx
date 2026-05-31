@@ -97,7 +97,13 @@ export async function Topbar(
       <div id="topbar-actions" class="topbar__actions">
         {/* Project filter */}
         {portfolioItems.length > 0 && (
-          <div class="topbar__filter-wrap">
+          <div
+            class="topbar__filter-wrap"
+            hx-post="/settings/global-filters"
+            hx-trigger="change"
+            hx-include="[data-global-filter-item] input"
+            hx-swap="none"
+          >
             <button
               type="button"
               class="topbar__filter-btn"
@@ -123,7 +129,11 @@ export async function Topbar(
                   data-global-filter-item="projects"
                   class="topbar__filter-option"
                 >
-                  <input type="checkbox" value={p.name} />
+                  <input
+                    type="checkbox"
+                    name="globalProjects"
+                    value={p.name}
+                  />
                   {p.name}
                 </label>
               ))}
@@ -133,7 +143,13 @@ export async function Topbar(
 
         {/* Assignee filter */}
         {people.length > 0 && (
-          <div class="topbar__filter-wrap">
+          <div
+            class="topbar__filter-wrap"
+            hx-post="/settings/global-filters"
+            hx-trigger="change"
+            hx-include="[data-global-filter-item] input"
+            hx-swap="none"
+          >
             <button
               type="button"
               class="topbar__filter-btn"
@@ -159,7 +175,11 @@ export async function Topbar(
                   data-global-filter-item="assignees"
                   class="topbar__filter-option"
                 >
-                  <input type="checkbox" value={p.name} />
+                  <input
+                    type="checkbox"
+                    name="globalAssignees"
+                    value={p.name}
+                  />
                   {p.name}
                 </label>
               ))}
