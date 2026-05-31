@@ -36,8 +36,8 @@ const TaskRow: FC<
     data-task-id={task.id}
     data-order={task.order != null ? task.order : (index + 1) * 10}
     data-tags={JSON.stringify(task.tags ?? [])}
-    draggable="true"
   >
+    <input type="hidden" name="sid" value={task.id} />
     <input
       type="checkbox"
       class="task-list__select"
@@ -355,7 +355,19 @@ export const TaskListView: FC<ListProps> = (
         return (
           <div key={name} class="task-list__section">
             <SectionHeader name={name} count={sorted.length} />
-            <div class="task-list__rows" data-section={name}>
+            <div
+              class="task-list__rows"
+              data-section={name}
+              data-sortable
+              data-sortable-group="task-list"
+              data-sortable-item=".task-list__row"
+              hx-post="/tasks/reorder"
+              hx-trigger="end"
+              hx-include="this"
+              hx-params="sid,reorderSection"
+              hx-swap="none"
+            >
+              <input type="hidden" name="reorderSection" value={name} />
               {sorted.map((t, i) => (
                 <TaskRow
                   key={t.id}
@@ -450,13 +462,6 @@ export const TaskListView: FC<ListProps> = (
         >
           ✕
         </button>
-      </div>
-      <div class="task-list__drop-strip" aria-hidden="true">
-        {(getSectionOrder() as readonly string[]).map((s) => (
-          <div key={s} class="task-list__drop-zone" data-drop-section={s}>
-            {s}
-          </div>
-        ))}
       </div>
     </div>
   );

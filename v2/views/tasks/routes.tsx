@@ -357,6 +357,40 @@ function parseTaskIds(raw: unknown): string[] {
   return raw != null ? [String(raw)] : [];
 }
 
+// POST /reorder — SortableJS drag reorder/move. Reads the target
+// `reorderSection` plus the ordered `sid` fields (one hidden input per row, in
+// post-drag DOM order) and reconciles section + order in a single pass. A
+// cross-section drag posts twice — the source list and the target list each
+// reconcile their own section. See
+// `[decision] MD Planner — htmx drag strategy: Sortable for lists ...`.
+tasksRouter.post("/reorder", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const section = String(body["reorderSection"] ?? "").trim();
+  const ids = parseTaskIds(body["sid"]);
+  if (!section || ids.length === 0) return c.body(null, 204);
+
+  const all = await getTaskService().list();
+  const byId = new Map(all.map((t) => [t.id, t]));
+
+  await Promise.all(
+    ids.map((id, i) => {
+      const task = byId.get(id);
+      if (!task || task.archived === true) return Promise.resolve();
+      const order = (i + 1) * 10;
+      const patch: { section?: string; order?: number } = {};
+      if (task.section !== section) patch.section = section;
+      if (task.order !== order) patch.order = order;
+      if (Object.keys(patch).length === 0) return Promise.resolve();
+      return getTaskService().update(id, patch);
+    }),
+  );
+
+  // Clear sort state so a page refresh respects the new drag order.
+  deleteUiStateKeys(c, "tasks", ["sort", "order"]);
+  publish("task.updated");
+  return c.body(null, 204);
+});
+
 // POST /batch-delete — htmx bulk soft-delete (archive) for the task-list bulk
 // bar. Reads repeated `taskId` form fields from hx-include of checked row
 // checkboxes, archives each (skipping missing/already-archived), then asks htmx
