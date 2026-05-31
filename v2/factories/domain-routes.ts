@@ -42,14 +42,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
 
   // Injected state keys — added here so every domain gets them without editing
   // 40+ domain configs' stateKeys arrays:
-  //  - filtersCollapsed: collapsible-filters UI preference, persisted per domain.
   //  - date range from/to keys: the universal date range filter.
   //  - archived: "Show archived" toggle (only when supportsArchive !== false).
   const dateRange = effectiveDateRangeFilter(cfg);
   const archiveEnabled = cfg.supportsArchive !== false;
   const stateKeys = [
     ...cfg.stateKeys,
-    ...(cfg.stateKeys.includes("filtersCollapsed") ? [] : ["filtersCollapsed"]),
     ...(cfg.stateKeys.includes(dateRange.fromKey) ? [] : [dateRange.fromKey]),
     ...(cfg.stateKeys.includes(dateRange.toKey) ? [] : [dateRange.toKey]),
     ...(archiveEnabled && !cfg.stateKeys.includes("archived")
@@ -64,10 +62,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
   function buildCanonicalUrl(state: DomainFilterState): string {
     const params = new URLSearchParams();
     for (const key of stateKeys) {
-      if (key === "filtersCollapsed") {
-        // UI preference — persisted in the cookie, never in the URL.
-        continue;
-      } else if (key === "view") {
+      if (key === "view") {
         if (state.view && state.view !== (cfg.defaultView || "grid")) {
           params.set("view", state.view);
         }
@@ -100,8 +95,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
       sort: merged.sort || undefined,
       order: (merged.order || "asc") as "asc" | "desc",
     };
-    // Copy domain-specific filter keys (status, project, etc.) plus the
-    // injected filtersCollapsed UI preference.
+    // Copy domain-specific filter keys (status, project, etc.).
     for (const key of stateKeys) {
       if (
         key !== "view" && key !== "q" && key !== "hideCompleted" &&
@@ -415,12 +409,6 @@ export function createDomainRoutes<T extends Entity, C, U>(
       { "HX-Replace-Url": buildCanonicalUrl(state) },
     );
   });
-
-  // Persist the collapsible-filters UI preference. The `*` middleware reads
-  // `?filtersCollapsed=` into the filter state and writeUiState persists it to
-  // the ui_state cookie; this handler just acknowledges with 204. Used by
-  // filter-collapse.js on the <details> toggle event.
-  router.get("/filters-collapsed", (c) => c.body(null, 204));
 
   // ---------------------------------------------------------------------------
   // Pagination — load next page of items (table rows or grid cards)

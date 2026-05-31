@@ -112,7 +112,6 @@ export const MainLayout: FC<Props> = (
         <script src="/js/toast.js" />
         <script src="/js/htmx-triggers.js" />
         <script src="/js/column-toggle.js" />
-        <script src="/js/filter-collapse.js" />
         <script src="/js/search-modal.js" />
         <script src="/js/preferences-loader.js" />
         <script src="/js/keybindings.js" />

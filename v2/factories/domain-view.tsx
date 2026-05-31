@@ -646,10 +646,10 @@ export function createDomainPage<T extends Entity>(
   ) => {
     const showFilters = hasFilterControls(cfg);
     const activeFilterCount = countActiveFilters(cfg, state);
-    // Open when the user expanded it explicitly, or — absent a saved
-    // preference — when filters are active. Collapsed otherwise.
-    const filtersOpen = state.filtersCollapsed === "false" ||
-      (state.filtersCollapsed === undefined && activeFilterCount > 0);
+    // Open by default when filters are active. The native <details> element
+    // owns the open/closed state for the page lifetime — no persistence (UI
+    // state is not stored; only backend data is).
+    const filtersOpen = activeFilterCount > 0;
     return (
       <MainLayout
         title={cfg.singular}
@@ -762,7 +762,6 @@ export function createDomainPage<T extends Entity>(
             {showFilters && (
               <details
                 class="domain-toolbar__filters"
-                data-filter-collapse={cfg.name}
                 open={filtersOpen}
               >
                 <summary class="domain-toolbar__filters-summary btn btn--secondary btn--sm">
