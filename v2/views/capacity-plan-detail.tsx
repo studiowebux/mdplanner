@@ -14,6 +14,7 @@ import type {
 import type { ViewProps } from "../types/app.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
 import { WEEKDAYS } from "../constants/mod.ts";
+import { utilizationBand } from "../utils/utilization.ts";
 
 // ---------------------------------------------------------------------------
 // Exported types — consumed by routes.tsx
@@ -401,13 +402,7 @@ const BandwidthSummary: FC<{ rows: BandwidthRow[] }> = ({ rows }) => {
       <div class="capacity-plan-detail__bandwidth-list">
         {rows.map((row) => {
           const pct = Math.min(row.totalPct, 200);
-          const state = row.totalPct > 100
-            ? "over"
-            : row.totalPct >= 80
-            ? "ok"
-            : row.totalPct >= 60
-            ? "warn"
-            : "under";
+          const state = utilizationBand(row.totalPct);
           return (
             <div key={row.personId} class="capacity-plan-detail__bw-row">
               <a

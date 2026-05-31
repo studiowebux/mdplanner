@@ -4,6 +4,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
+import { utilizationBand } from "../utils/utilization.ts";
 
 import type { ViewProps } from "../types/app.ts";
 import type {
@@ -569,9 +570,47 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             addLabel="Add Plan"
             addRoute="/capacity-plans/new"
           />
-          {data.capacity.plans.length === 0
-            ? <p class="analytics__empty">No capacity plans yet.</p>
-            : (
+          <div class="analytics__stat-grid">
+            <StatCard label="Plans" value={data.capacity.plans.length} />
+          </div>
+          {data.capacity.plans.length > 0
+            ? (
+              <div class="analytics__util-chart">
+                {[...data.capacity.plans]
+                  .sort((a, b) =>
+                    (b.utilizationPct ?? -1) - (a.utilizationPct ?? -1)
+                  )
+                  .map((p) => (
+                    <div
+                      key={p.id}
+                      class={`analytics__util-chart-row analytics__util-chart-row--${
+                        utilizationBand(p.utilizationPct)
+                      }`}
+                    >
+                      <a
+                        class="analytics__util-chart-name"
+                        href={`/capacity-plans/${p.id}`}
+                      >
+                        {p.name}
+                      </a>
+                      <progress
+                        class="progress-bar analytics__util-chart-bar"
+                        value={p.utilizationPct != null
+                          ? Math.min(p.utilizationPct, 100)
+                          : 0}
+                        max={100}
+                      />
+                      <span class="analytics__util-chart-value">
+                        {pct(p.utilizationPct)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )
+            : <EmptyState message="No capacity plans yet." />}
+          {data.capacity.plans.length > 0 && (
+            <details class="analytics__details">
+              <summary class="analytics__details-summary">Details</summary>
               <table class="data-table analytics__capacity-table">
                 <thead>
                   <tr class="data-table__head-row">
@@ -605,7 +644,8 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                   ))}
                 </tbody>
               </table>
-            )}
+            </details>
+          )}
         </section>
       )}
 
