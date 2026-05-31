@@ -439,26 +439,37 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           <div class="analytics__stat-grid">
             <StatCard label="Total" value={data.goals.total} />
           </div>
+          {data.goals.total > 0
+            ? (
+              <AnalyticsChart
+                kind="bar"
+                ariaLabel="Goals by status"
+                items={Object.entries(data.goals.byStatus)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([k, v]) => ({ label: capitalize(k), value: v }))}
+              />
+            )
+            : <EmptyState message="No goals yet." />}
           <div class="analytics__row">
             {Object.keys(data.goals.byStatus).length > 0 && (
-              <div class="analytics__col">
-                <h3 class="analytics__col-title">By Status</h3>
+              <details class="analytics__details">
+                <summary class="analytics__details-summary">By Status</summary>
                 <ByTable
                   rows={Object.entries(data.goals.byStatus).map((
                     [k, v],
                   ) => [capitalize(k), v])}
                 />
-              </div>
+              </details>
             )}
             {Object.keys(data.goals.byType).length > 0 && (
-              <div class="analytics__col">
-                <h3 class="analytics__col-title">By Type</h3>
+              <details class="analytics__details">
+                <summary class="analytics__details-summary">By Type</summary>
                 <ByTable
                   rows={Object.entries(data.goals.byType).map((
                     [k, v],
                   ) => [capitalize(k), v])}
                 />
-              </div>
+              </details>
             )}
           </div>
         </section>
