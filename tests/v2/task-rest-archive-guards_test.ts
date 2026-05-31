@@ -144,13 +144,6 @@ const viewMutations = (id: string): RouteCase[] => [
     path: () => `/${id}/github/unlink-pr`,
   },
   {
-    name: "POST /:id/reorder",
-    method: "POST",
-    path: () => `/${id}/reorder`,
-    body: JSON.stringify({ afterId: null }),
-    contentType: "application/json",
-  },
-  {
     name: "POST /:id/time-entries (view)",
     method: "POST",
     path: () => `/${id}/time-entries`,

@@ -3,7 +3,6 @@
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { createDomainForm } from "../../factories/domain-view.tsx";
 import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
-import { sortTasks } from "../../domains/task/constants.tsx";
 import type { AppContext } from "../../types/app.ts";
 import {
   getGitHubService,
@@ -299,55 +298,6 @@ tasksRouter.post("/:id/github/unlink-pr", async (c) => {
   await getTaskService().update(id, { githubPR: undefined });
   publish("task.updated");
   return renderGitHubFragment(c, id);
-});
-
-// POST /:id/reorder — drag-and-drop order within section
-tasksRouter.post("/:id/reorder", async (c) => {
-  const id = c.req.param("id")!;
-  const body = await c.req.json<{ afterId?: string | null }>();
-  const afterId = body.afterId ?? null;
-
-  const task = await getTaskService().getById(id);
-  if (!task) return c.notFound();
-  if (task.archived === true) {
-    return new Response(
-      JSON.stringify({ error: "Task is archived" }),
-      {
-        status: 422,
-        headers: {
-          "Content-Type": "application/json",
-          "HX-Trigger": hxTrigger("error", "Task is archived"),
-        },
-      },
-    );
-  }
-
-  const all = await getTaskService().list();
-  const sectionTasks = sortTasks(all.filter((t) => t.section === task.section));
-  const without = sectionTasks.filter((t) => t.id !== id);
-
-  let insertIdx = 0;
-  if (afterId != null) {
-    const afterIdx = without.findIndex((t) => t.id === afterId);
-    insertIdx = afterIdx === -1 ? without.length : afterIdx + 1;
-  }
-  without.splice(insertIdx, 0, task);
-
-  await Promise.all(
-    without.map((t, i) => {
-      const normalized = (i + 1) * 10;
-      if (t.order !== normalized) {
-        return getTaskService().update(t.id, { order: normalized });
-      }
-      return Promise.resolve();
-    }),
-  );
-
-  // Clear sort state so page refresh respects drag order
-  deleteUiStateKeys(c, "tasks", ["sort", "order"]);
-
-  publish("task.updated");
-  return new Response(null, { status: 204 });
 });
 
 // Parse repeated `taskId` form fields (hx-include of checked row checkboxes)
