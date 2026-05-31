@@ -453,8 +453,21 @@
   /* Layout */
   --prose-width: 52ch;
 
-  /* Analytics — theme-independent layout dimension (used in both light/dark) */
+  /* Analytics view — theme-independent layout dimensions (used in both light/dark) */
   --analytics-progress-scroll-max-h: 18rem;
+  --analytics-stat-card-min-w: var(--card-min-width);
+  --analytics-stat-value-size: var(--font-size-xl);
+  --analytics-kpi-card-min-w: 11rem;
+  --analytics-kpi-value-size: var(--font-size-2xl);
+  --analytics-chart-max-h: 12rem;
+  --analytics-chart-label-size: 11px;
+  --analytics-stat-value-line-height: var(--line-height-tight);
+  --analytics-col-min-w: 14rem;
+  --analytics-filter-min-w: 10rem;
+  --analytics-util-bar-h: var(--progress-bar-height);
+  --analytics-by-value-min-w: 8rem;
+  --analytics-customize-panel-min-w: var(--analytics-col-min-w);
+  --analytics-details-content-pad: var(--space-md);
 
   /* Org chart — initial value overridden by JS at runtime */
   --orgchart-current-zoom: 1;
@@ -789,21 +802,6 @@ html.font-mono {
   --te-recap-footer-border: var(--border-width-thick) solid var(
     --color-border-default
   );
-
-  /* Analytics view */
-  --analytics-stat-card-min-w: var(--card-min-width);
-  --analytics-stat-value-size: var(--font-size-xl);
-  --analytics-kpi-card-min-w: 11rem;
-  --analytics-kpi-value-size: var(--font-size-2xl);
-  --analytics-chart-max-h: 12rem;
-  --analytics-chart-label-size: 11px;
-  --analytics-stat-value-line-height: var(--line-height-tight);
-  --analytics-col-min-w: 14rem;
-  --analytics-filter-min-w: 10rem;
-  --analytics-util-bar-h: var(--progress-bar-height);
-  --analytics-by-value-min-w: 8rem;
-  --analytics-customize-panel-min-w: var(--analytics-col-min-w);
-  --analytics-details-content-pad: var(--space-md);
 
   /* Capacity grid cell tints — softer than alert bg in dark mode */
   --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
