@@ -81,6 +81,12 @@ export const PersonPreferencesSchema = z.object({
     description: "Default filter values per domain (domain → stateKey → value)",
     example: { tasks: { section: "In Progress" } },
   }),
+  uiState: z.record(z.record(z.string())).optional().openapi({
+    description:
+      "Last-used filter/view state per domain (domain → stateKey → value). " +
+      "Account-backed replacement for the browser ui_state cookie.",
+    example: { tasks: { archived: "true", view: "board" } },
+  }),
 }).optional().openapi("PersonPreferences");
 
 export type PersonPreferences = z.infer<typeof PersonPreferencesSchema>;

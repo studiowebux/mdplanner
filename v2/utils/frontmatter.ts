@@ -340,7 +340,16 @@ function appendValue(
 
 function serializeScalar(value: unknown): string {
   if (typeof value === "string") {
-    if (value.includes(":") || value.includes("#") || value.includes('"')) {
+    // Quote strings that would otherwise re-parse as a different type
+    // (boolean / null / number) — see parseScalar — plus the structural
+    // characters that break block YAML.
+    const ambiguous = value === "true" || value === "false" ||
+      value === "null" || value === "~" ||
+      (value.trim() !== "" && !isNaN(Number(value)));
+    if (
+      ambiguous ||
+      value.includes(":") || value.includes("#") || value.includes('"')
+    ) {
       return `"${value.replace(/"/g, '\\"')}"`;
     }
     return value;

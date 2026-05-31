@@ -2,31 +2,52 @@
  * Regression — factory boolean toolbar toggles must reset on uncheck.
  *
  * Bug: HTML unchecks omit a checkbox from form submission. The factory
- * middleware previously fell back to the saved cookie value via
- * `mergeParams`, so any boolean toggle (archived / showHidden) stayed
- * stuck "on" once enabled. Only `hideCompleted` had a special case that
- * forced htmx-absent params to "false".
+ * middleware previously fell back to the saved value via `mergeParams`, so any
+ * boolean toggle (archived / showHidden / hideCompleted) stayed stuck "on" once
+ * enabled. Fix: the middleware force-resets every rendered toolbar boolean
+ * toggle to `"false"` on htmx requests when the param is absent.
  *
- * Fix: `v2/factories/domain-routes.ts` middleware now force-resets every
- * known toolbar boolean toggle to `"false"` on htmx requests when the
- * param is absent (guarded per-domain on whether the toggle is rendered).
- *
- * Covers `archived` + `hideCompleted` on the tasks domain (which renders
- * all three toggles). `showHidden` shares the identical middleware
- * branch — see `v2/factories/domain-routes.ts` for the generalisation.
+ * Saved filter state now lives in the user's ACCOUNT (preferences.uiState), not
+ * the ui_state cookie. Domain routers are tested in isolation, so the app-level
+ * context middleware that sets actor/activePerson isn't present — this suite
+ * injects an authenticated person (with a per-domain saved uiState) via a
+ * wrapper app, replacing the former `ui_state` cookie header.
  */
 
 import { assert, assertEquals } from "@std/assert";
-import { tasksRouter as viewRouter } from "../../v2/views/tasks/routes.tsx";
-import { getTaskService, initServices } from "../../v2/singletons/services.ts";
+import { Hono } from "hono";
+import { tasksRouter } from "../../v2/views/tasks/routes.tsx";
+import {
+  getPeopleRepository,
+  getPeopleService,
+  getTaskService,
+  initServices,
+} from "../../v2/singletons/services.ts";
+import type { AppVariables } from "../../v2/types/app.ts";
 
-const UI_COOKIE = (state: Record<string, unknown>) =>
-  `ui_state=${encodeURIComponent(JSON.stringify({ tasks: state }))}`;
-
-Deno.test("factory boolean toggle reset — archived round-trip", async (t) => {
-  const dir = await Deno.makeTempDir({
-    prefix: "mdplanner-factory-boolean-toggle-archived-",
+// Inject an actor + activePerson carrying the given saved uiState for `tasks`.
+// The fake person id makes the middleware's account write a harmless no-op
+// (updatePreferences returns null when the person isn't found).
+function appWithSavedState(tasksState: Record<string, string>) {
+  const app = new Hono<{ Variables: AppVariables }>();
+  app.use("*", async (c, next) => {
+    c.set("actor", { id: "person_test_toggle" } as never);
+    c.set(
+      "activePerson",
+      {
+        id: "person_test_toggle",
+        name: "Toggle Tester",
+        preferences: { uiState: { tasks: tasksState } },
+      } as never,
+    );
+    await next();
   });
+  app.route("/", tasksRouter);
+  return app;
+}
+
+Deno.test("factory boolean toggle reset — archived round-trip (account uiState)", async (t) => {
+  const dir = await Deno.makeTempDir({ prefix: "mdplanner-toggle-archived-" });
   initServices(dir, { cache: false });
   const service = getTaskService();
 
@@ -42,35 +63,24 @@ Deno.test("factory boolean toggle reset — archived round-trip", async (t) => {
     assertEquals(await service.archive(arch.id, "Tester"), true);
 
     await t.step(
-      "GET /tasks?archived=true renders the archived task (baseline)",
+      "GET /tasks?archived=true renders the archived task",
       async () => {
-        const res = await viewRouter.request(
-          new Request("http://localhost/?archived=true", { method: "GET" }),
+        const res = await appWithSavedState({}).request(
+          "http://localhost/?archived=true",
         );
         assertEquals(res.status, 200);
         const html = await res.text();
-        assert(
-          html.includes("Archived archived test"),
-          "archived view must include the archived task",
-        );
-        assert(
-          !html.includes("Live archived test"),
-          "archived view must NOT include the live task",
-        );
+        assert(html.includes("Archived archived test"));
+        assert(!html.includes("Live archived test"));
       },
     );
 
     await t.step(
-      "htmx uncheck (no archived param + cookie still says true) returns to default list",
+      "htmx uncheck (no param + saved says true) returns to default list",
       async () => {
-        const res = await viewRouter.request(
-          new Request("http://localhost/view", {
-            method: "GET",
-            headers: {
-              "HX-Request": "true",
-              "Cookie": UI_COOKIE({ archived: "true" }),
-            },
-          }),
+        const res = await appWithSavedState({ archived: "true" }).request(
+          "http://localhost/view",
+          { headers: { "HX-Request": "true" } },
         );
         assertEquals(res.status, 200);
         const html = await res.text();
@@ -86,51 +96,34 @@ Deno.test("factory boolean toggle reset — archived round-trip", async (t) => {
     );
 
     await t.step(
-      "subsequent full-page GET /tasks renders the toolbar archived checkbox UNCHECKED",
+      "full-page GET with saved archived=false renders the checkbox UNCHECKED",
       async () => {
-        // The uncheck above wrote `archived=false` to the cookie. A
-        // subsequent full-page load should now render the toolbar
-        // without the `checked` attribute on the archived checkbox.
-        const res = await viewRouter.request(
-          new Request("http://localhost/", {
-            method: "GET",
-            headers: { "Cookie": UI_COOKIE({ archived: "false" }) },
-          }),
+        const res = await appWithSavedState({ archived: "false" }).request(
+          "http://localhost/",
         );
         assertEquals(res.status, 200);
         const html = await res.text();
-        const archivedCheckbox = html.match(
-          /<input[^>]*name="archived"[^>]*>/,
-        );
+        const cb = html.match(/<input[^>]*name="archived"[^>]*>/);
+        assert(cb, "toolbar must render the archived checkbox");
         assert(
-          archivedCheckbox,
-          "toolbar must render the archived checkbox",
-        );
-        assert(
-          !archivedCheckbox![0].includes(" checked"),
-          `archived checkbox should be unchecked, got: ${archivedCheckbox![0]}`,
+          !cb![0].includes(" checked"),
+          `archived checkbox should be unchecked, got: ${cb![0]}`,
         );
       },
     );
 
-    // Sanity: pretend a third party (URL bookmark) navigates with
-    // ?archived=true and no cookie — the param wins, archive view rendered.
     await t.step(
-      "URL ?archived=true with empty cookie still works (no regression)",
+      "URL ?archived=true with empty saved still works",
       async () => {
-        const res = await viewRouter.request(
-          new Request("http://localhost/?archived=true", { method: "GET" }),
+        const res = await appWithSavedState({}).request(
+          "http://localhost/?archived=true",
         );
         assertEquals(res.status, 200);
         const html = await res.text();
-        assert(
-          html.includes("Archived archived test"),
-          "URL ?archived=true must still render the archived view",
-        );
+        assert(html.includes("Archived archived test"));
       },
     );
 
-    // Cleanup
     await service.hardDelete(live.id);
     await service.hardDelete(arch.id);
   } finally {
@@ -138,10 +131,8 @@ Deno.test("factory boolean toggle reset — archived round-trip", async (t) => {
   }
 });
 
-Deno.test("factory boolean toggle reset — hideCompleted round-trip", async (t) => {
-  const dir = await Deno.makeTempDir({
-    prefix: "mdplanner-factory-boolean-toggle-hide-completed-",
-  });
+Deno.test("factory boolean toggle reset — hideCompleted round-trip (account uiState)", async (t) => {
+  const dir = await Deno.makeTempDir({ prefix: "mdplanner-toggle-hide-" });
   initServices(dir, { cache: false });
   const service = getTaskService();
 
@@ -157,37 +148,24 @@ Deno.test("factory boolean toggle reset — hideCompleted round-trip", async (t)
     await service.update(done.id, { completed: true });
 
     await t.step(
-      "GET /tasks?hideCompleted=true hides the completed task (baseline)",
+      "GET /tasks?hideCompleted=true hides the completed task",
       async () => {
-        const res = await viewRouter.request(
-          new Request("http://localhost/?hideCompleted=true", {
-            method: "GET",
-          }),
+        const res = await appWithSavedState({}).request(
+          "http://localhost/?hideCompleted=true",
         );
         assertEquals(res.status, 200);
         const html = await res.text();
-        assert(
-          html.includes("Open hide test"),
-          "hideCompleted view must include the open task",
-        );
-        assert(
-          !html.includes("Done hide test"),
-          "hideCompleted view must NOT include the completed task",
-        );
+        assert(html.includes("Open hide test"));
+        assert(!html.includes("Done hide test"));
       },
     );
 
     await t.step(
-      "htmx uncheck (no hideCompleted param + cookie says true) shows the completed task again",
+      "htmx uncheck (no param + saved says true) shows the completed task again",
       async () => {
-        const res = await viewRouter.request(
-          new Request("http://localhost/view", {
-            method: "GET",
-            headers: {
-              "HX-Request": "true",
-              "Cookie": UI_COOKIE({ hideCompleted: "true" }),
-            },
-          }),
+        const res = await appWithSavedState({ hideCompleted: "true" }).request(
+          "http://localhost/view",
+          { headers: { "HX-Request": "true" } },
         );
         assertEquals(res.status, 200);
         const html = await res.text();
@@ -202,9 +180,43 @@ Deno.test("factory boolean toggle reset — hideCompleted round-trip", async (t)
       },
     );
 
-    // Cleanup
     await service.hardDelete(open.id);
     await service.hardDelete(done.id);
+  } finally {
+    await Deno.remove(dir, { recursive: true });
+  }
+});
+
+Deno.test("filter selection persists to the user account (uiState)", async () => {
+  const dir = await Deno.makeTempDir({ prefix: "mdplanner-filter-persist-" });
+  initServices(dir, { cache: false });
+  const person = await getPeopleRepository().create({ name: "Filter Saver" });
+
+  try {
+    await getTaskService().create({ title: "Persist me", section: "Todo" });
+
+    // A request carrying an active filter must write it to the account.
+    const app = new Hono<{ Variables: AppVariables }>();
+    app.use("*", async (c, next) => {
+      c.set("actor", { id: person.id } as never);
+      c.set(
+        "activePerson",
+        { id: person.id, name: person.name, preferences: {} } as never,
+      );
+      await next();
+    });
+    app.route("/", tasksRouter);
+
+    const res = await app.request("http://localhost/?archived=true");
+    assertEquals(res.status, 200);
+    await res.text();
+
+    const saved = await getPeopleService().getById(person.id);
+    assertEquals(
+      saved?.preferences?.uiState?.tasks?.archived,
+      "true",
+      "the archived filter must be saved to the person's account uiState",
+    );
   } finally {
     await Deno.remove(dir, { recursive: true });
   }

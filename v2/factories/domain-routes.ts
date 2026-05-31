@@ -8,8 +8,6 @@ import {
   mergeParams,
   readGlobalAssignees,
   readGlobalProjects,
-  readUiState,
-  writeUiState,
 } from "../utils/ui-state.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
 import { viewProps } from "../middleware/view-props.ts";
@@ -105,6 +103,38 @@ export function createDomainRoutes<T extends Entity, C, U>(
       }
     }
     return state;
+  }
+
+  // Serialize the live filter state to a string map for account storage,
+  // skipping defaults (mirrors buildCanonicalUrl) so the saved blob stays lean.
+  function serializeFilterState(
+    state: DomainFilterState,
+  ): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const [key, val] of Object.entries(state)) {
+      if (val === undefined || val === null || val === "") continue;
+      if (key === "view" && val === (cfg.defaultView || "grid")) continue;
+      if (key === "order" && val === "asc") continue;
+      if (typeof val === "boolean") {
+        if (val) out[key] = "true";
+        continue;
+      }
+      out[key] = String(val);
+    }
+    return out;
+  }
+
+  function sameStringMap(
+    a: Record<string, string>,
+    b: Record<string, unknown>,
+  ): boolean {
+    const ak = Object.keys(a);
+    const bk = Object.keys(b);
+    if (ak.length !== bk.length) return false;
+    for (const k of ak) {
+      if (a[k] !== String(b[k])) return false;
+    }
+    return true;
   }
 
   function applyFilters(
@@ -274,7 +304,21 @@ export function createDomainRoutes<T extends Entity, C, U>(
 
   router.use("*", async (c, next) => {
     const isHtmx = c.req.header("HX-Request") === "true";
-    const saved = readUiState<DomainFilterState>(c, cfg.name);
+    const activePerson = c.get("activePerson" as never) as {
+      id?: string;
+      preferences?: {
+        viewPrefs?: Record<string, string>;
+        filterDefaults?: Record<string, Record<string, string>>;
+        uiState?: Record<string, Record<string, string>>;
+      };
+    } | undefined;
+    const actorId = activePerson?.id;
+    const personPrefs = activePerson?.preferences;
+    // Last-used filter state lives in the user's account (preferences.uiState),
+    // not a browser cookie. Anonymous requests (no actor) do not persist.
+    const saved: Record<string, unknown> = personPrefs?.uiState?.[cfg.name] ??
+      {};
+
     const params: Record<string, string | undefined> = {};
     for (const key of stateKeys) {
       params[key] = c.req.query(key);
@@ -282,7 +326,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     // Boolean toolbar toggles (hideCompleted / archived / showHidden) submit
     // via htmx form-include. An unchecked checkbox is OMITTED from the form
     // per the HTML spec, so mergeParams would otherwise fall back to the
-    // saved cookie value and the toggle would stay stuck "on". Force the
+    // saved account value and the toggle would stay stuck "on". Force the
     // absent key to "false" for htmx requests so the uncheck round-trips.
     // Only inject the key when the domain actually renders that toggle.
     if (isHtmx) {
@@ -298,13 +342,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     }
     const merged = mergeParams(params, saved);
 
-    // Apply PersonPreferences as fallback for keys not set by query param or cookie.
-    const personPrefs = (c.get("activePerson" as never) as {
-      preferences?: {
-        viewPrefs?: Record<string, string>;
-        filterDefaults?: Record<string, Record<string, string>>;
-      };
-    } | undefined)?.preferences;
+    // Configured defaults (Settings) as a fallback when nothing is saved.
     if (personPrefs) {
       if (!merged.view && personPrefs.viewPrefs?.[cfg.name]) {
         merged.view = personPrefs.viewPrefs[cfg.name];
@@ -322,7 +360,18 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const state = buildState(merged);
     c.set("filterState" as never, state as never);
     await next();
-    writeUiState(c, cfg.name, state);
+
+    // Persist last-used filter state to the account — only when there is an
+    // actor and the state actually changed, so the person file isn't rewritten
+    // on every request.
+    if (actorId) {
+      const serialized = serializeFilterState(state);
+      if (!sameStringMap(serialized, saved)) {
+        await getPeopleService().updatePreferences(actorId, {
+          uiState: { [cfg.name]: serialized },
+        });
+      }
+    }
   });
 
   // ---------------------------------------------------------------------------
