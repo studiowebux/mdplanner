@@ -161,6 +161,42 @@ const StatCard: FC<{ label: string; value: string | number }> = (
   </div>
 );
 
+// ── global summary KPI strip ───────────────────────────────────────────────
+// Cross-domain headline metrics above the filter bar. Visually distinct from
+// per-section StatCards (accent left-border, left-aligned). All values come
+// straight from the already-aggregated AnalyticsData — no new service queries —
+// and re-render on every filter swap since the strip sits inside
+// #analytics-content. Labels reflect the active filter range, not a fixed month.
+
+const KpiCard: FC<{ label: string; value: string | number }> = (
+  { label, value },
+) => (
+  <div class="analytics__kpi-card">
+    <span class="analytics__kpi-value">{value}</span>
+    <span class="analytics__kpi-label">{label}</span>
+  </div>
+);
+
+const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
+  const openTasks = data.tasks.total - (data.tasks.bySection["Done"] ?? 0);
+  return (
+    <div class="analytics__kpi-strip">
+      <KpiCard label="Open Tasks" value={openTasks} />
+      <KpiCard label="Active Milestones" value={data.milestones.total} />
+      <KpiCard label="Hours Logged" value={`${data.timeEntries.totalHours}h`} />
+      <KpiCard
+        label="Revenue"
+        value={formatCurrency(data.invoices.totalAmount)}
+      />
+      <KpiCard
+        label="Open Deals"
+        value={formatCurrency(data.deals.totalValue)}
+      />
+      <KpiCard label="Journal Streak" value={data.journal.streak} />
+    </div>
+  );
+};
+
 const ByTable: FC<{ rows: [string, number | string][]; unit?: string }> = (
   { rows, unit = "" },
 ) => (
@@ -295,6 +331,8 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
         </span>
         <CustomizePanel hiddenSections={hiddenSections} />
       </div>
+
+      <GlobalKpiStrip data={data} />
 
       <FilterBar
         filters={filters}

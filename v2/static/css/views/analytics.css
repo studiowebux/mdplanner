@@ -34,6 +34,45 @@
   color: var(--color-text-muted);
 }
 
+/* ── global KPI strip ───────────────────────────────────────────────────── */
+
+.analytics__kpi-strip {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(var(--analytics-kpi-card-min-w), 1fr));
+  gap: var(--space-md);
+}
+
+.analytics__kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-left: var(--border-width-thick) var(--border-style)
+    var(--color-accent);
+  border-radius: var(--radius-md);
+}
+
+.analytics__kpi-value {
+  font-size: var(--analytics-kpi-value-size);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.analytics__kpi-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-task-badge);
+}
+
 /* ── filter bar ─────────────────────────────────────────────────────────── */
 
 .analytics__filter-bar {

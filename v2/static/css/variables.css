@@ -790,6 +790,8 @@ html.font-mono {
   /* Analytics view */
   --analytics-stat-card-min-w: var(--card-min-width);
   --analytics-stat-value-size: var(--font-size-xl);
+  --analytics-kpi-card-min-w: 11rem;
+  --analytics-kpi-value-size: var(--font-size-2xl);
   --analytics-stat-value-line-height: var(--line-height-tight);
   --analytics-col-min-w: 14rem;
   --analytics-filter-min-w: 10rem;
