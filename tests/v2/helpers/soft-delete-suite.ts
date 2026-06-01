@@ -10,8 +10,8 @@
  *
  * Entity registration follows the Brain Memory rule — caller passes a
  * `registerEntity` function that is invoked exactly once per test file at
- * module level. `db.close()` runs in finally so the signal-listener
- * teardown in `CacheDatabase` doesn't trip the op sanitizer.
+ * module level. `db.close()` runs in finally so the `CacheDatabase` SQLite
+ * handle is released and doesn't trip the resource sanitizer.
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";

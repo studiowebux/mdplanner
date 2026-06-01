@@ -14,7 +14,7 @@
  * working search result. Registration pushes to the shared `ENTITIES` array
  * (register once per file — see habit-search_test.ts), so the assertions read
  * the real `EntityDef.fts.type` straight from the registry. No DB is created,
- * so there is no CacheDatabase signal-listener to leak.
+ * so there is no CacheDatabase SQLite handle to leak.
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";

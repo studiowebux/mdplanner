@@ -7,7 +7,6 @@
  * Uses Deno's built-in node:sqlite module.
  */
 
-import { log } from "../../singletons/logger.ts";
 import { DatabaseSync } from "node:sqlite";
 
 /** A row returned from SQLite. Values are the primitives node:sqlite actually produces. */
@@ -38,18 +37,12 @@ export class CacheDatabase {
     this.db.exec("PRAGMA synchronous = NORMAL");
     this.db.exec("PRAGMA foreign_keys = ON");
 
-    // Graceful shutdown — close db on process exit to prevent corruption
+    // Close db on process exit to prevent corruption. `unload` fires on
+    // Deno.exit() and normal exit. Signals are owned by the entrypoint
+    // (v2/bin.ts) which shuts the server down then exits — registering signal
+    // listeners here would suppress the default terminate and leave the process
+    // (and its bound port) lingering after Ctrl-C / kill.
     globalThis.addEventListener("unload", this.cleanup);
-    try {
-      Deno.addSignalListener("SIGINT", this.cleanup);
-    } catch (err) {
-      log.warn("[db] SIGINT listener not available:", err);
-    }
-    try {
-      Deno.addSignalListener("SIGTERM", this.cleanup);
-    } catch (err) {
-      log.warn("[db] SIGTERM listener not available:", err);
-    }
   }
 
   query<T = QueryResult>(sql: string, params: BindParams = []): T[] {
@@ -119,16 +112,6 @@ export class CacheDatabase {
     if (this.closed) return;
     this.closed = true;
     globalThis.removeEventListener("unload", this.cleanup);
-    try {
-      Deno.removeSignalListener("SIGINT", this.cleanup);
-    } catch (err) {
-      log.warn("[db] SIGINT listener removal failed:", err);
-    }
-    try {
-      Deno.removeSignalListener("SIGTERM", this.cleanup);
-    } catch (err) {
-      log.warn("[db] SIGTERM listener removal failed:", err);
-    }
     this.db.close();
   }
 }

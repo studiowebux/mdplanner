@@ -124,4 +124,28 @@ if (!Deno.env.get("MDPLANNER_SECRET_KEY")) {
   );
 }
 
-Deno.serve({ port }, app.fetch);
+const server = Deno.serve({ port }, app.fetch);
+
+// Graceful shutdown — stop accepting requests, then exit so the port is
+// released and the CacheDatabase `unload` handler closes the connection. The
+// DB layer no longer registers signal listeners (those suppressed the default
+// terminate and left the process lingering → AddrInUse on the next boot).
+let shuttingDown = false;
+const shutdown = async (signal: string) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  log.info(`Received ${signal} — shutting down`);
+  try {
+    await server.shutdown();
+  } catch (err) {
+    log.warn("[shutdown] server.shutdown() failed:", err);
+  }
+  Deno.exit(0);
+};
+for (const sig of ["SIGINT", "SIGTERM"] as const) {
+  try {
+    Deno.addSignalListener(sig, () => void shutdown(sig));
+  } catch (err) {
+    log.warn(`[shutdown] ${sig} listener not available:`, err);
+  }
+}
