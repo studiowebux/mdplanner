@@ -15,6 +15,8 @@ import type { SearchResult } from "../../types/search.types.ts";
 import { PersonDetailView } from "../person-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { resolvePersonByName } from "../../utils/person-name-match.ts";
+import { publish } from "../../singletons/event-bus.ts";
+import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const peopleRouter = createDomainRoutes(peopleConfig);
 
@@ -151,4 +153,27 @@ peopleRouter.get("/:id", async (c) => {
       showCompleted={showCompleted}
     />,
   );
+});
+
+// Org-chart drag → reassign manager. Form-encoded so the org-tree drag handler
+// can persist via htmx.ajax() instead of fetch(); the person.updated SSE event
+// auto-refreshes the chart and the toast comes from the HX-Trigger header. The
+// REST PUT /api/v1/people/:id stays the JSON API for external consumers.
+peopleRouter.post("/:id/reports-to", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const reportsTo = String(body.reportsTo ?? "");
+  const person = await getPeopleService().update(id, { reportsTo });
+  if (!person) return c.notFound();
+  publish("person.updated");
+  c.header(
+    "HX-Trigger",
+    hxTrigger(
+      "success",
+      reportsTo ? "Reporting structure updated" : "Manager removed",
+    ),
+  );
+  // c.body (not new Response) so the HX-Trigger header set above survives —
+  // Hono drops c.header() values when a raw Response object is returned.
+  return c.body(null, 204);
 });

@@ -198,31 +198,14 @@
   }
 
   function updateReportsTo(personId, newManagerId) {
-    // API expects JSON body. SSE person.updated event auto-refreshes the view.
-    fetch("/api/v1/people/" + personId, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reportsTo: newManagerId != null ? newManagerId : "",
-      }),
-    }).then(function (res) {
-      if (res.ok && window.toast) {
-        window.toast({
-          type: "success",
-          message: newManagerId
-            ? "Reporting structure updated"
-            : "Manager removed",
-        });
-      }
-      if (!res.ok) throw new Error("Update failed (" + res.status + ")");
-    }).catch(function (err) {
-      if (window.toast) {
-        window.toast({
-          type: "error",
-          message: "Failed to update reporting structure.",
-        });
-      }
-      console.debug("[org-tree] update failed:", err);
+    // Persist via htmx (not fetch) — the view endpoint updates the person,
+    // publishes person.updated (which SSE-refreshes the chart) and returns the
+    // toast through an HX-Trigger header. Drag mechanics stay in JS; only the
+    // network call goes through htmx.
+    if (typeof window.htmx === "undefined") return;
+    window.htmx.ajax("POST", "/people/" + personId + "/reports-to", {
+      values: { reportsTo: newManagerId != null ? newManagerId : "" },
+      swap: "none",
     });
   }
 
