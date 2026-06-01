@@ -556,6 +556,9 @@
   --invoice-print-max-w: 52rem;
   --invoice-print-padding: var(--space-xl);
   --invoice-print-section-gap: var(--space-lg);
+
+  /* Quadrant card max height (Eisenhower / MoSCoW) */
+  --quadrant-card-max-h: 40vh;
 }
 
 html.font-mono {
@@ -783,7 +786,6 @@ html.font-mono {
   --sticky-orange-border: #e65100;
   --sticky-orange-text: #ffe0b2;
 
-  --quadrant-card-max-h: 40vh;
   --lc-section-edit-max-h: 40vh;
 
   /* Deals pipeline */
