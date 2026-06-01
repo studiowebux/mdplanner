@@ -551,6 +551,11 @@
   --billing-doc-header-border: 1px solid var(--color-border-default);
   --billing-doc-header-pb: var(--space-md);
   --billing-doc-header-mb: var(--space-lg);
+
+  /* Invoice print view */
+  --invoice-print-max-w: 52rem;
+  --invoice-print-padding: var(--space-xl);
+  --invoice-print-section-gap: var(--space-lg);
 }
 
 html.font-mono {
@@ -777,11 +782,6 @@ html.font-mono {
   --sticky-orange-bg: #3d1e08;
   --sticky-orange-border: #e65100;
   --sticky-orange-text: #ffe0b2;
-
-  /* Invoice print view */
-  --invoice-print-max-w: 52rem;
-  --invoice-print-padding: var(--space-xl);
-  --invoice-print-section-gap: var(--space-lg);
 
   --quadrant-card-max-h: 40vh;
   --lc-section-edit-max-h: 40vh;
