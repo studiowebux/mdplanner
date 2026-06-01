@@ -183,13 +183,26 @@
         '<button type="button" class="btn btn--tertiary btn--sm" data-action="move-down">Down</button>' +
         '<button type="button" class="btn btn--tertiary btn--sm" data-action="toggle-type">' +
         (type === "code" ? "Text" : "Code") + "</button>" +
-        '<button type="button" class="btn btn--tertiary btn--sm" data-action="preview-block">Preview</button>' +
+        '<button type="button" class="btn btn--tertiary btn--sm"' +
+        ' hx-post="/notes/preview-block"' +
+        ' hx-include="closest .note-editor__block"' +
+        ' hx-target="next .note-editor__preview"' +
+        ' hx-swap="innerHTML">Preview</button>' +
         '<button type="button" class="btn btn--danger btn--sm" data-action="delete-block">Del</button>';
       block.appendChild(controls);
+
+      // Hidden type field — sent with the preview request (kept in sync by
+      // the toggle-type action) so the server can render code vs markdown.
+      var typeField = document.createElement("input");
+      typeField.type = "hidden";
+      typeField.name = "type";
+      typeField.value = type;
+      block.appendChild(typeField);
 
       if (type === "code") {
         var langInput = document.createElement("input");
         langInput.type = "text";
+        langInput.name = "lang";
         langInput.className = "note-editor__lang-input";
         langInput.value = lang;
         langInput.placeholder = "language";
@@ -198,10 +211,18 @@
 
       var textarea = document.createElement("textarea");
       textarea.className = "note-editor__textarea";
+      textarea.name = "content";
       textarea.value = content;
       textarea.rows = Math.max(3, content.split("\n").length + 1);
       textarea.addEventListener("input", autoResize);
       block.appendChild(textarea);
+
+      // Persistent preview pane — htmx swaps the rendered fragment here.
+      var preview = document.createElement("div");
+      preview.className = "note-editor__preview markdown-body";
+      block.appendChild(preview);
+
+      if (window.htmx) window.htmx.process(block);
     });
 
     // Custom section content blocks
@@ -424,52 +445,6 @@
 
     var body = qs(".note-detail__body");
     if (body) body.before(toolbar);
-  }
-
-  // -------------------------------------------------------------------------
-  // Preview a single block
-  // -------------------------------------------------------------------------
-
-  function previewBlock(block) {
-    var ta = qs(".note-editor__textarea", block);
-    if (!ta) return;
-    block.dataset.blockContent = ta.value;
-
-    var type = block.dataset.blockType;
-    var content = ta.value;
-    var previewDiv = qs(".note-editor__preview", block);
-
-    if (previewDiv) {
-      // Toggle off — remove preview
-      previewDiv.remove();
-      return;
-    }
-
-    previewDiv = document.createElement("div");
-    previewDiv.className = "note-editor__preview markdown-body";
-
-    if (type === "code") {
-      var lang = block.dataset.blockLang || "";
-      previewDiv.innerHTML = "<pre><code" +
-        (lang ? ' class="language-' + lang + '"' : "") + ">" +
-        escapeHtml(content) + "</code></pre>";
-    } else {
-      // Fetch rendered markdown from server
-      fetch("/notes/preview-block", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: content }),
-      }).then(function (res) {
-        if (!res.ok) throw new Error("Preview failed (" + res.status + ")");
-        return res.text();
-      }).then(function (html) {
-        previewDiv.innerHTML = html;
-      }).catch(function () {
-        previewDiv.textContent = "Preview unavailable";
-      });
-    }
-
-    block.appendChild(previewDiv);
   }
 
   function escapeHtml(str) {
@@ -729,13 +704,26 @@
       '<button type="button" class="btn btn--tertiary btn--sm" data-action="move-down">Down</button>' +
       '<button type="button" class="btn btn--tertiary btn--sm" data-action="toggle-type">' +
       (type === "code" ? "Text" : "Code") + "</button>" +
-      '<button type="button" class="btn btn--tertiary btn--sm" data-action="preview-block">Preview</button>' +
+      '<button type="button" class="btn btn--tertiary btn--sm"' +
+      ' hx-post="/notes/preview-block"' +
+      ' hx-include="closest .note-editor__block"' +
+      ' hx-target="next .note-editor__preview"' +
+      ' hx-swap="innerHTML">Preview</button>' +
       '<button type="button" class="btn btn--danger btn--sm" data-action="delete-block">Del</button>';
     div.appendChild(controls);
+
+    // Hidden type field — sent with the preview request (kept in sync by
+    // the toggle-type action) so the server can render code vs markdown.
+    var typeField = document.createElement("input");
+    typeField.type = "hidden";
+    typeField.name = "type";
+    typeField.value = type;
+    div.appendChild(typeField);
 
     if (type === "code" && lang) {
       var langInput = document.createElement("input");
       langInput.type = "text";
+      langInput.name = "lang";
       langInput.className = "note-editor__lang-input";
       langInput.value = lang;
       langInput.placeholder = "language";
@@ -744,10 +732,18 @@
 
     var textarea = document.createElement("textarea");
     textarea.className = "note-editor__textarea";
+    textarea.name = "content";
     textarea.value = content;
     textarea.rows = 3;
     textarea.addEventListener("input", autoResize);
     div.appendChild(textarea);
+
+    // Persistent preview pane — htmx swaps the rendered fragment here.
+    var preview = document.createElement("div");
+    preview.className = "note-editor__preview markdown-body";
+    div.appendChild(preview);
+
+    if (window.htmx) window.htmx.process(div);
 
     return div;
   }
@@ -997,13 +993,11 @@
         var current = block.dataset.blockType;
         block.dataset.blockType = current === "code" ? "text" : "code";
         btn.textContent = current === "code" ? "Code" : "Text";
+        var typeField = qs('input[name="type"]', block);
+        if (typeField) typeField.value = block.dataset.blockType;
         markDirty();
         break;
       }
-      case "preview-block":
-        if (block) previewBlock(block);
-        break;
-
       // Save bar actions
       case "save-content":
         save();

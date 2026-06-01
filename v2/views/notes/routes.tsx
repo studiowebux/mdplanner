@@ -9,6 +9,7 @@ import { NoteDetailView } from "../note-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { markdownToHtml } from "../../utils/markdown.ts";
+import { escapeHtml } from "../../utils/html.ts";
 import { publish } from "../../singletons/event-bus.ts";
 
 export const notesRouter = createDomainRoutes(noteConfig);
@@ -93,12 +94,18 @@ notesRouter.post("/:id/destroy", async (c) => {
   return new Response(null, { status: 204 });
 });
 
-// Preview a single block — returns rendered markdown HTML fragment
+// Preview a single block — returns a rendered HTML fragment (htmx swap target).
+// Form-encoded (htmx default); code blocks are wrapped server-side so the
+// editor needs no client-side render branch.
 notesRouter.post("/preview-block", async (c) => {
-  const body = await c.req.json();
+  const body = await c.req.parseBody();
   const content = String(body.content ?? "");
-  const html = markdownToHtml(content) ?? "";
-  return c.html(html);
+  if (String(body.type ?? "") === "code") {
+    const lang = String(body.lang ?? "");
+    const cls = lang ? ` class="language-${escapeHtml(lang)}"` : "";
+    return c.html(`<pre><code${cls}>${escapeHtml(content)}</code></pre>`);
+  }
+  return c.html(markdownToHtml(content) ?? "");
 });
 
 // Preview — rendered markdown in sidenav (read-only)
