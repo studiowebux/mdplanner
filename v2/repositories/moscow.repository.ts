@@ -14,6 +14,7 @@ import {
   type MoscowQuadrantKey,
 } from "../domains/moscow/constants.tsx";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { parseQuadrantMarkdown } from "../utils/quadrant-parse.ts";
 import { MOSCOW_TABLE, rowToMoscow } from "../domains/moscow/cache.ts";
 
 export class MoscowRepository extends CachedMarkdownRepository<
@@ -66,68 +67,12 @@ export class MoscowRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
 
-    const lines = body.split("\n");
-    let title = fm.title ? String(fm.title) : "";
-    const quadrants: Record<string, string[]> = {
-      must: [],
-      should: [],
-      could: [],
-      wont: [],
-    };
-    let currentSection: string | null = null;
-    const extraLines: string[] = [];
-    let pastQuadrants = false;
-
-    for (const line of lines) {
-      if (line.startsWith("# ")) {
-        if (!title) title = line.slice(2).trim();
-        continue;
-      }
-
-      const h2Match = line.match(/^##\s+(.+)$/);
-      if (h2Match) {
-        const heading = h2Match[1].toLowerCase();
-        let matched = false;
-        for (const [prefix, key] of Object.entries(MOSCOW_SECTION_MAP)) {
-          if (heading.startsWith(prefix)) {
-            currentSection = key;
-            matched = true;
-            break;
-          }
-        }
-        if (!matched) {
-          currentSection = null;
-          pastQuadrants = true;
-          extraLines.push(line);
-        }
-        continue;
-      }
-
-      const listMatch = line.match(/^[-*]\s+(.+)$/);
-      if (listMatch && currentSection && !pastQuadrants) {
-        quadrants[currentSection].push(listMatch[1].trim());
-        continue;
-      }
-
-      if (currentSection === null && !pastQuadrants) {
-        if (line.trim()) extraLines.push(line);
-        continue;
-      }
-
-      if (currentSection && !pastQuadrants && line.trim()) {
-        pastQuadrants = true;
-        extraLines.push(line);
-        continue;
-      }
-
-      if (pastQuadrants) {
-        extraLines.push(line);
-      }
-    }
-
-    const bodyNotes = extraLines.join("\n").trim();
-    const fmNotes = fm.notes != null ? String(fm.notes) : "";
-    const notes = bodyNotes || fmNotes || undefined;
+    const { title, quadrants, notes } = parseQuadrantMarkdown(
+      body,
+      MOSCOW_SECTION_MAP,
+      fm.title,
+      fm.notes,
+    );
 
     return {
       id,
