@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { Moscow } from "../types/moscow.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
@@ -165,7 +166,7 @@ export const MoscowDetailView: FC<
                               type="button"
                               class="quadrant-card__remove"
                               hx-delete={`/moscow/${moscow.id}/${key}/${idx}${editSuffix}`}
-                              hx-confirm={`Remove "${item}"?`}
+                              {...immediateDeleteConfirm(`"${item}"`)}
                               hx-target="#moscow-detail-root"
                               hx-select="#moscow-detail-root"
                               hx-swap="outerHTML"

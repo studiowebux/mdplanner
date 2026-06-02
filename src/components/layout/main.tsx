@@ -106,6 +106,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/animations-toggle.js" />
         <script src="/js/sidebar-toggle.js" />
         <script src="/js/sidebar-nav.js" />
+        <script src="/js/dirty-guard.js" />
         <script src="/js/sidenav.js" />
         <script src="/js/global-filter.js" />
         <script src="/js/confirm-dialog.js" />

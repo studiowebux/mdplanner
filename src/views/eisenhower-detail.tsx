@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { Eisenhower } from "../types/eisenhower.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
@@ -163,7 +164,7 @@ export const EisenhowerDetailView: FC<
                               type="button"
                               class="quadrant-card__remove"
                               hx-delete={`/eisenhower/${e.id}/${key}/${idx}${editSuffix}`}
-                              hx-confirm={`Remove "${item}"?`}
+                              {...immediateDeleteConfirm(`"${item}"`)}
                               hx-target="#eisenhower-detail-root"
                               hx-select="#eisenhower-detail-root"
                               hx-swap="outerHTML"

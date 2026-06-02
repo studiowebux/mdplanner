@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { LeanCanvas } from "../types/lean-canvas.types.ts";
 import {
   LEAN_CANVAS_SECTIONS,
@@ -51,7 +52,7 @@ const SectionBlock: FC<{
                     type="button"
                     class="quadrant-card__remove"
                     hx-delete={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-confirm={`Remove "${item}"?`}
+                    {...immediateDeleteConfirm(`"${item}"`)}
                     hx-target="#lc-detail-root"
                     hx-select="#lc-detail-root"
                     hx-swap="outerHTML"

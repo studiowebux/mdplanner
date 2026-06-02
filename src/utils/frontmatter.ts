@@ -257,11 +257,14 @@ function parseScalar(value: string): unknown {
   if (value === "false") return false;
   if (value === "null" || value === "~" || value === "") return undefined;
 
-  // Remove surrounding quotes
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
+  // Double-quoted: decode escape sequences (symmetric with serializeScalar) so
+  // newlines/tabs/quotes survive the round-trip. Single-pass so adjacent escapes
+  // like `\\n` (escaped backslash + n) don't get mis-decoded as a newline.
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    return unescapeDouble(value.slice(1, -1));
+  }
+  // Single-quoted: literal (YAML single quotes don't use backslash escapes).
+  if (value.length >= 2 && value.startsWith("'") && value.endsWith("'")) {
     return value.slice(1, -1);
   }
 
@@ -270,6 +273,31 @@ function parseScalar(value: string): unknown {
   if (!isNaN(num) && value !== "") return num;
 
   return value;
+}
+
+/**
+ * Decode the escape sequences produced by serializeScalar for double-quoted
+ * strings. Single left-to-right pass: each `\` consumes the following char as a
+ * unit, so `\\n` decodes to `\n` (backslash + n), not a newline. Unknown
+ * escapes are preserved verbatim (`\x` -> `\x`) to avoid dropping data.
+ */
+function unescapeDouble(s: string): string {
+  return s.replace(/\\(.)/g, (_, ch) => {
+    switch (ch) {
+      case "n":
+        return "\n";
+      case "r":
+        return "\r";
+      case "t":
+        return "\t";
+      case '"':
+        return '"';
+      case "\\":
+        return "\\";
+      default:
+        return "\\" + ch;
+    }
+  });
 }
 
 /**
@@ -341,16 +369,25 @@ function appendValue(
 function serializeScalar(value: unknown): string {
   if (typeof value === "string") {
     // Quote strings that would otherwise re-parse as a different type
-    // (boolean / null / number) — see parseScalar — plus the structural
-    // characters that break block YAML.
+    // (boolean / null / number) — see parseScalar — plus the structural and
+    // whitespace characters that break a bare block-YAML scalar. Newlines are
+    // the critical case: a bare multi-line value spills past the key and is
+    // truncated on re-parse (data loss). Encode them as \n inside a quoted
+    // scalar; unescapeDouble reverses it.
     const ambiguous = value === "true" || value === "false" ||
       value === "null" || value === "~" ||
       (value.trim() !== "" && !isNaN(Number(value)));
-    if (
-      ambiguous ||
-      value.includes(":") || value.includes("#") || value.includes('"')
-    ) {
-      return `"${value.replace(/"/g, '\\"')}"`;
+    const hasSpecial = value.includes(":") || value.includes("#") ||
+      value.includes('"') || value.includes("\\") ||
+      value.includes("\n") || value.includes("\r") || value.includes("\t");
+    if (ambiguous || hasSpecial) {
+      const escaped = value
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n")
+        .replace(/\r/g, "\\r")
+        .replace(/\t/g, "\\t");
+      return `"${escaped}"`;
     }
     return value;
   }

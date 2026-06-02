@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { BusinessModel } from "../types/business-model.types.ts";
 import {
   BUSINESS_MODEL_SECTION_KEYS,
@@ -95,7 +96,7 @@ const SectionBlock: FC<{
                     type="button"
                     class="quadrant-card__remove"
                     hx-delete={`/business-models/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-confirm={`Remove "${item}"?`}
+                    {...immediateDeleteConfirm(`"${item}"`)}
                     hx-target="#bmc-detail-root"
                     hx-select="#bmc-detail-root"
                     hx-swap="outerHTML"

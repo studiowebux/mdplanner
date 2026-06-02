@@ -7,6 +7,7 @@
 // fixed string[] sections (SWOT, Retrospective).
 
 import type { FC } from "hono/jsx";
+import { immediateDeleteConfirm } from "../../utils/confirm.ts";
 
 export interface QuadrantSection {
   /** Section key — entity field, URL path segment, and default data-quadrant. */
@@ -77,7 +78,7 @@ export const QuadrantEditGrid: FC<{
                           type="button"
                           class="quadrant-card__remove"
                           hx-delete={`${sectionUrl}/${idx}${editSuffix}`}
-                          hx-confirm={`Remove "${item}"?`}
+                          {...immediateDeleteConfirm(`"${item}"`)}
                           hx-target={target}
                           hx-select={target}
                           hx-swap="outerHTML"

@@ -117,6 +117,34 @@ Deno.test("frontmatter - quotes strings containing colon/hash/quote", () => {
   assertEquals(roundTrip(fm), fm);
 });
 
+Deno.test("frontmatter - round-trips multi-line strings (newlines preserved)", () => {
+  // Regression: a bare multi-line scalar spilled past the key and was
+  // truncated to the first line on re-parse (meeting agenda/notes data loss).
+  const fm = {
+    agenda: "Line one\nLine two\nLine three",
+    notes: "Single line",
+    crlf: "win\r\nendings",
+    tabbed: "col1\tcol2",
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips embedded quotes and backslashes", () => {
+  const fm = {
+    quoted: 'she said "hi"',
+    backslash: "a\\b",
+    escapeLiteral: "not a real \\newline", // backslash + n, must stay literal
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips multi-line value with embedded quotes", () => {
+  const fm = {
+    agenda: 'Topic: "Q3 review"\n- item one\n- item two',
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
 Deno.test("frontmatter - preserves array inside nested object", () => {
   const fm = {
     config: {

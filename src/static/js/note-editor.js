@@ -49,11 +49,26 @@
     if (dirty) return;
     dirty = true;
     updateSaveBar();
+    setUnsaved(true);
   }
 
   function clearDirty() {
     dirty = false;
     updateSaveBar();
+    setUnsaved(false);
+  }
+
+  // Declare unsaved state to the central dirty guard (dirty-guard.js) via a
+  // generic attribute on the edit root — the block editor is bespoke, so it
+  // opts into the shared beforeunload guard this way rather than per-field.
+  function setUnsaved(on) {
+    var root = qs(".note-detail__body");
+    if (!root) return;
+    if (on) {
+      root.setAttribute("data-unsaved", "true");
+    } else {
+      root.removeAttribute("data-unsaved");
+    }
   }
 
   function updateSaveBar() {
@@ -83,13 +98,9 @@
     }
   }
 
-  // Warn before leaving with unsaved changes
-  window.addEventListener("beforeunload", function (e) {
-    if (editing && dirty) {
-      e.preventDefault();
-      e.returnValue = "";
-    }
-  });
+  // Unsaved-changes warning is handled centrally by dirty-guard.js, which reads
+  // the [data-unsaved] attribute set via setUnsaved() above. No local
+  // beforeunload listener — one guard covers every edit surface.
 
   // -------------------------------------------------------------------------
   // Toggle edit mode
@@ -112,22 +123,33 @@
       trackDirtyInputs();
       disableFieldSwaps();
     } else {
-      // Cancel — reload to discard changes
+      // Cancel — discard in-DOM edits by re-rendering the server view.
       if (dirty) {
         window.confirmAction({
           title: "Discard changes",
           message: "You have unsaved changes. Discard them?",
           confirmLabel: "Discard",
         }).then(function (ok) {
-          if (ok) window.location.reload();
-          else {
-            editing = true; // stay in edit mode
-          }
+          if (ok) exitEditMode();
+          else editing = true; // declined — stay in edit mode
         });
       } else {
-        window.location.reload();
+        exitEditMode();
       }
     }
+  }
+
+  // Leave edit mode: drop dirty state, remove the save bar, and re-render the
+  // detail from the server. The re-render is true htmx — dispatching note:refresh
+  // fires the declarative hx-get on the SseRefresh element (clientTrigger), which
+  // morph-swaps #note-detail-root. No window.location.reload, no htmx.ajax.
+  function exitEditMode() {
+    editing = false;
+    clearDirty();
+    removeSaveBar();
+    document.body.dispatchEvent(
+      new CustomEvent("note:refresh", { bubbles: true }),
+    );
   }
 
   function trackDirtyInputs() {
@@ -659,8 +681,7 @@
       }),
     }).then(function (res) {
       if (res.ok) {
-        dirty = false; // prevent beforeunload warning
-        window.location.reload();
+        exitEditMode(); // clears dirty + re-renders the saved view via htmx
       } else {
         throw new Error("Save failed (" + res.status + ")");
       }

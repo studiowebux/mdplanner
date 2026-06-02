@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { Fishbone } from "../types/fishbone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
@@ -113,7 +114,9 @@ export const FishboneDetailView: FC<
                         type="button"
                         class="quadrant-card__remove fishbone-detail__category-remove"
                         hx-delete={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
-                        hx-confirm={`Remove category "${cause.section}" and all its causes?`}
+                        {...immediateDeleteConfirm(
+                          `category "${cause.section}" and all its causes`,
+                        )}
                         hx-target="#fishbone-detail-root"
                         hx-select="#fishbone-detail-root"
                         hx-swap="outerHTML"
@@ -150,7 +153,7 @@ export const FishboneDetailView: FC<
                                 type="button"
                                 class="quadrant-card__remove"
                                 hx-delete={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
-                                hx-confirm={`Remove "${item}"?`}
+                                {...immediateDeleteConfirm(`"${item}"`)}
                                 hx-target="#fishbone-detail-root"
                                 hx-select="#fishbone-detail-root"
                                 hx-swap="outerHTML"

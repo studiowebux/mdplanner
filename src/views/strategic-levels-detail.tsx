@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { StrategicLevelsBuilder } from "../types/strategic-levels.types.ts";
 import { LEVEL_ORDER } from "../types/strategic-levels.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -107,7 +108,7 @@ export const StrategicLevelsDetailView: FC<
                                 type="button"
                                 class="sl-item__remove"
                                 hx-delete={`/strategic-levels/${builder.id}/levels/${level.id}${editSuffix}`}
-                                hx-confirm={`Remove "${level.title}"?`}
+                                {...immediateDeleteConfirm(`"${level.title}"`)}
                                 hx-target="#sl-detail-root"
                                 hx-select="#sl-detail-root"
                                 hx-swap="outerHTML"

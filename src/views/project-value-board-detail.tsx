@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
+import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { ProjectValueBoard } from "../types/project-value-board.types.ts";
 import {
   PROJECT_VALUE_BOARD_SECTION_KEYS,
@@ -110,7 +111,7 @@ const SectionBlock: FC<{
                     type="button"
                     class="quadrant-card__remove"
                     hx-delete={`/project-value/${boardId}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-confirm={`Remove "${item}"?`}
+                    {...immediateDeleteConfirm(`"${item}"`)}
                     hx-target="#pv-detail-root"
                     hx-select="#pv-detail-root"
                     hx-swap="outerHTML"

@@ -192,6 +192,7 @@ export const NoteDetailView: FC<Props> = (props) => {
         getUrl={`/notes/${note.id}`}
         trigger="sse:note.updated, sse:note.deleted"
         targetId="note-detail-root"
+        clientTrigger="note:refresh from:body"
       />
     </>
   );
