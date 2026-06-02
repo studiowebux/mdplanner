@@ -9,6 +9,7 @@ WORKDIR /app
 
 COPY deno.json deno.lock ./
 COPY src/ ./src/
+COPY scripts/ ./scripts/
 
 # BuildKit inline cache: persists the Deno module store across builds so
 # re-runs of deno cache skip network downloads when deps haven't changed.
