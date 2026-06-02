@@ -1,28 +1,24 @@
 {
   "fmt": {
     "exclude": [
-      "src/",
+      "TO_MIGRATE/",
       "v2/static/js/vendor/",
       "v2/static/css/vendor/",
       "example/",
       "docs/",
       "__trash/",
       "dist/",
-      "main.ts",
-      "mcp.ts",
       "*.md"
     ]
   },
   "lint": {
     "exclude": [
-      "src/",
+      "TO_MIGRATE/",
       "v2/static/js/",
       "example/",
       "docs/",
       "__trash/",
-      "dist/",
-      "main.ts",
-      "mcp.ts"
+      "dist/"
     ],
     "rules": {
       "exclude": [
@@ -33,22 +29,22 @@
     }
   },
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts ./example",
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch v2/bin.ts ./example",
     "dev:v2": "deno run --allow-net --allow-read --allow-write --allow-env --watch v2/bin.ts ./example",
-    "start": "deno run --allow-net --allow-read --allow-write --allow-env main.ts",
-    "mcp": "deno run --allow-read --allow-write --allow-env mcp.ts",
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env v2/bin.ts",
+    "mcp": "deno run --allow-read --allow-write --allow-env v2/bin-mcp.ts",
     "test": "deno test --allow-read --allow-write --allow-env tests/",
     "test:watch": "deno test --allow-read --allow-write --allow-env --watch tests/",
-    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --output mdplanner main.ts",
-    "compile:linux": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target x86_64-unknown-linux-gnu --output dist/mdplanner-linux main.ts",
-    "compile:macos-intel": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target x86_64-apple-darwin --output dist/mdplanner-macos-intel main.ts",
-    "compile:macos-arm": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target aarch64-apple-darwin --output dist/mdplanner-macos-arm main.ts",
-    "compile:windows": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target x86_64-pc-windows-msvc --output dist/mdplanner-windows main.ts",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./v2/static --output mdplanner v2/bin.ts",
+    "compile:linux": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./v2/static --target x86_64-unknown-linux-gnu --output dist/mdplanner-linux v2/bin.ts",
+    "compile:macos-intel": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./v2/static --target x86_64-apple-darwin --output dist/mdplanner-macos-intel v2/bin.ts",
+    "compile:macos-arm": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./v2/static --target aarch64-apple-darwin --output dist/mdplanner-macos-arm v2/bin.ts",
+    "compile:windows": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./v2/static --target x86_64-pc-windows-msvc --output dist/mdplanner-windows v2/bin.ts",
     "compile:all": "mkdir -p dist && deno task compile:linux && deno task compile:macos-intel && deno task compile:macos-arm && deno task compile:windows",
-    "compile:mcp:linux": "deno compile --allow-read --allow-write --allow-env --target x86_64-unknown-linux-gnu --output dist/mdplanner-mcp-linux mcp.ts",
-    "compile:mcp:macos-intel": "deno compile --allow-read --allow-write --allow-env --target x86_64-apple-darwin --output dist/mdplanner-mcp-macos-intel mcp.ts",
-    "compile:mcp:macos-arm": "deno compile --allow-read --allow-write --allow-env --target aarch64-apple-darwin --output dist/mdplanner-mcp-macos-arm mcp.ts",
-    "compile:mcp:windows": "deno compile --allow-read --allow-write --allow-env --target x86_64-pc-windows-msvc --output dist/mdplanner-mcp-windows mcp.ts",
+    "compile:mcp:linux": "deno compile --allow-read --allow-write --allow-env --target x86_64-unknown-linux-gnu --output dist/mdplanner-mcp-linux v2/bin-mcp.ts",
+    "compile:mcp:macos-intel": "deno compile --allow-read --allow-write --allow-env --target x86_64-apple-darwin --output dist/mdplanner-mcp-macos-intel v2/bin-mcp.ts",
+    "compile:mcp:macos-arm": "deno compile --allow-read --allow-write --allow-env --target aarch64-apple-darwin --output dist/mdplanner-mcp-macos-arm v2/bin-mcp.ts",
+    "compile:mcp:windows": "deno compile --allow-read --allow-write --allow-env --target x86_64-pc-windows-msvc --output dist/mdplanner-mcp-windows v2/bin-mcp.ts",
     "compile:mcp:all": "mkdir -p dist && deno task compile:mcp:linux && deno task compile:mcp:macos-intel && deno task compile:mcp:macos-arm && deno task compile:mcp:windows"
   },
   "imports": {
