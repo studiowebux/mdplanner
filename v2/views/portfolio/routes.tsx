@@ -453,10 +453,16 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
   }
 });
 
-// Pipeline actions — perform action then return updated results
-portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
-  const id = c.req.param("id");
-  const runId = c.req.param("runId");
+// Pipeline actions — perform action then return updated results. Each handler
+// resolves the item, applies the archived guard, runs the action, re-lists the
+// workflow runs, and renders the shared results fragment.
+async function pipelineAction(
+  c: AppContext,
+  id: string,
+  runId: string,
+  action: (repo: string, runId: number) => Promise<void>,
+  label: string,
+) {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) return c.notFound();
   if (item.archived === true) {
@@ -466,9 +472,9 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
     );
   }
   try {
-    await getGitHubService().cancelRun(item.githubRepo, Number(runId));
+    await action(item.githubRepo, Number(runId));
   } catch (err) {
-    log.warn(`[portfolio] pipeline cancel failed for run ${runId}:`, err);
+    log.warn(`[portfolio] ${label} failed for run ${runId}:`, err);
   }
   const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
     item.githubRepo,
@@ -486,82 +492,42 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
       resultsUrl={resultsUrl}
     />,
   );
-});
+}
 
-portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
-  const id = c.req.param("id");
-  const runId = c.req.param("runId");
-  const item = await getPortfolioService().getById(id);
-  if (!item?.githubRepo) return c.notFound();
-  if (item.archived === true) {
-    return c.text(
-      "Portfolio item is archived — restore before editing",
-      422,
-    );
-  }
-  try {
-    await getGitHubService().rerunRun(item.githubRepo, Number(runId));
-  } catch (err) {
-    log.warn(`[portfolio] pipeline rerun failed for run ${runId}:`, err);
-  }
-  const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
-    item.githubRepo,
-    {},
-  );
-  const resultsUrl = (p: number) =>
-    `/portfolio/${id}/github/pipelines/results?page=${p}`;
-  return c.html(
-    <GitHubPipelineResults
-      runs={runs}
-      total={totalCount}
-      itemId={id}
-      page={1}
-      hasNext={runs.length === GITHUB_PIPELINES_PER_PAGE}
-      resultsUrl={resultsUrl}
-    />,
-  );
-});
+portfolioRouter.post(
+  "/:id/github/pipelines/cancel/:runId",
+  (c) =>
+    pipelineAction(
+      c,
+      c.req.param("id"),
+      c.req.param("runId"),
+      (repo, runId) => getGitHubService().cancelRun(repo, runId),
+      "pipeline cancel",
+    ),
+);
+
+portfolioRouter.post(
+  "/:id/github/pipelines/rerun/:runId",
+  (c) =>
+    pipelineAction(
+      c,
+      c.req.param("id"),
+      c.req.param("runId"),
+      (repo, runId) => getGitHubService().rerunRun(repo, runId),
+      "pipeline rerun",
+    ),
+);
 
 portfolioRouter.post(
   "/:id/github/pipelines/rerun-failed/:runId",
-  async (c) => {
-    const id = c.req.param("id");
-    const runId = c.req.param("runId");
-    const item = await getPortfolioService().getById(id);
-    if (!item?.githubRepo) return c.notFound();
-    if (item.archived === true) {
-      return c.text(
-        "Portfolio item is archived — restore before editing",
-        422,
-      );
-    }
-    try {
-      await getGitHubService().rerunFailedJobs(
-        item.githubRepo,
-        Number(runId),
-      );
-    } catch (err) {
-      log.warn(
-        `[portfolio] pipeline rerun-failed failed for run ${runId}:`,
-        err,
-      );
-    }
-    const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
-      item.githubRepo,
-    );
-    const resultsUrl = (p: number) =>
-      `/portfolio/${id}/github/pipelines/results?page=${p}`;
-    return c.html(
-      <GitHubPipelineResults
-        runs={runs}
-        total={totalCount}
-        itemId={id}
-        page={1}
-        hasNext={runs.length === GITHUB_PIPELINES_PER_PAGE}
-        resultsUrl={resultsUrl}
-      />,
-    );
-  },
+  (c) =>
+    pipelineAction(
+      c,
+      c.req.param("id"),
+      c.req.param("runId"),
+      (repo, runId) => getGitHubService().rerunFailedJobs(repo, runId),
+      "pipeline rerun-failed",
+    ),
 );
 
 /** Render the detail page; `?editing=true` enables in-place description editing. */
