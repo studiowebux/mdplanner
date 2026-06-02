@@ -1,4 +1,5 @@
 ---
+id: goal_campaign_revenue
 title: Revenue from Campaign
 type: project
 kpi: $120k campaign revenue

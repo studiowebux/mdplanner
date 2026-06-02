@@ -11,6 +11,8 @@ hours_per_day: 8
 working_days: [Mon, Tue, Wed, Thu, Fri]
 agent_type: human
 skills: [architecture, engineering, cloud, security, technical-strategy]
+created_at: "2026-04-05T06:09:18.091Z"
+updated_at: "2026-04-05T06:09:18.091Z"
 ---
 
 # Marcus Johnson

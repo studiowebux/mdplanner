@@ -1,4 +1,5 @@
 ---
+id: goal_case_studies
 title: Case Studies Published
 type: project
 kpi: 3 case studies

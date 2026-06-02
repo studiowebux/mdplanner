@@ -28,6 +28,7 @@ time_entries:
     hours: 3
     person: bob
     description: Rate limit headers + 429 responses
+created_at: "2026-05-23T21:39:24.719Z"
 ---
 
 # API Rate Limiting

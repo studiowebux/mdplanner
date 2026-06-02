@@ -1,4 +1,5 @@
 ---
+id: deal_acme_website
 title: Acme Corp — Website Redesign
 stage: proposal
 value: 18000

@@ -1,4 +1,5 @@
 ---
+id: swot_team_scaling
 title: Team Scaling Readiness
 date: 2026-03-01
 created_at: "2026-03-01T08:00:00.000Z"

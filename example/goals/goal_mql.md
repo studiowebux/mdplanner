@@ -1,4 +1,5 @@
 ---
+id: goal_mql
 title: Marketing Qualified Leads
 type: project
 kpi: 200 MQLs

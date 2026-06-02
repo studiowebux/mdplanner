@@ -1,4 +1,5 @@
 ---
+id: goal_partnership_leads
 title: Partnership Leads
 type: project
 kpi: 500 partnership leads

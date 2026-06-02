@@ -1,4 +1,5 @@
 ---
+id: goal_ranking_keywords
 title: Ranking Keywords Top 10
 type: project
 kpi: 150 top-10 keywords

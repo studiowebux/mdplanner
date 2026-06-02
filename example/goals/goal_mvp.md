@@ -1,4 +1,5 @@
 ---
+id: goal_mvp
 title: Launch MVP
 type: project
 kpi: Launch public beta
@@ -12,15 +13,10 @@ project: TaskFlow Platform
 owner: alice
 priority: 1
 progress: 65
-contributors:
-  - bob
-  - charlie
-tags:
-  - product
-  - launch
-linked_milestones:
-  - beta
-notes: "Weekly sync every Monday. Design review pending for onboarding flow."
+contributors: [bob, charlie]
+tags: [product, launch]
+linked_milestones: [beta]
+notes: Weekly sync every Monday. Design review pending for onboarding flow.
 created_at: "2026-03-26T05:54:59.256Z"
 updated_at: "2026-03-26T05:54:59.256Z"
 ---

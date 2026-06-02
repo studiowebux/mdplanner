@@ -1,10 +1,10 @@
 ---
 id: capacity_sprint_may2026
-startDate: 2026-05-01
-endDate: 2026-05-31
-budgetHours: 960
-createdAt: 2026-05-01T08:00:00.000Z
-updatedAt: 2026-05-12T10:00:00.000Z
+start_date: 2026-05-01
+end_date: 2026-05-31
+budget_hours: 960
+created_at: "2026-05-01T08:00:00.000Z"
+updated_at: "2026-05-12T10:00:00.000Z"
 ---
 
 # May 2026 Sprint Capacity

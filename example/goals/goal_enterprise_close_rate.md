@@ -1,4 +1,5 @@
 ---
+id: goal_enterprise_close_rate
 title: Enterprise Close Rate
 type: project
 kpi: 35% close rate

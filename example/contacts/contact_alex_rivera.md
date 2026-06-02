@@ -1,4 +1,5 @@
 ---
+id: contact_alex_rivera
 name: Alex Rivera
 email: alex@startupco.example.com
 phone: +1-555-0701

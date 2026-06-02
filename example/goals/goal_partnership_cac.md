@@ -1,4 +1,5 @@
 ---
+id: goal_partnership_cac
 title: Partnership CAC
 type: project
 kpi: $40 CAC

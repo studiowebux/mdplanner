@@ -1,0 +1,13 @@
+---
+id: default_sticky_1775938953858_kadwxw
+color: yellow
+position:
+  x: 176
+  y: 824
+size:
+  width: 360
+  height: 264
+created_at: "2026-04-11T20:23:47.014Z"
+updated_at: "2026-04-11T20:23:47.014Z"
+---
+

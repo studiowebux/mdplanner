@@ -11,6 +11,7 @@ working_days: [Mon, Tue, Wed, Thu, Fri]
 agent_type: human
 skills: [distributed-systems, api-design, go, team-management, code-review]
 updated_at: "2026-05-08T19:51:19.389Z"
+created_at: "2026-05-08T19:51:19.392Z"
 ---
 
 # Alex Kim

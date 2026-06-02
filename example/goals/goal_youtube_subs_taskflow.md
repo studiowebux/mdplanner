@@ -1,4 +1,5 @@
 ---
+id: goal_youtube_subs_taskflow
 title: YouTube Subscribers (TaskFlow)
 type: enterprise
 kpi: 10000 subscribers

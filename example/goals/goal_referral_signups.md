@@ -1,4 +1,5 @@
 ---
+id: goal_referral_signups
 title: Referral Signups Rate
 type: project
 kpi: 10% referral rate

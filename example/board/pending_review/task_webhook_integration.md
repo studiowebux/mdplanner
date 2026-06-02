@@ -29,6 +29,7 @@ time_entries:
     hours: 2
     person: agent_claude
     description: Retry policy + delivery log
+created_at: "2026-05-23T21:39:25.174Z"
 ---
 
 # Webhook Integration

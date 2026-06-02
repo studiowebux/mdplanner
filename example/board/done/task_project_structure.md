@@ -14,6 +14,7 @@ order: 0
 planned_start: 2026-01-10
 planned_end: 2026-01-20
 tags: [architecture, setup]
+created_at: "2026-04-05T06:09:18.053Z"
 ---
 
 # Project Structure and Monorepo Setup

@@ -37,6 +37,7 @@ time_entries:
     hours: 4
     person: charlie
     description: Daily digest job + delivery testing
+created_at: "2026-05-23T21:39:24.384Z"
 ---
 
 # Email Notifications

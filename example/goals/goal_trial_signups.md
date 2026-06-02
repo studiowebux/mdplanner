@@ -1,4 +1,5 @@
 ---
+id: goal_trial_signups
 title: Trial Signups
 type: project
 kpi: 800 trial signups

@@ -1,4 +1,5 @@
 ---
+id: goal_email_open_rate
 title: Email Open Rate
 type: project
 kpi: 35% open rate

@@ -9,6 +9,8 @@ contact: partner@example.com
 intro_date: 2026-01-10
 last_contact: 2026-02-15
 notes: Warm intro from portfolio founder. Partner meeting scheduled.
+created_at: "2026-04-05T06:09:18.080Z"
+updated_at: "2026-04-05T06:09:18.080Z"
 ---
 
 # Example Ventures

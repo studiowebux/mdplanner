@@ -1,4 +1,5 @@
 ---
+id: goal_social_impressions
 title: Social Media Impressions
 type: project
 kpi: 500k social impressions

@@ -1,0 +1,14 @@
+---
+id: default_sticky_1771000000006_ffff
+color: orange
+position:
+  x: 560
+  y: 280
+size:
+  width: 200
+  height: 160
+created_at: "2026-04-11T16:35:26.557Z"
+updated_at: "2026-04-11T16:35:26.557Z"
+---
+
+Document the directory schema for every domain

@@ -11,6 +11,7 @@ priority: 4
 effort: 20
 tags: [capacity, export, frontend]
 updated_at: "2026-04-01T08:00:00.000Z"
+created_at: "2026-06-02T02:28:17.380Z"
 ---
 
 # Capacity Grid CSV Export

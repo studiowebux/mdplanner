@@ -1,10 +1,12 @@
 ---
 id: goal_rebrand
 type: enterprise
-kpi: "Complete brand refresh"
+kpi: Complete brand refresh
 start_date: 2026-01-01
 end_date: 2026-03-01
 status: failed
+created_at: "2026-05-19T06:08:00.886Z"
+updated_at: "2026-05-19T06:08:00.886Z"
 ---
 
 # Brand Refresh

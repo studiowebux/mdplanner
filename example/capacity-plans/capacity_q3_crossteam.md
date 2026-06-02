@@ -1,10 +1,10 @@
 ---
 id: capacity_q3_crossteam
-startDate: 2026-05-01
-endDate: 2026-07-31
-budgetHours: 2400
-createdAt: 2026-05-01T08:00:00.000Z
-updatedAt: 2026-05-12T02:38:38.000Z
+start_date: 2026-05-01
+end_date: 2026-07-31
+budget_hours: 2400
+created_at: "2026-05-01T08:00:00.000Z"
+updated_at: "2026-05-12T02:38:38.000Z"
 ---
 
 # Q3 2026 Cross-Team Capacity Plan

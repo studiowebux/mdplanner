@@ -11,6 +11,7 @@ priority: 2
 effort: 16
 tags: [onboarding, product]
 updated_at: "2026-04-01T08:00:00.000Z"
+created_at: "2026-06-02T02:28:17.381Z"
 ---
 
 # Onboarding Checklist

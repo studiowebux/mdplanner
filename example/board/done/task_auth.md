@@ -36,6 +36,7 @@ time_entries:
     hours: 8
     person: bob
     description: Login/logout endpoints + middleware
+created_at: "2026-05-23T21:39:25.809Z"
 ---
 
 # Authentication System

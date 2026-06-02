@@ -1,4 +1,5 @@
 ---
+id: goal_community_prs
 title: Community Contributions
 type: enterprise
 kpi: 200 community PRs

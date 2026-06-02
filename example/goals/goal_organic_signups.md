@@ -1,4 +1,5 @@
 ---
+id: goal_organic_signups
 title: Organic Signups
 type: project
 kpi: 500 organic signups

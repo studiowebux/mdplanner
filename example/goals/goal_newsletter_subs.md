@@ -1,4 +1,5 @@
 ---
+id: goal_newsletter_subs
 title: Newsletter Subscribers
 type: enterprise
 kpi: 5000 subscribers

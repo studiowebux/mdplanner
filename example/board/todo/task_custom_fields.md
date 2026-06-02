@@ -13,6 +13,8 @@ planned_start: 2026-06-15
 planned_end: 2026-07-05
 tags: [feature, extensibility]
 blocked_by: [task_plugin_system]
+created_at: "2026-06-02T02:28:17.380Z"
+updated_at: "2026-06-02T02:28:17.380Z"
 ---
 
 # Custom Fields per Project

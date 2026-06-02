@@ -10,6 +10,8 @@ hours_per_day: 8
 working_days: [Mon, Tue, Wed, Thu, Fri]
 agent_type: human
 skills: [go, postgresql, microservices, testing, performance-tuning]
+created_at: "2026-04-05T06:09:18.091Z"
+updated_at: "2026-04-05T06:09:18.091Z"
 ---
 
 # Chris Martinez

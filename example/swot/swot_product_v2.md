@@ -1,4 +1,5 @@
 ---
+id: swot_product_v2
 title: Product V2 Competitive Analysis
 date: 2026-03-15
 project: Inventory System

@@ -9,13 +9,13 @@ progress: 75
 start_date: 2025-01-15
 end_date: 2026-06-30
 team:
-  - personId: alice
+  - person_id: alice
     role: Tech Lead
-  - personId: bob
+  - person_id: bob
     role: Backend
-  - personId: charlie
+  - person_id: charlie
     role: Frontend
-  - personId: diana
+  - person_id: diana
     role: QA
 tech_stack: [Deno, Hono, SQLite, htmx, TypeScript]
 logo: "https://placehold.co/64x64/e2e8f0/475569?text=TF"
@@ -57,6 +57,8 @@ status_updates:
   - message: Infrastructure migration to new region complete. Latency improved 30%.
     id: update_1773800000000_c3
     date: 2026-03-06
+created_at: "2026-05-23T23:39:24.669Z"
+updated_at: "2026-05-23T23:39:24.669Z"
 ---
 
 # TaskFlow Platform

@@ -1,4 +1,5 @@
 ---
+id: goal_webinar_attendees
 title: Webinar Attendees
 type: project
 kpi: 800 total attendees

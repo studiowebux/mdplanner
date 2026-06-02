@@ -1,4 +1,5 @@
 ---
+id: goal_qualified_leads
 title: Qualified Leads
 type: project
 kpi: 1500 qualified leads

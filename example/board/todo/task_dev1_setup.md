@@ -11,6 +11,7 @@ priority: 3
 effort: 40
 tags: [onboarding, dev]
 updated_at: "2026-06-01T08:00:00.000Z"
+created_at: "2026-06-02T02:28:17.380Z"
 ---
 
 # Dev 1 Ramp-Up Tasks

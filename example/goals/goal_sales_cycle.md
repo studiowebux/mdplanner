@@ -1,4 +1,5 @@
 ---
+id: goal_sales_cycle
 title: Sales Cycle Length
 type: project
 kpi: 60 day sales cycle

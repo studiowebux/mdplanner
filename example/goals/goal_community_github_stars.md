@@ -1,4 +1,5 @@
 ---
+id: goal_community_github_stars
 title: Community GitHub Stars
 type: enterprise
 kpi: 5000 stars

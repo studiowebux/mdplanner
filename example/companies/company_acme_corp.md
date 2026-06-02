@@ -1,7 +1,7 @@
 ---
 id: company_acme_corp
 name: Acme Corp
-website: https://acme.example.com
+website: "https://acme.example.com"
 industry: SaaS
 size: 51-200
 type: customer
@@ -9,8 +9,8 @@ phone: +1-555-0200
 email: contact@acme.example.com
 address: 123 Main St, Springfield
 tags: [enterprise, q1-2026]
-createdAt: "2026-05-14T00:00:00.000Z"
-updatedAt: "2026-05-14T00:00:00.000Z"
+created_at: "2026-05-14T00:00:00.000Z"
+updated_at: "2026-05-14T00:00:00.000Z"
 ---
 
 # Acme Corp

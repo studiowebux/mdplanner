@@ -12,6 +12,8 @@ order: 3
 planned_start: 2026-05-15
 planned_end: 2026-06-12
 tags: [architecture, plugins]
+created_at: "2026-06-02T02:28:17.381Z"
+updated_at: "2026-06-02T02:28:17.381Z"
 ---
 
 # Plugin System Architecture

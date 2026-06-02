@@ -1,4 +1,5 @@
 ---
+id: goal_youtube_subs
 title: YouTube Subscribers
 type: enterprise
 kpi: 5000 subscribers

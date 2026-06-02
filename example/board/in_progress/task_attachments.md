@@ -32,6 +32,7 @@ time_entries:
     hours: 2
     person: agent_claude
     description: Image preview thumbnails
+created_at: "2026-05-23T21:39:25.015Z"
 ---
 
 # File Attachments

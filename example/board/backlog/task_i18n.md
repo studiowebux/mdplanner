@@ -16,6 +16,8 @@ time_entries:
     hours: 0.25
     person: bob
     description: "Scoping spike: string extraction tooling survey"
+created_at: "2026-05-23T21:39:26.414Z"
+updated_at: "2026-05-23T21:39:26.414Z"
 ---
 
 # Internationalization (i18n)

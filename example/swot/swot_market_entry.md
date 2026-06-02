@@ -1,4 +1,5 @@
 ---
+id: swot_market_entry
 title: European Market Entry Analysis
 date: 2026-02-20
 project: Mobile App

@@ -9,8 +9,9 @@ billing_address:
   street: 789 Agency Way
   city: New York
   state: NY
-  postalCode: "10001"
+  postal_code: "10001"
   country: USA
+updated_at: 2026-02-10
 ---
 
 # DevAgency Inc

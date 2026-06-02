@@ -1,4 +1,5 @@
 ---
+id: goal_sso
 title: Enterprise SSO Integration
 type: project
 kpi: SSO for enterprise clients

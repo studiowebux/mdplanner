@@ -1,4 +1,5 @@
 ---
+id: mindmap_features
 project: TaskFlow Platform
 created_at: "2026-05-12T14:48:37.128Z"
 updated_at: "2026-05-13T02:43:01.283Z"

@@ -1,0 +1,12 @@
+---
+id: sboard_default_sticky_1776524305641_3c79pd
+color: blue
+position:
+  x: 800
+  y: 368
+board_id: sboard_default
+created_at: "2026-04-18T14:59:04.808Z"
+updated_at: "2026-04-18T14:59:04.808Z"
+---
+
+Fix notes list layout + sticky note content saving

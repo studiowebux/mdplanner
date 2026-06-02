@@ -30,6 +30,7 @@ time_entries:
     hours: 3
     person: diana
     description: Highlighting + recent searches
+created_at: "2026-05-23T21:39:24.564Z"
 ---
 
 # Global Search

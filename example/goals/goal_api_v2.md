@@ -1,4 +1,5 @@
 ---
+id: goal_api_v2
 title: API v2 Shipped
 type: project
 kpi: Ship API v2 with OpenAPI spec

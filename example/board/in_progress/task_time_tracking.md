@@ -55,6 +55,7 @@ time_entries:
     hours: 6
     person: bob
     description: Reports integration + bug fixes
+created_at: "2026-05-23T21:39:23.487Z"
 ---
 
 # Time Tracking Feature

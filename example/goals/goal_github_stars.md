@@ -1,4 +1,5 @@
 ---
+id: goal_github_stars
 title: GitHub Stars
 type: enterprise
 kpi: 2000 stars

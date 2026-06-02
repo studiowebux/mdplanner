@@ -1,0 +1,15 @@
+---
+id: sboard_default_sticky_1777014416192_6gewd5
+color: yellow
+position:
+  x: 208
+  y: 136
+size:
+  width: 400
+  height: 320
+board_id: sboard_default
+created_at: "2026-04-24T07:06:56.192Z"
+updated_at: "2026-04-24T07:07:14.550Z"
+---
+
+Hello World !

@@ -1,15 +1,15 @@
 ---
 id: company_startupco
 name: StartupCo
-website: https://startupco.example.com
+website: "https://startupco.example.com"
 industry: SaaS
 size: 1-10
 type: customer
 phone: +1-555-0700
 email: hello@startupco.example.com
 tags: [saas, smb, annual]
-createdAt: "2026-02-20T00:00:00.000Z"
-updatedAt: "2026-03-15T00:00:00.000Z"
+created_at: "2026-02-20T00:00:00.000Z"
+updated_at: "2026-03-15T00:00:00.000Z"
 ---
 
 # StartupCo

@@ -1,4 +1,5 @@
 ---
+id: idea_ai
 title: AI Task Assistant
 status: considering
 category: feature

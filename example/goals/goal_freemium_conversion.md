@@ -1,4 +1,5 @@
 ---
+id: goal_freemium_conversion
 title: Freemium-to-Paid Conversion Rate
 type: project
 kpi: 8% conversion

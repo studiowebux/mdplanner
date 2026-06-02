@@ -1,4 +1,5 @@
 ---
+id: goal_discord_members
 title: Discord Members
 type: enterprise
 kpi: 1000 members

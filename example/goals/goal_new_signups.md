@@ -1,4 +1,5 @@
 ---
+id: goal_new_signups
 title: New Monthly Signups
 type: project
 kpi: 2000 monthly signups

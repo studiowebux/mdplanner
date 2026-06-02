@@ -4,8 +4,8 @@ name: Weekly Sprint Retro
 description: End-of-sprint reflection for engineering teams.
 period: weekly
 categories: [Engineering, Sprint]
-createdAt: 2026-03-15T00:20:36.876Z
-updatedAt: 2026-03-15T00:20:36.876Z
+created_at: "2026-03-15T00:20:36.876Z"
+updated_at: "2026-03-15T00:20:36.876Z"
 ---
 
 ## Prompts

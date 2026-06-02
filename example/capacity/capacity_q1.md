@@ -1,0 +1,30 @@
+---
+id: capacity_q1
+date: 2026-01-01
+budget_hours: 2080
+created_at: "2026-04-12T02:13:09.246Z"
+updated_at: "2026-04-12T02:13:09.246Z"
+---
+
+# Q1 Capacity Plan
+
+## Team Members
+
+- (m_alice) alice | 6h/day | Mon,Tue,Wed,Thu,Fri
+- (m_bob) bob | 8h/day | Mon,Tue,Wed,Thu,Fri
+- (m_charlie) charlie | 8h/day | Mon,Tue,Wed,Thu,Fri
+- (m_diana) diana | 8h/day | Mon,Tue,Wed,Thu
+
+## Allocations
+
+- (alloc_1) m_alice | 2026-02-10 | 10h | task | task_time_tracking | Finishing time tracking feature
+- (alloc_2) m_bob | 2026-02-10 | 6h | task | task_workspace_settings | Workspace settings in progress
+- (alloc_3) m_diana | 2026-02-10 | 8h | task | task_search | Search feature implementation
+- (alloc_4) m_charlie | 2026-02-10 | 8h | task | task_email | Starting email notifications
+- (alloc_5) m_alice | 2026-02-17 | 12h | task | task_reporting | Helping with reporting dashboard
+- (alloc_6) m_bob | 2026-02-17 | 6h | task | task_attachments | File attachments feature
+- (alloc_7) m_diana | 2026-02-17 | 16h | task | task_sso | SSO integration start
+- (alloc_8) m_charlie | 2026-02-17 | 20h | task | task_reporting | Main reporting work
+- (alloc_9) m_bob | 2026-02-24 | 8h | task | task_api_versioning | API versioning prep
+- (alloc_10) m_diana | 2026-02-24 | 16h | task | task_sso | SSO integration continued
+- (alloc_11) m_charlie | 2026-02-24 | 12h | task | task_reporting | Finishing reporting dashboard

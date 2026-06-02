@@ -15,6 +15,7 @@ planned_start: 2026-02-06
 planned_end: 2026-02-18
 tags: [api, crud]
 blocked_by: [task_auth]
+created_at: "2026-04-05T06:09:18.052Z"
 ---
 
 # Core CRUD Operations

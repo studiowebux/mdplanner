@@ -12,6 +12,7 @@ working_days: [Mon, Tue, Wed, Thu, Fri]
 agent_type: human
 skills: [financial-planning, budgeting, investor-relations, risk-management, compliance]
 updated_at: "2026-05-08T19:51:21.179Z"
+created_at: "2026-05-21T02:04:20.700Z"
 ---
 
 # Emily Rodriguez

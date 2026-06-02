@@ -1,10 +1,10 @@
 ---
 id: capacity_q2_2026
-startDate: 2026-04-01
-endDate: 2026-06-30
-budgetHours: 1960
-createdAt: 2026-04-01T08:00:00.000Z
-updatedAt: 2026-04-01T08:00:00.000Z
+start_date: 2026-04-01
+end_date: 2026-06-30
+budget_hours: 1960
+created_at: "2026-04-01T08:00:00.000Z"
+updated_at: "2026-04-01T08:00:00.000Z"
 ---
 
 # Q2 2026 Capacity Plan

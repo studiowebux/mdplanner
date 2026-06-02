@@ -1,4 +1,5 @@
 ---
+id: goal_trial_conversion
 title: Trial-to-Paid Conversion Rate
 type: project
 kpi: 12% conversion

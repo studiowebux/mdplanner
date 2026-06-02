@@ -1,4 +1,5 @@
 ---
+id: goal_mau
 title: Monthly Active Users
 type: enterprise
 kpi: 3000 MAU

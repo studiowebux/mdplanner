@@ -10,6 +10,8 @@ models:
   - name: gpt-4o
     provider: openai
 status: offline
+created_at: "2026-06-02T02:28:17.383Z"
+updated_at: "2026-06-02T02:28:17.383Z"
 ---
 
 # Copilot

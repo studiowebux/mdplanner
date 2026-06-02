@@ -11,6 +11,7 @@ priority: 3
 effort: 32
 tags: [milestones, analytics, frontend]
 updated_at: "2026-04-01T08:00:00.000Z"
+created_at: "2026-06-02T02:28:17.381Z"
 ---
 
 # Milestone Burndown Chart
