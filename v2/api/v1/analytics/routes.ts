@@ -3,7 +3,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getProjectAnalytics } from "../../../services/analytics.service.ts";
 import { AnalyticsFiltersSchema } from "../../../types/analytics.types.ts";
-import { ErrorSchema } from "../../../types/api.ts";
+import { errorContent, jsonContent } from "../../../types/api.ts";
 
 export const analyticsRouter = new OpenAPIHono();
 
@@ -17,14 +17,8 @@ const getAnalyticsRoute = createRoute({
     query: AnalyticsFiltersSchema,
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.any() } },
-      description: "Analytics payload",
-    },
-    500: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Aggregation failed",
-    },
+    200: jsonContent(z.any(), "Analytics payload"),
+    500: errorContent("Aggregation failed"),
   },
 });
 

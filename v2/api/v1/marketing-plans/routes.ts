@@ -9,7 +9,12 @@ import {
   MarketingPlanSchema,
   UpdateMarketingPlanSchema,
 } from "../../../types/marketing-plan.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const marketingPlansRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listMarketingPlans",
   request: { query: ListMarketingPlanOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(MarketingPlanSchema) },
-      },
-      description: "List of marketing plans",
-    },
+    200: jsonContent(z.array(MarketingPlanSchema), "List of marketing plans"),
   },
 });
 
@@ -50,14 +50,8 @@ const getRoute = createRoute({
   operationId: "getMarketingPlan",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: MarketingPlanSchema } },
-      description: "Marketing plan",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MarketingPlanSchema, "Marketing plan"),
+    404: notFoundContent,
   },
 });
 
@@ -86,10 +80,7 @@ const createMktPlanRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: MarketingPlanSchema } },
-      description: "Created marketing plan",
-    },
+    201: jsonContent(MarketingPlanSchema, "Created marketing plan"),
   },
 });
 
@@ -119,14 +110,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: MarketingPlanSchema } },
-      description: "Updated marketing plan",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MarketingPlanSchema, "Updated marketing plan"),
+    404: notFoundContent,
   },
 });
 
@@ -153,10 +138,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

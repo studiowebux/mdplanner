@@ -10,7 +10,12 @@ import {
   ListFinanceOptionsSchema,
   UpdateFinanceSchema,
 } from "../../../types/finance.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const financesRouter = new OpenAPIHono();
 
@@ -33,10 +38,7 @@ financesRouter.openapi(
       }),
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: FinanceSummarySchema } },
-        description: "Finance summary",
-      },
+      200: jsonContent(FinanceSummarySchema, "Finance summary"),
     },
   }),
   async (c) => {
@@ -56,10 +58,7 @@ financesRouter.openapi(
     operationId: "listFinances",
     request: { query: ListFinanceOptionsSchema },
     responses: {
-      200: {
-        content: { "application/json": { schema: z.array(FinanceSchema) } },
-        description: "List of finance entries",
-      },
+      200: jsonContent(z.array(FinanceSchema), "List of finance entries"),
     },
   }),
   async (c) => {
@@ -79,14 +78,8 @@ financesRouter.openapi(
     operationId: "getFinance",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: FinanceSchema } },
-        description: "Finance entry",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(FinanceSchema, "Finance entry"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -112,10 +105,7 @@ financesRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: FinanceSchema } },
-        description: "Created finance entry",
-      },
+      201: jsonContent(FinanceSchema, "Created finance entry"),
     },
   }),
   async (c) => {
@@ -142,14 +132,8 @@ financesRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: FinanceSchema } },
-        description: "Updated finance entry",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(FinanceSchema, "Updated finance entry"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -173,10 +157,7 @@ financesRouter.openapi(
     request: { params: IdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      404: notFoundContent,
     },
   }),
   async (c) => {

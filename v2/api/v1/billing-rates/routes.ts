@@ -9,7 +9,12 @@ import {
   ListBillingRateOptionsSchema,
   UpdateBillingRateSchema,
 } from "../../../types/billing-rate.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const billingRatesRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listBillingRatesRoute = createRoute({
   operationId: "listBillingRates",
   request: { query: ListBillingRateOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(BillingRateSchema) },
-      },
-      description: "List of billing rates",
-    },
+    200: jsonContent(z.array(BillingRateSchema), "List of billing rates"),
   },
 });
 
@@ -50,14 +50,8 @@ const getBillingRateRoute = createRoute({
   operationId: "getBillingRate",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: BillingRateSchema } },
-      description: "Billing rate",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BillingRateSchema, "Billing rate"),
+    404: notFoundContent,
   },
 });
 
@@ -88,10 +82,7 @@ const createBillingRateRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: BillingRateSchema } },
-      description: "Created billing rate",
-    },
+    201: jsonContent(BillingRateSchema, "Created billing rate"),
   },
 });
 
@@ -123,14 +114,8 @@ const updateBillingRateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: BillingRateSchema } },
-      description: "Updated billing rate",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BillingRateSchema, "Updated billing rate"),
+    404: notFoundContent,
   },
 });
 
@@ -157,10 +142,7 @@ const deleteBillingRateRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

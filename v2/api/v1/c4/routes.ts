@@ -12,7 +12,12 @@ import {
   PatchC4PositionSchema,
   UpdateC4ComponentSchema,
 } from "../../../types/c4.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const c4ApiRouter = new OpenAPIHono();
 
@@ -28,10 +33,7 @@ c4ApiRouter.openapi(
     operationId: "listC4Components",
     request: { query: ListC4OptionsSchema },
     responses: {
-      200: {
-        content: { "application/json": { schema: z.array(C4ComponentSchema) } },
-        description: "List of C4 components",
-      },
+      200: jsonContent(z.array(C4ComponentSchema), "List of C4 components"),
     },
   }),
   async (c) => {
@@ -51,14 +53,8 @@ c4ApiRouter.openapi(
     operationId: "getC4Component",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: C4ComponentSchema } },
-        description: "C4 component",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(C4ComponentSchema, "C4 component"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -84,10 +80,7 @@ c4ApiRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: C4ComponentSchema } },
-        description: "Created C4 component",
-      },
+      201: jsonContent(C4ComponentSchema, "Created C4 component"),
     },
   }),
   async (c) => {
@@ -114,14 +107,8 @@ c4ApiRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: C4ComponentSchema } },
-        description: "Updated C4 component",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(C4ComponentSchema, "Updated C4 component"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -145,10 +132,7 @@ c4ApiRouter.openapi(
     request: { params: IdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -176,14 +160,8 @@ c4ApiRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: C4ComponentSchema } },
-        description: "Updated component",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(C4ComponentSchema, "Updated component"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -206,16 +184,8 @@ c4ApiRouter.openapi(
     operationId: "getC4Connections",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(C4ConnectionSchema) },
-        },
-        description: "Connections",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(z.array(C4ConnectionSchema), "Connections"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -242,21 +212,14 @@ c4ApiRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: {
-          "application/json": {
-            schema: z.object({
-              connectionId: z.string(),
-              component: C4ComponentSchema,
-            }),
-          },
-        },
-        description: "Created connection",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      201: jsonContent(
+        z.object({
+          connectionId: z.string(),
+          component: C4ComponentSchema,
+        }),
+        "Created connection",
+      ),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -284,10 +247,7 @@ c4ApiRouter.openapi(
     request: { params: ConnIdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      404: notFoundContent,
     },
   }),
   async (c) => {

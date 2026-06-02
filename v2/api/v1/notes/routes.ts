@@ -9,7 +9,12 @@ import {
   NoteSchema,
   UpdateNoteSchema,
 } from "../../../types/note.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const notesRouter = new OpenAPIHono();
 
@@ -24,10 +29,7 @@ const listNotesRoute = createRoute({
     query: ListNoteOptionsSchema,
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(NoteSchema) } },
-      description: "List of notes",
-    },
+    200: jsonContent(z.array(NoteSchema), "List of notes"),
   },
 });
 
@@ -52,14 +54,8 @@ const getNoteRoute = createRoute({
     params: IdParam,
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: NoteSchema } },
-      description: "Note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(NoteSchema, "Note"),
+    404: notFoundContent,
   },
 });
 
@@ -93,10 +89,7 @@ const createNoteRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: NoteSchema } },
-      description: "Created note",
-    },
+    201: jsonContent(NoteSchema, "Created note"),
   },
 });
 
@@ -126,14 +119,8 @@ const updateNoteRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: NoteSchema } },
-      description: "Updated note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(NoteSchema, "Updated note"),
+    404: notFoundContent,
   },
 });
 
@@ -167,10 +154,7 @@ const deleteNoteRoute = createRoute({
   },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

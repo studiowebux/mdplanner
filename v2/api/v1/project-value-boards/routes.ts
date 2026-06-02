@@ -9,7 +9,12 @@ import {
   ProjectValueBoardSchema,
   UpdateProjectValueBoardSchema,
 } from "../../../types/project-value-board.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const projectValueBoardApiRouter = new OpenAPIHono();
 
@@ -22,12 +27,10 @@ const listRoute = createRoute({
   operationId: "listProjectValueBoards",
   request: { query: ListProjectValueBoardOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(ProjectValueBoardSchema) },
-      },
-      description: "List of project value boards",
-    },
+    200: jsonContent(
+      z.array(ProjectValueBoardSchema),
+      "List of project value boards",
+    ),
   },
 });
 
@@ -46,14 +49,8 @@ const getRoute = createRoute({
   operationId: "getProjectValueBoard",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: ProjectValueBoardSchema } },
-      description: "Project value board",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(ProjectValueBoardSchema, "Project value board"),
+    404: notFoundContent,
   },
 });
 
@@ -80,10 +77,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: ProjectValueBoardSchema } },
-      description: "Created project value board",
-    },
+    201: jsonContent(ProjectValueBoardSchema, "Created project value board"),
   },
 });
 
@@ -111,14 +105,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: ProjectValueBoardSchema } },
-      description: "Updated project value board",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(ProjectValueBoardSchema, "Updated project value board"),
+    404: notFoundContent,
   },
 });
 
@@ -141,10 +129,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

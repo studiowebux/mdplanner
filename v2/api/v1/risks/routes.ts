@@ -9,7 +9,12 @@ import {
   RiskSchema,
   UpdateRiskSchema,
 } from "../../../types/risk.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const riskApiRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listRisks",
   request: { query: ListRiskOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(RiskSchema) },
-      },
-      description: "List of risks",
-    },
+    200: jsonContent(z.array(RiskSchema), "List of risks"),
   },
 });
 
@@ -50,14 +50,8 @@ const getRoute = createRoute({
   operationId: "getRisk",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: RiskSchema } },
-      description: "Risk",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(RiskSchema, "Risk"),
+    404: notFoundContent,
   },
 });
 
@@ -86,10 +80,7 @@ const createRiskRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: RiskSchema } },
-      description: "Created risk",
-    },
+    201: jsonContent(RiskSchema, "Created risk"),
   },
 });
 
@@ -119,14 +110,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: RiskSchema } },
-      description: "Updated risk",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(RiskSchema, "Updated risk"),
+    404: notFoundContent,
   },
 });
 
@@ -153,10 +138,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

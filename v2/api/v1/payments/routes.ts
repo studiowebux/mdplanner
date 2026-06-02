@@ -9,7 +9,12 @@ import {
   PaymentSchema,
   UpdatePaymentSchema,
 } from "../../../types/payment.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const paymentsRouter = new OpenAPIHono();
 
@@ -22,10 +27,7 @@ const listPaymentsRoute = createRoute({
   operationId: "listPayments",
   request: { query: ListPaymentOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(PaymentSchema) } },
-      description: "List of payments",
-    },
+    200: jsonContent(z.array(PaymentSchema), "List of payments"),
   },
 });
 
@@ -52,14 +54,8 @@ const getPaymentRoute = createRoute({
   operationId: "getPayment",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: PaymentSchema } },
-      description: "Payment",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PaymentSchema, "Payment"),
+    404: notFoundContent,
   },
 });
 
@@ -88,10 +84,7 @@ const createPaymentRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: PaymentSchema } },
-      description: "Created payment",
-    },
+    201: jsonContent(PaymentSchema, "Created payment"),
   },
 });
 
@@ -122,14 +115,8 @@ const updatePaymentRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: PaymentSchema } },
-      description: "Updated payment",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PaymentSchema, "Updated payment"),
+    404: notFoundContent,
   },
 });
 
@@ -157,10 +144,7 @@ const deletePaymentRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

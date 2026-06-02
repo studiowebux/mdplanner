@@ -9,7 +9,12 @@ import {
   OnboardingSchema,
   UpdateOnboardingSchema,
 } from "../../../types/onboarding.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const onboardingRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listOnboarding",
   request: { query: ListOnboardingOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(OnboardingSchema) },
-      },
-      description: "List of onboarding records",
-    },
+    200: jsonContent(z.array(OnboardingSchema), "List of onboarding records"),
   },
 });
 
@@ -46,14 +46,8 @@ const getRoute = createRoute({
   operationId: "getOnboarding",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: OnboardingSchema } },
-      description: "Onboarding record",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(OnboardingSchema, "Onboarding record"),
+    404: notFoundContent,
   },
 });
 
@@ -78,10 +72,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: OnboardingSchema } },
-      description: "Created onboarding record",
-    },
+    201: jsonContent(OnboardingSchema, "Created onboarding record"),
   },
 });
 
@@ -107,14 +98,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: OnboardingSchema } },
-      description: "Updated onboarding record",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(OnboardingSchema, "Updated onboarding record"),
+    404: notFoundContent,
   },
 });
 
@@ -137,10 +122,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

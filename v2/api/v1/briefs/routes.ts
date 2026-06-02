@@ -9,7 +9,12 @@ import {
   ListBriefOptionsSchema,
   UpdateBriefSchema,
 } from "../../../types/brief.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const briefsRouter = new OpenAPIHono();
 
@@ -22,10 +27,7 @@ const listRoute = createRoute({
   operationId: "listBriefs",
   request: { query: ListBriefOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(BriefSchema) } },
-      description: "List of briefs",
-    },
+    200: jsonContent(z.array(BriefSchema), "List of briefs"),
   },
 });
 
@@ -44,14 +46,8 @@ const getRoute = createRoute({
   operationId: "getBrief",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: BriefSchema } },
-      description: "Brief",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BriefSchema, "Brief"),
+    404: notFoundContent,
   },
 });
 
@@ -76,10 +72,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: BriefSchema } },
-      description: "Created brief",
-    },
+    201: jsonContent(BriefSchema, "Created brief"),
   },
 });
 
@@ -105,14 +98,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: BriefSchema } },
-      description: "Updated brief",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BriefSchema, "Updated brief"),
+    404: notFoundContent,
   },
 });
 
@@ -135,10 +122,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

@@ -9,7 +9,12 @@ import {
   ListLeanCanvasOptionsSchema,
   UpdateLeanCanvasSchema,
 } from "../../../types/lean-canvas.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const leanCanvasesRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listLeanCanvases",
   request: { query: ListLeanCanvasOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(LeanCanvasSchema) },
-      },
-      description: "List of lean canvases",
-    },
+    200: jsonContent(z.array(LeanCanvasSchema), "List of lean canvases"),
   },
 });
 
@@ -46,14 +46,8 @@ const getRoute = createRoute({
   operationId: "getLeanCanvas",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: LeanCanvasSchema } },
-      description: "Lean Canvas",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(LeanCanvasSchema, "Lean Canvas"),
+    404: notFoundContent,
   },
 });
 
@@ -78,10 +72,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: LeanCanvasSchema } },
-      description: "Created lean canvas",
-    },
+    201: jsonContent(LeanCanvasSchema, "Created lean canvas"),
   },
 });
 
@@ -107,14 +98,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: LeanCanvasSchema } },
-      description: "Updated lean canvas",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(LeanCanvasSchema, "Updated lean canvas"),
+    404: notFoundContent,
   },
 });
 
@@ -137,10 +122,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

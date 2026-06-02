@@ -22,7 +22,13 @@ import {
   UpdateStickyBoardSchema,
   UpdateStickyNoteSchema,
 } from "../../../types/sticky-note.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  errorContent,
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const stickyNotesRouter = new OpenAPIHono();
 
@@ -55,10 +61,7 @@ const listBoardsRoute = createRoute({
   operationId: "listStickyBoards",
   request: { query: ListStickyBoardOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(StickyBoardSchema) } },
-      description: "List of boards",
-    },
+    200: jsonContent(z.array(StickyBoardSchema), "List of boards"),
   },
 });
 
@@ -76,14 +79,8 @@ const getBoardRoute = createRoute({
   operationId: "getStickyBoard",
   request: { params: BoardIdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyBoardSchema } },
-      description: "Board",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyBoardSchema, "Board"),
+    404: notFoundContent,
   },
 });
 
@@ -107,10 +104,7 @@ const createBoardRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: StickyBoardSchema } },
-      description: "Created board",
-    },
+    201: jsonContent(StickyBoardSchema, "Created board"),
   },
 });
 
@@ -135,14 +129,8 @@ const updateBoardRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyBoardSchema } },
-      description: "Updated board",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyBoardSchema, "Updated board"),
+    404: notFoundContent,
   },
 });
 
@@ -164,14 +152,8 @@ const deleteBoardRoute = createRoute({
   request: { params: BoardIdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
-    409: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Board has notes — delete them first",
-    },
+    404: notFoundContent,
+    409: errorContent("Board has notes — delete them first"),
   },
 });
 
@@ -202,10 +184,7 @@ const listNotesRoute = createRoute({
   operationId: "listStickyNotes",
   request: { params: BoardIdParam, query: ListStickyNoteOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(StickyNoteSchema) } },
-      description: "List of sticky notes",
-    },
+    200: jsonContent(z.array(StickyNoteSchema), "List of sticky notes"),
   },
 });
 
@@ -228,14 +207,8 @@ const getNoteRoute = createRoute({
   operationId: "getStickyNote",
   request: { params: BoardNoteIdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyNoteSchema } },
-      description: "Sticky note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyNoteSchema, "Sticky note"),
+    404: notFoundContent,
   },
 });
 
@@ -260,10 +233,7 @@ const createNoteRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: StickyNoteSchema } },
-      description: "Created sticky note",
-    },
+    201: jsonContent(StickyNoteSchema, "Created sticky note"),
   },
 });
 
@@ -289,14 +259,8 @@ const updateNoteRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyNoteSchema } },
-      description: "Updated sticky note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyNoteSchema, "Updated sticky note"),
+    404: notFoundContent,
   },
 });
 
@@ -323,14 +287,8 @@ const updatePositionRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyNoteSchema } },
-      description: "Updated sticky note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyNoteSchema, "Updated sticky note"),
+    404: notFoundContent,
   },
 });
 
@@ -360,14 +318,8 @@ const updateContentRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyNoteSchema } },
-      description: "Updated sticky note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyNoteSchema, "Updated sticky note"),
+    404: notFoundContent,
   },
 });
 
@@ -396,14 +348,8 @@ const updateSizeRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: StickyNoteSchema } },
-      description: "Updated sticky note",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StickyNoteSchema, "Updated sticky note"),
+    404: notFoundContent,
   },
 });
 
@@ -429,10 +375,7 @@ const deleteNoteRoute = createRoute({
   request: { params: BoardNoteIdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

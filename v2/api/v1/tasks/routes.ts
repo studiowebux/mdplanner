@@ -34,10 +34,12 @@ import {
 } from "../../../types/task.types.ts";
 import {
   badRequest,
-  ErrorSchema,
+  errorContent,
   IdParam,
   invalidState,
+  jsonContent,
   notFound,
+  notFoundContent,
   payloadTooLarge,
 } from "../../../types/api.ts";
 import { sortTasks } from "../../../domains/task/constants.tsx";
@@ -69,10 +71,7 @@ tasksRouter.openapi(
     operationId: "listTasks",
     request: { query: ListTaskOptionsSchema },
     responses: {
-      200: {
-        content: { "application/json": { schema: z.array(TaskSchema) } },
-        description: "List of tasks",
-      },
+      200: jsonContent(z.array(TaskSchema), "List of tasks"),
     },
   }),
   async (c) => {
@@ -91,10 +90,7 @@ tasksRouter.openapi(
     operationId: "getNextTask",
     request: { query: GetNextTaskQuerySchema },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Next task",
-      },
+      200: jsonContent(TaskSchema, "Next task"),
       204: { description: "No tasks available" },
     },
   }),
@@ -123,12 +119,7 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: SweepStaleClaimsResultSchema },
-        },
-        description: "Swept task IDs",
-      },
+      200: jsonContent(SweepStaleClaimsResultSchema, "Swept task IDs"),
     },
   }),
   async (c) => {
@@ -155,10 +146,7 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: BatchUpdateResultSchema } },
-        description: "Batch result",
-      },
+      200: jsonContent(BatchUpdateResultSchema, "Batch result"),
     },
   }),
   async (c) => {
@@ -198,14 +186,8 @@ tasksRouter.openapi(
     operationId: "getTask",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(TaskSchema, "Task"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -233,10 +215,7 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Created task",
-      },
+      201: jsonContent(TaskSchema, "Created task"),
     },
   }),
   async (c) => {
@@ -262,22 +241,10 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Updated task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      409: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Revision conflict or claim guard",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Updated task"),
+      404: notFoundContent,
+      409: errorContent("Revision conflict or claim guard"),
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -326,14 +293,8 @@ tasksRouter.openapi(
     request: { params: IdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -366,22 +327,10 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Claimed task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      409: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Claim conflict",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Claimed task"),
+      404: notFoundContent,
+      409: errorContent("Claim conflict"),
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -429,18 +378,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Moved task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Moved task"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -474,18 +414,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Reordered task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Reordered task"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -556,18 +487,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: TaskCommentSchema } },
-        description: "Created comment",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      201: jsonContent(TaskCommentSchema, "Created comment"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -628,18 +550,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskCommentSchema } },
-        description: "Updated comment",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskCommentSchema, "Updated comment"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -675,14 +588,8 @@ tasksRouter.openapi(
     request: { params: IdAndCommentIdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -718,18 +625,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Updated task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Updated task"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -763,18 +661,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Task moved to Pending Review",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Task moved to Pending Review"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -816,18 +705,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Approved task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Approved task"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -861,18 +741,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: TaskSchema } },
-        description: "Rejected task",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      200: jsonContent(TaskSchema, "Rejected task"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -917,18 +788,9 @@ tasksRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: TimeEntrySchema } },
-        description: "Created time entry",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      201: jsonContent(TimeEntrySchema, "Created time entry"),
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {
@@ -957,14 +819,8 @@ tasksRouter.openapi(
     request: { params: IdAndEntryIdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      422: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: ARCHIVED_RESPONSE_DESC,
-      },
+      404: notFoundContent,
+      422: errorContent(ARCHIVED_RESPONSE_DESC),
     },
   }),
   async (c) => {

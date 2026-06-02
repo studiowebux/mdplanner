@@ -11,7 +11,12 @@ import {
   TeamMemberRefSchema,
   UpdateCapacityPlanSchema,
 } from "../../../types/capacity-plan.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const capacityPlansRouter = new OpenAPIHono();
 
@@ -33,12 +38,7 @@ capacityPlansRouter.openapi(
     summary: "List all capacity plans",
     operationId: "listCapacityPlans",
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(CapacityPlanSchema) },
-        },
-        description: "List of capacity plans",
-      },
+      200: jsonContent(z.array(CapacityPlanSchema), "List of capacity plans"),
     },
   }),
   async (c) => {
@@ -57,14 +57,8 @@ capacityPlansRouter.openapi(
     operationId: "getCapacityPlan",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -90,10 +84,7 @@ capacityPlansRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Created capacity plan",
-      },
+      201: jsonContent(CapacityPlanSchema, "Created capacity plan"),
     },
   }),
   async (c) => {
@@ -120,14 +111,8 @@ capacityPlansRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -151,10 +136,7 @@ capacityPlansRouter.openapi(
     request: { params: IdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -188,14 +170,8 @@ capacityPlansRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -224,14 +200,8 @@ capacityPlansRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -254,14 +224,8 @@ capacityPlansRouter.openapi(
     operationId: "removeCapacityPlanMember",
     request: { params: IdAndSubIdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -300,14 +264,8 @@ capacityPlansRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -338,14 +296,8 @@ capacityPlansRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -372,14 +324,8 @@ capacityPlansRouter.openapi(
     operationId: "removeCapacityPlanAllocation",
     request: { params: IdAndSubIdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: CapacityPlanSchema } },
-        description: "Updated capacity plan",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(CapacityPlanSchema, "Updated capacity plan"),
+      404: notFoundContent,
     },
   }),
   async (c) => {

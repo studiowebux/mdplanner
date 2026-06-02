@@ -9,7 +9,12 @@ import {
   OnboardingTemplateSchema,
   UpdateOnboardingTemplateSchema,
 } from "../../../types/onboarding-template.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const onboardingTemplatesRouter = new OpenAPIHono();
 
@@ -22,12 +27,10 @@ const listRoute = createRoute({
   operationId: "listOnboardingTemplates",
   request: { query: ListOnboardingTemplateOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(OnboardingTemplateSchema) },
-      },
-      description: "List of onboarding templates",
-    },
+    200: jsonContent(
+      z.array(OnboardingTemplateSchema),
+      "List of onboarding templates",
+    ),
   },
 });
 
@@ -46,14 +49,8 @@ const getRoute = createRoute({
   operationId: "getOnboardingTemplate",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: OnboardingTemplateSchema } },
-      description: "Onboarding template",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(OnboardingTemplateSchema, "Onboarding template"),
+    404: notFoundContent,
   },
 });
 
@@ -80,10 +77,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: OnboardingTemplateSchema } },
-      description: "Created onboarding template",
-    },
+    201: jsonContent(OnboardingTemplateSchema, "Created onboarding template"),
   },
 });
 
@@ -111,14 +105,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: OnboardingTemplateSchema } },
-      description: "Updated onboarding template",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(OnboardingTemplateSchema, "Updated onboarding template"),
+    404: notFoundContent,
   },
 });
 
@@ -141,10 +129,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

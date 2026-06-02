@@ -10,7 +10,12 @@ import {
   PersonWithChildrenSchema,
   UpdatePersonSchema,
 } from "../../../types/person.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 import { stringArray } from "../../../types/shared.types.ts";
 
 export const peopleRouter = new OpenAPIHono();
@@ -30,10 +35,7 @@ const listPeopleRoute = createRoute({
     }),
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(PersonSchema) } },
-      description: "List of people",
-    },
+    200: jsonContent(z.array(PersonSchema), "List of people"),
   },
 });
 
@@ -57,14 +59,7 @@ const getTreeRoute = createRoute({
   summary: "Get org chart as hierarchical tree",
   operationId: "getPeopleTree",
   responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.array(PersonWithChildrenSchema),
-        },
-      },
-      description: "Org tree",
-    },
+    200: jsonContent(z.array(PersonWithChildrenSchema), "Org tree"),
   },
 });
 
@@ -85,10 +80,7 @@ const getSummaryRoute = createRoute({
   summary: "Get people registry statistics",
   operationId: "getPeopleSummary",
   responses: {
-    200: {
-      content: { "application/json": { schema: PeopleSummarySchema } },
-      description: "Summary statistics",
-    },
+    200: jsonContent(PeopleSummarySchema, "Summary statistics"),
   },
 });
 
@@ -109,10 +101,7 @@ const getDepartmentsRoute = createRoute({
   summary: "List all unique departments",
   operationId: "getPeopleDepartments",
   responses: {
-    200: {
-      content: { "application/json": { schema: stringArray } },
-      description: "Department names",
-    },
+    200: jsonContent(stringArray, "Department names"),
   },
 });
 
@@ -134,14 +123,8 @@ const getPersonRoute = createRoute({
   operationId: "getPerson",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: PersonSchema } },
-      description: "Person",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PersonSchema, "Person"),
+    404: notFoundContent,
   },
 });
 
@@ -170,14 +153,8 @@ const getReportsRoute = createRoute({
   operationId: "getPersonReports",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(PersonSchema) } },
-      description: "Direct reports",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(z.array(PersonSchema), "Direct reports"),
+    404: notFoundContent,
   },
 });
 
@@ -212,10 +189,7 @@ const createPersonRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: PersonSchema } },
-      description: "Created person",
-    },
+    201: jsonContent(PersonSchema, "Created person"),
   },
 });
 
@@ -245,14 +219,8 @@ const updatePersonRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: PersonSchema } },
-      description: "Updated person",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PersonSchema, "Updated person"),
+    404: notFoundContent,
   },
 });
 
@@ -284,10 +252,7 @@ const deletePersonRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -333,18 +298,8 @@ const heartbeatRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean() }),
-        },
-      },
-      description: "Heartbeat recorded",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(z.object({ success: z.boolean() }), "Heartbeat recorded"),
+    404: notFoundContent,
   },
 });
 

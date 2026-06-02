@@ -6,7 +6,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppVariables } from "../../../types/app.ts";
 import { PersonPreferencesSchema } from "../../../types/person.types.ts";
 import { getPeopleService } from "../../../singletons/services.ts";
-import { notFound } from "../../../types/api.ts";
+import { jsonContent, notFound } from "../../../types/api.ts";
 import type { Person } from "../../../types/person.types.ts";
 
 export const preferencesRouter = new OpenAPIHono<
@@ -48,10 +48,7 @@ const getPreferencesRoute = createRoute({
     "person has no preferences stored.",
   operationId: "getPreferences",
   responses: {
-    200: {
-      content: { "application/json": { schema: PreferencesResponseSchema } },
-      description: "Current preferences",
-    },
+    200: jsonContent(PreferencesResponseSchema, "Current preferences"),
     404: { description: "No person found to resolve preferences for" },
   },
 });
@@ -87,10 +84,7 @@ const patchPreferencesRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: PreferencesResponseSchema } },
-      description: "Updated preferences",
-    },
+    200: jsonContent(PreferencesResponseSchema, "Updated preferences"),
     404: { description: "No person found to update preferences for" },
   },
 });

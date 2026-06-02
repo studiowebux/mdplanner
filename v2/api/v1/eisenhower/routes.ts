@@ -9,7 +9,12 @@ import {
   ListEisenhowerOptionsSchema,
   UpdateEisenhowerSchema,
 } from "../../../types/eisenhower.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const eisenhowerApiRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listEisenhower",
   request: { query: ListEisenhowerOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(EisenhowerSchema) },
-      },
-      description: "List of Eisenhower matrices",
-    },
+    200: jsonContent(z.array(EisenhowerSchema), "List of Eisenhower matrices"),
   },
 });
 
@@ -50,14 +50,8 @@ const getRoute = createRoute({
   operationId: "getEisenhower",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: EisenhowerSchema } },
-      description: "Eisenhower matrix",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(EisenhowerSchema, "Eisenhower matrix"),
+    404: notFoundContent,
   },
 });
 
@@ -86,10 +80,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: EisenhowerSchema } },
-      description: "Created Eisenhower matrix",
-    },
+    201: jsonContent(EisenhowerSchema, "Created Eisenhower matrix"),
   },
 });
 
@@ -119,14 +110,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: EisenhowerSchema } },
-      description: "Updated Eisenhower matrix",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(EisenhowerSchema, "Updated Eisenhower matrix"),
+    404: notFoundContent,
   },
 });
 
@@ -153,10 +138,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

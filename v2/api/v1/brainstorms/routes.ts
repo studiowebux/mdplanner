@@ -12,7 +12,13 @@ import {
   ListBrainstormOptionsSchema,
   UpdateBrainstormSchema,
 } from "../../../types/brainstorm.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  errorContent,
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const brainstormsRouter = new OpenAPIHono();
 
@@ -25,10 +31,7 @@ const listRoute = createRoute({
   operationId: "listBrainstorms",
   request: { query: ListBrainstormOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(BrainstormSchema) } },
-      description: "List of brainstorms",
-    },
+    200: jsonContent(z.array(BrainstormSchema), "List of brainstorms"),
   },
 });
 
@@ -47,14 +50,8 @@ const getRoute = createRoute({
   operationId: "getBrainstorm",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: BrainstormSchema } },
-      description: "Brainstorm",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BrainstormSchema, "Brainstorm"),
+    404: notFoundContent,
   },
 });
 
@@ -79,10 +76,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: BrainstormSchema } },
-      description: "Created brainstorm",
-    },
+    201: jsonContent(BrainstormSchema, "Created brainstorm"),
   },
 });
 
@@ -108,14 +102,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: BrainstormSchema } },
-      description: "Updated brainstorm",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BrainstormSchema, "Updated brainstorm"),
+    404: notFoundContent,
   },
 });
 
@@ -138,10 +126,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -172,14 +157,11 @@ const applyTemplateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: BrainstormSchema } },
-      description: "Updated brainstorm with appended questions",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Brainstorm or template not found",
-    },
+    200: jsonContent(
+      BrainstormSchema,
+      "Updated brainstorm with appended questions",
+    ),
+    404: errorContent("Brainstorm or template not found"),
   },
 });
 

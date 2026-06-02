@@ -14,7 +14,13 @@ import {
   MeetingSchema,
   UpdateMeetingSchema,
 } from "../../../types/meeting.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  htmlContent,
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 import {
   renderActionsTable,
   renderCarryoverSection,
@@ -33,12 +39,7 @@ const listRoute = createRoute({
   operationId: "listMeetings",
   request: { query: ListMeetingOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(MeetingSchema) },
-      },
-      description: "List of meetings",
-    },
+    200: jsonContent(z.array(MeetingSchema), "List of meetings"),
   },
 });
 
@@ -65,14 +66,8 @@ const getRoute = createRoute({
   operationId: "getMeeting",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: MeetingSchema } },
-      description: "Meeting",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MeetingSchema, "Meeting"),
+    404: notFoundContent,
   },
 });
 
@@ -97,10 +92,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: MeetingSchema } },
-      description: "Created meeting",
-    },
+    201: jsonContent(MeetingSchema, "Created meeting"),
   },
 });
 
@@ -126,14 +118,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: MeetingSchema } },
-      description: "Updated meeting",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MeetingSchema, "Updated meeting"),
+    404: notFoundContent,
   },
 });
 
@@ -156,10 +142,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -185,14 +168,8 @@ meetingsRouter.openapi(
     operationId: "getMeetingOpenActions",
     request: { params: IdParam },
     responses: {
-      200: {
-        description: "Carry-over section fragment",
-        content: { "text/html": { schema: z.string() } },
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: htmlContent("Carry-over section fragment"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -227,14 +204,8 @@ meetingsRouter.openapi(
       },
     },
     responses: {
-      200: {
-        description: "Updated actions table fragment",
-        content: { "text/html": { schema: z.string() } },
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: htmlContent("Updated actions table fragment"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -258,14 +229,8 @@ meetingsRouter.openapi(
     operationId: "toggleMeetingAction",
     request: { params: ActionIdParam },
     responses: {
-      200: {
-        description: "Updated actions table fragment",
-        content: { "text/html": { schema: z.string() } },
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: htmlContent("Updated actions table fragment"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -288,14 +253,8 @@ meetingsRouter.openapi(
     operationId: "deleteMeetingAction",
     request: { params: ActionIdParam },
     responses: {
-      200: {
-        description: "Updated actions table fragment",
-        content: { "text/html": { schema: z.string() } },
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: htmlContent("Updated actions table fragment"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -333,14 +292,8 @@ meetingsRouter.openapi(
       },
     },
     responses: {
-      200: {
-        description: "Updated related meetings section fragment",
-        content: { "text/html": { schema: z.string() } },
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: htmlContent("Updated related meetings section fragment"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -367,14 +320,8 @@ meetingsRouter.openapi(
     operationId: "unlinkMeeting",
     request: { params: LinkedIdParam },
     responses: {
-      200: {
-        description: "Updated related meetings section fragment",
-        content: { "text/html": { schema: z.string() } },
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: htmlContent("Updated related meetings section fragment"),
+      404: notFoundContent,
     },
   }),
   async (c) => {

@@ -9,7 +9,12 @@ import {
   RetrospectiveSchema,
   UpdateRetrospectiveSchema,
 } from "../../../types/retrospective.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const retrospectivesRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listRetrospectives",
   request: { query: ListRetrospectiveOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(RetrospectiveSchema) },
-      },
-      description: "List of retrospectives",
-    },
+    200: jsonContent(z.array(RetrospectiveSchema), "List of retrospectives"),
   },
 });
 
@@ -46,14 +46,8 @@ const getRoute = createRoute({
   operationId: "getRetrospective",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: RetrospectiveSchema } },
-      description: "Retrospective",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(RetrospectiveSchema, "Retrospective"),
+    404: notFoundContent,
   },
 });
 
@@ -78,10 +72,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: RetrospectiveSchema } },
-      description: "Created retrospective",
-    },
+    201: jsonContent(RetrospectiveSchema, "Created retrospective"),
   },
 });
 
@@ -107,14 +98,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: RetrospectiveSchema } },
-      description: "Updated retrospective",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(RetrospectiveSchema, "Updated retrospective"),
+    404: notFoundContent,
   },
 });
 
@@ -137,10 +122,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

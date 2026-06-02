@@ -9,7 +9,12 @@ import {
   ListBusinessModelOptionsSchema,
   UpdateBusinessModelSchema,
 } from "../../../types/business-model.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const businessModelApiRouter = new OpenAPIHono();
 
@@ -22,10 +27,10 @@ const listRoute = createRoute({
   operationId: "listBusinessModels",
   request: { query: ListBusinessModelOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(BusinessModelSchema) } },
-      description: "List of Business Model Canvases",
-    },
+    200: jsonContent(
+      z.array(BusinessModelSchema),
+      "List of Business Model Canvases",
+    ),
   },
 });
 
@@ -43,14 +48,8 @@ const getRoute = createRoute({
   operationId: "getBusinessModel",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: BusinessModelSchema } },
-      description: "Business Model Canvas",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BusinessModelSchema, "Business Model Canvas"),
+    404: notFoundContent,
   },
 });
 
@@ -75,10 +74,7 @@ const createBusinessModelRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: BusinessModelSchema } },
-      description: "Created Business Model Canvas",
-    },
+    201: jsonContent(BusinessModelSchema, "Created Business Model Canvas"),
   },
 });
 
@@ -104,14 +100,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: BusinessModelSchema } },
-      description: "Updated Business Model Canvas",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(BusinessModelSchema, "Updated Business Model Canvas"),
+    404: notFoundContent,
   },
 });
 
@@ -134,10 +124,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

@@ -9,7 +9,12 @@ import {
   MindmapSchema,
   UpdateMindmapSchema,
 } from "../../../types/mindmap.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const mindmapApiRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listMindmaps",
   request: { query: ListMindmapOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(MindmapSchema) },
-      },
-      description: "List of mindmaps",
-    },
+    200: jsonContent(z.array(MindmapSchema), "List of mindmaps"),
   },
 });
 
@@ -50,14 +50,8 @@ const getRoute = createRoute({
   operationId: "getMindmap",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: MindmapSchema } },
-      description: "Mindmap",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MindmapSchema, "Mindmap"),
+    404: notFoundContent,
   },
 });
 
@@ -86,10 +80,7 @@ const createRoute_ = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: MindmapSchema } },
-      description: "Created mindmap",
-    },
+    201: jsonContent(MindmapSchema, "Created mindmap"),
   },
 });
 
@@ -119,14 +110,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: MindmapSchema } },
-      description: "Updated mindmap",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MindmapSchema, "Updated mindmap"),
+    404: notFoundContent,
   },
 });
 
@@ -153,10 +138,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

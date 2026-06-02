@@ -9,7 +9,12 @@ import {
   ListFishboneOptionsSchema,
   UpdateFishboneSchema,
 } from "../../../types/fishbone.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const fishboneApiRouter = new OpenAPIHono();
 
@@ -22,12 +27,7 @@ const listRoute = createRoute({
   operationId: "listFishbone",
   request: { query: ListFishboneOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(FishboneSchema) },
-      },
-      description: "List of fishbone diagrams",
-    },
+    200: jsonContent(z.array(FishboneSchema), "List of fishbone diagrams"),
   },
 });
 
@@ -50,14 +50,8 @@ const getRoute = createRoute({
   operationId: "getFishbone",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: FishboneSchema } },
-      description: "Fishbone diagram",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(FishboneSchema, "Fishbone diagram"),
+    404: notFoundContent,
   },
 });
 
@@ -86,10 +80,7 @@ const createFishboneRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: FishboneSchema } },
-      description: "Created fishbone diagram",
-    },
+    201: jsonContent(FishboneSchema, "Created fishbone diagram"),
   },
 });
 
@@ -119,14 +110,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: FishboneSchema } },
-      description: "Updated fishbone diagram",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(FishboneSchema, "Updated fishbone diagram"),
+    404: notFoundContent,
   },
 });
 
@@ -153,10 +138,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

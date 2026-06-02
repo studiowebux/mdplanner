@@ -7,7 +7,12 @@ import {
   UpdateVacationRequestSchema,
   VacationRequestSchema,
 } from "../../../types/vacation.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const vacationApiRouter = new OpenAPIHono();
 
@@ -20,12 +25,10 @@ vacationApiRouter.openapi(
     operationId: "listVacationRequests",
     request: { query: ListVacationOptionsSchema },
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(VacationRequestSchema) },
-        },
-        description: "List of vacation requests",
-      },
+      200: jsonContent(
+        z.array(VacationRequestSchema),
+        "List of vacation requests",
+      ),
     },
   }),
   async (c) => {
@@ -49,14 +52,8 @@ vacationApiRouter.openapi(
     operationId: "getVacationRequest",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: VacationRequestSchema } },
-        description: "Vacation request",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(VacationRequestSchema, "Vacation request"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -83,10 +80,7 @@ vacationApiRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: VacationRequestSchema } },
-        description: "Created vacation request",
-      },
+      201: jsonContent(VacationRequestSchema, "Created vacation request"),
     },
   }),
   async (c) => {
@@ -114,14 +108,8 @@ vacationApiRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: VacationRequestSchema } },
-        description: "Updated vacation request",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(VacationRequestSchema, "Updated vacation request"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -144,10 +132,7 @@ vacationApiRouter.openapi(
     request: { params: IdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      404: notFoundContent,
     },
   }),
   async (c) => {

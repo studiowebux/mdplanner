@@ -12,7 +12,13 @@ import {
   ReflectionSchema,
   UpdateReflectionSchema,
 } from "../../../types/reflection.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  errorContent,
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const reflectionApiRouter = new OpenAPIHono();
 
@@ -24,12 +30,7 @@ const listReflectionsRoute = createRoute({
   operationId: "listReflections",
   request: { query: ListReflectionOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(ReflectionSchema) },
-      },
-      description: "List of reflections",
-    },
+    200: jsonContent(z.array(ReflectionSchema), "List of reflections"),
   },
 });
 
@@ -53,14 +54,8 @@ const getReflectionRoute = createRoute({
   operationId: "getReflection",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: ReflectionSchema } },
-      description: "Reflection",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(ReflectionSchema, "Reflection"),
+    404: notFoundContent,
   },
 });
 
@@ -84,10 +79,7 @@ const createReflectionRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: ReflectionSchema } },
-      description: "Created reflection",
-    },
+    201: jsonContent(ReflectionSchema, "Created reflection"),
   },
 });
 
@@ -112,14 +104,8 @@ const updateReflectionRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: ReflectionSchema } },
-      description: "Updated reflection",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(ReflectionSchema, "Updated reflection"),
+    404: notFoundContent,
   },
 });
 
@@ -141,10 +127,7 @@ const deleteReflectionRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -175,14 +158,11 @@ const applyTemplateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: ReflectionSchema } },
-      description: "Updated reflection with template prompts applied",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Reflection or template not found",
-    },
+    200: jsonContent(
+      ReflectionSchema,
+      "Updated reflection with template prompts applied",
+    ),
+    404: errorContent("Reflection or template not found"),
   },
 });
 

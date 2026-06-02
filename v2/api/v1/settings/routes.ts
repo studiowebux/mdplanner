@@ -11,7 +11,7 @@ import {
 import { getCookieSecret } from "../../../utils/secrets.ts";
 import { IDENTITY_COOKIE } from "../../../middleware/identity.ts";
 import { hxTrigger } from "../../../utils/hx-trigger.ts";
-import { notFound } from "../../../types/api.ts";
+import { jsonContent, notFound } from "../../../types/api.ts";
 import {
   FeaturesListSchema,
   ProjectConfigSchema,
@@ -35,10 +35,7 @@ const getSettingsRoute = createRoute({
     "Returns the full project configuration from project.md frontmatter.",
   operationId: "getSettings",
   responses: {
-    200: {
-      content: { "application/json": { schema: ProjectConfigSchema } },
-      description: "Project configuration",
-    },
+    200: jsonContent(ProjectConfigSchema, "Project configuration"),
   },
 });
 
@@ -63,10 +60,7 @@ const updateSettingsRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: ProjectConfigSchema } },
-      description: "Updated project configuration",
-    },
+    200: jsonContent(ProjectConfigSchema, "Updated project configuration"),
   },
 });
 
@@ -86,10 +80,7 @@ const getFeaturesRoute = createRoute({
     "These keys control which domain views appear in the sidebar.",
   operationId: "getFeatures",
   responses: {
-    200: {
-      content: { "application/json": { schema: FeaturesListSchema } },
-      description: "Enabled feature keys",
-    },
+    200: jsonContent(FeaturesListSchema, "Enabled feature keys"),
   },
 });
 
@@ -114,10 +105,7 @@ const updateFeaturesRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: FeaturesListSchema } },
-      description: "Updated features list",
-    },
+    200: jsonContent(FeaturesListSchema, "Updated features list"),
   },
 });
 

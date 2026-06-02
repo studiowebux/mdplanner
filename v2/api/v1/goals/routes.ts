@@ -9,7 +9,12 @@ import {
   ListGoalOptionsSchema,
   UpdateGoalSchema,
 } from "../../../types/goal.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const goalsRouter = new OpenAPIHono();
 
@@ -22,10 +27,7 @@ const listGoalsRoute = createRoute({
   operationId: "listGoals",
   request: { query: ListGoalOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(GoalSchema) } },
-      description: "List of goals",
-    },
+    200: jsonContent(z.array(GoalSchema), "List of goals"),
   },
 });
 
@@ -48,14 +50,8 @@ const getGoalRoute = createRoute({
   operationId: "getGoal",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: GoalSchema } },
-      description: "Goal",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(GoalSchema, "Goal"),
+    404: notFoundContent,
   },
 });
 
@@ -89,10 +85,7 @@ const createGoalRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: GoalSchema } },
-      description: "Created goal",
-    },
+    201: jsonContent(GoalSchema, "Created goal"),
   },
 });
 
@@ -122,14 +115,8 @@ const updateGoalRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: GoalSchema } },
-      description: "Updated goal",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(GoalSchema, "Updated goal"),
+    404: notFoundContent,
   },
 });
 
@@ -161,10 +148,7 @@ const deleteGoalRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

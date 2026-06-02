@@ -10,7 +10,12 @@ import {
   ListDealOptionsSchema,
   UpdateDealSchema,
 } from "../../../types/deal.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const dealsRouter = new OpenAPIHono();
 
@@ -24,10 +29,7 @@ dealsRouter.openapi(
     operationId: "listDeals",
     request: { query: ListDealOptionsSchema },
     responses: {
-      200: {
-        content: { "application/json": { schema: z.array(DealSchema) } },
-        description: "List of deals",
-      },
+      200: jsonContent(z.array(DealSchema), "List of deals"),
     },
   }),
   async (c) => {
@@ -47,14 +49,8 @@ dealsRouter.openapi(
     operationId: "getDeal",
     request: { params: IdParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: DealSchema } },
-        description: "Deal",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(DealSchema, "Deal"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -80,10 +76,7 @@ dealsRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: DealSchema } },
-        description: "Created deal",
-      },
+      201: jsonContent(DealSchema, "Created deal"),
     },
   }),
   async (c) => {
@@ -110,14 +103,8 @@ dealsRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: DealSchema } },
-        description: "Updated deal",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(DealSchema, "Updated deal"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -150,14 +137,8 @@ dealsRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: DealSchema } },
-        description: "Updated deal",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      200: jsonContent(DealSchema, "Updated deal"),
+      404: notFoundContent,
     },
   }),
   async (c) => {
@@ -181,10 +162,7 @@ dealsRouter.openapi(
     request: { params: IdParam },
     responses: {
       204: { description: "Deleted" },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
+      404: notFoundContent,
     },
   }),
   async (c) => {

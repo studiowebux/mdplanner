@@ -9,7 +9,12 @@ import {
   ListContactOptionsSchema,
   UpdateContactSchema,
 } from "../../../types/contact.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const contactsRouter = new OpenAPIHono();
 
@@ -22,10 +27,7 @@ const listContactsRoute = createRoute({
   operationId: "listContacts",
   request: { query: ListContactOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(ContactSchema) } },
-      description: "List of contacts",
-    },
+    200: jsonContent(z.array(ContactSchema), "List of contacts"),
   },
 });
 
@@ -48,14 +50,8 @@ const getContactRoute = createRoute({
   operationId: "getContact",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: ContactSchema } },
-      description: "Contact",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(ContactSchema, "Contact"),
+    404: notFoundContent,
   },
 });
 
@@ -84,10 +80,7 @@ const createContactRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: ContactSchema } },
-      description: "Created contact",
-    },
+    201: jsonContent(ContactSchema, "Created contact"),
   },
 });
 
@@ -117,14 +110,8 @@ const updateContactRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: ContactSchema } },
-      description: "Updated contact",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(ContactSchema, "Updated contact"),
+    404: notFoundContent,
   },
 });
 
@@ -151,10 +138,7 @@ const deleteContactRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

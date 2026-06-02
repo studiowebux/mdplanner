@@ -14,10 +14,11 @@ import {
   UpdateQuoteSchema,
 } from "../../../types/quote.types.ts";
 import {
-  ErrorSchema,
   IdParam,
   invalidState,
+  jsonContent,
   notFound,
+  notFoundContent,
 } from "../../../types/api.ts";
 
 export const quotesRouter = new OpenAPIHono();
@@ -31,10 +32,7 @@ const listQuotesRoute = createRoute({
   operationId: "listQuotes",
   request: { query: ListQuoteOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(QuoteSchema) } },
-      description: "List of quotes",
-    },
+    200: jsonContent(z.array(QuoteSchema), "List of quotes"),
   },
 });
 
@@ -57,14 +55,8 @@ const getQuoteRoute = createRoute({
   operationId: "getQuote",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: QuoteSchema } },
-      description: "Quote",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(QuoteSchema, "Quote"),
+    404: notFoundContent,
   },
 });
 
@@ -93,10 +85,7 @@ const createQuoteRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: QuoteSchema } },
-      description: "Created quote",
-    },
+    201: jsonContent(QuoteSchema, "Created quote"),
   },
 });
 
@@ -126,14 +115,8 @@ const updateQuoteRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: QuoteSchema } },
-      description: "Updated quote",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(QuoteSchema, "Updated quote"),
+    404: notFoundContent,
   },
 });
 
@@ -160,10 +143,7 @@ const deleteQuoteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -264,16 +244,11 @@ const getQuoteRevisionsRoute = createRoute({
   operationId: "getQuoteRevisions",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(QuoteRevisionSchema) },
-      },
-      description: "Revision history (oldest first)",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(
+      z.array(QuoteRevisionSchema),
+      "Revision history (oldest first)",
+    ),
+    404: notFoundContent,
   },
 });
 

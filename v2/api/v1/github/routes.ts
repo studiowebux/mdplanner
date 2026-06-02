@@ -3,7 +3,11 @@
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getGitHubService } from "../../../singletons/services.ts";
-import { ErrorSchema } from "../../../types/api.ts";
+import {
+  errorContent,
+  jsonContent,
+  notFoundContent,
+} from "../../../types/api.ts";
 import {
   CreateIssueBodySchema,
   GitHubCreatedIssueSchema,
@@ -40,22 +44,10 @@ githubRouter.openapi(
     summary: "Get repository summary",
     operationId: "githubGetRepo",
     responses: {
-      200: {
-        content: { "application/json": { schema: GitHubRepoSchema } },
-        description: "Repository summary",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(GitHubRepoSchema, "Repository summary"),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -82,24 +74,10 @@ githubRouter.openapi(
     operationId: "githubListIssues",
     request: { query: ListIssuesQuerySchema },
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(GitHubIssueSchema) },
-        },
-        description: "List of issues",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(z.array(GitHubIssueSchema), "List of issues"),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -126,22 +104,10 @@ githubRouter.openapi(
     operationId: "githubGetIssue",
     request: { params: NumberParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: GitHubIssueSchema } },
-        description: "Issue",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(GitHubIssueSchema, "Issue"),
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -173,22 +139,10 @@ githubRouter.openapi(
       },
     },
     responses: {
-      201: {
-        content: { "application/json": { schema: GitHubCreatedIssueSchema } },
-        description: "Created issue",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      201: jsonContent(GitHubCreatedIssueSchema, "Created issue"),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -221,22 +175,10 @@ githubRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: GitHubIssueSchema } },
-        description: "Updated issue",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(GitHubIssueSchema, "Updated issue"),
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -268,22 +210,10 @@ githubRouter.openapi(
     operationId: "githubListPRs",
     request: { query: ListPRsQuerySchema },
     responses: {
-      200: {
-        content: { "application/json": { schema: z.array(GitHubPRSchema) } },
-        description: "List of pull requests",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(z.array(GitHubPRSchema), "List of pull requests"),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -307,22 +237,10 @@ githubRouter.openapi(
     operationId: "githubGetPR",
     request: { params: NumberParam },
     responses: {
-      200: {
-        content: { "application/json": { schema: GitHubPRSchema } },
-        description: "Pull request",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(GitHubPRSchema, "Pull request"),
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -355,22 +273,10 @@ githubRouter.openapi(
       },
     },
     responses: {
-      200: {
-        content: { "application/json": { schema: GitHubMergeResultSchema } },
-        description: "Merge result",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(GitHubMergeResultSchema, "Merge result"),
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -405,24 +311,10 @@ githubRouter.openapi(
     summary: "List open milestones",
     operationId: "githubListMilestones",
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(GitHubMilestoneSchema) },
-        },
-        description: "List of milestones",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(z.array(GitHubMilestoneSchema), "List of milestones"),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -448,23 +340,11 @@ githubRouter.openapi(
     summary: "Get latest release",
     operationId: "githubGetLatestRelease",
     responses: {
-      200: {
-        content: { "application/json": { schema: GitHubReleaseSchema } },
-        description: "Latest release",
-      },
+      200: jsonContent(GitHubReleaseSchema, "Latest release"),
       204: { description: "No releases exist" },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -492,24 +372,13 @@ githubRouter.openapi(
     summary: "List workflow runs",
     operationId: "githubListWorkflowRuns",
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(GitHubWorkflowRunSchema) },
-        },
-        description: "List of workflow runs",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(
+        z.array(GitHubWorkflowRunSchema),
+        "List of workflow runs",
+      ),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -534,18 +403,9 @@ githubRouter.openapi(
     request: { params: RunIdParam },
     responses: {
       204: { description: "Cancelled" },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -571,18 +431,9 @@ githubRouter.openapi(
     request: { params: RunIdParam },
     responses: {
       204: { description: "Re-run triggered" },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -608,18 +459,9 @@ githubRouter.openapi(
     request: { params: RunIdParam },
     responses: {
       204: { description: "Re-run triggered" },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -647,24 +489,10 @@ githubRouter.openapi(
     summary: "List workflows",
     operationId: "githubListWorkflows",
     responses: {
-      200: {
-        content: {
-          "application/json": { schema: z.array(GitHubWorkflowSchema) },
-        },
-        description: "List of workflows",
-      },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Portfolio not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      200: jsonContent(z.array(GitHubWorkflowSchema), "List of workflows"),
+      400: errorContent("Not configured"),
+      404: errorContent("Portfolio not found"),
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {
@@ -694,18 +522,9 @@ githubRouter.openapi(
     },
     responses: {
       204: { description: "Dispatch triggered" },
-      400: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not configured",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "Not found",
-      },
-      502: {
-        content: { "application/json": { schema: ErrorSchema } },
-        description: "GitHub API error",
-      },
+      400: errorContent("Not configured"),
+      404: notFoundContent,
+      502: errorContent("GitHub API error"),
     },
   }),
   async (c) => {

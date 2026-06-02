@@ -28,6 +28,35 @@ export const ErrorSchema = z
   })
   .openapi("Error");
 
+// ---------------------------------------------------------------------------
+// Response content builders — DRY the verbose `responses` blocks in route defs
+// without collapsing route registration (paths/methods stay explicit).
+// ---------------------------------------------------------------------------
+
+/** JSON response block. Usage: `200: jsonContent(TaskSchema, "Task")`. */
+export const jsonContent = <T extends z.ZodTypeAny>(
+  schema: T,
+  description: string,
+) => ({
+  content: { "application/json": { schema } },
+  description,
+});
+
+/** HTML fragment response block. Usage: `200: htmlContent("Card fragment")`. */
+export const htmlContent = (description: string) => ({
+  content: { "text/html": { schema: z.string() } },
+  description,
+});
+
+/** ErrorSchema JSON response block. Usage: `404: errorContent("Not found")`. */
+export const errorContent = (description: string) => ({
+  content: { "application/json": { schema: ErrorSchema } },
+  description,
+});
+
+/** 404 ErrorSchema block — the most common error fragment. */
+export const notFoundContent = errorContent("Not found");
+
 export const IdParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });

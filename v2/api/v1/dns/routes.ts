@@ -13,10 +13,12 @@ import {
 } from "../../../types/dns.types.ts";
 import {
   badGateway,
-  ErrorSchema,
+  errorContent,
   IdParam,
   IdWithIndexParam,
+  jsonContent,
   notFound,
+  notFoundContent,
 } from "../../../types/api.ts";
 
 export const dnsRouter = new OpenAPIHono();
@@ -33,10 +35,7 @@ const listDnsRoute = createRoute({
   summary: "List all DNS domains",
   operationId: "listDnsDomains",
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(DnsDomainSchema) } },
-      description: "List of DNS domains",
-    },
+    200: jsonContent(z.array(DnsDomainSchema), "List of DNS domains"),
   },
 });
 
@@ -58,14 +57,8 @@ const getDnsRoute = createRoute({
   operationId: "getDnsDomain",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: DnsDomainSchema } },
-      description: "DNS domain",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(DnsDomainSchema, "DNS domain"),
+    404: notFoundContent,
   },
 });
 
@@ -99,10 +92,7 @@ const createDnsRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: DnsDomainSchema } },
-      description: "Created DNS domain",
-    },
+    201: jsonContent(DnsDomainSchema, "Created DNS domain"),
   },
 });
 
@@ -132,14 +122,8 @@ const updateDnsRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: DnsDomainSchema } },
-      description: "Updated DNS domain",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(DnsDomainSchema, "Updated DNS domain"),
+    404: notFoundContent,
   },
 });
 
@@ -171,10 +155,7 @@ const deleteDnsRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -207,18 +188,9 @@ const syncCloudflareRoute = createRoute({
   summary: "Sync domains and records from Cloudflare",
   operationId: "syncCloudflare",
   responses: {
-    200: {
-      content: { "application/json": { schema: DnsSyncResponseSchema } },
-      description: "Sync results",
-    },
-    400: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Cloudflare token not configured",
-    },
-    502: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Cloudflare API error",
-    },
+    200: jsonContent(DnsSyncResponseSchema, "Sync results"),
+    400: errorContent("Cloudflare token not configured"),
+    502: errorContent("Cloudflare API error"),
   },
 });
 
@@ -256,14 +228,8 @@ const listDnsRecordsRoute = createRoute({
   operationId: "listDnsRecords",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(DnsRecordSchema) } },
-      description: "List of DNS records",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Domain not found",
-    },
+    200: jsonContent(z.array(DnsRecordSchema), "List of DNS records"),
+    404: errorContent("Domain not found"),
   },
 });
 
@@ -298,14 +264,8 @@ const addDnsRecordRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: DnsDomainSchema } },
-      description: "Updated domain with new record",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Domain not found",
-    },
+    200: jsonContent(DnsDomainSchema, "Updated domain with new record"),
+    404: errorContent("Domain not found"),
   },
 });
 
@@ -342,14 +302,8 @@ const updateDnsRecordRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: DnsDomainSchema } },
-      description: "Updated domain",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Domain or record not found",
-    },
+    200: jsonContent(DnsDomainSchema, "Updated domain"),
+    404: errorContent("Domain or record not found"),
   },
 });
 
@@ -384,14 +338,8 @@ const deleteDnsRecordRoute = createRoute({
   operationId: "deleteDnsRecord",
   request: { params: IdWithIndexParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: DnsDomainSchema } },
-      description: "Updated domain after record deletion",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Domain not found",
-    },
+    200: jsonContent(DnsDomainSchema, "Updated domain after record deletion"),
+    404: errorContent("Domain not found"),
   },
 });
 

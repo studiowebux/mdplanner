@@ -9,7 +9,12 @@ import {
   StrategicLevelsBuildersSchema,
   UpdateStrategicLevelsBuildersSchema,
 } from "../../../types/strategic-levels.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const strategicLevelsApiRouter = new OpenAPIHono();
 
@@ -22,12 +27,10 @@ const listRoute = createRoute({
   operationId: "listStrategicLevels",
   request: { query: ListStrategicLevelsOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(StrategicLevelsBuildersSchema) },
-      },
-      description: "List of strategic levels builders",
-    },
+    200: jsonContent(
+      z.array(StrategicLevelsBuildersSchema),
+      "List of strategic levels builders",
+    ),
   },
 });
 
@@ -46,16 +49,8 @@ const getRoute = createRoute({
   operationId: "getStrategicLevels",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: StrategicLevelsBuildersSchema },
-      },
-      description: "Strategic levels builder",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(StrategicLevelsBuildersSchema, "Strategic levels builder"),
+    404: notFoundContent,
   },
 });
 
@@ -82,12 +77,10 @@ const createStrategicLevelsRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: {
-        "application/json": { schema: StrategicLevelsBuildersSchema },
-      },
-      description: "Created strategic levels builder",
-    },
+    201: jsonContent(
+      StrategicLevelsBuildersSchema,
+      "Created strategic levels builder",
+    ),
   },
 });
 
@@ -115,16 +108,11 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: StrategicLevelsBuildersSchema },
-      },
-      description: "Updated strategic levels builder",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(
+      StrategicLevelsBuildersSchema,
+      "Updated strategic levels builder",
+    ),
+    404: notFoundContent,
   },
 });
 
@@ -147,10 +135,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

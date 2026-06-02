@@ -20,10 +20,12 @@ import {
   UpdatePortfolioItemSchema,
 } from "../../../types/portfolio.types.ts";
 import {
-  ErrorSchema,
+  errorContent,
   IdParam,
   IdWithUpdateIdParam,
+  jsonContent,
   notFound,
+  notFoundContent,
 } from "../../../types/api.ts";
 import { githubRouter } from "../github/routes.ts";
 import { ciEquals } from "../../../utils/string.ts";
@@ -53,12 +55,7 @@ const listRoute = createRoute({
     }),
   },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(PortfolioItemSchema) },
-      },
-      description: "List of portfolio items",
-    },
+    200: jsonContent(z.array(PortfolioItemSchema), "List of portfolio items"),
   },
 });
 
@@ -83,10 +80,7 @@ const summaryRoute = createRoute({
   summary: "Get aggregated portfolio statistics",
   operationId: "getPortfolioSummary",
   responses: {
-    200: {
-      content: { "application/json": { schema: PortfolioSummarySchema } },
-      description: "Portfolio summary",
-    },
+    200: jsonContent(PortfolioSummarySchema, "Portfolio summary"),
   },
 });
 
@@ -134,10 +128,10 @@ const dashboardRoute = createRoute({
     "Portfolio dashboard — per-project health with tasks, milestones, GitHub",
   operationId: "getPortfolioDashboard",
   responses: {
-    200: {
-      content: { "application/json": { schema: PortfolioDashboardSchema } },
-      description: "Dashboard data for all portfolio items",
-    },
+    200: jsonContent(
+      PortfolioDashboardSchema,
+      "Dashboard data for all portfolio items",
+    ),
   },
 });
 
@@ -273,14 +267,8 @@ const getRoute = createRoute({
   operationId: "getPortfolioItem",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: PortfolioItemSchema } },
-      description: "Portfolio item",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PortfolioItemSchema, "Portfolio item"),
+    404: notFoundContent,
   },
 });
 
@@ -309,14 +297,8 @@ const createItemRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: PortfolioItemSchema } },
-      description: "Created portfolio item",
-    },
-    409: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Duplicate name",
-    },
+    201: jsonContent(PortfolioItemSchema, "Created portfolio item"),
+    409: errorContent("Duplicate name"),
   },
 });
 
@@ -357,14 +339,8 @@ const updateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: PortfolioItemSchema } },
-      description: "Updated portfolio item",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PortfolioItemSchema, "Updated portfolio item"),
+    404: notFoundContent,
   },
 });
 
@@ -391,10 +367,7 @@ const deleteRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -425,16 +398,8 @@ const addStatusUpdateRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: {
-        "application/json": { schema: PortfolioStatusUpdateSchema },
-      },
-      description: "Created status update",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Portfolio item not found",
-    },
+    201: jsonContent(PortfolioStatusUpdateSchema, "Created status update"),
+    404: errorContent("Portfolio item not found"),
   },
 });
 
@@ -466,16 +431,8 @@ const updateStatusUpdateRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: PortfolioStatusUpdateSchema },
-      },
-      description: "Updated status update",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(PortfolioStatusUpdateSchema, "Updated status update"),
+    404: notFoundContent,
   },
 });
 
@@ -508,10 +465,7 @@ const deleteStatusUpdateRoute = createRoute({
   },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

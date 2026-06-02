@@ -10,10 +10,12 @@ import {
   UpdateIdeaSchema,
 } from "../../../types/idea.types.ts";
 import {
-  ErrorSchema,
+  errorContent,
   IdParam,
   IdWithTargetIdParam,
+  jsonContent,
   notFound,
+  notFoundContent,
 } from "../../../types/api.ts";
 
 export const ideasRouter = new OpenAPIHono();
@@ -27,10 +29,7 @@ const listIdeasRoute = createRoute({
   operationId: "listIdeas",
   request: { query: ListIdeaOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(IdeaSchema) } },
-      description: "List of ideas",
-    },
+    200: jsonContent(z.array(IdeaSchema), "List of ideas"),
   },
 });
 
@@ -58,14 +57,8 @@ const getIdeaRoute = createRoute({
   operationId: "getIdea",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: IdeaSchema } },
-      description: "Idea",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(IdeaSchema, "Idea"),
+    404: notFoundContent,
   },
 });
 
@@ -94,10 +87,7 @@ const createIdeaRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: IdeaSchema } },
-      description: "Created idea",
-    },
+    201: jsonContent(IdeaSchema, "Created idea"),
   },
 });
 
@@ -127,14 +117,8 @@ const updateIdeaRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: IdeaSchema } },
-      description: "Updated idea",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(IdeaSchema, "Updated idea"),
+    404: notFoundContent,
   },
 });
 
@@ -161,10 +145,7 @@ const deleteIdeaRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
@@ -189,18 +170,8 @@ const linkIdeasRoute = createRoute({
   operationId: "linkIdeas",
   request: { params: IdWithTargetIdParam },
   responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean() }),
-        },
-      },
-      description: "Linked",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "One or both ideas not found",
-    },
+    200: jsonContent(z.object({ success: z.boolean() }), "Linked"),
+    404: errorContent("One or both ideas not found"),
   },
 });
 
@@ -230,18 +201,8 @@ const unlinkIdeasRoute = createRoute({
   operationId: "unlinkIdeas",
   request: { params: IdWithTargetIdParam },
   responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean() }),
-        },
-      },
-      description: "Unlinked",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "One or both ideas not found",
-    },
+    200: jsonContent(z.object({ success: z.boolean() }), "Unlinked"),
+    404: errorContent("One or both ideas not found"),
   },
 });
 

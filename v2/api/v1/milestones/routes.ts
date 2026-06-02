@@ -9,7 +9,12 @@ import {
   MilestoneSchema,
   UpdateMilestoneSchema,
 } from "../../../types/milestone.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const milestonesRouter = new OpenAPIHono();
 
@@ -24,10 +29,7 @@ const listMilestonesRoute = createRoute({
     query: ListMilestoneOptionsSchema,
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(MilestoneSchema) } },
-      description: "List of milestones",
-    },
+    200: jsonContent(z.array(MilestoneSchema), "List of milestones"),
   },
 });
 
@@ -52,14 +54,8 @@ const getMilestoneRoute = createRoute({
     params: IdParam,
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: MilestoneSchema } },
-      description: "Milestone",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MilestoneSchema, "Milestone"),
+    404: notFoundContent,
   },
 });
 
@@ -93,10 +89,7 @@ const createMilestoneRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: MilestoneSchema } },
-      description: "Created milestone",
-    },
+    201: jsonContent(MilestoneSchema, "Created milestone"),
   },
 });
 
@@ -126,14 +119,8 @@ const updateMilestoneRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: MilestoneSchema } },
-      description: "Updated milestone",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(MilestoneSchema, "Updated milestone"),
+    404: notFoundContent,
   },
 });
 
@@ -167,10 +154,7 @@ const deleteMilestoneRoute = createRoute({
   },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

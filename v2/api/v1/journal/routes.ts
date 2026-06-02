@@ -9,7 +9,12 @@ import {
   ListJournalOptionsSchema,
   UpdateJournalEntrySchema,
 } from "../../../types/journal.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  IdParam,
+  jsonContent,
+  notFound,
+  notFoundContent,
+} from "../../../types/api.ts";
 
 export const journalApiRouter = new OpenAPIHono();
 
@@ -21,12 +26,7 @@ const listJournalRoute = createRoute({
   operationId: "listJournalEntries",
   request: { query: ListJournalOptionsSchema },
   responses: {
-    200: {
-      content: {
-        "application/json": { schema: z.array(JournalEntrySchema) },
-      },
-      description: "List of journal entries",
-    },
+    200: jsonContent(z.array(JournalEntrySchema), "List of journal entries"),
   },
 });
 
@@ -44,14 +44,8 @@ const getJournalRoute = createRoute({
   operationId: "getJournalEntry",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: JournalEntrySchema } },
-      description: "Journal entry",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(JournalEntrySchema, "Journal entry"),
+    404: notFoundContent,
   },
 });
 
@@ -75,10 +69,7 @@ const createJournalRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: JournalEntrySchema } },
-      description: "Created journal entry",
-    },
+    201: jsonContent(JournalEntrySchema, "Created journal entry"),
   },
 });
 
@@ -103,14 +94,8 @@ const updateJournalRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: JournalEntrySchema } },
-      description: "Updated journal entry",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(JournalEntrySchema, "Updated journal entry"),
+    404: notFoundContent,
   },
 });
 
@@ -132,10 +117,7 @@ const deleteJournalRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 

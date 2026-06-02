@@ -10,10 +10,11 @@ import {
   UpdateInvoiceSchema,
 } from "../../../types/invoice.types.ts";
 import {
-  ErrorSchema,
   IdParam,
   invalidState,
+  jsonContent,
   notFound,
+  notFoundContent,
 } from "../../../types/api.ts";
 
 export const invoicesRouter = new OpenAPIHono();
@@ -27,10 +28,7 @@ const listInvoicesRoute = createRoute({
   operationId: "listInvoices",
   request: { query: ListInvoiceOptionsSchema },
   responses: {
-    200: {
-      content: { "application/json": { schema: z.array(InvoiceSchema) } },
-      description: "List of invoices",
-    },
+    200: jsonContent(z.array(InvoiceSchema), "List of invoices"),
   },
 });
 
@@ -57,14 +55,8 @@ const getInvoiceRoute = createRoute({
   operationId: "getInvoice",
   request: { params: IdParam },
   responses: {
-    200: {
-      content: { "application/json": { schema: InvoiceSchema } },
-      description: "Invoice",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(InvoiceSchema, "Invoice"),
+    404: notFoundContent,
   },
 });
 
@@ -93,10 +85,7 @@ const createInvoiceRoute = createRoute({
     },
   },
   responses: {
-    201: {
-      content: { "application/json": { schema: InvoiceSchema } },
-      description: "Created invoice",
-    },
+    201: jsonContent(InvoiceSchema, "Created invoice"),
   },
 });
 
@@ -126,14 +115,8 @@ const updateInvoiceRoute = createRoute({
     },
   },
   responses: {
-    200: {
-      content: { "application/json": { schema: InvoiceSchema } },
-      description: "Updated invoice",
-    },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    200: jsonContent(InvoiceSchema, "Updated invoice"),
+    404: notFoundContent,
   },
 });
 
@@ -160,10 +143,7 @@ const deleteInvoiceRoute = createRoute({
   request: { params: IdParam },
   responses: {
     204: { description: "Deleted" },
-    404: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Not found",
-    },
+    404: notFoundContent,
   },
 });
 
