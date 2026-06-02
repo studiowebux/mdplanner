@@ -6,6 +6,7 @@ import type { Fishbone } from "../types/fishbone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -57,23 +58,10 @@ export const FishboneDetailView: FC<
             formContainerId="fishbones-form-container"
             archived={fishbone.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/fishbones/${fishbone.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/fishbones/${fishbone.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle
+              href={`/fishbones/${fishbone.id}`}
+              editing={editing}
+            />
           </DetailActions>
         </header>
 

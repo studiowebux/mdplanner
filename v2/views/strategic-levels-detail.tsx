@@ -6,6 +6,7 @@ import type { StrategicLevelsBuilder } from "../types/strategic-levels.types.ts"
 import { LEVEL_ORDER } from "../types/strategic-levels.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
@@ -60,23 +61,10 @@ export const StrategicLevelsDetailView: FC<
             formContainerId="strategic-levels-form-container"
             archived={builder.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/strategic-levels/${builder.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/strategic-levels/${builder.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle
+              href={`/strategic-levels/${builder.id}`}
+              editing={editing}
+            />
           </DetailActions>
         </header>
 

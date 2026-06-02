@@ -12,6 +12,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BUSINESS_MODEL_SECTION_META } from "../domains/business-model/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -174,23 +175,10 @@ export const BusinessModelDetailView: FC<
             formContainerId="business-models-form-container"
             archived={bmc.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/business-models/${bmc.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/business-models/${bmc.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle
+              href={`/business-models/${bmc.id}`}
+              editing={editing}
+            />
           </DetailActions>
         </header>
 

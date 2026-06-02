@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import {
   EISENHOWER_QUADRANT_KEYS,
@@ -100,23 +101,7 @@ export const EisenhowerDetailView: FC<
             formContainerId="eisenhower-form-container"
             archived={e.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/eisenhower/${e.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/eisenhower/${e.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle href={`/eisenhower/${e.id}`} editing={editing} />
           </DetailActions>
         </header>
 

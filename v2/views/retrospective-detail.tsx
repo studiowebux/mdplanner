@@ -6,6 +6,7 @@ import type { Retrospective } from "../types/retrospective.types.ts";
 import { RETROSPECTIVE_SECTIONS } from "../types/retrospective.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -72,23 +73,10 @@ export const RetrospectiveDetailView: FC<
             formContainerId="retrospectives-form-container"
             archived={retro.archived === true}
           >
-            {editing
-              ? (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/retrospectives/${retro.id}`}
-                >
-                  Done Editing
-                </a>
-              )
-              : (
-                <a
-                  class="btn btn--secondary btn--sm"
-                  href={`/retrospectives/${retro.id}?editing=true`}
-                >
-                  Edit Items
-                </a>
-              )}
+            <EditModeToggle
+              href={`/retrospectives/${retro.id}`}
+              editing={editing}
+            />
           </DetailActions>
         </header>
 
