@@ -2,13 +2,52 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
-import type { Brainstorm } from "../types/brainstorm.types.ts";
+import type {
+  Brainstorm,
+  BrainstormQuestion,
+} from "../types/brainstorm.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import { toKebab } from "../utils/slug.ts";
+
+// ---------------------------------------------------------------------------
+// Q&A pair — read or in-place editable (contenteditable + Save per field).
+// Each question and answer is an independent inline editable: it syncs its own
+// hidden input and shows its own Save button only when dirty (inline-edit.js).
+// ---------------------------------------------------------------------------
+
+const EditableQA: FC<{ id: string; q: BrainstormQuestion; index: number }> = ({
+  id,
+  q,
+  index,
+}) => {
+  const hxPut = `/brainstorms/${id}/qa/${index}?editing=true`;
+  return (
+    <div class="brainstorm-detail__question">
+      <InlineEditable
+        fieldId={`bq-${index}-question`}
+        name="question"
+        value={q.question}
+        hxPut={hxPut}
+        rootId="brainstorm-detail-root"
+        class="brainstorm-detail__question-text"
+      />
+      <InlineEditable
+        fieldId={`bq-${index}-answer`}
+        name="answer"
+        value={q.answer ?? ""}
+        hxPut={hxPut}
+        rootId="brainstorm-detail-root"
+        class="brainstorm-detail__answer"
+      />
+    </div>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -17,11 +56,12 @@ import { toKebab } from "../utils/slug.ts";
 export const BrainstormDetailView: FC<
   ViewProps & {
     item: Brainstorm;
+    editing?: boolean;
     taskInfo?: Map<string, { title: string } | null>;
     goalInfo?: Map<string, { title: string } | null>;
   }
 > = (
-  { item: brainstorm, taskInfo, goalInfo, ...viewProps },
+  { item: brainstorm, editing = false, taskInfo, goalInfo, ...viewProps },
 ) => {
   const hasTags = brainstorm.tags && brainstorm.tags.length > 0;
   const hasLinks = (brainstorm.linkedProjects?.length ?? 0) > 0 ||
@@ -33,13 +73,20 @@ export const BrainstormDetailView: FC<
       title={brainstorm.title}
       {...viewProps}
       styles={["/css/views/brainstorms.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/brainstorms/" + brainstorm.id}
+        getUrl={"/brainstorms/" + brainstorm.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:brainstorm.updated"
         targetId="brainstorm-detail-root"
       />
-      <main id="brainstorm-detail-root" class="detail-view brainstorm-detail">
+      <main
+        id="brainstorm-detail-root"
+        class={`detail-view brainstorm-detail${
+          editing ? " brainstorm-detail--editing" : ""
+        }`}
+      >
         <Breadcrumb
           items={[
             { label: "Brainstorms", href: "/brainstorms" },
@@ -61,7 +108,12 @@ export const BrainstormDetailView: FC<
             title={brainstorm.title}
             formContainerId="brainstorms-form-container"
             archived={brainstorm.archived === true}
-          />
+          >
+            <EditModeToggle
+              href={`/brainstorms/${brainstorm.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         <ArchivedBanner entity={brainstorm} />
@@ -141,18 +193,22 @@ export const BrainstormDetailView: FC<
           {brainstorm.questions.length === 0 && (
             <p class="brainstorm-detail__empty">No questions yet.</p>
           )}
-          {brainstorm.questions.map((q, i) => (
-            <div key={i} class="brainstorm-detail__question">
-              <h3 class="brainstorm-detail__question-text">{q.question}</h3>
-              {q.answer
-                ? <div class="brainstorm-detail__answer">{q.answer}</div>
-                : (
-                  <p class="brainstorm-detail__no-answer">
-                    No answer yet.
-                  </p>
-                )}
-            </div>
-          ))}
+          {brainstorm.questions.map((q, i) =>
+            editing
+              ? <EditableQA key={i} id={brainstorm.id} q={q} index={i} />
+              : (
+                <div key={i} class="brainstorm-detail__question">
+                  <h3 class="brainstorm-detail__question-text">{q.question}</h3>
+                  {q.answer
+                    ? <div class="brainstorm-detail__answer">{q.answer}</div>
+                    : (
+                      <p class="brainstorm-detail__no-answer">
+                        No answer yet.
+                      </p>
+                    )}
+                </div>
+              )
+          )}
         </section>
 
         {/* -- Meta ------------------------------------------------------- */}
