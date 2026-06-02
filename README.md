@@ -222,6 +222,30 @@ Open `http://localhost:8003`. The project directory contains one `.md` file per
 entity. Edit files directly, use the web UI, or mount via WebDAV — all three
 work.
 
+## Migrating from v1
+
+Projects created on v1 (≤ 0.38.x) need their markdown frontmatter normalized
+before v2 reads them (snake_case keys, stable ids, `{id}.md` filenames). Back
+up the project directory first, then:
+
+```bash
+deno task migrate --dry-run ./my-project   # preview, writes nothing
+deno task migrate ./my-project             # apply (idempotent)
+```
+
+Then audit what v2 reads vs. drops:
+
+```bash
+deno run --allow-read --allow-write --allow-env \
+  scripts/audit-v1-v2-loss.ts ./my-project
+```
+
+The script normalizes frontmatter/filenames only. **Directory renames**
+(`crm/contacts`→`contacts`, `canvas`→`sticky-notes`, …) and **field changes**
+(`people.department`→`departments`) are **not** automatic — see
+[Migrating v1 → v2](docs/02-guides/09-v1-to-v2-migration.md) for the full table
+and the safe Docker sequence.
+
 ## Contributing
 
 Fork, branch, PR. Follow the branch naming convention: `feat/`, `fix/`,
@@ -230,7 +254,7 @@ Fork, branch, PR. Follow the branch naming convention: `feat/`, `fix/`,
 ```bash
 deno fmt --check
 deno lint
-deno check main.ts
+deno check src/bin.ts
 deno task test
 ```
 
