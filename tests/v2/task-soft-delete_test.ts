@@ -3,7 +3,7 @@
  *
  * Task is a standalone repo (does NOT extend `BaseMarkdownRepository`) with
  * FTS, and stores files under `board/<section>/<id>.md`. This file mirrors
- * `tests/v2/portfolio-soft-delete_test.ts` — 8 canonical archive steps plus
+ * `tests/src/portfolio-soft-delete_test.ts` — 8 canonical archive steps plus
  * one FTS-exclusion step — and resolves files through the section subdir.
  *
  * `registerTaskEntity` is invoked exactly once per file at the start of the
@@ -19,9 +19,9 @@ import {
   CacheDatabase,
   CacheSync,
   SearchEngine,
-} from "../../v2/database/sqlite/mod.ts";
-import { registerTaskEntity } from "../../v2/domains/task/cache.ts";
-import { TaskRepository } from "../../v2/repositories/task.repository.ts";
+} from "../../src/database/sqlite/mod.ts";
+import { registerTaskEntity } from "../../src/domains/task/cache.ts";
+import { TaskRepository } from "../../src/repositories/task.repository.ts";
 
 Deno.test("soft-delete (archive) — Task", async (t) => {
   const dir = await Deno.makeTempDir({

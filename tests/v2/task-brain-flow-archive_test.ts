@@ -20,12 +20,12 @@
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";
-import { registerTaskTools } from "../../v2/mcp/tools/tasks.ts";
+import { registerTaskTools } from "../../src/mcp/tools/tasks.ts";
 import {
   getTaskRepository,
   getTaskService,
   initServices,
-} from "../../v2/singletons/services.ts";
+} from "../../src/singletons/services.ts";
 
 // deno-lint-ignore no-explicit-any
 type Handler = (args: any) => Promise<{ isError?: boolean; content: unknown }>;

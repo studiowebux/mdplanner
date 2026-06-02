@@ -18,9 +18,9 @@ import {
   MindmapRepository,
   parseBulletTree,
   serializeBulletTree,
-} from "../../v2/repositories/mindmap.repository.ts";
-import { MindmapService } from "../../v2/services/mindmap.service.ts";
-import type { MindmapNode } from "../../v2/types/mindmap.types.ts";
+} from "../../src/repositories/mindmap.repository.ts";
+import { MindmapService } from "../../src/services/mindmap.service.ts";
+import type { MindmapNode } from "../../src/types/mindmap.types.ts";
 
 async function setup(): Promise<
   { repo: MindmapRepository; service: MindmapService; dir: string }

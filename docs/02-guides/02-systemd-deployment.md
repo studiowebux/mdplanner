@@ -46,7 +46,7 @@ Group=mdplanner
 WorkingDirectory=/opt/mdplanner
 ExecStart=/home/<your-user>/.deno/bin/deno run \
   --allow-net --allow-read --allow-write --allow-env \
-  v2/bin.ts
+  src/bin.ts
 Environment=PROJECT_DIR=/var/lib/mdplanner/project
 Environment=PORT=8003
 Environment=CACHE=true

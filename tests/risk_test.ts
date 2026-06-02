@@ -3,7 +3,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { RiskRepository } from "../v2/repositories/risk.repository.ts";
+import { RiskRepository } from "../src/repositories/risk.repository.ts";
 
 async function withTmpDir(
   fn: (dir: string) => Promise<void>,

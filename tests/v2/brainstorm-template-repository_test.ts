@@ -8,7 +8,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { BrainstormTemplateRepository } from "../../v2/repositories/brainstorm-template.repository.ts";
+import { BrainstormTemplateRepository } from "../../src/repositories/brainstorm-template.repository.ts";
 
 async function setup(): Promise<
   { repo: BrainstormTemplateRepository; dir: string }

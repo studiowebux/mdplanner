@@ -3,7 +3,7 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { NoteRepository } from "../../v2/repositories/note.repository.ts";
+import { NoteRepository } from "../../src/repositories/note.repository.ts";
 
 async function setup(): Promise<{ repo: NoteRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-note-test-" });

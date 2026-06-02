@@ -24,8 +24,8 @@ import { join } from "@std/path";
 import {
   parseFrontmatter,
   serializeFrontmatter,
-} from "../v2/utils/frontmatter.ts";
-import { camelToSnake } from "../v2/utils/frontmatter-mapper.ts";
+} from "../src/utils/frontmatter.ts";
+import { camelToSnake } from "../src/utils/frontmatter-mapper.ts";
 
 // ---------------------------------------------------------------------------
 // Configuration

@@ -7,7 +7,7 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { JournalRepository } from "../../v2/repositories/journal.repository.ts";
+import { JournalRepository } from "../../src/repositories/journal.repository.ts";
 
 async function setup(): Promise<{ repo: JournalRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-journal-test-" });

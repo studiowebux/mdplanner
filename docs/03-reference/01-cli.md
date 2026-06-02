@@ -29,7 +29,7 @@ pass a different path as an argument to the task. To use a custom directory, set
 
 ```bash
 PROJECT_DIR=/path/to/my-project \
-  deno run --allow-net --allow-read --allow-write --allow-env --watch v2/bin.ts
+  deno run --allow-net --allow-read --allow-write --allow-env --watch src/bin.ts
 ```
 
 Or set it as an environment variable before running the task (but the task still

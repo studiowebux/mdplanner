@@ -9,7 +9,7 @@ import { assertEquals } from "@std/assert";
 import {
   parseFrontmatter,
   serializeFrontmatter,
-} from "../../v2/utils/frontmatter.ts";
+} from "../../src/utils/frontmatter.ts";
 
 function roundTrip(
   fm: Record<string, unknown>,

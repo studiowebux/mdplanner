@@ -24,14 +24,14 @@ import {
   assertRejects,
   assertStrictEquals,
 } from "@std/assert";
-import { TaskRepository } from "../../v2/repositories/task.repository.ts";
-import type { PeopleRepository } from "../../v2/repositories/people.repository.ts";
+import { TaskRepository } from "../../src/repositories/task.repository.ts";
+import type { PeopleRepository } from "../../src/repositories/people.repository.ts";
 import {
   ClaimConflictError,
   ClaimGuardError,
   RevisionConflictError,
   TaskService,
-} from "../../v2/services/task.service.ts";
+} from "../../src/services/task.service.ts";
 
 async function setup(): Promise<
   { repo: TaskRepository; service: TaskService; dir: string }

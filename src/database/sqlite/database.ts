@@ -39,7 +39,7 @@ export class CacheDatabase {
 
     // Close db on process exit to prevent corruption. `unload` fires on
     // Deno.exit() and normal exit. Signals are owned by the entrypoint
-    // (v2/bin.ts) which shuts the server down then exits — registering signal
+    // (src/bin.ts) which shuts the server down then exits — registering signal
     // listeners here would suppress the default terminate and leave the process
     // (and its bound port) lingering after Ctrl-C / kill.
     globalThis.addEventListener("unload", this.cleanup);

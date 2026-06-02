@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerRiskEntity } from "../../v2/domains/risk/cache.ts";
-import { RiskRepository } from "../../v2/repositories/risk.repository.ts";
+import { registerRiskEntity } from "../../src/domains/risk/cache.ts";
+import { RiskRepository } from "../../src/repositories/risk.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

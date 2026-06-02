@@ -6,8 +6,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { EisenhowerRepository } from "../../v2/repositories/eisenhower.repository.ts";
-import { EisenhowerService } from "../../v2/services/eisenhower.service.ts";
+import { EisenhowerRepository } from "../../src/repositories/eisenhower.repository.ts";
+import { EisenhowerService } from "../../src/services/eisenhower.service.ts";
 
 async function setup(): Promise<
   { repo: EisenhowerRepository; service: EisenhowerService; dir: string }

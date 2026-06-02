@@ -8,8 +8,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { StickyNoteRepository } from "../../v2/repositories/sticky-note.repository.ts";
-import { StickyNoteService } from "../../v2/services/sticky-note.service.ts";
+import { StickyNoteRepository } from "../../src/repositories/sticky-note.repository.ts";
+import { StickyNoteService } from "../../src/services/sticky-note.service.ts";
 
 async function setup(): Promise<
   {

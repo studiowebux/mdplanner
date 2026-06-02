@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerEisenhowerEntity } from "../../v2/domains/eisenhower/cache.ts";
-import { EisenhowerRepository } from "../../v2/repositories/eisenhower.repository.ts";
+import { registerEisenhowerEntity } from "../../src/domains/eisenhower/cache.ts";
+import { EisenhowerRepository } from "../../src/repositories/eisenhower.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

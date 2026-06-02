@@ -6,8 +6,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { MeetingRepository } from "../../v2/repositories/meeting.repository.ts";
-import { MeetingService } from "../../v2/services/meeting.service.ts";
+import { MeetingRepository } from "../../src/repositories/meeting.repository.ts";
+import { MeetingService } from "../../src/services/meeting.service.ts";
 
 async function setupRepo(): Promise<{ repo: MeetingRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-meeting-test-" });

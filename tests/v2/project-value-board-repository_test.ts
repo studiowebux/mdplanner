@@ -12,8 +12,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { ProjectValueBoardRepository } from "../../v2/repositories/project-value-board.repository.ts";
-import { ProjectValueBoardService } from "../../v2/services/project-value-board.service.ts";
+import { ProjectValueBoardRepository } from "../../src/repositories/project-value-board.repository.ts";
+import { ProjectValueBoardService } from "../../src/services/project-value-board.service.ts";
 
 async function setup(): Promise<{
   repo: ProjectValueBoardRepository;

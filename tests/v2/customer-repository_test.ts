@@ -10,8 +10,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { CustomerRepository } from "../../v2/repositories/customer.repository.ts";
-import { CustomerService } from "../../v2/services/customer.service.ts";
+import { CustomerRepository } from "../../src/repositories/customer.repository.ts";
+import { CustomerService } from "../../src/services/customer.service.ts";
 
 async function setup(): Promise<
   { repo: CustomerRepository; service: CustomerService; dir: string }

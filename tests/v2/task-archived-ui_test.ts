@@ -15,8 +15,8 @@
  */
 
 import { assert, assertEquals } from "@std/assert";
-import { tasksRouter as viewRouter } from "../../v2/views/tasks/routes.tsx";
-import { getTaskService, initServices } from "../../v2/singletons/services.ts";
+import { tasksRouter as viewRouter } from "../../src/views/tasks/routes.tsx";
+import { getTaskService, initServices } from "../../src/singletons/services.ts";
 
 Deno.test("archived UI — Task service + view routes + list/detail rendering", async (t) => {
   const dir = await Deno.makeTempDir({

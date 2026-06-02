@@ -15,8 +15,8 @@
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";
-import { registerTaskTools } from "../../v2/mcp/tools/tasks.ts";
-import { getTaskService, initServices } from "../../v2/singletons/services.ts";
+import { registerTaskTools } from "../../src/mcp/tools/tasks.ts";
+import { getTaskService, initServices } from "../../src/singletons/services.ts";
 
 // deno-lint-ignore no-explicit-any
 type Handler = (args: any) => Promise<{ isError?: boolean; content: unknown }>;

@@ -3,7 +3,7 @@
  */
 
 import { assertEquals, assertExists, assertRejects } from "@std/assert";
-import { FishboneRepository } from "../v2/repositories/fishbone.repository.ts";
+import { FishboneRepository } from "../src/repositories/fishbone.repository.ts";
 
 async function withTmpDir(
   fn: (dir: string) => Promise<void>,

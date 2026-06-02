@@ -9,7 +9,7 @@
  * make later tests resolve a stale (cleaned-up) tempdir.
  *
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
- * Reference: `tests/v2/note-soft-delete_test.ts` (commit 3e39450).
+ * Reference: `tests/src/note-soft-delete_test.ts` (commit 3e39450).
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";
@@ -17,9 +17,9 @@ import {
   CacheDatabase,
   CacheSync,
   SearchEngine,
-} from "../../v2/database/sqlite/mod.ts";
-import { registerPortfolioEntity } from "../../v2/domains/portfolio/cache.ts";
-import { PortfolioRepository } from "../../v2/repositories/portfolio.repository.ts";
+} from "../../src/database/sqlite/mod.ts";
+import { registerPortfolioEntity } from "../../src/domains/portfolio/cache.ts";
+import { PortfolioRepository } from "../../src/repositories/portfolio.repository.ts";
 
 Deno.test("soft-delete (archive) — Portfolio", async (t) => {
   const dir = await Deno.makeTempDir({

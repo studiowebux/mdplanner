@@ -42,7 +42,7 @@ export type AuditFields = z.infer<typeof AuditFieldsSchema>;
 /**
  * Soft-delete frontmatter fields. Domain schemas merge this in alongside
  * `AuditFieldsSchema`. Pair with the cache helpers in
- * `v2/database/sqlite/entities.ts` (`archiveCols`/`archiveVals`/
+ * `src/database/sqlite/entities.ts` (`archiveCols`/`archiveVals`/
  * `archiveFieldsFromRow`/`archiveMigrations`) and the shared
  * `<ArchivedBanner>` view component.
  *

@@ -202,7 +202,7 @@ const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
 };
 
 // ── charts ──────────────────────────────────────────────────────────────────
-// Empty container; v2/static/js/analytics-charts.js reads data-chart-values and
+// Empty container; src/static/js/analytics-charts.js reads data-chart-values and
 // builds the SVG. Pure data-attr handoff (CSP-safe), re-rendered on filter swap.
 
 type ChartItem = { label: string; value: number; display?: string };

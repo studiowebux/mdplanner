@@ -8,7 +8,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { ReflectionTemplateRepository } from "../../v2/repositories/reflection-template.repository.ts";
+import { ReflectionTemplateRepository } from "../../src/repositories/reflection-template.repository.ts";
 
 async function setup(): Promise<
   { repo: ReflectionTemplateRepository; dir: string }

@@ -20,8 +20,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { CapacityPlanRepository } from "../../v2/repositories/capacity-plan.repository.ts";
-import { CapacityPlanService } from "../../v2/services/capacity-plan.service.ts";
+import { CapacityPlanRepository } from "../../src/repositories/capacity-plan.repository.ts";
+import { CapacityPlanService } from "../../src/services/capacity-plan.service.ts";
 
 async function setup(): Promise<{
   repo: CapacityPlanRepository;

@@ -11,7 +11,7 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { DnsRepository } from "../../v2/repositories/dns.repository.ts";
+import { DnsRepository } from "../../src/repositories/dns.repository.ts";
 
 async function setup(): Promise<{ repo: DnsRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-dns-test-" });

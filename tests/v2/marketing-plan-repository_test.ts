@@ -15,8 +15,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { MarketingPlanRepository } from "../../v2/repositories/marketing-plan.repository.ts";
-import { MarketingPlanService } from "../../v2/services/marketing-plan.service.ts";
+import { MarketingPlanRepository } from "../../src/repositories/marketing-plan.repository.ts";
+import { MarketingPlanService } from "../../src/services/marketing-plan.service.ts";
 
 async function setup(): Promise<{
   repo: MarketingPlanRepository;

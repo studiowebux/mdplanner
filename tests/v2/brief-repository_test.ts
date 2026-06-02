@@ -13,8 +13,8 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { briefConfig } from "../../v2/domains/brief/config.tsx";
-import { BriefRepository } from "../../v2/repositories/brief.repository.ts";
+import { briefConfig } from "../../src/domains/brief/config.tsx";
+import { BriefRepository } from "../../src/repositories/brief.repository.ts";
 
 async function setup(): Promise<{ repo: BriefRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-brief-test-" });

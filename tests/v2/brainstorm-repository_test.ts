@@ -9,7 +9,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { BrainstormRepository } from "../../v2/repositories/brainstorm.repository.ts";
+import { BrainstormRepository } from "../../src/repositories/brainstorm.repository.ts";
 
 async function setup(): Promise<{ repo: BrainstormRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-brainstorm-test-" });

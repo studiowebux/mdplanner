@@ -3,7 +3,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { BusinessModelRepository } from "../v2/repositories/business-model.repository.ts";
+import { BusinessModelRepository } from "../src/repositories/business-model.repository.ts";
 
 async function withTmpDir(
   fn: (dir: string) => Promise<void>,

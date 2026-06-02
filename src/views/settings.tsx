@@ -1,6 +1,6 @@
 // Settings page — tabbed layout.
 // Pure CSS tabs via radio buttons.
-// Each tab panel lives in v2/views/settings/tabs/.
+// Each tab panel lives in src/views/settings/tabs/.
 
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";

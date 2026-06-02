@@ -4,8 +4,8 @@
  * Custom serialize() — archive guard preserves archived/_at/_by.
  */
 
-import { registerHabitEntity } from "../../v2/domains/habit/cache.ts";
-import { HabitRepository } from "../../v2/repositories/habit.repository.ts";
+import { registerHabitEntity } from "../../src/domains/habit/cache.ts";
+import { HabitRepository } from "../../src/repositories/habit.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

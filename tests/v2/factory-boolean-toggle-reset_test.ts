@@ -16,14 +16,14 @@
 
 import { assert, assertEquals } from "@std/assert";
 import { Hono } from "hono";
-import { tasksRouter } from "../../v2/views/tasks/routes.tsx";
+import { tasksRouter } from "../../src/views/tasks/routes.tsx";
 import {
   getPeopleRepository,
   getPeopleService,
   getTaskService,
   initServices,
-} from "../../v2/singletons/services.ts";
-import type { AppVariables } from "../../v2/types/app.ts";
+} from "../../src/singletons/services.ts";
+import type { AppVariables } from "../../src/types/app.ts";
 
 // Inject an actor + activePerson carrying the given saved uiState for `tasks`.
 // The fake person id makes the middleware's account write a harmless no-op

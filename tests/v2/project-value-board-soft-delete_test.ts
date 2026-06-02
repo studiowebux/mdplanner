@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerProjectValueBoardEntity } from "../../v2/domains/project-value-board/cache.ts";
-import { ProjectValueBoardRepository } from "../../v2/repositories/project-value-board.repository.ts";
+import { registerProjectValueBoardEntity } from "../../src/domains/project-value-board/cache.ts";
+import { ProjectValueBoardRepository } from "../../src/repositories/project-value-board.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

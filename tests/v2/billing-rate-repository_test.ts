@@ -11,8 +11,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { BillingRateRepository } from "../../v2/repositories/billing-rate.repository.ts";
-import { BillingRateService } from "../../v2/services/billing-rate.service.ts";
+import { BillingRateRepository } from "../../src/repositories/billing-rate.repository.ts";
+import { BillingRateService } from "../../src/services/billing-rate.service.ts";
 
 async function setup(): Promise<
   { repo: BillingRateRepository; service: BillingRateService; dir: string }

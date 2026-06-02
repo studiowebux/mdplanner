@@ -7,8 +7,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { IdeaRepository } from "../../v2/repositories/idea.repository.ts";
-import { IdeaService } from "../../v2/services/idea.service.ts";
+import { IdeaRepository } from "../../src/repositories/idea.repository.ts";
+import { IdeaService } from "../../src/services/idea.service.ts";
 
 async function setup(): Promise<
   { repo: IdeaRepository; service: IdeaService; dir: string }

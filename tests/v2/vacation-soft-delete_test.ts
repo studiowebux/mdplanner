@@ -6,8 +6,8 @@
 import {
   registerVacationEntity,
   VACATION_TABLE,
-} from "../../v2/domains/vacation/cache.ts";
-import { VacationRepository } from "../../v2/repositories/vacation.repository.ts";
+} from "../../src/domains/vacation/cache.ts";
+import { VacationRepository } from "../../src/repositories/vacation.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

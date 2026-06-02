@@ -10,8 +10,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { StrategicLevelsRepository } from "../../v2/repositories/strategic-levels.repository.ts";
-import { StrategicLevelsService } from "../../v2/services/strategic-levels.service.ts";
+import { StrategicLevelsRepository } from "../../src/repositories/strategic-levels.repository.ts";
+import { StrategicLevelsService } from "../../src/services/strategic-levels.service.ts";
 
 async function setup(): Promise<
   {

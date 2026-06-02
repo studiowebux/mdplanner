@@ -66,7 +66,7 @@ export const LEAN_CANVAS_TABLE_COLUMNS: ColumnDef[] = [
 
 // Sidenav handles only simple inputs (create + edit). The 12 canvas sections
 // are bullet-list arrays edited in place on the detail page (?editing=true) —
-// see v2/views/lean-canvases/routes.tsx. Section textareas were removed here
+// see src/views/lean-canvases/routes.tsx. Section textareas were removed here
 // because parseFormBody saves them as raw strings, which buildBody then
 // iterates char-by-char, corrupting the data.
 export const LEAN_CANVAS_FORM_FIELDS: FieldDef[] = [

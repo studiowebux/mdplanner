@@ -18,8 +18,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { LeanCanvasRepository } from "../../v2/repositories/lean-canvas.repository.ts";
-import { LeanCanvasService } from "../../v2/services/lean-canvas.service.ts";
+import { LeanCanvasRepository } from "../../src/repositories/lean-canvas.repository.ts";
+import { LeanCanvasService } from "../../src/services/lean-canvas.service.ts";
 
 async function setup(): Promise<
   { repo: LeanCanvasRepository; service: LeanCanvasService; dir: string }

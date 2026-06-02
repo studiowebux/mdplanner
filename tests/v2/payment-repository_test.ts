@@ -12,9 +12,9 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { PaymentRepository } from "../../v2/repositories/payment.repository.ts";
-import { PaymentService } from "../../v2/services/payment.service.ts";
-import type { InvoiceService } from "../../v2/services/invoice.service.ts";
+import { PaymentRepository } from "../../src/repositories/payment.repository.ts";
+import { PaymentService } from "../../src/services/payment.service.ts";
+import type { InvoiceService } from "../../src/services/invoice.service.ts";
 
 interface SyncCall {
   invoiceId: string;

@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerMoscowEntity } from "../../v2/domains/moscow/cache.ts";
-import { MoscowRepository } from "../../v2/repositories/moscow.repository.ts";
+import { registerMoscowEntity } from "../../src/domains/moscow/cache.ts";
+import { MoscowRepository } from "../../src/repositories/moscow.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

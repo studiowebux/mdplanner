@@ -12,8 +12,8 @@
  */
 
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
-import { notesRouter as viewRouter } from "../../v2/views/notes/routes.tsx";
-import { initServices } from "../../v2/singletons/services.ts";
+import { notesRouter as viewRouter } from "../../src/views/notes/routes.tsx";
+import { initServices } from "../../src/singletons/services.ts";
 
 function formRequest(fields: [string, string][]): Request {
   const form = new URLSearchParams();

@@ -8,8 +8,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { SwotRepository } from "../../v2/repositories/swot.repository.ts";
-import { SwotService } from "../../v2/services/swot.service.ts";
+import { SwotRepository } from "../../src/repositories/swot.repository.ts";
+import { SwotService } from "../../src/services/swot.service.ts";
 
 async function setup(): Promise<
   { repo: SwotRepository; service: SwotService; dir: string }

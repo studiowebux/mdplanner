@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerLeanCanvasEntity } from "../../v2/domains/lean-canvas/cache.ts";
-import { LeanCanvasRepository } from "../../v2/repositories/lean-canvas.repository.ts";
+import { registerLeanCanvasEntity } from "../../src/domains/lean-canvas/cache.ts";
+import { LeanCanvasRepository } from "../../src/repositories/lean-canvas.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

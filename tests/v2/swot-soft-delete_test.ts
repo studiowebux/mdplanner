@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerSwotEntity } from "../../v2/domains/swot/cache.ts";
-import { SwotRepository } from "../../v2/repositories/swot.repository.ts";
+import { registerSwotEntity } from "../../src/domains/swot/cache.ts";
+import { SwotRepository } from "../../src/repositories/swot.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

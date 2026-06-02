@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerMeetingEntity } from "../../v2/domains/meeting/cache.ts";
-import { MeetingRepository } from "../../v2/repositories/meeting.repository.ts";
+import { registerMeetingEntity } from "../../src/domains/meeting/cache.ts";
+import { MeetingRepository } from "../../src/repositories/meeting.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

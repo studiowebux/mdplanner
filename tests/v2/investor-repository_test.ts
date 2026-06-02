@@ -10,8 +10,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { InvestorRepository } from "../../v2/repositories/investor.repository.ts";
-import { InvestorService } from "../../v2/services/investor.service.ts";
+import { InvestorRepository } from "../../src/repositories/investor.repository.ts";
+import { InvestorService } from "../../src/services/investor.service.ts";
 
 async function setup(): Promise<
   { repo: InvestorRepository; service: InvestorService; dir: string }

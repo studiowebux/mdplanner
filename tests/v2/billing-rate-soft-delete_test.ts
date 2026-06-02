@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerBillingRateEntity } from "../../v2/domains/billing-rate/cache.ts";
-import { BillingRateRepository } from "../../v2/repositories/billing-rate.repository.ts";
+import { registerBillingRateEntity } from "../../src/domains/billing-rate/cache.ts";
+import { BillingRateRepository } from "../../src/repositories/billing-rate.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

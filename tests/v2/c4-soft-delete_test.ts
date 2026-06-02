@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerC4Entity } from "../../v2/domains/c4/cache.ts";
-import { C4Repository } from "../../v2/repositories/c4.repository.ts";
+import { registerC4Entity } from "../../src/domains/c4/cache.ts";
+import { C4Repository } from "../../src/repositories/c4.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

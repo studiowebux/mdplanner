@@ -12,8 +12,8 @@ import { assert, assertEquals } from "@std/assert";
 import {
   registerStrategicLevelsEntity,
   STRATEGIC_LEVELS_TABLE,
-} from "../../v2/domains/strategic-levels/cache.ts";
-import { StrategicLevelsRepository } from "../../v2/repositories/strategic-levels.repository.ts";
+} from "../../src/domains/strategic-levels/cache.ts";
+import { StrategicLevelsRepository } from "../../src/repositories/strategic-levels.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

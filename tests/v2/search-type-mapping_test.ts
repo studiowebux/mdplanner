@@ -18,31 +18,31 @@
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";
-import { ENTITIES } from "../../v2/database/sqlite/entities.ts";
+import { ENTITIES } from "../../src/database/sqlite/entities.ts";
 import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPE_ROUTES,
   SEARCH_TYPE_LABELS,
   SEARCH_TYPE_ROUTES,
-} from "../../v2/constants/mod.ts";
-import { registerBillingRateEntity } from "../../v2/domains/billing-rate/cache.ts";
-import { registerC4Entity } from "../../v2/domains/c4/cache.ts";
-import { registerJournalEntity } from "../../v2/domains/journal/cache.ts";
-import { registerLeanCanvasEntity } from "../../v2/domains/lean-canvas/cache.ts";
-import { registerProjectValueBoardEntity } from "../../v2/domains/project-value-board/cache.ts";
+} from "../../src/constants/mod.ts";
+import { registerBillingRateEntity } from "../../src/domains/billing-rate/cache.ts";
+import { registerC4Entity } from "../../src/domains/c4/cache.ts";
+import { registerJournalEntity } from "../../src/domains/journal/cache.ts";
+import { registerLeanCanvasEntity } from "../../src/domains/lean-canvas/cache.ts";
+import { registerProjectValueBoardEntity } from "../../src/domains/project-value-board/cache.ts";
 import {
   registerStickyBoardEntity,
   registerStickyNoteEntity,
-} from "../../v2/domains/sticky-note/cache.ts";
-import { registerStrategicLevelsEntity } from "../../v2/domains/strategic-levels/cache.ts";
-import { BillingRateRepository } from "../../v2/repositories/billing-rate.repository.ts";
-import { C4Repository } from "../../v2/repositories/c4.repository.ts";
-import { JournalRepository } from "../../v2/repositories/journal.repository.ts";
-import { LeanCanvasRepository } from "../../v2/repositories/lean-canvas.repository.ts";
-import { ProjectValueBoardRepository } from "../../v2/repositories/project-value-board.repository.ts";
-import { StickyBoardRepository } from "../../v2/repositories/sticky-board.repository.ts";
-import { StickyNoteRepository } from "../../v2/repositories/sticky-note.repository.ts";
-import { StrategicLevelsRepository } from "../../v2/repositories/strategic-levels.repository.ts";
+} from "../../src/domains/sticky-note/cache.ts";
+import { registerStrategicLevelsEntity } from "../../src/domains/strategic-levels/cache.ts";
+import { BillingRateRepository } from "../../src/repositories/billing-rate.repository.ts";
+import { C4Repository } from "../../src/repositories/c4.repository.ts";
+import { JournalRepository } from "../../src/repositories/journal.repository.ts";
+import { LeanCanvasRepository } from "../../src/repositories/lean-canvas.repository.ts";
+import { ProjectValueBoardRepository } from "../../src/repositories/project-value-board.repository.ts";
+import { StickyBoardRepository } from "../../src/repositories/sticky-board.repository.ts";
+import { StickyNoteRepository } from "../../src/repositories/sticky-note.repository.ts";
+import { StrategicLevelsRepository } from "../../src/repositories/strategic-levels.repository.ts";
 
 Deno.test("search entity type mapping", async (t) => {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-search-type-" });

@@ -9,7 +9,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { OnboardingTemplateRepository } from "../../v2/repositories/onboarding-template.repository.ts";
+import { OnboardingTemplateRepository } from "../../src/repositories/onboarding-template.repository.ts";
 
 async function setup(): Promise<
   { repo: OnboardingTemplateRepository; dir: string }

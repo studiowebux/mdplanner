@@ -7,7 +7,7 @@
  */
 
 import { assertEquals } from "@std/assert";
-import { resolveLinkedItems } from "../../v2/utils/resolve-links.ts";
+import { resolveLinkedItems } from "../../src/utils/resolve-links.ts";
 
 type FakeEntity = { id: string; title: string };
 

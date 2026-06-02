@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerMilestoneEntity } from "../../v2/domains/milestone/cache.ts";
-import { MilestoneRepository } from "../../v2/repositories/milestone.repository.ts";
+import { registerMilestoneEntity } from "../../src/domains/milestone/cache.ts";
+import { MilestoneRepository } from "../../src/repositories/milestone.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

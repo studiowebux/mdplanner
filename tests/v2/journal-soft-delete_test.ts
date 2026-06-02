@@ -4,8 +4,8 @@
  * Custom serialize() — archive guard preserves archived/_at/_by.
  */
 
-import { registerJournalEntity } from "../../v2/domains/journal/cache.ts";
-import { JournalRepository } from "../../v2/repositories/journal.repository.ts";
+import { registerJournalEntity } from "../../src/domains/journal/cache.ts";
+import { JournalRepository } from "../../src/repositories/journal.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

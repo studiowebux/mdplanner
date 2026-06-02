@@ -17,7 +17,7 @@ deno task dev:v2
 
 # To use a custom project directory, set PROJECT_DIR and run deno directly
 PROJECT_DIR=/path/to/my-project \
-  deno run --allow-net --allow-read --allow-write --allow-env --watch v2/bin.ts
+  deno run --allow-net --allow-read --allow-write --allow-env --watch src/bin.ts
 ```
 
 The server reads and writes markdown files in the given directory. No

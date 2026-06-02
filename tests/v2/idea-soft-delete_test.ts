@@ -6,8 +6,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerIdeaEntity } from "../../v2/domains/idea/cache.ts";
-import { IdeaRepository } from "../../v2/repositories/idea.repository.ts";
+import { registerIdeaEntity } from "../../src/domains/idea/cache.ts";
+import { IdeaRepository } from "../../src/repositories/idea.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

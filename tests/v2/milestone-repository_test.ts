@@ -12,12 +12,12 @@ import {
   assertRejects,
   assertStrictEquals,
 } from "@std/assert";
-import { MilestoneRepository } from "../../v2/repositories/milestone.repository.ts";
-import { TaskRepository } from "../../v2/repositories/task.repository.ts";
+import { MilestoneRepository } from "../../src/repositories/milestone.repository.ts";
+import { TaskRepository } from "../../src/repositories/task.repository.ts";
 import {
   DuplicateMilestoneError,
   MilestoneService,
-} from "../../v2/services/milestone.service.ts";
+} from "../../src/services/milestone.service.ts";
 
 async function setupRepo(): Promise<
   { repo: MilestoneRepository; dir: string }

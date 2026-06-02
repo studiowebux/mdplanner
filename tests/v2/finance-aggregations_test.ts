@@ -10,8 +10,8 @@
  */
 
 import { assertEquals } from "@std/assert";
-import { FinanceService } from "../../v2/services/finance.service.ts";
-import type { Finance } from "../../v2/types/finance.types.ts";
+import { FinanceService } from "../../src/services/finance.service.ts";
+import type { Finance } from "../../src/types/finance.types.ts";
 
 function entry(
   overrides: Partial<Finance> & Pick<Finance, "type" | "amount">,

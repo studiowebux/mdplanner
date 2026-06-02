@@ -5,7 +5,7 @@
  */
 
 import { assertEquals } from "@std/assert";
-import { parseAuditFields } from "../../v2/utils/frontmatter-mapper.ts";
+import { parseAuditFields } from "../../src/utils/frontmatter-mapper.ts";
 
 Deno.test("parseAuditFields - reads snake_case (standalone-repo shape)", () => {
   const fm = {

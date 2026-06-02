@@ -15,7 +15,7 @@
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";
-import { CacheDatabase, CacheSync } from "../../../v2/database/sqlite/mod.ts";
+import { CacheDatabase, CacheSync } from "../../../src/database/sqlite/mod.ts";
 
 /**
  * A minimal entity shape the suite asserts against. Domains pass their own

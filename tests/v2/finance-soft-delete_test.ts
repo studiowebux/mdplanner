@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerFinanceEntity } from "../../v2/domains/finance/cache.ts";
-import { FinanceRepository } from "../../v2/repositories/finance.repository.ts";
+import { registerFinanceEntity } from "../../src/domains/finance/cache.ts";
+import { FinanceRepository } from "../../src/repositories/finance.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

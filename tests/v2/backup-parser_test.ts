@@ -13,7 +13,7 @@ import { assertEquals } from "@std/assert";
 import {
   type BackupParseEvent,
   parseBackupStream,
-} from "../../v2/api/v1/backup/parser.ts";
+} from "../../src/api/v1/backup/parser.ts";
 
 function streamOf(s: string): ReadableStream<Uint8Array> {
   return new Response(s).body!;

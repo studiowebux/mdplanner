@@ -6,8 +6,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { PortfolioRepository } from "../../v2/repositories/portfolio.repository.ts";
-import { PortfolioService } from "../../v2/services/portfolio.service.ts";
+import { PortfolioRepository } from "../../src/repositories/portfolio.repository.ts";
+import { PortfolioService } from "../../src/services/portfolio.service.ts";
 
 async function setupRepo(): Promise<
   { repo: PortfolioRepository; dir: string }

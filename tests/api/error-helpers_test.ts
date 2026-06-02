@@ -14,7 +14,7 @@ import {
   payloadTooLarge,
   serverError,
   unauthorized,
-} from "../../v2/types/api.ts";
+} from "../../src/types/api.ts";
 
 // === notFound ===
 

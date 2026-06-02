@@ -11,9 +11,9 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { InvoiceRepository } from "../../v2/repositories/invoice.repository.ts";
-import { InvoiceService } from "../../v2/services/invoice.service.ts";
-import type { LineItem } from "../../v2/types/billing.types.ts";
+import { InvoiceRepository } from "../../src/repositories/invoice.repository.ts";
+import { InvoiceService } from "../../src/services/invoice.service.ts";
+import type { LineItem } from "../../src/types/billing.types.ts";
 
 async function setup(): Promise<
   { repo: InvoiceRepository; service: InvoiceService; dir: string }

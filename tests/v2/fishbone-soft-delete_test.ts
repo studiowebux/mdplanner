@@ -4,8 +4,8 @@
  * Custom serialize() — archive guard preserves archived/_at/_by.
  */
 
-import { registerFishboneEntity } from "../../v2/domains/fishbone/cache.ts";
-import { FishboneRepository } from "../../v2/repositories/fishbone.repository.ts";
+import { registerFishboneEntity } from "../../src/domains/fishbone/cache.ts";
+import { FishboneRepository } from "../../src/repositories/fishbone.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

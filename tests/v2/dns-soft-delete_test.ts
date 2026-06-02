@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerDnsEntity } from "../../v2/domains/dns/cache.ts";
-import { DnsRepository } from "../../v2/repositories/dns.repository.ts";
+import { registerDnsEntity } from "../../src/domains/dns/cache.ts";
+import { DnsRepository } from "../../src/repositories/dns.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

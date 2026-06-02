@@ -14,8 +14,8 @@
  */
 
 import { assert, assertEquals } from "@std/assert";
-import { tasksRouter as viewRouter } from "../../v2/views/tasks/routes.tsx";
-import { getTaskService, initServices } from "../../v2/singletons/services.ts";
+import { tasksRouter as viewRouter } from "../../src/views/tasks/routes.tsx";
+import { getTaskService, initServices } from "../../src/singletons/services.ts";
 
 function batchDeleteRequest(ids: string[]): Request {
   const form = new URLSearchParams();

@@ -2,7 +2,7 @@
  * Unit tests for v2 FinanceRepository (CRUD on disk) + FinanceService
  * (filter behaviour).
  *
- * Complements `tests/v2/finance-aggregations_test.ts`, which exercises the
+ * Complements `tests/src/finance-aggregations_test.ts`, which exercises the
  * static aggregator helpers (`aggregateMonthly`, `aggregateByTag`). This file
  * covers: CRUD, parse-guard regression (`FINANCE_BODY_KEYS = ["id",
  * "description"]` so the post-update file has no `fm.id` — `parse()` must
@@ -13,9 +13,9 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { FinanceRepository } from "../../v2/repositories/finance.repository.ts";
-import { FinanceService } from "../../v2/services/finance.service.ts";
-import type { Finance } from "../../v2/types/finance.types.ts";
+import { FinanceRepository } from "../../src/repositories/finance.repository.ts";
+import { FinanceService } from "../../src/services/finance.service.ts";
+import type { Finance } from "../../src/types/finance.types.ts";
 
 async function setup(): Promise<
   { repo: FinanceRepository; service: FinanceService; dir: string }

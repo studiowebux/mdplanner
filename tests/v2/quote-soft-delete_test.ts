@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerQuoteEntity } from "../../v2/domains/quote/cache.ts";
-import { QuoteRepository } from "../../v2/repositories/quote.repository.ts";
+import { registerQuoteEntity } from "../../src/domains/quote/cache.ts";
+import { QuoteRepository } from "../../src/repositories/quote.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

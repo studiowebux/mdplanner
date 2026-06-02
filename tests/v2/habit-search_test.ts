@@ -19,9 +19,9 @@ import {
   CacheDatabase,
   CacheSync,
   SearchEngine,
-} from "../../v2/database/sqlite/mod.ts";
-import { registerHabitEntity } from "../../v2/domains/habit/cache.ts";
-import { HabitRepository } from "../../v2/repositories/habit.repository.ts";
+} from "../../src/database/sqlite/mod.ts";
+import { registerHabitEntity } from "../../src/domains/habit/cache.ts";
+import { HabitRepository } from "../../src/repositories/habit.repository.ts";
 
 Deno.test("habit global search", async (t) => {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-habit-search-" });

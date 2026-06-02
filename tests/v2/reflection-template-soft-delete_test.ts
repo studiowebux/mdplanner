@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerReflectionTemplateEntity } from "../../v2/domains/reflection-template/cache.ts";
-import { ReflectionTemplateRepository } from "../../v2/repositories/reflection-template.repository.ts";
+import { registerReflectionTemplateEntity } from "../../src/domains/reflection-template/cache.ts";
+import { ReflectionTemplateRepository } from "../../src/repositories/reflection-template.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

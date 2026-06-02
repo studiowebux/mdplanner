@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerBusinessModelEntity } from "../../v2/domains/business-model/cache.ts";
-import { BusinessModelRepository } from "../../v2/repositories/business-model.repository.ts";
+import { registerBusinessModelEntity } from "../../src/domains/business-model/cache.ts";
+import { BusinessModelRepository } from "../../src/repositories/business-model.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

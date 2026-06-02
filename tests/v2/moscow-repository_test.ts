@@ -7,8 +7,8 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { MoscowRepository } from "../../v2/repositories/moscow.repository.ts";
-import { MoscowService } from "../../v2/services/moscow.service.ts";
+import { MoscowRepository } from "../../src/repositories/moscow.repository.ts";
+import { MoscowService } from "../../src/services/moscow.service.ts";
 
 async function setup(): Promise<
   { repo: MoscowRepository; service: MoscowService; dir: string }

@@ -10,8 +10,8 @@
 import {
   registerStickyNoteEntity,
   STICKY_NOTE_TABLE,
-} from "../../v2/domains/sticky-note/cache.ts";
-import { StickyNoteRepository } from "../../v2/repositories/sticky-note.repository.ts";
+} from "../../src/domains/sticky-note/cache.ts";
+import { StickyNoteRepository } from "../../src/repositories/sticky-note.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

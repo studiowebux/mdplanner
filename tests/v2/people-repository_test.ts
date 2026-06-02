@@ -7,9 +7,9 @@
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
-import { PeopleRepository } from "../../v2/repositories/people.repository.ts";
-import { PeopleService } from "../../v2/services/people.service.ts";
-import type { Person } from "../../v2/types/person.types.ts";
+import { PeopleRepository } from "../../src/repositories/people.repository.ts";
+import { PeopleService } from "../../src/services/people.service.ts";
+import type { Person } from "../../src/types/person.types.ts";
 
 async function setupRepo(): Promise<{ repo: PeopleRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-people-test-" });

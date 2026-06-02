@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerMindmapEntity } from "../../v2/domains/mindmap/cache.ts";
-import { MindmapRepository } from "../../v2/repositories/mindmap.repository.ts";
+import { registerMindmapEntity } from "../../src/domains/mindmap/cache.ts";
+import { MindmapRepository } from "../../src/repositories/mindmap.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

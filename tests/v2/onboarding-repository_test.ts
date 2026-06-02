@@ -8,7 +8,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { OnboardingRepository } from "../../v2/repositories/onboarding.repository.ts";
+import { OnboardingRepository } from "../../src/repositories/onboarding.repository.ts";
 
 async function setup(): Promise<{ repo: OnboardingRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-onboarding-test-" });

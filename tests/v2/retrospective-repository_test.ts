@@ -9,7 +9,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { RetrospectiveRepository } from "../../v2/repositories/retrospective.repository.ts";
+import { RetrospectiveRepository } from "../../src/repositories/retrospective.repository.ts";
 
 async function setup(): Promise<
   { repo: RetrospectiveRepository; dir: string }

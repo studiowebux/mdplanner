@@ -12,8 +12,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { SafeRepository } from "../../v2/repositories/safe.repository.ts";
-import { SafeService } from "../../v2/services/safe.service.ts";
+import { SafeRepository } from "../../src/repositories/safe.repository.ts";
+import { SafeService } from "../../src/services/safe.service.ts";
 
 async function setup(): Promise<
   { repo: SafeRepository; service: SafeService; dir: string }

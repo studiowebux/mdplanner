@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerRetrospectiveEntity } from "../../v2/domains/retrospective/cache.ts";
-import { RetrospectiveRepository } from "../../v2/repositories/retrospective.repository.ts";
+import { registerRetrospectiveEntity } from "../../src/domains/retrospective/cache.ts";
+import { RetrospectiveRepository } from "../../src/repositories/retrospective.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

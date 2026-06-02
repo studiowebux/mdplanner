@@ -18,9 +18,9 @@ import {
   CacheDatabase,
   CacheSync,
   SearchEngine,
-} from "../../v2/database/sqlite/mod.ts";
-import { registerNoteEntity } from "../../v2/domains/note/cache.ts";
-import { NoteRepository } from "../../v2/repositories/note.repository.ts";
+} from "../../src/database/sqlite/mod.ts";
+import { registerNoteEntity } from "../../src/domains/note/cache.ts";
+import { NoteRepository } from "../../src/repositories/note.repository.ts";
 
 Deno.test("soft-delete (archive) — Note", async (t) => {
   const dir = await Deno.makeTempDir({

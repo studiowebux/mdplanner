@@ -4,8 +4,8 @@
  * Custom serialize() — archive guard preserves archived/_at/_by.
  */
 
-import { registerInvestorEntity } from "../../v2/domains/investor/cache.ts";
-import { InvestorRepository } from "../../v2/repositories/investor.repository.ts";
+import { registerInvestorEntity } from "../../src/domains/investor/cache.ts";
+import { InvestorRepository } from "../../src/repositories/investor.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

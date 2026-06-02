@@ -10,7 +10,7 @@
 
 import { assertEquals, assertExists } from "@std/assert";
 import { join } from "@std/path";
-import { ReflectionRepository } from "../../v2/repositories/reflection.repository.ts";
+import { ReflectionRepository } from "../../src/repositories/reflection.repository.ts";
 
 async function setup(): Promise<{ repo: ReflectionRepository; dir: string }> {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-reflection-test-" });

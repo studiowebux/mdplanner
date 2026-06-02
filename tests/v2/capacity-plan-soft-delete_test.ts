@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerCapacityPlanEntity } from "../../v2/domains/capacity-plan/cache.ts";
-import { CapacityPlanRepository } from "../../v2/repositories/capacity-plan.repository.ts";
+import { registerCapacityPlanEntity } from "../../src/domains/capacity-plan/cache.ts";
+import { CapacityPlanRepository } from "../../src/repositories/capacity-plan.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

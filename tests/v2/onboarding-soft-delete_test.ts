@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerOnboardingEntity } from "../../v2/domains/onboarding/cache.ts";
-import { OnboardingRepository } from "../../v2/repositories/onboarding.repository.ts";
+import { registerOnboardingEntity } from "../../src/domains/onboarding/cache.ts";
+import { OnboardingRepository } from "../../src/repositories/onboarding.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

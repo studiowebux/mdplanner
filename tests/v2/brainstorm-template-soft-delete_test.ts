@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerBrainstormTemplateEntity } from "../../v2/domains/brainstorm-template/cache.ts";
-import { BrainstormTemplateRepository } from "../../v2/repositories/brainstorm-template.repository.ts";
+import { registerBrainstormTemplateEntity } from "../../src/domains/brainstorm-template/cache.ts";
+import { BrainstormTemplateRepository } from "../../src/repositories/brainstorm-template.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

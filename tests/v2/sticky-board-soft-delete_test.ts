@@ -10,8 +10,8 @@
 import {
   registerStickyBoardEntity,
   STICKY_BOARD_TABLE,
-} from "../../v2/domains/sticky-note/cache.ts";
-import { StickyBoardRepository } from "../../v2/repositories/sticky-board.repository.ts";
+} from "../../src/domains/sticky-note/cache.ts";
+import { StickyBoardRepository } from "../../src/repositories/sticky-board.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({

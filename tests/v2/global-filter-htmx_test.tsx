@@ -15,13 +15,13 @@
 
 import { Hono } from "hono";
 import { assert, assertEquals } from "@std/assert";
-import { settingsViewRouter } from "../../v2/views/settings/routes.tsx";
-import { Topbar } from "../../v2/components/shell/topbar.tsx";
+import { settingsViewRouter } from "../../src/views/settings/routes.tsx";
+import { Topbar } from "../../src/components/shell/topbar.tsx";
 import {
   getPeopleService,
   getPortfolioService,
   initServices,
-} from "../../v2/singletons/services.ts";
+} from "../../src/singletons/services.ts";
 
 function filtersRequest(projects: string[], assignees: string[]): Request {
   const form = new URLSearchParams();

@@ -13,14 +13,14 @@
  * Tests construct UserScope inline to avoid the singleton wiring that
  * `resolveUserScope`/`defaultScope`/`getDefaultUserId` need.
  *
- * Complements `tests/v2/habit-search_test.ts` which covers FTS only.
+ * Complements `tests/src/habit-search_test.ts` which covers FTS only.
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { HabitRepository } from "../../v2/repositories/habit.repository.ts";
-import { HabitService } from "../../v2/services/habit.service.ts";
-import type { UserScope } from "../../v2/utils/actor.ts";
+import { HabitRepository } from "../../src/repositories/habit.repository.ts";
+import { HabitService } from "../../src/services/habit.service.ts";
+import type { UserScope } from "../../src/utils/actor.ts";
 
 const ALICE: UserScope = { userId: "alice", isDefault: false };
 const BOB: UserScope = { userId: "bob", isDefault: false };

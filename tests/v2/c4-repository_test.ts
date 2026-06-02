@@ -15,8 +15,8 @@
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
-import { C4Repository } from "../../v2/repositories/c4.repository.ts";
-import { C4Service } from "../../v2/services/c4.service.ts";
+import { C4Repository } from "../../src/repositories/c4.repository.ts";
+import { C4Service } from "../../src/services/c4.service.ts";
 
 async function setup(): Promise<
   { repo: C4Repository; service: C4Service; dir: string }

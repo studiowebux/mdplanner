@@ -3,8 +3,8 @@
  * Pattern: `[architecture] MD Planner — Soft-delete (archive) pattern`.
  */
 
-import { registerContactEntity } from "../../v2/domains/contact/cache.ts";
-import { ContactRepository } from "../../v2/repositories/contact.repository.ts";
+import { registerContactEntity } from "../../src/domains/contact/cache.ts";
+import { ContactRepository } from "../../src/repositories/contact.repository.ts";
 import { runSoftDeleteSuite } from "./helpers/soft-delete-suite.ts";
 
 runSoftDeleteSuite({
