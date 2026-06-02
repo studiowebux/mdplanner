@@ -559,6 +559,32 @@
 
   /* Quadrant card max height (Eisenhower / MoSCoW) */
   --quadrant-card-max-h: 40vh;
+
+  /* Lean canvas section edit max height */
+  --lc-section-edit-max-h: 40vh;
+
+  /* Deals pipeline */
+  --deal-pipeline-col-w: 16rem;
+
+  /* GitHub view */
+  --github-table-num-w: 3rem;
+  --github-milestone-bar-h: var(--space-sm);
+  --github-tab-border-w: 2px;
+  --github-summary-card-min-w: 20rem;
+
+  /* Uploads view */
+  --uploads-stat-card-min-w: var(--card-min-width);
+  --uploads-stat-value-size: var(--font-size-xl);
+  --uploads-table-actions-w: calc(var(--space-xl) * 3);
+
+  /* Time entries view */
+  --te-recap-label-min-w: var(--sidebar-width);
+  --te-recap-label-max-w: var(--table-compact-cell-max-width);
+  --te-recap-col-min-w: var(--card-min-width);
+  --te-recap-col-gap: var(--space-xl);
+  --te-recap-footer-border: var(--border-width-thick) solid var(
+    --color-border-default
+  );
 }
 
 html.font-mono {
@@ -785,31 +811,6 @@ html.font-mono {
   --sticky-orange-bg: #3d1e08;
   --sticky-orange-border: #e65100;
   --sticky-orange-text: #ffe0b2;
-
-  --lc-section-edit-max-h: 40vh;
-
-  /* Deals pipeline */
-  --deal-pipeline-col-w: 16rem;
-
-  /* GitHub view */
-  --github-table-num-w: 3rem;
-  --github-milestone-bar-h: var(--space-sm);
-  --github-tab-border-w: 2px;
-  --github-summary-card-min-w: 20rem;
-
-  /* Uploads view */
-  --uploads-stat-card-min-w: var(--card-min-width);
-  --uploads-stat-value-size: var(--font-size-xl);
-  --uploads-table-actions-w: calc(var(--space-xl) * 3);
-
-  /* Time entries view */
-  --te-recap-label-min-w: var(--sidebar-width);
-  --te-recap-label-max-w: var(--table-compact-cell-max-width);
-  --te-recap-col-min-w: var(--card-min-width);
-  --te-recap-col-gap: var(--space-xl);
-  --te-recap-footer-border: var(--border-width-thick) solid var(
-    --color-border-default
-  );
 
   /* Capacity grid cell tints — softer than alert bg in dark mode */
   --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
