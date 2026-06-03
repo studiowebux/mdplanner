@@ -60,10 +60,7 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: var(--line-height-tight);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .analytics__kpi-label {
@@ -385,10 +382,7 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-accent);
   line-height: var(--analytics-stat-value-line-height);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .analytics__stat-label {
