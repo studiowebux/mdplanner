@@ -12,4 +12,4 @@ created_at: "2026-04-18T14:57:57.257Z"
 updated_at: "2026-05-08T19:36:02.526Z"
 ---
 
-Ship v2.0.0 before end of sprint...ddsdsd
+Ship v2.0.0 before the end of the sprint

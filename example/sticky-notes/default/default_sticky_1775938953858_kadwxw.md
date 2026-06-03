@@ -11,3 +11,4 @@ created_at: "2026-04-11T20:23:47.014Z"
 updated_at: "2026-04-11T20:23:47.014Z"
 ---
 
+Draft the public changelog for the v2 launch announcement
