@@ -103,6 +103,7 @@ export async function Topbar(
             hx-trigger="change"
             hx-include="[data-global-filter-item] input"
             hx-swap="none"
+            hx-sync="closest .topbar__actions:queue last"
           >
             <button
               type="button"
@@ -149,6 +150,7 @@ export async function Topbar(
             hx-trigger="change"
             hx-include="[data-global-filter-item] input"
             hx-swap="none"
+            hx-sync="closest .topbar__actions:queue last"
           >
             <button
               type="button"

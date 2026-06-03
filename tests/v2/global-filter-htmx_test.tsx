@@ -49,6 +49,12 @@ Deno.test("global-filter htmx — server contract", async (t) => {
         assertEquals(res.headers.get("HX-Trigger"), "global-filter:changed");
         const cookie = res.headers.get("Set-Cookie") ?? "";
         assert(cookie.includes("ui_state"), "ui_state cookie must be written");
+        // Aggregation: ALL selected projects/assignees must round-trip into the
+        // cookie, not just the first (regression: multi-select collapsed to one).
+        const raw = cookie.match(/ui_state=([^;]+)/)?.[1] ?? "";
+        const state = JSON.parse(decodeURIComponent(raw));
+        assertEquals(state._global.globalProjects, ["Alpha", "Beta"]);
+        assertEquals(state._global.globalAssignees, ["Alice"]);
         await res.body?.cancel();
       },
     );
@@ -102,6 +108,13 @@ Deno.test("global-filter htmx — topbar markup wiring", async (t) => {
         assert(
           html.includes('name="globalAssignees"'),
           "assignee checkbox must carry name=globalAssignees",
+        );
+        // Serialize filter POSTs through one shared queue so the last full-state
+        // write wins (regression: concurrent posts raced, collapsing the cookie
+        // to a stale subset — "only the first project applied").
+        assert(
+          html.includes('hx-sync="closest .topbar__actions:queue last"'),
+          "filter wraps must share an hx-sync queue to avoid the cookie write race",
         );
       },
     );
