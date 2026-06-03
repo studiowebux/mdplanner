@@ -114,24 +114,65 @@ const CustomizePanel: FC<{ hiddenSections: string[] }> = (
   </details>
 );
 
-const AnalyticsJumpBar: FC<{ hiddenSections: string[] }> = (
-  { hiddenSections },
-) => {
-  const visible = ALL_SECTIONS.filter((s) => !hiddenSections.includes(s.key));
-  if (visible.length === 0) return null;
+// Category grouping — the 16 sections are organized into a handful of themed
+// tabs so the page reads as a dashboard, not a 16-block wall. CSS-only tabs:
+// hidden radios + label nav are rendered as siblings of the sections, and
+// `#atab-<cat>:checked ~ .analytics__section[data-cat="<cat>"]` reveals only the
+// active category (no JS, CSP-safe). Charts use viewBox scaling so hidden
+// panels render correctly once shown.
+
+export const CATEGORY_DEFS: {
+  key: string;
+  label: string;
+  sections: string[];
+}[] = [
+  {
+    key: "delivery",
+    label: "Delivery",
+    sections: ["tasks", "goals", "milestones", "timeEntries", "capacity"],
+  },
+  {
+    key: "revenue",
+    label: "Revenue",
+    sections: ["invoices", "quotes", "deals", "finances", "investors"],
+  },
+  { key: "crm", label: "CRM", sections: ["customers", "meetings"] },
+  {
+    key: "personal",
+    label: "Personal",
+    sections: ["habits", "journal", "reflections"],
+  },
+  { key: "knowledge", label: "Knowledge", sections: ["notes"] },
+];
+
+const CategoryTabs: FC<{ hiddenSections: string[] }> = ({ hiddenSections }) => {
+  const cats = CATEGORY_DEFS
+    .map((c) => ({
+      ...c,
+      count: c.sections.filter((s) => !hiddenSections.includes(s)).length,
+    }))
+    .filter((c) => c.count > 0);
+  if (cats.length === 0) return null;
   return (
-    <nav class="analytics__jump-bar" aria-label="Analytics sections">
-      {visible.map(({ key, label }) => (
-        <a
-          key={key}
-          href={`#analytics-${key}`}
-          class="analytics__jump-link"
-          data-jump-anchor={key}
-        >
-          {label}
-        </a>
+    <>
+      {cats.map((c, i) => (
+        <input
+          key={c.key}
+          type="radio"
+          name="analytics-cat"
+          id={`atab-${c.key}`}
+          class="analytics__tab-radio"
+          checked={i === 0}
+        />
       ))}
-    </nav>
+      <nav class="analytics__tab-nav" aria-label="Analytics categories">
+        {cats.map((c) => (
+          <label key={c.key} for={`atab-${c.key}`} class="analytics__tab">
+            {c.label}
+          </label>
+        ))}
+      </nav>
+    </>
   );
 };
 
@@ -372,7 +413,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
         people={people}
       />
 
-      <AnalyticsJumpBar hiddenSections={hiddenSections} />
+      <CategoryTabs hiddenSections={hiddenSections} />
 
       {/* Tasks */}
       {visible("tasks") && (
@@ -380,6 +421,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-tasks"
           data-jump-target="tasks"
+          data-cat="delivery"
         >
           <SectionHeader
             title="Tasks"
@@ -440,6 +482,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-goals"
           data-jump-target="goals"
+          data-cat="delivery"
         >
           <SectionHeader
             title="Goals"
@@ -492,6 +535,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-milestones"
           data-jump-target="milestones"
+          data-cat="delivery"
         >
           <SectionHeader
             title="Milestones"
@@ -549,6 +593,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-timeEntries"
           data-jump-target="timeEntries"
+          data-cat="delivery"
         >
           <SectionHeader
             title="Time Tracking"
@@ -607,6 +652,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-capacity"
           data-jump-target="capacity"
+          data-cat="delivery"
         >
           <SectionHeader
             title="Capacity Plans"
@@ -699,6 +745,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-invoices"
           data-jump-target="invoices"
+          data-cat="revenue"
         >
           <SectionHeader
             title="Invoices"
@@ -750,6 +797,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-quotes"
           data-jump-target="quotes"
+          data-cat="revenue"
         >
           <SectionHeader
             title="Quotes"
@@ -797,6 +845,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-meetings"
           data-jump-target="meetings"
+          data-cat="crm"
         >
           <SectionHeader
             title="Meetings"
@@ -834,6 +883,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-customers"
           data-jump-target="customers"
+          data-cat="crm"
         >
           <SectionHeader
             title="Customers"
@@ -853,6 +903,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-notes"
           data-jump-target="notes"
+          data-cat="knowledge"
         >
           <SectionHeader
             title="Notes"
@@ -905,6 +956,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-investors"
           data-jump-target="investors"
+          data-cat="revenue"
         >
           <SectionHeader
             title="Investors"
@@ -954,6 +1006,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-finances"
           data-jump-target="finances"
+          data-cat="revenue"
         >
           <SectionHeader
             title="Finances"
@@ -1011,6 +1064,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-deals"
           data-jump-target="deals"
+          data-cat="revenue"
         >
           <SectionHeader
             title="Deals"
@@ -1057,6 +1111,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-habits"
           data-jump-target="habits"
+          data-cat="personal"
         >
           <SectionHeader
             title="Habits"
@@ -1104,6 +1159,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-journal"
           data-jump-target="journal"
+          data-cat="personal"
         >
           <SectionHeader
             title="Journal"
@@ -1151,6 +1207,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           class="analytics__section"
           id="analytics-reflections"
           data-jump-target="reflections"
+          data-cat="personal"
         >
           <SectionHeader
             title="Reflections"
@@ -1190,7 +1247,7 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       {...vp}
       activePath="/analytics"
       styles={["/css/views/analytics.css"]}
-      scripts={["/js/analytics-jump-bar.js", "/js/analytics-charts.js"]}
+      scripts={["/js/analytics-charts.js"]}
     >
       <div id="analytics-sidenav-container" />
       <AnalyticsBody

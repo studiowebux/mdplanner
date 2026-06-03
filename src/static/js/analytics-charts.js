@@ -8,8 +8,7 @@
 // re-rendering. Geometry is the only thing computed here.
 //
 // Re-renders on every htmx body swap (filter bar + customize panel both
-// re-render the entire <main id="analytics-content">), mirroring
-// analytics-jump-bar.js.
+// re-render the entire <main id="analytics-content">).
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 

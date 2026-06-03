@@ -652,19 +652,29 @@
   justify-content: flex-end;
 }
 
-/* ── jump bar ───────────────────────────────────────────────────────────── */
+/* ── category tabs (CSS-only) ───────────────────────────────────────────── */
+/* Hidden radios + a sticky label nav, rendered as siblings of the sections.
+   The checked radio reveals only its category via the `~` combinator — no JS,
+   CSP-safe. If no radios render (all sections hidden), sections fall back to
+   their base display and all show. */
 
-.analytics__jump-bar {
+.analytics__tab-radio {
+  position: absolute;
+  width: var(--border-width);
+  height: var(--border-width);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.analytics__tab-nav {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: var(--space-xs);
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  padding: var(--space-sm) 0;
+  padding: var(--space-sm) var(--page-padding);
   margin: 0 calc(-1 * var(--page-padding));
-  padding-left: var(--page-padding);
-  padding-right: var(--page-padding);
   background: var(--color-bg-primary);
   border-bottom: var(--border-width) var(--border-style)
     var(--color-border-default);
@@ -672,29 +682,48 @@
   scrollbar-width: thin;
 }
 
-.analytics__jump-link {
+.analytics__tab {
   flex: 0 0 auto;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
   color: var(--color-text-secondary);
   background: var(--color-bg-secondary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-full);
-  text-decoration: none;
+  cursor: pointer;
   white-space: nowrap;
+  user-select: none;
   transition:
     color var(--transition-fast),
     background var(--transition-fast),
     border-color var(--transition-fast);
 }
 
-.analytics__jump-link:hover {
+.analytics__tab:hover {
   color: var(--color-text-primary);
   background: var(--color-bg-hover);
 }
 
-.analytics__jump-link.is-active {
+/* Hide every section that follows the tab radios; the checked radio re-shows
+   only its category. */
+.analytics__tab-radio ~ .analytics__section {
+  display: none;
+}
+
+#atab-delivery:checked ~ .analytics__section[data-cat="delivery"],
+#atab-revenue:checked ~ .analytics__section[data-cat="revenue"],
+#atab-crm:checked ~ .analytics__section[data-cat="crm"],
+#atab-personal:checked ~ .analytics__section[data-cat="personal"],
+#atab-knowledge:checked ~ .analytics__section[data-cat="knowledge"] {
+  display: flex;
+}
+
+#atab-delivery:checked ~ .analytics__tab-nav label[for="atab-delivery"],
+#atab-revenue:checked ~ .analytics__tab-nav label[for="atab-revenue"],
+#atab-crm:checked ~ .analytics__tab-nav label[for="atab-crm"],
+#atab-personal:checked ~ .analytics__tab-nav label[for="atab-personal"],
+#atab-knowledge:checked ~ .analytics__tab-nav label[for="atab-knowledge"] {
   color: var(--color-text-on-accent);
   background: var(--color-accent);
   border-color: var(--color-accent);
