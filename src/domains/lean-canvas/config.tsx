@@ -23,6 +23,7 @@ export const leanCanvasConfig: DomainConfig<
 > = {
   name: "lean-canvases",
   singular: "Lean Canvas",
+  plural: "Lean Canvases",
   path: "/lean-canvases",
   ssePrefix: "lean-canvas",
   styles: ["/css/views/lean-canvases.css"],
