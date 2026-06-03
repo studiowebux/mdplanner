@@ -24,11 +24,7 @@ actions:
     owner: diana
     due: 2026-03-01
     status: open
-  - id: act_1771796140243_zsw6
-    description: Do Work
-    owner: Ping
-    due: 2026-02-27
-    status: open
+project: TaskFlow Platform
 created_at: "2026-04-18T15:06:21.073Z"
 updated_at: "2026-04-18T15:06:21.073Z"
 related_meetings: []
