@@ -1,6 +1,7 @@
 ---
 id: lean_taskflow
 title: TaskFlow Lean Canvas
+project: TaskFlow Platform
 date: 2026-01-05
 created_at: "2026-05-21T02:04:20.699Z"
 updated_at: "2026-05-21T02:04:20.699Z"
