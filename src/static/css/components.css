@@ -1611,13 +1611,13 @@ a.badge:hover {
 
 .data-table--compact .data-table__th,
 .data-table--compact th {
-  padding: var(--space-sm) var(--space-sm);
+  padding: var(--space-smd) var(--space-sm);
   font-size: var(--font-size-xs);
 }
 
 .data-table--compact .data-table__td,
 .data-table--compact td {
-  padding: var(--space-sm) var(--space-sm);
+  padding: var(--space-smd) var(--space-sm);
   font-size: var(--font-size-sm);
   white-space: nowrap;
   overflow: hidden;
