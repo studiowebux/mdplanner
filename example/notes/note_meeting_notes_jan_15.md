@@ -10,7 +10,7 @@ tags: [mdplanner/notes]
 
 # Meeting Notes — Jan 15
 
-**Attendees:** Tommy, Claude
+**Attendees:** Sam Patel, Claude
 
 ## Agenda
 - Review v2 progress
@@ -23,5 +23,5 @@ tags: [mdplanner/notes]
 - SSE bus stays event-name-only (no payload)
 
 ## Action Items
-- [ ] Tommy: review domain factory PR
+- [ ] Sam Patel: review domain factory PR
 - [ ] Claude: port remaining 8 domains

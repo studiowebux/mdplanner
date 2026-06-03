@@ -6,7 +6,7 @@ value: 18000
 currency: CAD
 company: Acme Corp
 contact: Jane Doe
-assignee: Tommy
+assignee: Alice
 tags: [q2-2026, enterprise]
 created_at: "2026-05-14T14:36:55.868Z"
 updated_at: "2026-05-14T14:36:55.868Z"

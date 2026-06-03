@@ -6,7 +6,7 @@ value: 4800
 currency: CAD
 company: StartupCo
 contact: Alex Rivera
-assignee: Tommy
+assignee: Bob
 tags: [saas, annual]
 closed_at: "2026-03-15T10:00:00.000Z"
 created_at: "2026-02-20T08:00:00.000Z"

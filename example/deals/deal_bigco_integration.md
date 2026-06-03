@@ -6,7 +6,7 @@ value: 32000
 currency: CAD
 company: BigCo Inc
 contact: Sarah Chen
-assignee: Tommy
+assignee: Bob
 tags: [enterprise, integration]
 created_at: "2026-03-05T11:00:00.000Z"
 updated_at: "2026-05-10T16:00:00.000Z"

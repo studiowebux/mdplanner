@@ -25,4 +25,4 @@ Scope creep from feature requests during migration. Mitigation: strict milestone
 
 ## Who needs to be involved?
 
-Engineering (Claude) for implementation, product owner (Tommy) for prioritization and review, early users for billing workflow validation.
+Engineering (Claude) for implementation, product owner (Sam Patel) for prioritization and review, early users for billing workflow validation.

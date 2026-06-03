@@ -16,7 +16,7 @@ tags: [mdplanner/notes]
 - Achieve 80% test coverage on repositories
 
 ## Capacity
-- Tommy: 4 days/week (1 day client work)
+- Sam Patel: 4 days/week (1 day client work)
 - Claude: async, unlimited
 
 ## Committed

@@ -6,7 +6,7 @@ value: 600
 currency: CAD
 company: FreelanceHub
 contact: Mike Torres
-assignee: Tommy
+assignee: Alice
 tags: [smb]
 closed_at: "2026-04-02T00:00:00.000Z"
 created_at: "2026-03-18T09:00:00.000Z"

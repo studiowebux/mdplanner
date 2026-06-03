@@ -24,7 +24,7 @@ What to try first:
 
 Reply to this email with any feedback — I read every message.
 
-Tommy
+Sam Patel
 
 ---
 

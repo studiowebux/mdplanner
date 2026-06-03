@@ -11,7 +11,7 @@ updated_at: "2026-04-01T08:00:00.000Z"
 
 ## Team Members
 
-- (m_tommy) member_cto | 8h/day | Mon,Tue,Wed,Thu,Fri
+- (m_cto) member_cto | 8h/day | Mon,Tue,Wed,Thu,Fri
 - (m_alice) alice | 6h/day | Mon,Tue,Wed,Thu,Fri
 - (m_bob) bob | 8h/day | Mon,Tue,Wed,Thu,Fri
 - (m_diana) diana | 8h/day | Mon,Tue,Wed,Thu

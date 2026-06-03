@@ -6,7 +6,7 @@ value: 25000
 currency: CAD
 company: RetailPro
 contact: Dana Kim
-assignee: Tommy
+assignee: Diana
 tags: [retail, e-commerce]
 created_at: "2026-05-12T10:00:00.000Z"
 updated_at: "2026-05-12T10:00:00.000Z"
