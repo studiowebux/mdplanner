@@ -63,8 +63,13 @@ export const MindmapDetailView: FC<
       {...viewProps}
       styles={["/css/views/mindmaps.css"]}
       scripts={editing
-        ? ["/js/mindmap.js", "/js/mindmap-editor.js", "/js/inline-edit.js"]
-        : ["/js/mindmap.js"]}
+        ? [
+          "/js/mindmap-layout.js",
+          "/js/mindmap.js",
+          "/js/mindmap-editor.js",
+          "/js/inline-edit.js",
+        ]
+        : ["/js/mindmap-layout.js", "/js/mindmap.js"]}
     >
       <SseRefresh
         getUrl={`/mindmaps/${item.id}${editSuffix}`}

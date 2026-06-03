@@ -7,10 +7,12 @@
 (function () {
   "use strict";
 
+  // Pure geometry (node _x/_y, leaf counting) lives in mindmap-layout.js, loaded
+  // as a classic script before this one. Kept separate so the layout math is
+  // unit-testable without a DOM. See globalThis.MindmapLayout.
+  const { layout } = globalThis.MindmapLayout;
+
   // ── Config ──────────────────────────────────────────────────────────────────
-  const COL_W = 240; // horizontal space per depth level (px)
-  const NODE_H = 28; // vertical space allocated per leaf node
-  const V_GAP = 6; // extra gap between sibling groups
   const JUNCTION_OFFSET = 48; // how far the bracket junction sits from parent text edge
   const TEXT_MARGIN = 10; // gap between text edge and junction line
   const MAX_TEXT_W = 180; // truncate text beyond this width
@@ -75,55 +77,6 @@
     node._tw = measure(node._label, size);
     node._fontSize = size;
     (node.children || []).forEach((c) => prep(c, depth + 1));
-  }
-
-  // ── Leaf count ──────────────────────────────────────────────────────────────
-  function leaves(node) {
-    if (node._collapsed || !node.children || !node.children.length) return 1;
-    return node.children.reduce((s, c) => s + leaves(c), 0);
-  }
-
-  // ── Layout ──────────────────────────────────────────────────────────────────
-  // dir: 1 = right, -1 = left. Returns next available y.
-  function layoutBranch(node, depth, dir, y0) {
-    const l = leaves(node);
-    const totalH = l * NODE_H + (l - 1) * V_GAP;
-    node._y = y0 + totalH / 2;
-    node._x = dir * depth * COL_W;
-    node._dir = dir;
-
-    if (!node._collapsed && node.children && node.children.length) {
-      let cy = y0;
-      for (const child of node.children) {
-        cy = layoutBranch(child, depth + 1, dir, cy);
-      }
-    }
-    return y0 + totalH + V_GAP * 2;
-  }
-
-  function layout(root) {
-    root._x = 0;
-    root._y = 0;
-    root._dir = 0;
-
-    const ch = (root.children || []).filter((c) => !c._hidden);
-    if (!ch.length) return;
-
-    const rightCount = Math.ceil(ch.length / 2);
-    const right = ch.slice(0, rightCount);
-    const left = ch.slice(rightCount);
-
-    // Right side — centered vertically
-    const rLeaves = right.reduce((s, c) => s + leaves(c), 0);
-    const rH = rLeaves * NODE_H + (rLeaves - 1) * V_GAP;
-    let ry = -rH / 2;
-    for (const c of right) ry = layoutBranch(c, 1, 1, ry);
-
-    // Left side — centered vertically
-    const lLeaves = left.reduce((s, c) => s + leaves(c), 0);
-    const lH = lLeaves * NODE_H + (lLeaves - 1) * V_GAP;
-    let ly = -lH / 2;
-    for (const c of left) ly = layoutBranch(c, 1, -1, ly);
   }
 
   // ── SVG helpers ─────────────────────────────────────────────────────────────
