@@ -96,15 +96,16 @@ const ActionRow: FC<
     <td class="data-table__td">
       <button
         type="button"
-        class={`badge badge--${
-          action.status === "done" ? "success" : "warning"
-        } action-badge`}
+        class="btn btn--sm btn--ghost meeting-detail__action-toggle"
+        data-status={action.status}
         hx-put={`/meetings/${meetingId}/actions/${action.id}/toggle`}
         hx-target="#meeting-actions-table"
         hx-swap="outerHTML"
-        title="Toggle status"
+        title={action.status === "done"
+          ? "Reopen this action"
+          : "Mark this action done"}
       >
-        {action.status}
+        {action.status === "done" ? "Reopen" : "Mark done"}
       </button>
     </td>
     <td class="data-table__td data-table__td--actions">
@@ -178,10 +179,11 @@ const ActionsTableComponent: FC<
       hx-on--htmx:after-request="this.reset()"
     >
       <input
-        class="input meeting-detail__add-action-input"
+        class="form__input meeting-detail__add-action-input"
         type="text"
         name="description"
         placeholder="Add action item…"
+        aria-label="Action item description"
         required
       />
       <AutocompleteWidget
@@ -191,9 +193,10 @@ const ActionsTableComponent: FC<
         placeholder="Owner"
       />
       <input
-        class="input meeting-detail__add-action-input meeting-detail__add-action-input--sm"
+        class="form__input form__input--sm meeting-detail__add-action-input--sm"
         type="date"
         name="due"
+        aria-label="Due date"
       />
       <button class="btn btn--primary" type="submit">Add</button>
     </form>

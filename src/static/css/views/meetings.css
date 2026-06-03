@@ -20,16 +20,26 @@
   vertical-align: middle;
 }
 
-.action-badge {
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: var(--space-xs) var(--space-sm);
-  transition: opacity var(--transition-fast);
+/* Status toggle: a clear "Mark done / Reopen" button with an at-a-glance
+   status dot (warning = open, success = done). */
+.meeting-detail__action-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
 }
 
-.action-badge:hover {
-  opacity: var(--opacity-muted);
+.meeting-detail__action-toggle::before {
+  content: "";
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border-radius: var(--radius-full);
+  background: var(--color-warning);
+  flex-shrink: 0;
+}
+
+.meeting-detail__action-toggle[data-status="done"]::before {
+  background: var(--color-success);
 }
 
 .action-delete {
@@ -127,6 +137,13 @@
 }
 
 .meeting-detail__add-action-input {
+  flex: 1 1 var(--meeting-action-input-basis);
+  min-width: 0;
+}
+
+/* The owner autocomplete renders its own wrapper — give it the same flex
+   sizing as the sibling inputs so the row aligns instead of looking ragged. */
+.meeting-detail__add-action-form .form__autocomplete {
   flex: 1 1 var(--meeting-action-input-basis);
   min-width: 0;
 }
