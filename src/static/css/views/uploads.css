@@ -112,12 +112,7 @@
   width: 100%;
 }
 
-.uploads__td {
-  padding: var(--space-sm) var(--space-md);
-  vertical-align: middle;
-}
-
-.uploads__td--name {
+.uploads__file-name {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -137,7 +132,7 @@
   text-align: right;
 }
 
-.uploads__row--dangling {
+.data-table__row.uploads__row--dangling {
   background: var(--color-warning-bg);
 }
 

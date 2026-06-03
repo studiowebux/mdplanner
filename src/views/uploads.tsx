@@ -77,20 +77,24 @@ const SummaryCards: FC<
 );
 
 const FileRow: FC<{ file: UploadedFile }> = ({ file }) => (
-  <tr class={`uploads__row${file.isDangling ? " uploads__row--dangling" : ""}`}>
-    <td class="uploads__td uploads__td--name">
-      <a
-        href={`/api/v1/tasks/${file.taskId}/upload/${file.filename}`}
-        class="uploads__file-link"
-        download={file.filename}
-      >
-        {file.filename}
-      </a>
-      {file.isDangling && (
-        <span class="badge uploads__badge--dangling">dangling</span>
-      )}
+  <tr
+    class={`data-table__row${file.isDangling ? " uploads__row--dangling" : ""}`}
+  >
+    <td class="data-table__td">
+      <span class="uploads__file-name">
+        <a
+          href={`/api/v1/tasks/${file.taskId}/upload/${file.filename}`}
+          class="uploads__file-link"
+          download={file.filename}
+        >
+          {file.filename}
+        </a>
+        {file.isDangling && (
+          <span class="badge uploads__badge--dangling">dangling</span>
+        )}
+      </span>
     </td>
-    <td class="uploads__td uploads__td--task">
+    <td class="data-table__td uploads__td--task">
       {file.isDangling
         ? <span class="uploads__no-task">{file.taskId}</span>
         : (
@@ -99,12 +103,14 @@ const FileRow: FC<{ file: UploadedFile }> = ({ file }) => (
           </a>
         )}
     </td>
-    <td class="uploads__td uploads__td--ext">
+    <td class="data-table__td uploads__td--ext">
       <span class="badge">{ext(file.filename) || "—"}</span>
     </td>
-    <td class="uploads__td uploads__td--size">{formatBytes(file.sizeBytes)}</td>
-    <td class="uploads__td uploads__td--date">{formatDate(file.mtime)}</td>
-    <td class="uploads__td uploads__td--actions">
+    <td class="data-table__td uploads__td--size">
+      {formatBytes(file.sizeBytes)}
+    </td>
+    <td class="data-table__td uploads__td--date">{formatDate(file.mtime)}</td>
+    <td class="data-table__td uploads__td--actions">
       <button
         type="button"
         class="btn btn--danger btn--sm"
@@ -119,7 +125,9 @@ const FileRow: FC<{ file: UploadedFile }> = ({ file }) => (
   </tr>
 );
 
-const FilesTable: FC<{ files: UploadedFile[]; filter: "all" | "dangling" }> = (
+export const FilesTable: FC<
+  { files: UploadedFile[]; filter: "all" | "dangling" }
+> = (
   { files, filter },
 ) => {
   const shown = filter === "dangling"
