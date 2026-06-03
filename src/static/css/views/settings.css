@@ -542,7 +542,7 @@ html.sidebar-collapsed .settings-page__form-actions {
   top: 0;
   z-index: var(--z-sticky);
   background: var(--color-bg-primary);
-  padding: var(--space-sm) 0;
+  padding: var(--space-sm) var(--space-md);
 }
 
 .settings-nav__jump-pill {
