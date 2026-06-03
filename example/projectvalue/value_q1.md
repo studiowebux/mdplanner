@@ -1,6 +1,7 @@
 ---
 id: value_q1
 title: Q1 Value Assessment
+project: TaskFlow Platform
 date: 2026-01-20
 created_at: "2026-04-05T06:09:18.096Z"
 updated_at: "2026-04-05T06:09:18.096Z"

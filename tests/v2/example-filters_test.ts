@@ -25,6 +25,7 @@ import { businessModelConfig } from "../../src/domains/business-model/config.tsx
 import { eisenhowerConfig } from "../../src/domains/eisenhower/config.tsx";
 import { safeConfig } from "../../src/domains/safe/config.tsx";
 import { meetingConfig } from "../../src/domains/meeting/config.tsx";
+import { projectValueBoardConfig } from "../../src/domains/project-value-board/config.tsx";
 // deno-lint-ignore no-explicit-any
 type AnyConfig = any;
 
@@ -42,6 +43,7 @@ const CONFIGS: { name: string; cfg: AnyConfig }[] = [
   { name: "eisenhower", cfg: eisenhowerConfig },
   { name: "safe", cfg: safeConfig },
   { name: "meeting", cfg: meetingConfig },
+  { name: "project-value-board", cfg: projectValueBoardConfig },
 ];
 
 Deno.test("example filters — data-derived options populate for demo domains", async () => {
