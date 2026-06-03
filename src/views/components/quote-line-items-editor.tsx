@@ -70,6 +70,7 @@ export const EditCell: FC<{
   return (
     <td class="qli-cell qli-cell--editing">
       <input
+        id={`qli-${index}-${field}`}
         class="qli-input"
         type={numeric ? "number" : "text"}
         step={numeric ? "0.01" : undefined}
@@ -77,11 +78,20 @@ export const EditCell: FC<{
         value={value}
         autofocus
         autocomplete="off"
+        data-quadrant-edit={`/quotes/${quoteId}/line-items/${index}?field=${field}`}
         hx-post={`/quotes/${quoteId}/line-items/${index}?field=${field}`}
         hx-target="closest td"
         hx-swap="outerHTML"
-        hx-trigger="blur, keyup[key=='Enter']"
+        hx-trigger="quadrant-save"
       />
+      <button
+        type="button"
+        class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+        data-quadrant-save-for={`qli-${index}-${field}`}
+        aria-label="Save"
+      >
+        ✓
+      </button>
     </td>
   );
 };

@@ -39,15 +39,27 @@ const SectionBlock: FC<{
               ? (
                 <li key={idx} class="quadrant-card__item">
                   <textarea
+                    id={`qed-${sectionKey}-${idx}`}
                     class="quadrant-card__inline-edit quadrant-card__textarea"
                     name="text"
+                    data-quadrant-edit={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
                     hx-put={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-trigger="change"
-                    hx-swap="none"
+                    hx-trigger="quadrant-save"
+                    hx-target="#lc-detail-root"
+                    hx-select="#lc-detail-root"
+                    hx-swap="outerHTML"
                     hx-include="this"
                   >
                     {item}
                   </textarea>
+                  <button
+                    type="button"
+                    class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                    data-quadrant-save-for={`qed-${sectionKey}-${idx}`}
+                    aria-label="Save"
+                  >
+                    ✓
+                  </button>
                   <button
                     type="button"
                     class="quadrant-card__remove"
@@ -100,6 +112,7 @@ export const LeanCanvasDetailView: FC<
       title={lc.title}
       {...viewProps}
       styles={["/css/views/lean-canvases.css"]}
+      scripts={["/js/quadrant-edit.js"]}
     >
       <SseRefresh
         getUrl={"/lean-canvases/" + lc.id + editSuffix}

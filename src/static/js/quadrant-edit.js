@@ -53,7 +53,11 @@
       input.dispatchEvent(
         new CustomEvent("quadrant-submit", { bubbles: true }),
       );
-    } else if (input.hasAttribute("data-quadrant-edit")) {
+    } else if (
+      input.hasAttribute("data-quadrant-edit") && input.tagName !== "TEXTAREA"
+    ) {
+      // Single-line item: Enter commits. Textareas keep Enter as a newline and
+      // save via the ✓ button only.
       e.preventDefault();
       commit(input);
     }

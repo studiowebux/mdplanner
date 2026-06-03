@@ -83,15 +83,27 @@ const SectionBlock: FC<{
               ? (
                 <li key={idx} class="quadrant-card__item">
                   <textarea
+                    id={`qed-${sectionKey}-${idx}`}
                     class="quadrant-card__inline-edit quadrant-card__textarea"
                     name="text"
+                    data-quadrant-edit={`/business-models/${id}/${sectionKey}/${idx}${editSuffix}`}
                     hx-put={`/business-models/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-trigger="change"
-                    hx-swap="none"
+                    hx-trigger="quadrant-save"
+                    hx-target="#bmc-detail-root"
+                    hx-select="#bmc-detail-root"
+                    hx-swap="outerHTML"
                     hx-include="this"
                   >
                     {item}
                   </textarea>
+                  <button
+                    type="button"
+                    class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                    data-quadrant-save-for={`qed-${sectionKey}-${idx}`}
+                    aria-label="Save"
+                  >
+                    ✓
+                  </button>
                   <button
                     type="button"
                     class="quadrant-card__remove"
@@ -144,7 +156,7 @@ export const BusinessModelDetailView: FC<
       title={bmc.title}
       {...viewProps}
       styles={["/css/views/lean-canvases.css", "/css/views/business-model.css"]}
-      scripts={["/js/inline-edit.js"]}
+      scripts={["/js/inline-edit.js", "/js/quadrant-edit.js"]}
     >
       <SseRefresh
         getUrl={"/business-models/" + bmc.id + editSuffix}
