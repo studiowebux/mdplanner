@@ -21,6 +21,7 @@ import { vacationConfig } from "../../src/domains/vacation/config.tsx";
 import { peopleConfig } from "../../src/domains/people/config.tsx";
 import { dealConfig } from "../../src/domains/deal/config.tsx";
 import { leanCanvasConfig } from "../../src/domains/lean-canvas/config.tsx";
+import { businessModelConfig } from "../../src/domains/business-model/config.tsx";
 // deno-lint-ignore no-explicit-any
 type AnyConfig = any;
 
@@ -34,6 +35,7 @@ const CONFIGS: { name: string; cfg: AnyConfig }[] = [
   { name: "people", cfg: peopleConfig },
   { name: "deal", cfg: dealConfig },
   { name: "lean-canvas", cfg: leanCanvasConfig },
+  { name: "business-model", cfg: businessModelConfig },
 ];
 
 Deno.test("example filters — data-derived options populate for demo domains", async () => {

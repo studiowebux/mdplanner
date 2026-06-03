@@ -1,6 +1,7 @@
 ---
 id: bmc_taskflow
 title: TaskFlow Business Model Canvas
+project: TaskFlow Platform
 date: 2026-01-10
 created_at: "2026-05-13T05:35:19.085Z"
 updated_at: "2026-05-13T05:57:55.904Z"
@@ -21,7 +22,6 @@ updated_at: "2026-05-13T05:57:55.904Z"
 - Marketing and content
 - Community building
 - Security and compliance
-- test
 
 ## Key Resources
 
