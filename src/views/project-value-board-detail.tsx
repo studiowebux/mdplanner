@@ -96,6 +96,7 @@ const SectionBlock: FC<{
                 <li key={idx} class="quadrant-card__item">
                   <input
                     type="text"
+                    id={`qed-${sectionKey}-${idx}`}
                     class="quadrant-card__inline-edit"
                     name="text"
                     value={item}
@@ -107,6 +108,14 @@ const SectionBlock: FC<{
                     hx-swap="outerHTML"
                     hx-include="this"
                   />
+                  <button
+                    type="button"
+                    class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                    data-quadrant-save-for={`qed-${sectionKey}-${idx}`}
+                    aria-label="Save"
+                  >
+                    ✓
+                  </button>
                   <button
                     type="button"
                     class="quadrant-card__remove"

@@ -92,20 +92,31 @@ export const FishboneDetailView: FC<
                   <div class="quadrant-card__header">
                     {editing
                       ? (
-                        <input
-                          type="text"
-                          class="quadrant-card__inline-edit fishbone-detail__category-name"
-                          name="text"
-                          value={cause.section}
-                          data-quadrant-edit={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
-                          hx-put={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
-                          hx-trigger="quadrant-save"
-                          hx-target="#fishbone-detail-root"
-                          hx-select="#fishbone-detail-root"
-                          hx-swap="outerHTML"
-                          hx-include="this"
-                          aria-label="Category name"
-                        />
+                        <>
+                          <input
+                            type="text"
+                            id={`qed-fcat-${idx}`}
+                            class="quadrant-card__inline-edit fishbone-detail__category-name"
+                            name="text"
+                            value={cause.section}
+                            data-quadrant-edit={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
+                            hx-put={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
+                            hx-trigger="quadrant-save"
+                            hx-target="#fishbone-detail-root"
+                            hx-select="#fishbone-detail-root"
+                            hx-swap="outerHTML"
+                            hx-include="this"
+                            aria-label="Category name"
+                          />
+                          <button
+                            type="button"
+                            class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                            data-quadrant-save-for={`qed-fcat-${idx}`}
+                            aria-label="Save"
+                          >
+                            ✓
+                          </button>
+                        </>
                       )
                       : <h2 class="quadrant-card__title">{cause.section}</h2>}
                     <span class="badge">{cause.items.length}</span>
@@ -133,19 +144,30 @@ export const FishboneDetailView: FC<
                           <li key={i} class="quadrant-card__item">
                             {editing
                               ? (
-                                <input
-                                  type="text"
-                                  class="quadrant-card__inline-edit"
-                                  name="text"
-                                  value={item}
-                                  data-quadrant-edit={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
-                                  hx-put={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
-                                  hx-trigger="quadrant-save"
-                                  hx-target="#fishbone-detail-root"
-                                  hx-select="#fishbone-detail-root"
-                                  hx-swap="outerHTML"
-                                  hx-include="this"
-                                />
+                                <>
+                                  <input
+                                    type="text"
+                                    id={`qed-fitem-${idx}-${i}`}
+                                    class="quadrant-card__inline-edit"
+                                    name="text"
+                                    value={item}
+                                    data-quadrant-edit={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
+                                    hx-put={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
+                                    hx-trigger="quadrant-save"
+                                    hx-target="#fishbone-detail-root"
+                                    hx-select="#fishbone-detail-root"
+                                    hx-swap="outerHTML"
+                                    hx-include="this"
+                                  />
+                                  <button
+                                    type="button"
+                                    class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                                    data-quadrant-save-for={`qed-fitem-${idx}-${i}`}
+                                    aria-label="Save"
+                                  >
+                                    ✓
+                                  </button>
+                                </>
                               )
                               : <span>{item}</span>}
                             {editing && (

@@ -2105,6 +2105,14 @@ a.badge:hover {
   border-bottom-color: var(--color-accent);
 }
 
+/* Explicit per-item Save (revealed by quadrant-edit.js only when the item is
+   dirty). No autosave-on-blur; the global dirty-guard warns on leave. */
+.quadrant-card__save {
+  flex-shrink: 0;
+  padding: var(--space-xxs) var(--space-sm);
+  line-height: 1;
+}
+
 .quadrant-card__add {
   padding: var(--space-sm) var(--space-md);
   border-top: var(--border-width) solid var(--color-border-default);

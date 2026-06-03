@@ -144,19 +144,30 @@ export const EisenhowerDetailView: FC<
                         <li key={idx} class="quadrant-card__item">
                           {editing
                             ? (
-                              <input
-                                type="text"
-                                class="quadrant-card__inline-edit"
-                                name="text"
-                                value={item}
-                                data-quadrant-edit={`/eisenhower/${e.id}/${key}/${idx}${editSuffix}`}
-                                hx-put={`/eisenhower/${e.id}/${key}/${idx}${editSuffix}`}
-                                hx-trigger="quadrant-save"
-                                hx-target="#eisenhower-detail-root"
-                                hx-select="#eisenhower-detail-root"
-                                hx-swap="outerHTML"
-                                hx-include="this"
-                              />
+                              <>
+                                <input
+                                  type="text"
+                                  id={`qed-${key}-${idx}`}
+                                  class="quadrant-card__inline-edit"
+                                  name="text"
+                                  value={item}
+                                  data-quadrant-edit={`/eisenhower/${e.id}/${key}/${idx}${editSuffix}`}
+                                  hx-put={`/eisenhower/${e.id}/${key}/${idx}${editSuffix}`}
+                                  hx-trigger="quadrant-save"
+                                  hx-target="#eisenhower-detail-root"
+                                  hx-select="#eisenhower-detail-root"
+                                  hx-swap="outerHTML"
+                                  hx-include="this"
+                                />
+                                <button
+                                  type="button"
+                                  class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                                  data-quadrant-save-for={`qed-${key}-${idx}`}
+                                  aria-label="Save"
+                                >
+                                  ✓
+                                </button>
+                              </>
                             )
                             : <span>{item}</span>}
                           {editing && (

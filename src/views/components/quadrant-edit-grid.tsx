@@ -58,19 +58,30 @@ export const QuadrantEditGrid: FC<{
                     <li key={idx} class="quadrant-card__item">
                       {editing
                         ? (
-                          <input
-                            type="text"
-                            class="quadrant-card__inline-edit"
-                            name="text"
-                            value={item}
-                            data-quadrant-edit={`${sectionUrl}/${idx}${editSuffix}`}
-                            hx-put={`${sectionUrl}/${idx}${editSuffix}`}
-                            hx-trigger="quadrant-save"
-                            hx-target={target}
-                            hx-select={target}
-                            hx-swap="outerHTML"
-                            hx-include="this"
-                          />
+                          <>
+                            <input
+                              type="text"
+                              id={`qed-${section.key}-${idx}`}
+                              class="quadrant-card__inline-edit"
+                              name="text"
+                              value={item}
+                              data-quadrant-edit={`${sectionUrl}/${idx}${editSuffix}`}
+                              hx-put={`${sectionUrl}/${idx}${editSuffix}`}
+                              hx-trigger="quadrant-save"
+                              hx-target={target}
+                              hx-select={target}
+                              hx-swap="outerHTML"
+                              hx-include="this"
+                            />
+                            <button
+                              type="button"
+                              class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                              data-quadrant-save-for={`qed-${section.key}-${idx}`}
+                              aria-label="Save"
+                            >
+                              ✓
+                            </button>
+                          </>
                         )
                         : <span>{item}</span>}
                       {editing && (

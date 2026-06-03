@@ -93,6 +93,7 @@ export const StrategicLevelsDetailView: FC<
                             <>
                               <input
                                 type="text"
+                                id={`qed-sl-${level.id}`}
                                 class="sl-item__input"
                                 name="title"
                                 value={level.title}
@@ -104,6 +105,14 @@ export const StrategicLevelsDetailView: FC<
                                 hx-swap="outerHTML"
                                 hx-include="this"
                               />
+                              <button
+                                type="button"
+                                class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+                                data-quadrant-save-for={`qed-sl-${level.id}`}
+                                aria-label="Save"
+                              >
+                                ✓
+                              </button>
                               <button
                                 type="button"
                                 class="sl-item__remove"
