@@ -69,6 +69,7 @@ import { ArrayTableRow } from "../components/ui/form-builder.tsx";
 import { BRAINSTORM_FORM_FIELDS } from "../domains/brainstorm/constants.tsx";
 import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
+import { ONBOARDING_FORM_FIELDS } from "../domains/onboarding/constants.tsx";
 import { ONBOARDING_TEMPLATE_FORM_FIELDS } from "../domains/onboarding-template/constants.tsx";
 import { REFLECTION_TEMPLATE_FORM_FIELDS } from "../domains/reflection-template/constants.tsx";
 import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
@@ -466,6 +467,7 @@ for (
     BRAINSTORM_FORM_FIELDS,
     PORTFOLIO_FORM_FIELDS,
     PEOPLE_FORM_FIELDS,
+    ONBOARDING_FORM_FIELDS,
     ONBOARDING_TEMPLATE_FORM_FIELDS,
     REFLECTION_TEMPLATE_FORM_FIELDS,
     SETTINGS_FORM_FIELDS,

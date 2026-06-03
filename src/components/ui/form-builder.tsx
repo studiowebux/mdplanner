@@ -59,6 +59,17 @@ export type FieldDef =
     label: string;
     options: Option[];
     required?: boolean;
+    /**
+     * Optional htmx wiring fired when the selection changes — e.g. seed a
+     * sibling array-table from a chosen template. The select's own value is
+     * sent as a query/form param (htmx includes the triggering element).
+     */
+    hx?: {
+      get: string;
+      target: string;
+      trigger?: string;
+      swap?: string;
+    };
   }
   | {
     type: "textarea";
@@ -350,6 +361,14 @@ const Field: FC<
           name={def.name}
           class="form__select"
           required={def.required}
+          {...(def.hx
+            ? {
+              "hx-get": def.hx.get,
+              "hx-target": def.hx.target,
+              "hx-trigger": def.hx.trigger ?? "change",
+              "hx-swap": def.hx.swap ?? "innerHTML",
+            }
+            : {})}
         >
           {def.options.map((o) => (
             <option key={o.value} value={o.value} selected={value === o.value}>

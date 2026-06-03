@@ -9,6 +9,7 @@ import type {
 } from "../../types/onboarding.types.ts";
 import {
   getOnboardingService,
+  getOnboardingTemplateService,
   getPeopleService,
 } from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
@@ -74,20 +75,34 @@ export const onboardingConfig: DomainConfig<
     const parsed = parseFormBody(
       ONBOARDING_FORM_FIELDS,
       body,
-    ) as CreateOnboarding & { steps?: unknown };
+    ) as CreateOnboarding & { steps?: unknown; templateId?: unknown };
     const steps = normalizeSteps(parsed.steps);
+    // templateId is a UI-only seed selector — steps are copied, not linked.
+    delete (parsed as Record<string, unknown>).templateId;
     return { ...parsed, steps: steps ?? [] } as CreateOnboarding;
   },
 
   parseUpdate: (body) => {
     const parsed = parseFormBody(ONBOARDING_FORM_FIELDS, body, {
       clearEmpty: true,
-    }) as Partial<UpdateOnboarding> & { steps?: unknown };
+    }) as Partial<UpdateOnboarding> & { steps?: unknown; templateId?: unknown };
     const out: Partial<UpdateOnboarding> = { ...parsed };
+    delete (out as Record<string, unknown>).templateId;
     if ("steps" in parsed) {
       out.steps = normalizeSteps(parsed.steps) ?? [];
     }
     return out;
+  },
+
+  // Populate the "Seed from template" selector with available templates.
+  extractFormOptions: async () => {
+    const templates = await getOnboardingTemplateService().list();
+    return {
+      templateId: [
+        { value: "", label: "— None (enter steps manually) —" },
+        ...templates.map((t) => ({ value: t.id, label: t.name })),
+      ],
+    };
   },
 
   resolveFormValues: async (values) => {

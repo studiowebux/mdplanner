@@ -106,6 +106,18 @@ export const ONBOARDING_FORM_FIELDS: FieldDef[] = [
     rows: 4,
   },
   {
+    // Optional convenience — seeds the steps below from a template's step list.
+    // Placeholder options; overridden at render by config.extractFormOptions.
+    type: "select",
+    name: "templateId",
+    label: "Seed from template",
+    options: [{ value: "", label: "— None (enter steps manually) —" }],
+    hx: {
+      get: "/onboarding/template-steps",
+      target: "#onboarding-form-steps-rows",
+    },
+  },
+  {
     type: "array-table",
     name: "steps",
     label: "Step",
