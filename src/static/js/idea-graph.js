@@ -10,6 +10,10 @@
   var draggingNode = null, hoveredNode = null, panningBg = false;
   var mouseStartX = 0, mouseStartY = 0;
   var panOriginX = 0, panOriginY = 0;
+  // Drag-vs-click: a node/pan drag past this many px suppresses the
+  // post-mouseup click so dragging never navigates to the idea detail.
+  var suppressClick = false;
+  var DRAG_THRESHOLD = 5;
   var animFrame = null;
   var alpha = 1; // simulation heat — decays toward 0
 
@@ -410,6 +414,8 @@
   }
 
   function onMouseDown(e) {
+    mouseStartX = e.clientX;
+    mouseStartY = e.clientY;
     var n = nodeAt(e.clientX, e.clientY);
     if (n) {
       draggingNode = n;
@@ -417,8 +423,6 @@
       alpha = Math.max(alpha, 0.3);
     } else {
       panningBg = true;
-      mouseStartX = e.clientX;
-      mouseStartY = e.clientY;
       panOriginX = panX;
       panOriginY = panY;
     }
@@ -444,13 +448,21 @@
     canvas.style.cursor = "grab";
   }
 
-  function onMouseUp() {
+  function onMouseUp(e) {
+    var dx = e.clientX - mouseStartX;
+    var dy = e.clientY - mouseStartY;
+    var moved = (dx * dx + dy * dy) > DRAG_THRESHOLD * DRAG_THRESHOLD;
+    suppressClick = (draggingNode !== null || panningBg) && moved;
     if (draggingNode) draggingNode.fixed = false;
     draggingNode = null;
     panningBg = false;
   }
 
   function onClick(e) {
+    if (suppressClick) {
+      suppressClick = false;
+      return;
+    }
     var n = nodeAt(e.clientX, e.clientY);
     if (n && !panningBg) {
       window.location.href = "/ideas/" + n.id;
