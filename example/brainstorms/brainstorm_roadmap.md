@@ -1,8 +1,8 @@
 ---
 id: brainstorm_roadmap
 tags: [planning, product]
-linked_projects: [mdplanner]
-linked_goals: [goal_v2]
+linked_projects: [MD Planner]
+linked_goals: [goal_api_v2]
 created_at: 2026-03-01
 updated_at: 2026-03-15
 ---

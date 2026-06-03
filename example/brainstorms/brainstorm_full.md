@@ -1,9 +1,9 @@
 ---
 id: brainstorm_full
 tags: [architecture, design, v2]
-linked_projects: [mdplanner]
-linked_tasks: [task_1774934556608_4lcq, task_1775088741078_ej4r]
-linked_goals: [goal_v2]
+linked_projects: [MD Planner]
+linked_tasks: [task_api_versioning, task_auth_refactor]
+linked_goals: [goal_api_v2]
 created_by: person_1771824850093_s067dw
 updated_by: person_1771824811363_phhxpx
 created_at: 2026-04-01

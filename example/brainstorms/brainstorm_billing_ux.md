@@ -1,7 +1,6 @@
 ---
 id: brainstorm_billing_ux
 tags: [billing, ux, design]
-linked_tasks: [task_1775093654964_jp5s]
 created_at: 2026-03-20
 updated_at: 2026-03-20
 ---
