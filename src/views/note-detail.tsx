@@ -179,7 +179,9 @@ export const NoteDetailView: FC<Props> = (props) => {
             </div>
           </header>
 
-          <NoteBlocks note={note} />
+          <section class="detail-section">
+            <NoteBlocks note={note} />
+          </section>
           <AuditMeta
             createdAt={note.createdAt}
             updatedAt={note.updatedAt}
