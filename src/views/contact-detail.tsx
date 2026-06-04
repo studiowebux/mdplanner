@@ -13,40 +13,18 @@ import { InfoItem } from "./components/info-item.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { CONTACT_TYPE_VARIANTS } from "../domains/contact/constants.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ contact: Contact }> = ({ contact }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={contact.notes ?? ""}
-      data-inline-target="contact-notes-value"
-      data-inline-save-btn="contact-notes-save"
-    >
-      {contact.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="contact-notes-value"
+    <InlineEditable
+      fieldId="contact-notes"
       name="notes"
       value={contact.notes ?? ""}
+      hxPut={`/contacts/${contact.id}/notes?editing=true`}
+      rootId="contact-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="contact-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/contacts/${contact.id}/notes?editing=true`}
-        hx-include="#contact-notes-value"
-        hx-target="#contact-detail-root"
-        hx-select="#contact-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

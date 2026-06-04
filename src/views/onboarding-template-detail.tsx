@@ -10,40 +10,18 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const DescriptionSection: FC<{ item: OnboardingTemplate }> = ({ item }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={item.description ?? ""}
-      data-inline-target="onboarding-template-description-value"
-      data-inline-save-btn="onboarding-template-description-save"
-    >
-      {item.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="onboarding-template-description-value"
+    <InlineEditable
+      fieldId="onboarding-template-description"
       name="description"
       value={item.description ?? ""}
+      hxPut={`/onboarding-templates/${item.id}/description?editing=true`}
+      rootId="onboarding-template-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="onboarding-template-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/onboarding-templates/${item.id}/description?editing=true`}
-        hx-include="#onboarding-template-description-value"
-        hx-target="#onboarding-template-detail-root"
-        hx-select="#onboarding-template-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

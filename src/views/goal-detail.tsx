@@ -22,6 +22,7 @@ import {
 } from "../domains/goal/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const InlineEditSection: FC<{
   goal: Goal;
@@ -29,36 +30,16 @@ const InlineEditSection: FC<{
   title: string;
 }> = ({ goal, field, title }) => {
   const value = (goal[field] ?? "") as string;
-  const inputId = `goal-${field}-value`;
-  const btnId = `goal-${field}-save`;
   return (
     <section class="detail-section">
       <h2 class="section-heading">{title}</h2>
-      <div
-        class="inline-editable"
-        contenteditable
-        data-inline-edit
-        data-inline-original={value}
-        data-inline-target={inputId}
-        data-inline-save-btn={btnId}
-      >
-        {value}
-      </div>
-      <input type="hidden" id={inputId} name={field} value={value} />
-      <div class="inline-editable__actions">
-        <button
-          type="button"
-          id={btnId}
-          class="btn btn--primary btn--sm is-hidden"
-          hx-put={`/goals/${goal.id}/${field}?editing=true`}
-          hx-include={`#${inputId}`}
-          hx-target="#goal-detail-root"
-          hx-select="#goal-detail-root"
-          hx-swap="outerHTML"
-        >
-          Save
-        </button>
-      </div>
+      <InlineEditable
+        fieldId={`goal-${field}`}
+        name={field}
+        value={value}
+        hxPut={`/goals/${goal.id}/${field}?editing=true`}
+        rootId="goal-detail-root"
+      />
     </section>
   );
 };

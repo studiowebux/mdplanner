@@ -1150,12 +1150,40 @@
     }
   });
 
-  // Init — attach the SSE edit-guard once the SseRefresh element exists. The
-  // [data-edit-guard] flag inside guardSseRefresh() keeps it bound only once.
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", guardSseRefresh);
-  } else {
-    guardSseRefresh();
+  // -------------------------------------------------------------------------
+  // Title field — explicit Save (no save-on-blur). The Save button is revealed
+  // only while the title differs from the persisted value; htmx performs the
+  // actual save + re-render on click. data-unsaved opts the field into the
+  // central dirty guard (dirty-guard.js) so leaving with unsaved edits warns.
+  // -------------------------------------------------------------------------
+
+  function wireTitleSave() {
+    var input = document.getElementById("note-title-input");
+    if (!input || input.dataset.titleWired) return;
+    input.dataset.titleWired = "true";
+    var btn = document.getElementById("note-title-save");
+    if (!btn) return;
+    var original = input.dataset.noteTitleOriginal || "";
+    input.addEventListener("input", function () {
+      var changed = input.value !== original;
+      btn.classList.toggle("is-hidden", !changed);
+      if (changed) btn.setAttribute("data-unsaved", "true");
+      else btn.removeAttribute("data-unsaved");
+    });
   }
-  document.addEventListener("htmx:load", guardSseRefresh);
+
+  // Init — attach the SSE edit-guard once the SseRefresh element exists (the
+  // [data-edit-guard] flag inside guardSseRefresh() keeps it bound only once)
+  // and wire the explicit title Save. Both are idempotent and re-run on
+  // htmx:load so they re-bind after #note-detail-root re-renders.
+  function initEditor() {
+    guardSseRefresh();
+    wireTitleSave();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initEditor);
+  } else {
+    initEditor();
+  }
+  document.addEventListener("htmx:load", initEditor);
 })();

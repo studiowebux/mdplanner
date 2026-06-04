@@ -18,40 +18,18 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ item: Moscow }> = ({ item }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={item.notes ?? ""}
-      data-inline-target="moscow-notes-value"
-      data-inline-save-btn="moscow-notes-save"
-    >
-      {item.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="moscow-notes-value"
+    <InlineEditable
+      fieldId="moscow-notes"
       name="notes"
       value={item.notes ?? ""}
+      hxPut={`/moscow/${item.id}/notes?editing=true`}
+      rootId="moscow-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="moscow-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/moscow/${item.id}/notes?editing=true`}
-        hx-include="#moscow-notes-value"
-        hx-target="#moscow-detail-root"
-        hx-select="#moscow-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

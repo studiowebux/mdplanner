@@ -19,40 +19,18 @@ import {
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const DescriptionSection: FC<{ idea: Idea }> = ({ idea }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={idea.description ?? ""}
-      data-inline-target="idea-description-value"
-      data-inline-save-btn="idea-description-save"
-    >
-      {idea.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="idea-description-value"
+    <InlineEditable
+      fieldId="idea-description"
       name="description"
       value={idea.description ?? ""}
+      hxPut={`/ideas/${idea.id}/description?editing=true`}
+      rootId="idea-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="idea-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/ideas/${idea.id}/description?editing=true`}
-        hx-include="#idea-description-value"
-        hx-target="#idea-detail-root"
-        hx-select="#idea-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

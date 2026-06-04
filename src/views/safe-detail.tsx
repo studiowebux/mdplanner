@@ -13,40 +13,18 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { SAFE_STATUS_VARIANTS } from "../domains/safe/constants.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ safe: Safe }> = ({ safe }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={safe.notes ?? ""}
-      data-inline-target="safe-notes-value"
-      data-inline-save-btn="safe-notes-save"
-    >
-      {safe.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="safe-notes-value"
+    <InlineEditable
+      fieldId="safe-notes"
       name="notes"
       value={safe.notes ?? ""}
+      hxPut={`/safe/${safe.id}/notes?editing=true`}
+      rootId="safe-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="safe-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/safe/${safe.id}/notes?editing=true`}
-        hx-include="#safe-notes-value"
-        hx-target="#safe-detail-root"
-        hx-select="#safe-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

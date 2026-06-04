@@ -19,40 +19,18 @@ import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ board: ProjectValueBoard }> = ({ board }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={board.notes ?? ""}
-      data-inline-target="pv-notes-value"
-      data-inline-save-btn="pv-notes-save"
-    >
-      {board.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="pv-notes-value"
+    <InlineEditable
+      fieldId="pv-notes"
       name="notes"
       value={board.notes ?? ""}
+      hxPut={`/project-value/${board.id}/notes?editing=true`}
+      rootId="pv-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="pv-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/project-value/${board.id}/notes?editing=true`}
-        hx-include="#pv-notes-value"
-        hx-target="#pv-detail-root"
-        hx-select="#pv-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

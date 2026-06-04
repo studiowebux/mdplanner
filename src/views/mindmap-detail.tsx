@@ -11,42 +11,20 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import { countAllNodes } from "../domains/mindmap/constants.tsx";
 import { serializeBulletTree } from "../repositories/mindmap.repository.ts";
 
 const NotesSection: FC<{ item: Mindmap }> = ({ item }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={item.notes ?? ""}
-      data-inline-target="mindmap-notes-value"
-      data-inline-save-btn="mindmap-notes-save"
-    >
-      {item.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="mindmap-notes-value"
+    <InlineEditable
+      fieldId="mindmap-notes"
       name="notes"
       value={item.notes ?? ""}
+      hxPut={`/mindmaps/${item.id}/notes?editing=true`}
+      rootId="mindmap-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="mindmap-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/mindmaps/${item.id}/notes?editing=true`}
-        hx-include="#mindmap-notes-value"
-        hx-target="#mindmap-detail-root"
-        hx-select="#mindmap-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

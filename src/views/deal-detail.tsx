@@ -15,40 +15,18 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { DEAL_STAGE_VARIANTS } from "../domains/deal/constants.tsx";
 import { formatDate } from "../utils/time.ts";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const DescriptionSection: FC<{ deal: Deal }> = ({ deal }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={deal.description ?? ""}
-      data-inline-target="deal-description-value"
-      data-inline-save-btn="deal-description-save"
-    >
-      {deal.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="deal-description-value"
+    <InlineEditable
+      fieldId="deal-description"
       name="description"
       value={deal.description ?? ""}
+      hxPut={`/deals/${deal.id}/description?editing=true`}
+      rootId="deal-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="deal-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/deals/${deal.id}/description?editing=true`}
-        hx-include="#deal-description-value"
-        hx-target="#deal-detail-root"
-        hx-select="#deal-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

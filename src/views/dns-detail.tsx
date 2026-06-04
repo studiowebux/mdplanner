@@ -19,6 +19,7 @@ import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -141,36 +142,13 @@ export const DnsRecordForm: FC<{
 const NotesSection: FC<{ domain: DnsDomain }> = ({ domain }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={domain.notes ?? ""}
-      data-inline-target="dns-notes-value"
-      data-inline-save-btn="dns-notes-save"
-    >
-      {domain.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="dns-notes-value"
+    <InlineEditable
+      fieldId="dns-notes"
       name="notes"
       value={domain.notes ?? ""}
+      hxPut={`/dns/${domain.id}/notes?editing=true`}
+      rootId="dns-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="dns-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/dns/${domain.id}/notes?editing=true`}
-        hx-include="#dns-notes-value"
-        hx-target="#dns-detail-root"
-        hx-select="#dns-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

@@ -14,6 +14,7 @@ import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BUSINESS_MODEL_SECTION_META } from "../domains/business-model/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -27,36 +28,13 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 const NotesSection: FC<{ bmc: BusinessModel }> = ({ bmc }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={bmc.notes ?? ""}
-      data-inline-target="bmc-notes-value"
-      data-inline-save-btn="bmc-notes-save"
-    >
-      {bmc.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="bmc-notes-value"
+    <InlineEditable
+      fieldId="bmc-notes"
       name="notes"
       value={bmc.notes ?? ""}
+      hxPut={`/business-models/${bmc.id}/notes?editing=true`}
+      rootId="bmc-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="bmc-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/business-models/${bmc.id}/notes?editing=true`}
-        hx-include="#bmc-notes-value"
-        hx-target="#bmc-detail-root"
-        hx-select="#bmc-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

@@ -18,40 +18,18 @@ import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { CUSTOMER_BILLING_MAX_ROWS } from "../domains/customer/constants.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ customer: Customer }> = ({ customer }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={customer.notes ?? ""}
-      data-inline-target="customer-notes-value"
-      data-inline-save-btn="customer-notes-save"
-    >
-      {customer.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="customer-notes-value"
+    <InlineEditable
+      fieldId="customer-notes"
       name="notes"
       value={customer.notes ?? ""}
+      hxPut={`/customers/${customer.id}/notes?editing=true`}
+      rootId="customer-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="customer-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/customers/${customer.id}/notes?editing=true`}
-        hx-include="#customer-notes-value"
-        hx-target="#customer-detail-root"
-        hx-select="#customer-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

@@ -4,10 +4,12 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { quoteConfig } from "../../domains/quote/config.tsx";
 import {
+  getCustomerService,
   getProjectService,
   getQuoteService,
 } from "../../singletons/services.ts";
 import { QuoteDetailView } from "../quote-detail.tsx";
+import { QuotePrintView } from "../quote-print.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
@@ -56,6 +58,30 @@ async function renderDetail(c: AppContext, id: string) {
 }
 
 quotesRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
+
+// Print-only view — browser Print / Save as PDF (mirrors invoices/:id/print).
+quotesRouter.get("/:id/print", async (c) => {
+  const id = c.req.param("id")!;
+  const service = getQuoteService();
+  const [quote, billingConfig] = await Promise.all([
+    service.getById(id),
+    getProjectService().getConfig(),
+  ]);
+  if (!quote) return c.notFound();
+
+  const customer = quote.customerId
+    ? await getCustomerService().getById(quote.customerId)
+    : null;
+
+  return c.html(
+    <QuotePrintView
+      quote={quote}
+      billingConfig={billingConfig}
+      customer={customer ?? null}
+      nonce={c.get("nonce")}
+    />,
+  );
+});
 
 // In-place notes save (Edit Mode). Factory provides edit/delete routes.
 quotesRouter.put("/:id/notes", async (c) => {

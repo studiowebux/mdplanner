@@ -19,6 +19,7 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // Shared inline-editable section for `notes` and `footer`.
@@ -30,36 +31,16 @@ const InlineEditSection: FC<{
   title: string;
 }> = ({ invoice, field, title }) => {
   const value = (invoice[field] ?? "") as string;
-  const inputId = `invoice-${field}-value`;
-  const btnId = `invoice-${field}-save`;
   return (
     <section class="detail-section">
       <h2 class="section-heading">{title}</h2>
-      <div
-        class="inline-editable"
-        contenteditable
-        data-inline-edit
-        data-inline-original={value}
-        data-inline-target={inputId}
-        data-inline-save-btn={btnId}
-      >
-        {value}
-      </div>
-      <input type="hidden" id={inputId} name={field} value={value} />
-      <div class="inline-editable__actions">
-        <button
-          type="button"
-          id={btnId}
-          class="btn btn--primary btn--sm is-hidden"
-          hx-put={`/invoices/${invoice.id}/${field}?editing=true`}
-          hx-include={`#${inputId}`}
-          hx-target="#invoice-detail-root"
-          hx-select="#invoice-detail-root"
-          hx-swap="outerHTML"
-        >
-          Save
-        </button>
-      </div>
+      <InlineEditable
+        fieldId={`invoice-${field}`}
+        name={field}
+        value={value}
+        hxPut={`/invoices/${invoice.id}/${field}?editing=true`}
+        rootId="invoice-detail-root"
+      />
     </section>
   );
 };

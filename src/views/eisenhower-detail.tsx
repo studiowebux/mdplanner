@@ -10,6 +10,7 @@ import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import {
   EISENHOWER_QUADRANT_KEYS,
@@ -23,36 +24,13 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 const NotesSection: FC<{ e: Eisenhower }> = ({ e }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={e.notes ?? ""}
-      data-inline-target="eisenhower-notes-value"
-      data-inline-save-btn="eisenhower-notes-save"
-    >
-      {e.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="eisenhower-notes-value"
+    <InlineEditable
+      fieldId="eisenhower-notes"
       name="notes"
       value={e.notes ?? ""}
+      hxPut={`/eisenhower/${e.id}/notes?editing=true`}
+      rootId="eisenhower-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="eisenhower-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/eisenhower/${e.id}/notes?editing=true`}
-        hx-include="#eisenhower-notes-value"
-        hx-target="#eisenhower-detail-root"
-        hx-select="#eisenhower-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

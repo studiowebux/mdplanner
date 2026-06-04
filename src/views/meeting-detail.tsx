@@ -19,6 +19,7 @@ import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // Shared inline-editable section for `agenda` and `notes`.
@@ -30,36 +31,16 @@ const InlineEditSection: FC<{
   title: string;
 }> = ({ meeting, field, title }) => {
   const value = (meeting[field] ?? "") as string;
-  const inputId = `meeting-${field}-value`;
-  const btnId = `meeting-${field}-save`;
   return (
     <section class="detail-section">
       <h2 class="section-heading">{title}</h2>
-      <div
-        class="inline-editable"
-        contenteditable
-        data-inline-edit
-        data-inline-original={value}
-        data-inline-target={inputId}
-        data-inline-save-btn={btnId}
-      >
-        {value}
-      </div>
-      <input type="hidden" id={inputId} name={field} value={value} />
-      <div class="inline-editable__actions">
-        <button
-          type="button"
-          id={btnId}
-          class="btn btn--primary btn--sm is-hidden"
-          hx-put={`/meetings/${meeting.id}/${field}?editing=true`}
-          hx-include={`#${inputId}`}
-          hx-target="#meeting-detail-root"
-          hx-select="#meeting-detail-root"
-          hx-swap="outerHTML"
-        >
-          Save
-        </button>
-      </div>
+      <InlineEditable
+        fieldId={`meeting-${field}`}
+        name={field}
+        value={value}
+        hxPut={`/meetings/${meeting.id}/${field}?editing=true`}
+        rootId="meeting-detail-root"
+      />
     </section>
   );
 };

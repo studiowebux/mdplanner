@@ -116,18 +116,29 @@ export const NoteDetailView: FC<Props> = (props) => {
             {isArchived
               ? <h1 class="note-detail__title-input">{note.title}</h1>
               : (
-                <input
-                  type="text"
-                  class="note-detail__title-input"
-                  name="title"
-                  value={note.title}
-                  hx-post={`/notes/${note.id}/title`}
-                  hx-trigger="change"
-                  hx-target="#note-detail-root"
-                  hx-select="#note-detail-root"
-                  hx-swap="outerHTML"
-                  hx-include="this"
-                />
+                <>
+                  <input
+                    type="text"
+                    id="note-title-input"
+                    class="note-detail__title-input"
+                    name="title"
+                    value={note.title}
+                    data-note-title-input
+                    data-note-title-original={note.title}
+                  />
+                  <button
+                    type="button"
+                    id="note-title-save"
+                    class="btn btn--primary btn--sm is-hidden"
+                    hx-post={`/notes/${note.id}/title`}
+                    hx-include="#note-title-input"
+                    hx-target="#note-detail-root"
+                    hx-select="#note-detail-root"
+                    hx-swap="outerHTML"
+                  >
+                    Save
+                  </button>
+                </>
               )}
           </div>
           <div class="note-detail__meta">

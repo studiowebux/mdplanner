@@ -9,6 +9,7 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // Description — read or in-place editable (contenteditable + Save).
@@ -19,36 +20,13 @@ const DescriptionSection: FC<{ template: BrainstormTemplate }> = ({
 }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={template.description ?? ""}
-      data-inline-target="btemplate-description-value"
-      data-inline-save-btn="btemplate-description-save"
-    >
-      {template.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="btemplate-description-value"
+    <InlineEditable
+      fieldId="btemplate-description"
       name="description"
       value={template.description ?? ""}
+      hxPut={`/brainstorm-templates/${template.id}/description?editing=true`}
+      rootId="btemplate-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="btemplate-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/brainstorm-templates/${template.id}/description?editing=true`}
-        hx-include="#btemplate-description-value"
-        hx-target="#btemplate-detail-root"
-        hx-select="#btemplate-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

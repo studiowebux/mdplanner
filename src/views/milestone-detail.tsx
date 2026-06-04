@@ -15,6 +15,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -25,36 +26,13 @@ type Props = ViewProps & {
 const DescriptionSection: FC<{ milestone: Milestone }> = ({ milestone }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={milestone.description ?? ""}
-      data-inline-target="milestone-description-value"
-      data-inline-save-btn="milestone-description-save"
-    >
-      {milestone.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="milestone-description-value"
+    <InlineEditable
+      fieldId="milestone-description"
       name="description"
       value={milestone.description ?? ""}
+      hxPut={`/milestones/${milestone.id}/description?editing=true`}
+      rootId="milestone-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="milestone-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/milestones/${milestone.id}/description?editing=true`}
-        hx-include="#milestone-description-value"
-        hx-target="#milestone-detail-root"
-        hx-select="#milestone-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

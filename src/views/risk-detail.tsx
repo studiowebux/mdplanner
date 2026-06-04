@@ -14,6 +14,7 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { RISK_STATUS_VARIANTS } from "../domains/risk/constants.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const InlineEditSection: FC<{
   risk: Risk;
@@ -21,36 +22,16 @@ const InlineEditSection: FC<{
   title: string;
 }> = ({ risk, field, title }) => {
   const value = (risk[field] ?? "") as string;
-  const inputId = `risk-${field}-value`;
-  const btnId = `risk-${field}-save`;
   return (
     <section class="detail-section">
       <h2 class="section-heading">{title}</h2>
-      <div
-        class="inline-editable"
-        contenteditable
-        data-inline-edit
-        data-inline-original={value}
-        data-inline-target={inputId}
-        data-inline-save-btn={btnId}
-      >
-        {value}
-      </div>
-      <input type="hidden" id={inputId} name={field} value={value} />
-      <div class="inline-editable__actions">
-        <button
-          type="button"
-          id={btnId}
-          class="btn btn--primary btn--sm is-hidden"
-          hx-put={`/risks/${risk.id}/${field}?editing=true`}
-          hx-include={`#${inputId}`}
-          hx-target="#risk-detail-root"
-          hx-select="#risk-detail-root"
-          hx-swap="outerHTML"
-        >
-          Save
-        </button>
-      </div>
+      <InlineEditable
+        fieldId={`risk-${field}`}
+        name={field}
+        value={value}
+        hxPut={`/risks/${risk.id}/${field}?editing=true`}
+        rootId="risk-detail-root"
+      />
     </section>
   );
 };

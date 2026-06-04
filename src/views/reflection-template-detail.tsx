@@ -10,40 +10,18 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const DescriptionSection: FC<{ item: ReflectionTemplate }> = ({ item }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={item.description ?? ""}
-      data-inline-target="rtemplate-description-value"
-      data-inline-save-btn="rtemplate-description-save"
-    >
-      {item.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="rtemplate-description-value"
+    <InlineEditable
+      fieldId="rtemplate-description"
       name="description"
       value={item.description ?? ""}
+      hxPut={`/reflection-templates/${item.id}/description?editing=true`}
+      rootId="rtemplate-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="rtemplate-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/reflection-templates/${item.id}/description?editing=true`}
-        hx-include="#rtemplate-description-value"
-        hx-target="#rtemplate-detail-root"
-        hx-select="#rtemplate-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

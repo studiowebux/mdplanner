@@ -12,6 +12,7 @@ import { InfoItem } from "./components/info-item.tsx";
 import { formatRate, UNIT_LABELS } from "../domains/billing-rate/constants.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // Notes — read (markdown) or in-place editable (contenteditable + Save).
@@ -20,36 +21,13 @@ import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 const NotesSection: FC<{ rate: BillingRate }> = ({ rate }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={rate.notes ?? ""}
-      data-inline-target="billing-rate-notes-value"
-      data-inline-save-btn="billing-rate-notes-save"
-    >
-      {rate.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="billing-rate-notes-value"
+    <InlineEditable
+      fieldId="billing-rate-notes"
       name="notes"
       value={rate.notes ?? ""}
+      hxPut={`/billing-rates/${rate.id}/notes?editing=true`}
+      rootId="billing-rate-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="billing-rate-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/billing-rates/${rate.id}/notes?editing=true`}
-        hx-include="#billing-rate-notes-value"
-        hx-target="#billing-rate-detail-root"
-        hx-select="#billing-rate-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

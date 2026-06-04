@@ -20,6 +20,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // Shared inline-editable section for `notes` and `footer`.
@@ -31,36 +32,16 @@ const InlineEditSection: FC<{
   title: string;
 }> = ({ quote, field, title }) => {
   const value = (quote[field] ?? "") as string;
-  const inputId = `quote-${field}-value`;
-  const btnId = `quote-${field}-save`;
   return (
     <section class="detail-section">
       <h2 class="section-heading">{title}</h2>
-      <div
-        class="inline-editable"
-        contenteditable
-        data-inline-edit
-        data-inline-original={value}
-        data-inline-target={inputId}
-        data-inline-save-btn={btnId}
-      >
-        {value}
-      </div>
-      <input type="hidden" id={inputId} name={field} value={value} />
-      <div class="inline-editable__actions">
-        <button
-          type="button"
-          id={btnId}
-          class="btn btn--primary btn--sm is-hidden"
-          hx-put={`/quotes/${quote.id}/${field}?editing=true`}
-          hx-include={`#${inputId}`}
-          hx-target="#quote-detail-root"
-          hx-select="#quote-detail-root"
-          hx-swap="outerHTML"
-        >
-          Save
-        </button>
-      </div>
+      <InlineEditable
+        fieldId={`quote-${field}`}
+        name={field}
+        value={value}
+        hxPut={`/quotes/${quote.id}/${field}?editing=true`}
+        rootId="quote-detail-root"
+      />
     </section>
   );
 };
@@ -209,6 +190,14 @@ export const QuoteDetailView: FC<
                 </button>
               </>
             )}
+            <a
+              class="btn btn--secondary btn--sm quote-detail__print-btn"
+              href={`/quotes/${quote.id}/print`}
+              target="_blank"
+              rel="noopener"
+            >
+              Print / Save as PDF
+            </a>
           </div>
         </header>
 

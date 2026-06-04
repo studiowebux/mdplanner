@@ -9,6 +9,7 @@ import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -23,36 +24,13 @@ import { REFLECTION_PERIOD_VARIANTS } from "../domains/reflection/constants.tsx"
 const ContentSection: FC<{ reflection: Reflection }> = ({ reflection }) => (
   <section class="detail-section">
     <h2 class="section-heading">Content</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={reflection.content ?? ""}
-      data-inline-target="reflection-content-value"
-      data-inline-save-btn="reflection-content-save"
-    >
-      {reflection.content ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="reflection-content-value"
+    <InlineEditable
+      fieldId="reflection-content"
       name="content"
       value={reflection.content ?? ""}
+      hxPut={`/reflections/${reflection.id}/content?editing=true`}
+      rootId="reflection-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="reflection-content-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/reflections/${reflection.id}/content?editing=true`}
-        hx-include="#reflection-content-value"
-        hx-target="#reflection-detail-root"
-        hx-select="#reflection-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

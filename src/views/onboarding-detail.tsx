@@ -10,6 +10,7 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import {
   STEP_CATEGORY_LABELS,
   STEP_STATUS_LABELS,
@@ -18,36 +19,13 @@ import {
 const NotesSection: FC<{ item: Onboarding }> = ({ item }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={item.notes ?? ""}
-      data-inline-target="onboarding-notes-value"
-      data-inline-save-btn="onboarding-notes-save"
-    >
-      {item.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="onboarding-notes-value"
+    <InlineEditable
+      fieldId="onboarding-notes"
       name="notes"
       value={item.notes ?? ""}
+      hxPut={`/onboarding/${item.id}/notes?editing=true`}
+      rootId="onboarding-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="onboarding-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/onboarding/${item.id}/notes?editing=true`}
-        hx-include="#onboarding-notes-value"
-        hx-target="#onboarding-detail-root"
-        hx-select="#onboarding-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

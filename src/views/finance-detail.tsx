@@ -16,40 +16,18 @@ import { FINANCE_TYPE_VARIANTS } from "../domains/finance/constants.tsx";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ finance: Finance }> = ({ finance }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={finance.description ?? ""}
-      data-inline-target="finance-description-value"
-      data-inline-save-btn="finance-description-save"
-    >
-      {finance.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="finance-description-value"
+    <InlineEditable
+      fieldId="finance-description"
       name="description"
       value={finance.description ?? ""}
+      hxPut={`/finances/${finance.id}/description?editing=true`}
+      rootId="finance-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="finance-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/finances/${finance.id}/description?editing=true`}
-        hx-include="#finance-description-value"
-        hx-target="#finance-detail-root"
-        hx-select="#finance-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

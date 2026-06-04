@@ -11,6 +11,7 @@ import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import {
@@ -29,36 +30,13 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 const DescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
   <section class="detail-section mktplan-detail__section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={plan.description ?? ""}
-      data-inline-target="mktplan-description-value"
-      data-inline-save-btn="mktplan-description-save"
-    >
-      {plan.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="mktplan-description-value"
+    <InlineEditable
+      fieldId="mktplan-description"
       name="description"
       value={plan.description ?? ""}
+      hxPut={`/marketing-plans/${plan.id}/description?editing=true`}
+      rootId="mktplan-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="mktplan-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/marketing-plans/${plan.id}/description?editing=true`}
-        hx-include="#mktplan-description-value"
-        hx-target="#mktplan-detail-root"
-        hx-select="#mktplan-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 
@@ -69,36 +47,13 @@ const DescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
 const NotesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
   <section class="detail-section mktplan-detail__section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={plan.notes ?? ""}
-      data-inline-target="mktplan-notes-value"
-      data-inline-save-btn="mktplan-notes-save"
-    >
-      {plan.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="mktplan-notes-value"
+    <InlineEditable
+      fieldId="mktplan-notes"
       name="notes"
       value={plan.notes ?? ""}
+      hxPut={`/marketing-plans/${plan.id}/notes?editing=true`}
+      rootId="mktplan-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="mktplan-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/marketing-plans/${plan.id}/notes?editing=true`}
-        hx-include="#mktplan-notes-value"
-        hx-target="#mktplan-detail-root"
-        hx-select="#mktplan-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

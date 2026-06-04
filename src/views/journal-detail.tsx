@@ -14,6 +14,7 @@ import { JOURNAL_MOOD_VARIANTS } from "../domains/journal/constants.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 // ---------------------------------------------------------------------------
 // Content — read (markdown) or in-place editable (contenteditable + Save).
@@ -22,36 +23,13 @@ import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 const ContentSection: FC<{ entry: JournalEntry }> = ({ entry }) => (
   <section class="detail-section">
     <h2 class="section-heading">Content</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={entry.content ?? ""}
-      data-inline-target="journal-content-value"
-      data-inline-save-btn="journal-content-save"
-    >
-      {entry.content ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="journal-content-value"
+    <InlineEditable
+      fieldId="journal-content"
       name="content"
       value={entry.content ?? ""}
+      hxPut={`/journal/${entry.id}/content?editing=true`}
+      rootId="journal-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="journal-content-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/journal/${entry.id}/content?editing=true`}
-        hx-include="#journal-content-value"
-        hx-target="#journal-detail-root"
-        hx-select="#journal-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

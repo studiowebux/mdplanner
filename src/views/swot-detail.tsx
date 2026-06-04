@@ -19,40 +19,18 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { QuadrantEditGrid } from "./components/quadrant-edit-grid.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ swot: Swot }> = ({ swot }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={swot.notes ?? ""}
-      data-inline-target="swot-notes-value"
-      data-inline-save-btn="swot-notes-save"
-    >
-      {swot.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="swot-notes-value"
+    <InlineEditable
+      fieldId="swot-notes"
       name="notes"
       value={swot.notes ?? ""}
+      hxPut={`/swot/${swot.id}/notes?editing=true`}
+      rootId="swot-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="swot-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/swot/${swot.id}/notes?editing=true`}
-        hx-include="#swot-notes-value"
-        hx-target="#swot-detail-root"
-        hx-select="#swot-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

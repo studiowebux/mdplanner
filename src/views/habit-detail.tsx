@@ -16,40 +16,18 @@ import { HabitCompletionLog } from "./habits/components/habit-completion-log.tsx
 import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ habit: Habit }> = ({ habit }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={habit.description ?? ""}
-      data-inline-target="habit-description-value"
-      data-inline-save-btn="habit-description-save"
-    >
-      {habit.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="habit-description-value"
+    <InlineEditable
+      fieldId="habit-description"
       name="description"
       value={habit.description ?? ""}
+      hxPut={`/habits/${habit.id}/description?editing=true`}
+      rootId="habit-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="habit-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/habits/${habit.id}/description?editing=true`}
-        hx-include="#habit-description-value"
-        hx-target="#habit-detail-root"
-        hx-select="#habit-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

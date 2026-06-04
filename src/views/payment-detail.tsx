@@ -14,40 +14,18 @@ import { PAYMENT_METHOD_VARIANTS } from "../domains/payment/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 const NotesSection: FC<{ payment: Payment }> = ({ payment }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={payment.notes ?? ""}
-      data-inline-target="payment-notes-value"
-      data-inline-save-btn="payment-notes-save"
-    >
-      {payment.notes ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="payment-notes-value"
+    <InlineEditable
+      fieldId="payment-notes"
       name="notes"
       value={payment.notes ?? ""}
+      hxPut={`/payments/${payment.id}/notes?editing=true`}
+      rootId="payment-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="payment-notes-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/payments/${payment.id}/notes?editing=true`}
-        hx-include="#payment-notes-value"
-        hx-target="#payment-detail-root"
-        hx-select="#payment-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 

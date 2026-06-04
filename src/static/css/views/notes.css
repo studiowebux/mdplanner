@@ -334,6 +334,15 @@
   outline: none;
 }
 
+/* Edit Mode: the title <input> flexes so its explicit Save button sits inline
+   beside it (the row is .detail-title-row — flex with wrap) instead of dropping
+   onto a second line. The read-mode <h1> keeps width:100%. */
+.note-detail__title-row input.note-detail__title-input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  width: auto;
+}
+
 .note-detail__top-bar {
   display: flex;
   justify-content: space-between;

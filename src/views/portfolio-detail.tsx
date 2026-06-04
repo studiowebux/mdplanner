@@ -20,6 +20,7 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
+import { InlineEditable } from "./components/inline-editable.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -35,36 +36,13 @@ type Props = ViewProps & {
 const DescriptionSection: FC<{ item: PortfolioItem }> = ({ item }) => (
   <section class="detail-section">
     <h2 class="section-heading">Description</h2>
-    <div
-      class="inline-editable"
-      contenteditable
-      data-inline-edit
-      data-inline-original={item.description ?? ""}
-      data-inline-target="portfolio-description-value"
-      data-inline-save-btn="portfolio-description-save"
-    >
-      {item.description ?? ""}
-    </div>
-    <input
-      type="hidden"
-      id="portfolio-description-value"
+    <InlineEditable
+      fieldId="portfolio-description"
       name="description"
       value={item.description ?? ""}
+      hxPut={`/portfolio/${item.id}/description?editing=true`}
+      rootId="portfolio-detail-root"
     />
-    <div class="inline-editable__actions">
-      <button
-        type="button"
-        id="portfolio-description-save"
-        class="btn btn--primary btn--sm is-hidden"
-        hx-put={`/portfolio/${item.id}/description?editing=true`}
-        hx-include="#portfolio-description-value"
-        hx-target="#portfolio-detail-root"
-        hx-select="#portfolio-detail-root"
-        hx-swap="outerHTML"
-      >
-        Save
-      </button>
-    </div>
   </section>
 );
 
