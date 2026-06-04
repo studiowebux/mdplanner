@@ -61,7 +61,7 @@ const NotesSection: FC<{ customer: Customer }> = ({ customer }) => (
 
 type InvoiceWithDisplay = Invoice & { displayStatus: string };
 
-const BillingSection: FC<{
+export const BillingSection: FC<{
   customerId: string;
   quotes: Quote[];
   invoices: InvoiceWithDisplay[];
@@ -137,20 +137,20 @@ const BillingSection: FC<{
               </thead>
               <tbody class="data-table__body">
                 {recentQuotes.map((q) => (
-                  <tr key={q.id}>
-                    <td>
+                  <tr key={q.id} class="data-table__row">
+                    <td class="data-table__td">
                       <a href={`/quotes/${q.id}`}>{q.number}</a>
                     </td>
-                    <td>{q.title}</td>
-                    <td data-col="status">
+                    <td class="data-table__td">{q.title}</td>
+                    <td class="data-table__td" data-col="status">
                       <span class={badgeClass(QUOTE_STATUS_VARIANTS, q.status)}>
                         {q.status}
                       </span>
                     </td>
-                    <td class="data-table__td--right">
+                    <td class="data-table__td data-table__td--right">
                       {formatCurrency(q.total) || "$0"}
                     </td>
-                    <td>{q.expiresAt ?? ""}</td>
+                    <td class="data-table__td">{q.expiresAt ?? ""}</td>
                   </tr>
                 ))}
               </tbody>
@@ -190,12 +190,12 @@ const BillingSection: FC<{
               </thead>
               <tbody class="data-table__body">
                 {recentInvoices.map((inv) => (
-                  <tr key={inv.id}>
-                    <td>
+                  <tr key={inv.id} class="data-table__row">
+                    <td class="data-table__td">
                       <a href={`/invoices/${inv.id}`}>{inv.number}</a>
                     </td>
-                    <td>{inv.title}</td>
-                    <td data-col="status">
+                    <td class="data-table__td">{inv.title}</td>
+                    <td class="data-table__td" data-col="status">
                       <span
                         class={badgeClass(
                           INVOICE_STATUS_VARIANTS,
@@ -205,13 +205,13 @@ const BillingSection: FC<{
                         {inv.displayStatus}
                       </span>
                     </td>
-                    <td class="data-table__td--right">
+                    <td class="data-table__td data-table__td--right">
                       {formatCurrency(inv.total) || "$0"}
                     </td>
-                    <td class="data-table__td--right">
+                    <td class="data-table__td data-table__td--right">
                       {formatCurrency(inv.paidAmount) || "$0"}
                     </td>
-                    <td>{inv.dueDate ?? ""}</td>
+                    <td class="data-table__td">{inv.dueDate ?? ""}</td>
                   </tr>
                 ))}
               </tbody>

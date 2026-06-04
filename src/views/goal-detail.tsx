@@ -176,6 +176,51 @@ const SmartCriteriaSection: FC<{ goal: Goal }> = ({ goal }) => {
 // Main view
 // ---------------------------------------------------------------------------
 
+export const SubGoalsTable: FC<{ childGoals: Goal[] }> = ({ childGoals }) => (
+  <section class="detail-section goal-detail__section">
+    <h2 class="section-heading">
+      Sub-Goals ({childGoals.length})
+    </h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="data-table__th">Title</th>
+          <th class="data-table__th">Status</th>
+          <th class="data-table__th">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        {childGoals.map((child) => (
+          <tr class="data-table__row">
+            <td class="data-table__td">
+              <a href={`/goals/${child.id}`}>{child.title}</a>
+            </td>
+            <td class="data-table__td">
+              <span class={badgeClass(GOAL_STATUS_VARIANTS, child.status)}>
+                {child.status}
+              </span>
+            </td>
+            <td class="data-table__td">
+              {child.progress != null
+                ? (
+                  <div class="goal-progress-cell">
+                    <progress
+                      class="progress-bar"
+                      value={child.progress}
+                      max={100}
+                    />
+                    <span>{child.progress}%</span>
+                  </div>
+                )
+                : ""}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+);
+
 export const GoalDetailView: FC<
   ViewProps & {
     item: Goal;
@@ -432,52 +477,7 @@ export const GoalDetailView: FC<
           : <MarkdownSection title="Notes" markdown={goal.notes} />}
 
         {/* ── Sub-Goals ──────────────────────────────────────────── */}
-        {childGoals.length > 0 && (
-          <section class="detail-section goal-detail__section">
-            <h2 class="section-heading">
-              Sub-Goals ({childGoals.length})
-            </h2>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Status</th>
-                  <th>Progress</th>
-                </tr>
-              </thead>
-              <tbody>
-                {childGoals.map((child) => (
-                  <tr>
-                    <td class="data-table__td">
-                      <a href={`/goals/${child.id}`}>{child.title}</a>
-                    </td>
-                    <td class="data-table__td">
-                      <span
-                        class={badgeClass(GOAL_STATUS_VARIANTS, child.status)}
-                      >
-                        {child.status}
-                      </span>
-                    </td>
-                    <td class="data-table__td">
-                      {child.progress != null
-                        ? (
-                          <div class="goal-progress-cell">
-                            <progress
-                              class="progress-bar"
-                              value={child.progress}
-                              max={100}
-                            />
-                            <span>{child.progress}%</span>
-                          </div>
-                        )
-                        : ""}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+        {childGoals.length > 0 && <SubGoalsTable childGoals={childGoals} />}
         {/* ── SMART criteria ─────────────────────────────────────── */}
         <SmartCriteriaSection goal={goal} />
 

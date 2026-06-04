@@ -268,7 +268,7 @@ export const LogTimeForm: FC<{
   );
 };
 
-const TimeEntriesSection: FC<{
+export const TimeEntriesSection: FC<{
   taskId: string;
   entries: Task["time_entries"];
 }> = ({ taskId, entries }) => {
@@ -299,21 +299,23 @@ const TimeEntriesSection: FC<{
         <table class="data-table data-table--compact">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Hours</th>
-              <th>Person</th>
-              <th>Description</th>
-              <th />
+              <th class="data-table__th">Date</th>
+              <th class="data-table__th">Hours</th>
+              <th class="data-table__th">Person</th>
+              <th class="data-table__th">Description</th>
+              <th class="data-table__th" />
             </tr>
           </thead>
           <tbody>
             {list.map((e) => (
-              <tr key={e.id}>
-                <td>{formatDate(e.date)}</td>
-                <td class="task-detail__time-hours">{e.hours}h</td>
-                <td>{e.person ?? "—"}</td>
-                <td>{e.description ?? "—"}</td>
-                <td class="data-table__td--actions">
+              <tr key={e.id} class="data-table__row">
+                <td class="data-table__td">{formatDate(e.date)}</td>
+                <td class="data-table__td task-detail__time-hours">
+                  {e.hours}h
+                </td>
+                <td class="data-table__td">{e.person ?? "—"}</td>
+                <td class="data-table__td">{e.description ?? "—"}</td>
+                <td class="data-table__td data-table__td--actions">
                   <button
                     class="btn btn--danger btn--sm"
                     type="button"
