@@ -80,480 +80,480 @@ export const PersonDetailView: FC<Props> = (
     .toUpperCase();
 
   return (
-    <>
-      <MainLayout
-        title={person.name}
-        {...viewProps}
-        styles={["/css/views/people.css"]}
-      >
-        <main id="person-detail" class="detail-view person-detail">
-          <Breadcrumb
-            items={[
-              { label: "People", href: "/people" },
-              { label: person.name },
-            ]}
-          />
-          <BackButton href="/people" label="Back to people" />
+    <MainLayout
+      title={person.name}
+      {...viewProps}
+      styles={["/css/views/people.css"]}
+    >
+      <main id="person-detail" class="detail-view person-detail">
+        <Breadcrumb
+          items={[
+            { label: "People", href: "/people" },
+            { label: person.name },
+          ]}
+        />
+        <BackButton href="/people" label="Back to people" />
 
-          <header class="detail-header person-detail__header">
-            <div class="person-detail__identity">
-              <span
-                class={`person-card__avatar person-card__avatar--${
-                  person.agentType ?? "human"
-                }`}
-              >
-                {initials}
+        <header class="detail-header person-detail__header">
+          <div class="person-detail__identity">
+            <span
+              class={`person-card__avatar person-card__avatar--${
+                person.agentType ?? "human"
+              }`}
+            >
+              {initials}
+            </span>
+            <div>
+              <h1 class="detail-title person-detail__name">{person.name}</h1>
+              {person.title && (
+                <p class="person-detail__title">{person.title}</p>
+              )}
+            </div>
+          </div>
+          {person.agentType && (
+            <span class={badgeClass(PERSON_TYPE_VARIANTS, person.agentType)}>
+              {person.agentType}
+            </span>
+          )}
+          <DetailActions
+            entity="people"
+            id={person.id}
+            title={person.name}
+            formContainerId="people-form-container"
+            onDeleteRedirect="/people"
+            archived={person.archived === true}
+          />
+        </header>
+
+        <ArchivedBanner entity={person} />
+
+        <dl class="person-detail__meta">
+          {person.role && (
+            <>
+              <dt>Role</dt>
+              <dd>{person.role}</dd>
+            </>
+          )}
+          {person.departments && person.departments.length > 0 && (
+            <>
+              <dt>Departments</dt>
+              <dd>{person.departments.join(", ")}</dd>
+            </>
+          )}
+          {person.email && (
+            <>
+              <dt>Email</dt>
+              <dd>
+                <a href={`mailto:${person.email}`}>{person.email}</a>
+              </dd>
+            </>
+          )}
+          {person.phone && (
+            <>
+              <dt>Phone</dt>
+              <dd>{person.phone}</dd>
+            </>
+          )}
+          {person.startDate && (
+            <>
+              <dt>Start date</dt>
+              <dd>{formatDate(person.startDate)}</dd>
+            </>
+          )}
+          {manager && (
+            <>
+              <dt>Reports to</dt>
+              <dd>
+                <a href={`/people/${manager.id}`}>{manager.name}</a>
+              </dd>
+            </>
+          )}
+          {person.hoursPerDay != null && (
+            <>
+              <dt>Hours/day</dt>
+              <dd>{person.hoursPerDay}</dd>
+            </>
+          )}
+          {person.workingDays && person.workingDays.length > 0 && (
+            <>
+              <dt>Working days</dt>
+              <dd>{person.workingDays.join(", ")}</dd>
+            </>
+          )}
+        </dl>
+
+        {person.skills && person.skills.length > 0 && (
+          <section class="detail-section person-detail__section">
+            <h2>Skills</h2>
+            <div class="person-card__skills">
+              {person.skills.map((s) => <span key={s} class="badge">{s}</span>)}
+            </div>
+          </section>
+        )}
+
+        {person.agentType && person.agentType !== "human" && (
+          <section class="detail-section person-detail__section">
+            <h2>Agent</h2>
+            <dl class="person-detail__meta">
+              {person.status && (
+                <>
+                  <dt>Status</dt>
+                  <dd>
+                    <span
+                      class={badgeClass(
+                        PERSON_STATUS_VARIANTS,
+                        person.status,
+                      )}
+                    >
+                      {person.status}
+                    </span>
+                  </dd>
+                </>
+              )}
+              {person.lastSeen && (
+                <>
+                  <dt>Last seen</dt>
+                  <dd>{timeAgo(person.lastSeen)}</dd>
+                </>
+              )}
+              {person.currentTaskId && (
+                <>
+                  <dt>Current task</dt>
+                  <dd>{person.currentTaskId}</dd>
+                </>
+              )}
+              {person.models && person.models.length > 0 && (
+                <>
+                  <dt>Models</dt>
+                  <dd>
+                    {person.models.map((m) => `${m.name} (${m.provider})`)
+                      .join(
+                        ", ",
+                      )}
+                  </dd>
+                </>
+              )}
+            </dl>
+            {person.systemPrompt && (
+              <details class="person-detail__prompt">
+                <summary>System prompt</summary>
+                <pre>{person.systemPrompt}</pre>
+              </details>
+            )}
+          </section>
+        )}
+
+        {person.accounts && Object.keys(person.accounts).length > 0 && (
+          <section class="detail-section person-detail__section">
+            <h2>External accounts</h2>
+            <dl class="person-detail__meta">
+              {Object.entries(person.accounts).map(([provider, username]) => (
+                <>
+                  <dt key={provider}>{provider}</dt>
+                  <dd key={`${provider}-val`}>{username}</dd>
+                </>
+              ))}
+            </dl>
+          </section>
+        )}
+
+        {person.notes && (
+          <section class="detail-section person-detail__section">
+            <h2>Notes</h2>
+            <div class="person-detail__notes">{person.notes}</div>
+          </section>
+        )}
+
+        {reports.length > 0 && (
+          <section class="detail-section person-detail__section">
+            <h2>
+              Direct reports
+              <span class="person-detail__count">({reports.length})</span>
+            </h2>
+            <ul class="person-detail__reports">
+              {reports.map((r) => (
+                <li key={r.id}>
+                  <a href={`/people/${r.id}`}>{r.name}</a>
+                  {r.title && (
+                    <span class="person-detail__report-title">
+                      &nbsp;&mdash; {r.title}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {retrospectives.length > 0 && (
+          <section class="detail-section person-detail__section">
+            <h2>
+              Retrospectives
+              <span class="person-detail__count">
+                ({retrospectives.length})
               </span>
-              <div>
-                <h1 class="detail-title person-detail__name">{person.name}</h1>
-                {person.title && (
-                  <p class="person-detail__title">{person.title}</p>
+            </h2>
+            <ul class="person-detail__retros">
+              {retrospectives.map((r) => (
+                <li key={r.id}>
+                  <a href={`/retrospectives/${r.id}`}>{r.title}</a>
+                  {r.date && (
+                    <span class="person-detail__retro-date">
+                      &nbsp;&mdash; {formatDate(r.date)}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section class="detail-section person-detail__section">
+          <h2>
+            Meetings
+            {attendedMeetingsTotal > 0 && (
+              <span class="person-detail__count">
+                ({attendedMeetingsTotal})
+              </span>
+            )}
+          </h2>
+          {attendedMeetings.length > 0
+            ? (
+              <>
+                <ul class="person-detail__meetings">
+                  {attendedMeetings.map((m) => (
+                    <li key={m.id}>
+                      <a href={`/meetings/${m.id}`}>{m.title}</a>
+                      <span class="person-detail__meeting-meta">
+                        {formatDate(m.date)} &middot;{" "}
+                        {(m.attendees ?? []).length} attendees
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {attendedMeetingsTotal > attendedMeetings.length && (
+                  <a
+                    class="person-detail__toggle"
+                    href={`/meetings?q=${encodeURIComponent(person.name)}`}
+                  >
+                    View all ({attendedMeetingsTotal})
+                  </a>
                 )}
+              </>
+            )
+            : <EmptyState message="No meetings attended yet." />}
+        </section>
+
+        {analytics && (
+          <section class="detail-section person-detail__section">
+            <h2>Analytics</h2>
+            <div class="person-detail__stat-grid">
+              <div class="person-detail__stat-card">
+                <span class="person-detail__stat-value">
+                  {analytics.openTasks}
+                </span>
+                <span class="person-detail__stat-label">Open tasks</span>
+              </div>
+              <div class="person-detail__stat-card">
+                <span class="person-detail__stat-value">
+                  {analytics.doneTasks}
+                </span>
+                <span class="person-detail__stat-label">Tasks done</span>
+              </div>
+              <div class="person-detail__stat-card">
+                <span class="person-detail__stat-value">
+                  {analytics.activeGoals}
+                </span>
+                <span class="person-detail__stat-label">Active goals</span>
+              </div>
+              <div class="person-detail__stat-card">
+                <span class="person-detail__stat-value">
+                  {analytics.hoursLogged}h
+                </span>
+                <span class="person-detail__stat-label">Time logged</span>
+              </div>
+              <div class="person-detail__stat-card">
+                <span class="person-detail__stat-value">
+                  {analytics.meetingsAttended}
+                </span>
+                <span class="person-detail__stat-label">
+                  Meetings attended
+                </span>
               </div>
             </div>
-            {person.agentType && (
-              <span class={badgeClass(PERSON_TYPE_VARIANTS, person.agentType)}>
-                {person.agentType}
-              </span>
-            )}
-            <DetailActions
-              entity="people"
-              id={person.id}
-              title={person.name}
-              formContainerId="people-form-container"
-              onDeleteRedirect="/people"
-              archived={person.archived === true}
-            />
-          </header>
+          </section>
+        )}
 
-          <ArchivedBanner entity={person} />
+        <section class="detail-section person-detail__section">
+          <h2>
+            Assigned
+            <a class="person-detail__toggle" href={toggleHref}>
+              {toggleLabel}
+            </a>
+          </h2>
 
-          <dl class="person-detail__meta">
-            {person.role && (
-              <>
-                <dt>Role</dt>
-                <dd>{person.role}</dd>
-              </>
-            )}
-            {person.departments && person.departments.length > 0 && (
-              <>
-                <dt>Departments</dt>
-                <dd>{person.departments.join(", ")}</dd>
-              </>
-            )}
-            {person.email && (
-              <>
-                <dt>Email</dt>
-                <dd>
-                  <a href={`mailto:${person.email}`}>{person.email}</a>
-                </dd>
-              </>
-            )}
-            {person.phone && (
-              <>
-                <dt>Phone</dt>
-                <dd>{person.phone}</dd>
-              </>
-            )}
-            {person.startDate && (
-              <>
-                <dt>Start date</dt>
-                <dd>{formatDate(person.startDate)}</dd>
-              </>
-            )}
-            {manager && (
-              <>
-                <dt>Reports to</dt>
-                <dd>
-                  <a href={`/people/${manager.id}`}>{manager.name}</a>
-                </dd>
-              </>
-            )}
-            {person.hoursPerDay != null && (
-              <>
-                <dt>Hours/day</dt>
-                <dd>{person.hoursPerDay}</dd>
-              </>
-            )}
-            {person.workingDays && person.workingDays.length > 0 && (
-              <>
-                <dt>Working days</dt>
-                <dd>{person.workingDays.join(", ")}</dd>
-              </>
-            )}
-          </dl>
-
-          {person.skills && person.skills.length > 0 && (
-            <section class="detail-section person-detail__section">
-              <h2>Skills</h2>
-              <div class="person-card__skills">
-                {person.skills.map((s) => (
-                  <span key={s} class="badge">{s}</span>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {person.agentType && person.agentType !== "human" && (
-            <section class="detail-section person-detail__section">
-              <h2>Agent</h2>
-              <dl class="person-detail__meta">
-                {person.status && (
-                  <>
-                    <dt>Status</dt>
-                    <dd>
+          <h3 class="person-detail__subsection-heading">
+            Tasks
+            <span class="person-detail__count">({assignedTasks.length})</span>
+          </h3>
+          {assignedTasks.length > 0
+            ? (
+              <ul class="person-detail__assigned-tasks">
+                {assignedTasks.map((t) => (
+                  <li key={t.id}>
+                    <a href={`/tasks/${t.id}`}>{t.title}</a>
+                    <span class="person-detail__assigned-meta">
                       <span
-                        class={badgeClass(
-                          PERSON_STATUS_VARIANTS,
-                          person.status,
-                        )}
+                        class={badgeClass(TASK_SECTION_VARIANTS, t.section)}
                       >
-                        {person.status}
+                        {t.section}
                       </span>
-                    </dd>
-                  </>
-                )}
-                {person.lastSeen && (
-                  <>
-                    <dt>Last seen</dt>
-                    <dd>{timeAgo(person.lastSeen)}</dd>
-                  </>
-                )}
-                {person.currentTaskId && (
-                  <>
-                    <dt>Current task</dt>
-                    <dd>{person.currentTaskId}</dd>
-                  </>
-                )}
-                {person.models && person.models.length > 0 && (
-                  <>
-                    <dt>Models</dt>
-                    <dd>
-                      {person.models.map((m) => `${m.name} (${m.provider})`)
-                        .join(
-                          ", ",
-                        )}
-                    </dd>
-                  </>
-                )}
-              </dl>
-              {person.systemPrompt && (
-                <details class="person-detail__prompt">
-                  <summary>System prompt</summary>
-                  <pre>{person.systemPrompt}</pre>
-                </details>
-              )}
-            </section>
-          )}
-
-          {person.accounts && Object.keys(person.accounts).length > 0 && (
-            <section class="detail-section person-detail__section">
-              <h2>External accounts</h2>
-              <dl class="person-detail__meta">
-                {Object.entries(person.accounts).map(([provider, username]) => (
-                  <>
-                    <dt key={provider}>{provider}</dt>
-                    <dd key={`${provider}-val`}>{username}</dd>
-                  </>
-                ))}
-              </dl>
-            </section>
-          )}
-
-          {person.notes && (
-            <section class="detail-section person-detail__section">
-              <h2>Notes</h2>
-              <div class="person-detail__notes">{person.notes}</div>
-            </section>
-          )}
-
-          {reports.length > 0 && (
-            <section class="detail-section person-detail__section">
-              <h2>
-                Direct reports
-                <span class="person-detail__count">({reports.length})</span>
-              </h2>
-              <ul class="person-detail__reports">
-                {reports.map((r) => (
-                  <li key={r.id}>
-                    <a href={`/people/${r.id}`}>{r.name}</a>
-                    {r.title && (
-                      <span class="person-detail__report-title">
-                        &nbsp;&mdash; {r.title}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {retrospectives.length > 0 && (
-            <section class="detail-section person-detail__section">
-              <h2>
-                Retrospectives
-                <span class="person-detail__count">
-                  ({retrospectives.length})
-                </span>
-              </h2>
-              <ul class="person-detail__retros">
-                {retrospectives.map((r) => (
-                  <li key={r.id}>
-                    <a href={`/retrospectives/${r.id}`}>{r.title}</a>
-                    {r.date && (
-                      <span class="person-detail__retro-date">
-                        &nbsp;&mdash; {formatDate(r.date)}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <section class="detail-section person-detail__section">
-            <h2>
-              Meetings
-              {attendedMeetingsTotal > 0 && (
-                <span class="person-detail__count">
-                  ({attendedMeetingsTotal})
-                </span>
-              )}
-            </h2>
-            {attendedMeetings.length > 0
-              ? (
-                <>
-                  <ul class="person-detail__meetings">
-                    {attendedMeetings.map((m) => (
-                      <li key={m.id}>
-                        <a href={`/meetings/${m.id}`}>{m.title}</a>
-                        <span class="person-detail__meeting-meta">
-                          {formatDate(m.date)} &middot;{" "}
-                          {(m.attendees ?? []).length} attendees
+                      {t.priority != null && (
+                        <span class={`badge priority--${t.priority}`}>
+                          P{t.priority}
                         </span>
-                      </li>
+                      )}
+                      {t.due_date && (
+                        <span class="person-detail__assigned-date">
+                          due {formatDate(t.due_date)}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )
+            : <EmptyState message="No tasks assigned to this person." />}
+
+          <h3 class="person-detail__subsection-heading">
+            Goals
+            <span class="person-detail__count">({assignedGoals.length})</span>
+          </h3>
+          {assignedGoals.length > 0
+            ? (
+              <ul class="person-detail__assigned-goals">
+                {assignedGoals.map((g) => (
+                  <li key={g.id}>
+                    <a href={`/goals/${g.id}`}>{g.title}</a>
+                    <span class="person-detail__assigned-meta">
+                      <span
+                        class={badgeClass(GOAL_STATUS_VARIANTS, g.status)}
+                      >
+                        {g.status}
+                      </span>
+                      {g.progress != null && (
+                        <span class="person-detail__assigned-date">
+                          {g.progress}%
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )
+            : <EmptyState message="No goals owned by this person." />}
+        </section>
+
+        <section class="detail-section person-detail__section">
+          <h2>
+            Vacation
+            {vacations.length > 0 && (
+              <span class="person-detail__count">({vacations.length})</span>
+            )}
+          </h2>
+          {vacations.length > 0
+            ? (
+              <ul class="person-detail__vacations">
+                {vacations.map((v) => (
+                  <li key={v.id}>
+                    <a href={`/vacation/${v.id}`}>
+                      {formatDate(v.startDate)} &ndash; {formatDate(v.endDate)}
+                    </a>
+                    <span class="person-detail__vacation-meta">
+                      <span class="person-detail__vacation-type">
+                        {v.type}
+                      </span>
+                      <span
+                        class={badgeClass(VACATION_STATUS_VARIANTS, v.status)}
+                      >
+                        {v.status}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )
+            : <EmptyState message="No vacations recorded for this person." />}
+        </section>
+
+        <section class="detail-section person-detail__section">
+          <h2>
+            Mentions
+            {mentionsTotal > 0 && (
+              <span class="person-detail__count">({mentionsTotal})</span>
+            )}
+          </h2>
+          {mentionsTotal > 0
+            ? (
+              <>
+                <div class="person-detail__mentions">
+                  {Object.entries(mentionsByType)
+                    .sort(([, a], [, b]) => b.length - a.length)
+                    .map(([type, items]) => (
+                      <div key={type} class="person-detail__mention-group">
+                        <h3 class="person-detail__subsection-heading">
+                          {ENTITY_TYPE_LABELS[type] ?? type}
+                          <span class="person-detail__count">
+                            ({items.length})
+                          </span>
+                        </h3>
+                        <ul class="person-detail__mention-list">
+                          {items.map((r) => (
+                            <li key={r.id}>
+                              <a
+                                href={`${
+                                  ENTITY_TYPE_ROUTES[type] ?? ""
+                                }/${r.id}`}
+                              >
+                                {r.title}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
-                  {attendedMeetingsTotal > attendedMeetings.length && (
-                    <a
-                      class="person-detail__toggle"
-                      href={`/meetings?q=${encodeURIComponent(person.name)}`}
-                    >
-                      View all ({attendedMeetingsTotal})
-                    </a>
-                  )}
-                </>
-              )
-              : <EmptyState message="No meetings attended yet." />}
-          </section>
-
-          {analytics && (
-            <section class="detail-section person-detail__section">
-              <h2>Analytics</h2>
-              <div class="person-detail__stat-grid">
-                <div class="person-detail__stat-card">
-                  <span class="person-detail__stat-value">
-                    {analytics.openTasks}
-                  </span>
-                  <span class="person-detail__stat-label">Open tasks</span>
                 </div>
-                <div class="person-detail__stat-card">
-                  <span class="person-detail__stat-value">
-                    {analytics.doneTasks}
-                  </span>
-                  <span class="person-detail__stat-label">Tasks done</span>
-                </div>
-                <div class="person-detail__stat-card">
-                  <span class="person-detail__stat-value">
-                    {analytics.activeGoals}
-                  </span>
-                  <span class="person-detail__stat-label">Active goals</span>
-                </div>
-                <div class="person-detail__stat-card">
-                  <span class="person-detail__stat-value">
-                    {analytics.hoursLogged}h
-                  </span>
-                  <span class="person-detail__stat-label">Time logged</span>
-                </div>
-                <div class="person-detail__stat-card">
-                  <span class="person-detail__stat-value">
-                    {analytics.meetingsAttended}
-                  </span>
-                  <span class="person-detail__stat-label">
-                    Meetings attended
-                  </span>
-                </div>
-              </div>
-            </section>
-          )}
+                {mentionsTotal > 20 && (
+                  <a
+                    class="person-detail__toggle"
+                    href={`/search?q=${encodeURIComponent(person.name)}`}
+                  >
+                    Search all mentions ({mentionsTotal})
+                  </a>
+                )}
+              </>
+            )
+            : <EmptyState message="No mentions found." />}
+        </section>
 
-          <section class="detail-section person-detail__section">
-            <h2>
-              Assigned
-              <a class="person-detail__toggle" href={toggleHref}>
-                {toggleLabel}
-              </a>
-            </h2>
-
-            <h3 class="person-detail__subsection-heading">
-              Tasks
-              <span class="person-detail__count">({assignedTasks.length})</span>
-            </h3>
-            {assignedTasks.length > 0
-              ? (
-                <ul class="person-detail__assigned-tasks">
-                  {assignedTasks.map((t) => (
-                    <li key={t.id}>
-                      <a href={`/tasks/${t.id}`}>{t.title}</a>
-                      <span class="person-detail__assigned-meta">
-                        <span
-                          class={badgeClass(TASK_SECTION_VARIANTS, t.section)}
-                        >
-                          {t.section}
-                        </span>
-                        {t.priority != null && (
-                          <span class={`badge priority--${t.priority}`}>
-                            P{t.priority}
-                          </span>
-                        )}
-                        {t.due_date && (
-                          <span class="person-detail__assigned-date">
-                            due {formatDate(t.due_date)}
-                          </span>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )
-              : <EmptyState message="No tasks assigned to this person." />}
-
-            <h3 class="person-detail__subsection-heading">
-              Goals
-              <span class="person-detail__count">({assignedGoals.length})</span>
-            </h3>
-            {assignedGoals.length > 0
-              ? (
-                <ul class="person-detail__assigned-goals">
-                  {assignedGoals.map((g) => (
-                    <li key={g.id}>
-                      <a href={`/goals/${g.id}`}>{g.title}</a>
-                      <span class="person-detail__assigned-meta">
-                        <span
-                          class={badgeClass(GOAL_STATUS_VARIANTS, g.status)}
-                        >
-                          {g.status}
-                        </span>
-                        {g.progress != null && (
-                          <span class="person-detail__assigned-date">
-                            {g.progress}%
-                          </span>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )
-              : <EmptyState message="No goals owned by this person." />}
-          </section>
-
-          <section class="detail-section person-detail__section">
-            <h2>
-              Vacation
-              {vacations.length > 0 && (
-                <span class="person-detail__count">({vacations.length})</span>
-              )}
-            </h2>
-            {vacations.length > 0
-              ? (
-                <ul class="person-detail__vacations">
-                  {vacations.map((v) => (
-                    <li key={v.id}>
-                      <a href={`/vacation/${v.id}`}>
-                        {formatDate(v.startDate)} &ndash;{" "}
-                        {formatDate(v.endDate)}
-                      </a>
-                      <span class="person-detail__vacation-meta">
-                        <span class="person-detail__vacation-type">
-                          {v.type}
-                        </span>
-                        <span
-                          class={badgeClass(VACATION_STATUS_VARIANTS, v.status)}
-                        >
-                          {v.status}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )
-              : <EmptyState message="No vacations recorded for this person." />}
-          </section>
-
-          <section class="detail-section person-detail__section">
-            <h2>
-              Mentions
-              {mentionsTotal > 0 && (
-                <span class="person-detail__count">({mentionsTotal})</span>
-              )}
-            </h2>
-            {mentionsTotal > 0
-              ? (
-                <>
-                  <div class="person-detail__mentions">
-                    {Object.entries(mentionsByType)
-                      .sort(([, a], [, b]) => b.length - a.length)
-                      .map(([type, items]) => (
-                        <div key={type} class="person-detail__mention-group">
-                          <h3 class="person-detail__subsection-heading">
-                            {ENTITY_TYPE_LABELS[type] ?? type}
-                            <span class="person-detail__count">
-                              ({items.length})
-                            </span>
-                          </h3>
-                          <ul class="person-detail__mention-list">
-                            {items.map((r) => (
-                              <li key={r.id}>
-                                <a
-                                  href={`${
-                                    ENTITY_TYPE_ROUTES[type] ?? ""
-                                  }/${r.id}`}
-                                >
-                                  {r.title}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                  </div>
-                  {mentionsTotal > 20 && (
-                    <a
-                      class="person-detail__toggle"
-                      href={`/search?q=${encodeURIComponent(person.name)}`}
-                    >
-                      Search all mentions ({mentionsTotal})
-                    </a>
-                  )}
-                </>
-              )
-              : <EmptyState message="No mentions found." />}
-          </section>
-
-          <AuditMeta
-            createdAt={person.createdAt}
-            updatedAt={person.updatedAt}
-            createdBy={person.createdBy}
-            updatedBy={person.updatedBy}
-          />
-        </main>
-        <div id="people-form-container" />
-      </MainLayout>
+        <AuditMeta
+          createdAt={person.createdAt}
+          updatedAt={person.updatedAt}
+          createdBy={person.createdBy}
+          updatedBy={person.updatedBy}
+        />
+      </main>
+      <div id="people-form-container" />
+      {
+        /* Sibling of <main>, inside MainLayout so it renders in <body> and
+            htmx opens the /sse EventSource (outside MainLayout = after </html>,
+            SSE never connects). */
+      }
       <SseRefresh
         getUrl={`/people/${person.id}`}
         trigger="sse:person.updated, sse:person.deleted"
         targetId="person-detail"
       />
-    </>
+    </MainLayout>
   );
 };

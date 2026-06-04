@@ -923,8 +923,8 @@
       if (!isOnCanvas()) return;
       if (!e.detail) return;
 
-      // ── sticky_note.content — update text in-place, skip if focused ──
-      if (e.detail.type === "sticky_note.content") {
+      // ── sticky-note.content — update text in-place, skip if focused ──
+      if (e.detail.type === "sticky-note.content") {
         var raw = e.detail.data;
         if (!raw) return;
         var cd;
@@ -945,7 +945,7 @@
         return;
       }
 
-      if (e.detail.type !== "sticky_note.moved") return;
+      if (e.detail.type !== "sticky-note.moved") return;
       var raw = e.detail.data;
       if (!raw) return;
       var data;

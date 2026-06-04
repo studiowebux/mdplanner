@@ -187,93 +187,96 @@ export const TimeEntriesView: FC<Props> = (props) => {
   const refreshUrl = `/time-entries?${refreshParams.toString()}`;
 
   return (
-    <>
-      <MainLayout
-        title="Time Entries"
-        {...vp}
-        activePath="/time-entries"
-        styles={["/css/views/time-entries.css"]}
-      >
-        <main id="time-entries-main" class="time-entries">
-          <div class="time-entries__header">
-            <h1 class="time-entries__title">Time Entries</h1>
-            {totalHours > 0 && (
-              <span class="time-entries__total">{totalHours}h total</span>
-            )}
-            <div class="time-entries__controls">
-              <ViewToggle
-                current={view}
-                filterProject={filterProject}
-                filterPerson={filterPerson}
-              />
-            </div>
+    <MainLayout
+      title="Time Entries"
+      {...vp}
+      activePath="/time-entries"
+      styles={["/css/views/time-entries.css"]}
+    >
+      <main id="time-entries-main" class="time-entries">
+        <div class="time-entries__header">
+          <h1 class="time-entries__title">Time Entries</h1>
+          {totalHours > 0 && (
+            <span class="time-entries__total">{totalHours}h total</span>
+          )}
+          <div class="time-entries__controls">
+            <ViewToggle
+              current={view}
+              filterProject={filterProject}
+              filterPerson={filterPerson}
+            />
           </div>
+        </div>
 
-          {view === "list" && "rows" in props && (
-            props.rows.length === 0
-              ? (
-                <p class="time-entries__empty">
-                  No time entries yet. Log time from a task detail page.
-                </p>
-              )
-              : (
-                <table class="data-table">
-                  <thead>
-                    <tr class="data-table__head-row">
-                      <th class="data-table__th">Date</th>
-                      <th class="data-table__th">Task</th>
-                      <th class="data-table__th">Project</th>
-                      <th class="data-table__th">Hours</th>
-                      <th class="data-table__th">Person</th>
-                      <th class="data-table__th">Description</th>
+        {view === "list" && "rows" in props && (
+          props.rows.length === 0
+            ? (
+              <p class="time-entries__empty">
+                No time entries yet. Log time from a task detail page.
+              </p>
+            )
+            : (
+              <table class="data-table">
+                <thead>
+                  <tr class="data-table__head-row">
+                    <th class="data-table__th">Date</th>
+                    <th class="data-table__th">Task</th>
+                    <th class="data-table__th">Project</th>
+                    <th class="data-table__th">Hours</th>
+                    <th class="data-table__th">Person</th>
+                    <th class="data-table__th">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {props.rows.map((r) => (
+                    <tr key={r.id} class="data-table__row">
+                      <td class="data-table__td">{formatDate(r.date)}</td>
+                      <td class="data-table__td">
+                        <a href={`/tasks/${r.taskId}`}>{r.taskTitle}</a>
+                      </td>
+                      <td class="data-table__td">{r.taskProject || "—"}</td>
+                      <td class="data-table__td time-entries__hours">
+                        {r.hours}h
+                      </td>
+                      <td class="data-table__td">{r.person ?? "—"}</td>
+                      <td class="data-table__td">{r.description ?? "—"}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {props.rows.map((r) => (
-                      <tr key={r.id} class="data-table__row">
-                        <td class="data-table__td">{formatDate(r.date)}</td>
-                        <td class="data-table__td">
-                          <a href={`/tasks/${r.taskId}`}>{r.taskTitle}</a>
-                        </td>
-                        <td class="data-table__td">{r.taskProject || "—"}</td>
-                        <td class="data-table__td time-entries__hours">
-                          {r.hours}h
-                        </td>
-                        <td class="data-table__td">{r.person ?? "—"}</td>
-                        <td class="data-table__td">{r.description ?? "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )
-          )}
+                  ))}
+                </tbody>
+              </table>
+            )
+        )}
 
-          {"recap" in props && props.recap.periods.length === 0 && (
-            <p class="time-entries__empty">No time entries for this period.</p>
-          )}
+        {"recap" in props && props.recap.periods.length === 0 && (
+          <p class="time-entries__empty">No time entries for this period.</p>
+        )}
 
-          {"recap" in props && props.recap.periods.length > 0 && (
-            <div class="time-entries__recap">
-              <RecapTable
-                label="By Project"
-                periods={props.recap.periods}
-                groups={props.recap.byProject}
-              />
-              <RecapTable
-                label="By Person"
-                periods={props.recap.periods}
-                groups={props.recap.byPerson}
-              />
-            </div>
-          )}
-        </main>
-      </MainLayout>
+        {"recap" in props && props.recap.periods.length > 0 && (
+          <div class="time-entries__recap">
+            <RecapTable
+              label="By Project"
+              periods={props.recap.periods}
+              groups={props.recap.byProject}
+            />
+            <RecapTable
+              label="By Person"
+              periods={props.recap.periods}
+              groups={props.recap.byPerson}
+            />
+          </div>
+        )}
+      </main>
+      {
+        /* Sibling of <main>, inside MainLayout so it renders in <body> and
+            htmx opens the /sse EventSource (outside MainLayout = after </html>,
+            SSE never connects). */
+      }
       <SseRefresh
         getUrl={refreshUrl}
         trigger="sse:task.updated"
         targetId="time-entries-main"
       />
-    </>
+    </MainLayout>
   );
 };
 

@@ -164,14 +164,31 @@
   // -------------------------------------------------------------------------
 
   function disableFieldSwaps() {
-    var fields = document.querySelectorAll(
-      "[hx-target='#note-detail-root']",
-    );
+    // Scope to the header so only the title/project inline-edit inputs are
+    // neutralized. A document-wide selector also matched the SseRefresh element
+    // (same hx-target="#note-detail-root"), permanently killing live refresh
+    // and the post-save re-render.
+    var header = document.getElementById("note-detail-header");
+    if (!header) return;
+    var fields = header.querySelectorAll("[hx-target='#note-detail-root']");
     fields.forEach(function (el) {
       el.setAttribute("hx-swap", "none");
       el.removeAttribute("hx-target");
       el.removeAttribute("hx-select");
       if (window.htmx) window.htmx.process(el);
+    });
+  }
+
+  // Guard the SSE live-refresh while editing: a note.updated arriving mid-edit
+  // (save echo or another tab) must not morph #note-detail-root and wipe the
+  // open editor. exitEditMode() sets editing=false BEFORE dispatching
+  // note:refresh, so the post-save re-render still passes this guard.
+  function guardSseRefresh() {
+    var sse = document.querySelector("[sse-connect][hx-get]");
+    if (!sse || sse.dataset.editGuard) return;
+    sse.dataset.editGuard = "true";
+    sse.addEventListener("htmx:beforeRequest", function (e) {
+      if (editing) e.preventDefault();
     });
   }
 
@@ -1132,4 +1149,13 @@
       }
     }
   });
+
+  // Init — attach the SSE edit-guard once the SseRefresh element exists. The
+  // [data-edit-guard] flag inside guardSseRefresh() keeps it bound only once.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", guardSseRefresh);
+  } else {
+    guardSseRefresh();
+  }
+  document.addEventListener("htmx:load", guardSseRefresh);
 })();

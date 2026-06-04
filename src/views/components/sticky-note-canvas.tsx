@@ -146,6 +146,17 @@ export const StickyNoteCanvas: FC<Props> = (
             : notes.map((note) => <StickyNoteCard key={note.id} note={note} />)}
         </div>
       </div>
+      {
+        /* SSE listener — opens the shared /sse EventSource and subscribes to the
+          board's note events. No hx-get: sticky-note-canvas.js applies geometry
+          and content in place via htmx:sseMessage (no flicker, skips the note
+          being dragged locally). Mirrors c4-canvas's separate listener div. */
+      }
+      <div
+        hx-ext="sse"
+        sse-connect="/sse"
+        hx-trigger="sse:sticky-note.moved, sse:sticky-note.content"
+      />
     </div>
   );
 };
