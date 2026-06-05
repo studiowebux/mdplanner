@@ -135,11 +135,12 @@ export const riskConfig: DomainConfig<Risk, CreateRisk, UpdateRisk> = {
             data-i={impact}
           >
             {matching.map((r) => (
-              <a
+              <button
+                type="button"
                 hx-get={`/risks/${r.id}/preview`}
                 hx-target="#risks-form-container"
-                hx-swap="outerHTML"
-                data-sidenav-open="risks-form-container"
+                hx-swap="innerHTML"
+                data-sidenav-open
                 class="risk-matrix__chip"
                 title={r.title}
               >
@@ -147,7 +148,7 @@ export const riskConfig: DomainConfig<Risk, CreateRisk, UpdateRisk> = {
                 <span class={badgeClass(RISK_STATUS_VARIANTS, r.status)}>
                   {r.status}
                 </span>
-              </a>
+              </button>
             ))}
           </div>,
         );

@@ -31,7 +31,7 @@ riskRouter.get("/:id/preview", async (c) => {
   const item = await getRiskService().getById(id);
   if (!item) return c.notFound();
   return c.html(
-    <Sidenav id="risks-form-container" title={item.title} open>
+    <Sidenav id="risks-preview-sidenav" title={item.title} open>
       <RiskPreview item={item} />
     </Sidenav>,
   );
