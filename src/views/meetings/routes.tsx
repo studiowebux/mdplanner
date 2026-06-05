@@ -8,7 +8,10 @@ import { MEETING_FORM_FIELDS } from "../../domains/meeting/constants.tsx";
 import { getMeetingService } from "../../singletons/services.ts";
 import { resolveLinkedItems } from "../../utils/resolve-links.ts";
 import { generateId } from "../../utils/id.ts";
-import { buildActionPersonById } from "../../domains/meeting/owners.ts";
+import {
+  buildActionPersonById,
+  buildAttendeePersonMap,
+} from "../../domains/meeting/owners.ts";
 import {
   MeetingDetailView,
   renderActionsTable,
@@ -38,6 +41,7 @@ async function renderDetail(c: AppContext, id: string) {
     (rid) => getMeetingService().getById(rid),
   );
   const personById = await buildActionPersonById(item.actions);
+  const attendeeById = await buildAttendeePersonMap(item.attendees ?? []);
   const editing = c.req.query("editing") === "true";
 
   return c.html(
@@ -46,6 +50,7 @@ async function renderDetail(c: AppContext, id: string) {
       item={item}
       relatedItems={relatedItems}
       personById={personById}
+      attendeeById={attendeeById}
       editing={editing}
     />,
   );

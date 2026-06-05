@@ -10,6 +10,7 @@ import type {
   OpenActionEntry,
 } from "../types/meeting.types.ts";
 import type { ViewProps } from "../types/app.ts";
+import type { ResolvedAttendee } from "../domains/meeting/owners.ts";
 import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -194,6 +195,44 @@ export function renderActionsTable(
   );
 }
 
+/**
+ * Attendees section. Resolved attendees link to their Person page by ID and
+ * render the person's name; unresolved (legacy free-text) values fall back to a
+ * people search by the raw string. Returns null when there are no attendees.
+ * Exported for unit tests.
+ */
+export const AttendeesSection: FC<{
+  attendees: string[];
+  attendeeById: Record<string, ResolvedAttendee>;
+}> = ({ attendees, attendeeById }) => {
+  if (attendees.length === 0) return null;
+  return (
+    <div class="detail-section">
+      <h2 class="section-heading">Attendees</h2>
+      <div class="form__tags-pills">
+        {attendees.map((a) => {
+          const person = attendeeById[a];
+          return person
+            ? (
+              <a key={a} href={`/people/${person.id}`} class="form__tags-pill">
+                {person.name}
+              </a>
+            )
+            : (
+              <a
+                key={a}
+                href={`/people?q=${encodeURIComponent(a)}`}
+                class="form__tags-pill"
+              >
+                {a}
+              </a>
+            );
+        })}
+      </div>
+    </div>
+  );
+};
+
 // ---------------------------------------------------------------------------
 // Carry-over section — open actions from prior meetings
 // ---------------------------------------------------------------------------
@@ -377,10 +416,18 @@ export const MeetingDetailView: FC<
     item: Meeting;
     relatedItems: Meeting[];
     personById: Record<string, string>;
+    attendeeById: Record<string, ResolvedAttendee>;
     editing?: boolean;
   }
 > = (
-  { item: meeting, relatedItems, personById, editing = false, ...viewProps },
+  {
+    item: meeting,
+    relatedItems,
+    personById,
+    attendeeById,
+    editing = false,
+    ...viewProps
+  },
 ) => {
   const attendees = meeting.attendees ?? [];
 
@@ -444,22 +491,7 @@ export const MeetingDetailView: FC<
         </div>
 
         {/* -- Attendees -------------------------------------------------- */}
-        {attendees.length > 0 && (
-          <div class="detail-section">
-            <h2 class="section-heading">Attendees</h2>
-            <div class="form__tags-pills">
-              {attendees.map((a) => (
-                <a
-                  key={a}
-                  href={`/people?q=${encodeURIComponent(a)}`}
-                  class="form__tags-pill"
-                >
-                  {a}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+        <AttendeesSection attendees={attendees} attendeeById={attendeeById} />
 
         {/* -- Agenda ----------------------------------------------------- */}
         {editing
