@@ -7,18 +7,69 @@
   padding: var(--page-padding);
   max-width: var(--page-max-width);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
   width: 100%;
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(var(--analytics-section-min-w), 1fr));
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+/* Page chrome spans every dashboard column; only the section cards flow into
+   the responsive grid. Sections stay direct siblings of the tab radios so the
+   CSS-only category toggle (combinator selectors below) keeps working. */
+.analytics__header,
+.analytics__kpi-strip,
+.analytics__filter-bar,
+.analytics__tab-nav {
+  grid-column: 1 / -1;
+}
+
+/* ── filter loading indicator (htmx) ────────────────────────────────────── */
+/* Lives outside #analytics-content so it survives the filter swap; htmx adds
+   .htmx-request to it for the duration of the request. */
+
+.analytics__loading {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  height: var(--analytics-loading-h);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.analytics__loading.htmx-request {
+  opacity: 1;
+}
+
+.analytics__loading::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 40%;
+  border-radius: inherit;
+  background: var(--color-accent);
+  animation: analytics-loading-slide 1s ease-in-out infinite;
+}
+
+@keyframes analytics-loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
 }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
 
 .analytics__header {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-md);
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
   flex-wrap: wrap;
 }
 
@@ -332,14 +383,25 @@
 
 /* ── section ────────────────────────────────────────────────────────────── */
 
+/* Section cards adopt the canonical card surface (matches .detail-section /
+   .domain-card) so analytics reads as part of the same product, not a bespoke
+   page. */
 .analytics__section {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  padding: var(--space-lg);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+/* Chart-heavy sections (line/grouped charts, progress lists, habit grid,
+   heatmap) span the full dashboard width; compact stat+chart sections sit in
+   the responsive columns. */
+.analytics__section--wide {
+  grid-column: 1 / -1;
 }
 
 .analytics__section-header {

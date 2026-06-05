@@ -6,6 +6,7 @@ import { EmptyState } from "../components/ui/empty-state.tsx";
 import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
 import { DEAL_STAGE_LABELS, DEAL_STAGES } from "../types/deal.types.ts";
 import { utilizationBand } from "../utils/utilization.ts";
+import { formatDate } from "../utils/time.ts";
 
 import type { ViewProps } from "../types/app.ts";
 import type {
@@ -89,6 +90,7 @@ const CustomizePanel: FC<{ hiddenSections: string[] }> = (
         hx-post="/analytics/customize"
         hx-target="#analytics-content"
         hx-swap="outerHTML"
+        hx-indicator="#analytics-loading"
       >
         <fieldset class="analytics__customize-fieldset">
           <legend class="analytics__customize-legend">Visible sections</legend>
@@ -313,6 +315,7 @@ const FilterBar: FC<{
     hx-push-url="true"
     hx-target="#analytics-content"
     hx-swap="outerHTML"
+    hx-indicator="#analytics-loading"
     hx-trigger="change from:select, change from:input[type=date]"
   >
     <div class="analytics__filter-group">
@@ -399,7 +402,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       <div class="analytics__header">
         <h1 class="analytics__title">Analytics</h1>
         <span class="analytics__generated">
-          As of {new Date(data.generatedAt).toLocaleString()}
+          Updated {formatDate(data.generatedAt, true)}
         </span>
         <CustomizePanel hiddenSections={hiddenSections} />
       </div>
@@ -460,18 +463,6 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 />
               </details>
             )}
-            {Object.keys(data.tasks.byPriority).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">
-                  By Priority
-                </summary>
-                <ByTable
-                  rows={Object.entries(data.tasks.byPriority)
-                    .sort(([a], [b]) => Number(a) - Number(b))
-                    .map(([k, v]) => [`Priority ${k}`, v])}
-                />
-              </details>
-            )}
           </div>
         </section>
       )}
@@ -505,16 +496,6 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             )
             : <EmptyState message="No goals yet." />}
           <div class="analytics__row">
-            {Object.keys(data.goals.byStatus).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Status</summary>
-                <ByTable
-                  rows={Object.entries(data.goals.byStatus).map((
-                    [k, v],
-                  ) => [capitalize(k), v])}
-                />
-              </details>
-            )}
             {Object.keys(data.goals.byType).length > 0 && (
               <details class="analytics__details">
                 <summary class="analytics__details-summary">By Type</summary>
@@ -532,7 +513,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       {/* Milestones */}
       {visible("milestones") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-milestones"
           data-jump-target="milestones"
           data-cat="delivery"
@@ -590,7 +571,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       {/* Time Entries */}
       {visible("timeEntries") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-timeEntries"
           data-jump-target="timeEntries"
           data-cat="delivery"
@@ -649,7 +630,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       {/* Capacity */}
       {visible("capacity") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-capacity"
           data-jump-target="capacity"
           data-cat="delivery"
@@ -742,7 +723,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       {/* Invoices */}
       {visible("invoices") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-invoices"
           data-jump-target="invoices"
           data-cat="revenue"
@@ -926,16 +907,6 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             )
             : <EmptyState message="No notes yet." />}
           <div class="analytics__row">
-            {Object.keys(data.notes.byType).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Type</summary>
-                <ByTable
-                  rows={Object.entries(data.notes.byType).map((
-                    [k, v],
-                  ) => [capitalize(k), v])}
-                />
-              </details>
-            )}
             {Object.keys(data.notes.byProject).length > 0 && (
               <details class="analytics__details">
                 <summary class="analytics__details-summary">By Project</summary>
@@ -1003,7 +974,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       {/* Finances */}
       {visible("finances") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-finances"
           data-jump-target="finances"
           data-cat="revenue"
@@ -1091,24 +1062,13 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               />
             )
             : <EmptyState message="No deals yet." />}
-          {Object.keys(data.deals.byStage).length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">By Stage</summary>
-              <ByTable
-                rows={Object.entries(data.deals.byStage).map(([k, v]) => [
-                  capitalize(k),
-                  v,
-                ])}
-              />
-            </details>
-          )}
         </section>
       )}
 
       {/* Habits */}
       {visible("habits") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-habits"
           data-jump-target="habits"
           data-cat="personal"
@@ -1156,7 +1116,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
       {/* Journal */}
       {visible("journal") && (
         <section
-          class="analytics__section"
+          class="analytics__section analytics__section--wide"
           id="analytics-journal"
           data-jump-target="journal"
           data-cat="personal"
@@ -1250,6 +1210,11 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       scripts={["/js/analytics-charts.js"]}
     >
       <div id="analytics-sidenav-container" />
+      <div
+        id="analytics-loading"
+        class="analytics__loading"
+        aria-hidden="true"
+      />
       <AnalyticsBody
         data={data}
         customers={customers}

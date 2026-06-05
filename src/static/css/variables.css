@@ -475,6 +475,8 @@
   --analytics-habit-cell-gap: 2px;
   --analytics-heat-cell: 0.85rem;
   --analytics-heat-gap: 3px;
+  --analytics-section-min-w: 22rem;
+  --analytics-loading-h: 3px;
 
   /* Org chart — initial value overridden by JS at runtime */
   --orgchart-current-zoom: 1;
