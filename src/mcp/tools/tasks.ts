@@ -39,7 +39,13 @@ export function registerTaskTools(server: McpServer): void {
   // this before touching the task; archived rows return an err result so
   // callers can route to Restore/HardDelete instead. Matches the canonical
   // pattern (Strategic Levels reference).
-  const requireLiveTask = async (id: string) => {
+  type LiveTask = NonNullable<Awaited<ReturnType<typeof service.getById>>>;
+  const requireLiveTask = async (
+    id: string,
+  ): Promise<
+    | { err: ReturnType<typeof err>; task?: undefined }
+    | { err?: undefined; task: LiveTask }
+  > => {
     const task = await service.getById(id);
     if (!task) return { err: err(`Task '${id}' not found`) };
     if (task.archived === true) {
@@ -301,11 +307,9 @@ export function registerTaskTools(server: McpServer): void {
       if (guard.err) return guard.err;
       try {
         if (expected_revision !== undefined) {
-          if (guard.task!.revision !== expected_revision) {
+          if (guard.task.revision !== expected_revision) {
             return err(
-              `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${
-                guard.task!.revision
-              }`,
+              `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${guard.task.revision}`,
             );
           }
         }

@@ -121,7 +121,7 @@ export const BrainstormDetailView: FC<
         {/* -- Tags ------------------------------------------------------ */}
         {hasTags && (
           <div class="detail-section brainstorm-detail__tags">
-            {brainstorm.tags!.map((tag) => (
+            {brainstorm.tags?.map((tag) => (
               <span key={tag} class="badge badge--sm badge--neutral">
                 {tag}
               </span>

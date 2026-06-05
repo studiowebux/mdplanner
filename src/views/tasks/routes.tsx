@@ -194,11 +194,10 @@ async function resolveGitHubRepo(
   task: { githubRepo?: string | null; project?: string | null },
 ): Promise<{ repo: string; inherited: string | null } | null> {
   if (task.githubRepo) return { repo: task.githubRepo, inherited: null };
-  if (!task.project) return null;
+  const project = task.project;
+  if (!project) return null;
   const all = await getPortfolioService().list();
-  const match = all.find((p) =>
-    p.name.toLowerCase() === task.project!.toLowerCase()
-  );
+  const match = all.find((p) => p.name.toLowerCase() === project.toLowerCase());
   if (!match?.githubRepo) return null;
   return { repo: match.githubRepo, inherited: match.name };
 }

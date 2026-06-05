@@ -73,7 +73,7 @@ export const BrainstormTemplateDetailView: FC<
             </h1>
             {hasCategories && (
               <div class="btemplate-detail__categories">
-                {template.categories!.map((cat) => (
+                {template.categories?.map((cat) => (
                   <span key={cat} class="badge badge--sm badge--neutral">
                     {cat}
                   </span>

@@ -73,7 +73,7 @@ export const ReflectionTemplateDetailView: FC<
                 </span>
               )}
               {hasCategories &&
-                template.categories!.map((cat) => (
+                template.categories?.map((cat) => (
                   <span key={cat} class="badge badge--sm badge--neutral">
                     {cat}
                   </span>

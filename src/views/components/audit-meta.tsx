@@ -27,7 +27,9 @@ export async function AuditMeta(
     ];
     const people = await Promise.all(ids.map((id) => svc.getById(id)));
     const nameMap = new Map(
-      people.filter(Boolean).map((p) => [p!.id, p!.name]),
+      people
+        .filter((p): p is NonNullable<typeof p> => p !== null)
+        .map((p) => [p.id, p.name]),
     );
     if (createdBy) createdByName = nameMap.get(createdBy) ?? createdBy;
     if (updatedBy) updatedByName = nameMap.get(updatedBy) ?? updatedBy;

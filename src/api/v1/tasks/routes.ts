@@ -513,8 +513,8 @@ tasksRouter.openapi(
                 p.name.toLowerCase().replace(/\s+/g, "") === lower,
             );
         })
-        .filter(Boolean)
-        .map((p) => p!.id);
+        .filter((p): p is NonNullable<typeof p> => p != null)
+        .map((p) => p.id);
       if (mentionedIds.length > 0) {
         resolvedMetadata = { ...metadata, mentionedIds };
       }

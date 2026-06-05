@@ -249,7 +249,7 @@ export const QuoteDetailView: FC<
                 </tr>
               </thead>
               <tbody>
-                {quote.paymentSchedule!.map((ps) => {
+                {quote.paymentSchedule?.map((ps) => {
                   const amt = ps.amount ??
                     (ps.percent != null
                       ? Math.round(quote.total * ps.percent / 100 * 100) / 100

@@ -656,7 +656,7 @@ export async function createWebDavHandler(
     const tag = await fileEtag(info);
     const dp = getDeadProps(fsPath);
     const all = requestedProps === null;
-    const want = (n: string) => all || requestedProps!.includes(n);
+    const want = (n: string) => all || (requestedProps?.includes(n) ?? false);
 
     const p200: string[] = [];
     const p404: string[] = [];
@@ -722,7 +722,7 @@ export async function createWebDavHandler(
       const ci = key.indexOf(":");
       const dpNs = key.slice(0, ci);
       const local = key.slice(ci + 1);
-      if (all || requestedProps!.includes(local)) {
+      if (all || (requestedProps?.includes(local) ?? false)) {
         p200.push(`<Z:${local} xmlns:Z="${xe(dpNs)}">${val}</Z:${local}>`);
       }
     }
