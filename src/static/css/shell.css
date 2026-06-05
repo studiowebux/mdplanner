@@ -578,26 +578,6 @@ html.focus-mode .focus-mode-exit {
   display: contents;
 }
 
-.topbar__identity-select {
-  -webkit-appearance: none;
-  appearance: none;
-  box-sizing: border-box;
-  padding: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-sans);
-  line-height: var(--line-height-tight);
-  color: var(--color-text);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.topbar__identity-select:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
 .topbar__action-btn {
   display: flex;
   align-items: center;

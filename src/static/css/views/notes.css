@@ -70,13 +70,6 @@
   color: var(--color-text-secondary);
 }
 
-.note-preview__body {
-  font-size: var(--font-size-base);
-  line-height: var(--body-line-height);
-  color: var(--color-text-secondary);
-  overflow-x: auto;
-}
-
 .note-preview {
   overflow-x: hidden;
   max-width: 100%;
@@ -112,11 +105,6 @@
   gap: var(--space-md);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-}
-
-.note-detail__project {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
 }
 
 .note-detail__body {
@@ -481,10 +469,6 @@
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-sm);
   color: var(--color-text-primary);
-}
-
-.note-editor__sub-block {
-  margin-bottom: var(--space-xs);
 }
 
 /* ---- Sticky save bar ---- */

@@ -84,17 +84,3 @@
 .moscow-detail__title {
   margin: 0;
 }
-
-.moscow-detail__section {
-  margin-top: var(--section-gap);
-}
-
-.moscow-detail__meta {
-  display: flex;
-  gap: var(--space-sm);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: var(--space-lg);
-  padding-top: var(--space-md);
-  border-top: var(--border-width) solid var(--color-border-default);
-}

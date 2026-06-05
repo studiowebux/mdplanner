@@ -21,7 +21,7 @@ export const briefConfig: DomainConfig<Brief, CreateBrief, UpdateBrief> = {
   singular: "Brief",
   path: "/briefs",
   ssePrefix: "brief",
-  styles: ["/css/views/briefs.css"],
+  styles: [],
   emptyMessage: "No briefs yet. Create one to get started.",
   defaultView: "table",
 

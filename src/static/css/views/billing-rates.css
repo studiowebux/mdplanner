@@ -16,8 +16,3 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
-
-.billing-rate-detail__meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}

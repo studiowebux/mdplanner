@@ -93,13 +93,6 @@
   margin-top: var(--space-sm);
 }
 
-.milestone-detail__description {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-}
-
 .milestone-detail__tasks {
   background: var(--card-bg);
   border: var(--card-border);

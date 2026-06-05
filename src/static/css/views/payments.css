@@ -14,8 +14,3 @@
   color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
 }
-
-.payment-detail__meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}

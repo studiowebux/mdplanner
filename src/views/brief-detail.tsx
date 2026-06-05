@@ -35,7 +35,6 @@ export const BriefDetailView: FC<
     <MainLayout
       title={brief.title}
       {...viewProps}
-      styles={["/css/views/briefs.css"]}
       scripts={["/js/quadrant-edit.js"]}
     >
       <SseRefresh

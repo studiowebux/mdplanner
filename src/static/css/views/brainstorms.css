@@ -77,8 +77,3 @@ a.brainstorm-detail__link:hover {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
-
-.brainstorm-detail__meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}

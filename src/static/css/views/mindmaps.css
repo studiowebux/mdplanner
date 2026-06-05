@@ -19,10 +19,6 @@
   gap: var(--space-sm);
 }
 
-.mindmap-detail__toolbar-end {
-  margin-left: auto;
-}
-
 .mindmap-detail__canvas {
   height: var(--mindmap-canvas-height);
   min-height: var(--mindmap-min-height);

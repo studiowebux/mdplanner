@@ -32,11 +32,6 @@
   gap: var(--space-xs);
 }
 
-.idea-detail__meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
-
 /* ── Graph view — viewport-fill (mirrors orgchart pattern) ──────────────── */
 
 .app-shell__content:has(.idea-graph) {

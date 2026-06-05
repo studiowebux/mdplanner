@@ -813,23 +813,10 @@ a.badge:hover {
   gap: var(--space-xs);
 }
 
-.form__group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
 .form__label {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
-}
-
-.form__hint {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-normal);
-  color: var(--color-text-muted);
-  margin-left: var(--space-xs);
 }
 
 .form__input,
@@ -1348,17 +1335,6 @@ a.badge:hover {
 .domain-toolbar__search:focus {
   border-color: var(--color-border-focus);
   background: var(--color-bg-primary);
-}
-
-/* -------------------------------------------------------------------------
-   Filter bar
-   ------------------------------------------------------------------------- */
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
 }
 
 .filter-bar__select {

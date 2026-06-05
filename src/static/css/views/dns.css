@@ -11,16 +11,6 @@
   word-break: break-all;
 }
 
-/* ---------------------------------------------------------------------------
-   Info grid
---------------------------------------------------------------------------- */
-
-.dns-detail__info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
-  gap: var(--space-sm);
-}
-
 .dns-detail__nameservers {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
@@ -37,14 +27,6 @@
   justify-content: space-between;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
-}
-
-.dns-detail__notes {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--body-line-height);
-  white-space: pre-wrap;
-  margin: 0;
 }
 
 .dns-detail__empty {

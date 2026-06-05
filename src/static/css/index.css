@@ -95,9 +95,6 @@ pre {
 .text-error {
   color: var(--color-error-text);
 }
-.text-warning {
-  color: var(--color-warning-text);
-}
 .text-muted {
   color: var(--color-text-muted);
 }

@@ -50,7 +50,3 @@
 .swot-detail__title {
   margin: 0;
 }
-
-.swot-detail__section {
-  margin-top: var(--section-gap);
-}

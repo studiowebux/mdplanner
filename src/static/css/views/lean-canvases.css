@@ -142,13 +142,6 @@
   border-top: var(--border-width-thick) solid var(--color-success);
 }
 
-/* -- Meta ------------------------------------------------------------------ */
-
-.lc-detail__meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
-
 /* ---------------------------------------------------------------------------
    Edit mode — hover bg, ghost input (.quadrant-card__input--ghost), and
    textarea (.quadrant-card__textarea) come from components.css.

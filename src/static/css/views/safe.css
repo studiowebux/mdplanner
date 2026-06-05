@@ -12,13 +12,3 @@
   gap: var(--space-xs);
   margin-top: var(--space-xs);
 }
-
-/* -- Notes ---------------------------------------------------------------- */
-
-.safe-detail__notes {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-  white-space: pre-wrap;
-  margin: 0;
-}
