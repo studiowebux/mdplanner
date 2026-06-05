@@ -1,6 +1,6 @@
 // Analytics command center — cross-domain metrics, customer-centric filters, quick-add per section.
 
-import type { FC } from "hono/jsx";
+import type { Child, FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
@@ -385,6 +385,685 @@ const FilterBar: FC<{
   </form>
 );
 
+// ── section spec (data-driven) ────────────────────────────────────────────────
+// The 16 per-domain sections share one canonical shape: header → stat grid →
+// chart-or-EmptyState → optional drill-downs. Rather than hand-write that
+// scaffolding 16×, each section is described by a SectionSpec and rendered by a
+// single <AnalyticsSection>. Bespoke bodies (milestones, capacity, habits,
+// journal) and the per-section drill-downs stay as render closures referenced
+// from the spec — they don't force into the chart slot. Section order, ids,
+// `data-cat`, and `--wide` are preserved exactly so the CSS-only tabs and jump
+// anchors keep working.
+
+type StatProps = { label: string; value: string | number };
+
+type SectionSpec = {
+  key: string;
+  title: string;
+  cat: string;
+  wide?: boolean;
+  addLabel: string;
+  addRoute: string;
+  stats: (d: AnalyticsData) => StatProps[];
+  hasData?: (d: AnalyticsData) => boolean;
+  emptyMessage?: string;
+  body?: (d: AnalyticsData) => Child;
+  drilldowns?: (d: AnalyticsData) => Child;
+};
+
+const SECTIONS: SectionSpec[] = [
+  {
+    key: "tasks",
+    title: "Tasks",
+    cat: "delivery",
+    addLabel: "Add Task",
+    addRoute: "/tasks/new",
+    stats: (d) => [
+      { label: "Total", value: d.tasks.total },
+      ...Object.entries(d.tasks.bySection).map(([sec, count]) => ({
+        label: sec,
+        value: count,
+      })),
+    ],
+    hasData: (d) => d.tasks.total > 0,
+    emptyMessage: "No tasks yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="bar"
+        ariaLabel="Tasks by priority"
+        items={Object.entries(d.tasks.byPriority)
+          .sort(([a], [b]) => Number(a) - Number(b))
+          .map(([k, v]) => ({
+            label: TASK_PRIORITY_LABELS[k] ?? `P${k}`,
+            value: v,
+          }))}
+      />
+    ),
+    drilldowns: (d) => (
+      <div class="analytics__row">
+        {Object.keys(d.tasks.byProject).length > 0 && (
+          <details class="analytics__details">
+            <summary class="analytics__details-summary">By Project</summary>
+            <ByTable
+              rows={Object.entries(d.tasks.byProject)
+                .sort(([, a], [, b]) => b - a)
+                .map(([k, v]) => [k, v])}
+            />
+          </details>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "goals",
+    title: "Goals",
+    cat: "delivery",
+    addLabel: "Add Goal",
+    addRoute: "/goals/new",
+    stats: (d) => [{ label: "Total", value: d.goals.total }],
+    hasData: (d) => d.goals.total > 0,
+    emptyMessage: "No goals yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="bar"
+        ariaLabel="Goals by status"
+        items={Object.entries(d.goals.byStatus)
+          .sort(([, a], [, b]) => b - a)
+          .map(([k, v]) => ({ label: capitalize(k), value: v }))}
+      />
+    ),
+    drilldowns: (d) => (
+      <div class="analytics__row">
+        {Object.keys(d.goals.byType).length > 0 && (
+          <details class="analytics__details">
+            <summary class="analytics__details-summary">By Type</summary>
+            <ByTable
+              rows={Object.entries(d.goals.byType).map((
+                [k, v],
+              ) => [capitalize(k), v])}
+            />
+          </details>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "milestones",
+    title: "Milestones",
+    cat: "delivery",
+    wide: true,
+    addLabel: "Add Milestone",
+    addRoute: "/milestones/new",
+    stats: (d) => [{ label: "Total", value: d.milestones.total }],
+    hasData: (d) => d.milestones.total > 0,
+    emptyMessage: "No milestones yet.",
+    body: (d) => (
+      <div class="analytics__milestones analytics__progress-scroll">
+        {[...d.milestones.milestones]
+          .sort((a, b) =>
+            b.progress - a.progress || a.name.localeCompare(b.name)
+          )
+          .map((m) => (
+            <MilestoneBar
+              key={m.id}
+              name={m.name}
+              done={m.doneCount}
+              total={m.taskCount}
+              progress={m.progress}
+            />
+          ))}
+      </div>
+    ),
+    drilldowns: (d) =>
+      d.milestones.total > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">
+            {d.milestones.total} milestone{d.milestones.total !== 1 ? "s" : ""}
+          </summary>
+          <div class="analytics__milestones">
+            {d.milestones.milestones.map((m) => (
+              <MilestoneBar
+                key={m.id}
+                name={m.name}
+                done={m.doneCount}
+                total={m.taskCount}
+                progress={m.progress}
+              />
+            ))}
+          </div>
+        </details>
+      ),
+  },
+  {
+    key: "timeEntries",
+    title: "Time Tracking",
+    cat: "delivery",
+    wide: true,
+    addLabel: "Log Time",
+    addRoute: "/tasks/new",
+    stats: (d) => [
+      { label: "Total Hours", value: `${d.timeEntries.totalHours}h` },
+      { label: "Entries", value: d.timeEntries.entryCount },
+    ],
+    hasData: (d) => d.timeEntries.totalHours > 0,
+    emptyMessage: "No time logged yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="line"
+        ariaLabel="Hours logged per day, last 30 days"
+        items={d.timeEntries.hoursPerDay.map((x) => ({
+          label: x.date.slice(5).replace("-", "/"),
+          value: x.hours,
+          display: `${x.hours}h`,
+        }))}
+      />
+    ),
+    drilldowns: (d) => (
+      <div class="analytics__row">
+        {Object.keys(d.timeEntries.byPerson).length > 0 && (
+          <details class="analytics__details">
+            <summary class="analytics__details-summary">By Person</summary>
+            <ByTable
+              rows={Object.entries(d.timeEntries.byPerson)
+                .sort(([, a], [, b]) => b - a)
+                .map(([k, v]) => [k, `${v}h`])}
+            />
+          </details>
+        )}
+        {Object.keys(d.timeEntries.byProject).length > 0 && (
+          <details class="analytics__details">
+            <summary class="analytics__details-summary">By Project</summary>
+            <ByTable
+              rows={Object.entries(d.timeEntries.byProject)
+                .sort(([, a], [, b]) => b - a)
+                .map(([k, v]) => [k, `${v}h`])}
+            />
+          </details>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "capacity",
+    title: "Capacity Plans",
+    cat: "delivery",
+    wide: true,
+    addLabel: "Add Plan",
+    addRoute: "/capacity-plans/new",
+    stats: (d) => [{ label: "Plans", value: d.capacity.plans.length }],
+    hasData: (d) => d.capacity.plans.length > 0,
+    emptyMessage: "No capacity plans yet.",
+    body: (d) => (
+      <div class="analytics__util-chart">
+        {[...d.capacity.plans]
+          .sort((a, b) => (b.utilizationPct ?? -1) - (a.utilizationPct ?? -1))
+          .map((p) => (
+            <div
+              key={p.id}
+              class={`analytics__util-chart-row analytics__util-chart-row--${
+                utilizationBand(p.utilizationPct)
+              }`}
+            >
+              <a
+                class="analytics__util-chart-name"
+                href={`/capacity-plans/${p.id}`}
+              >
+                {p.name}
+              </a>
+              <progress
+                class="progress-bar analytics__util-chart-bar"
+                value={p.utilizationPct != null
+                  ? Math.min(p.utilizationPct, 100)
+                  : 0}
+                max={100}
+              />
+              <span class="analytics__util-chart-value">
+                {pct(p.utilizationPct)}
+              </span>
+            </div>
+          ))}
+      </div>
+    ),
+    drilldowns: (d) =>
+      d.capacity.plans.length > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">Details</summary>
+          <table class="data-table analytics__capacity-table">
+            <thead>
+              <tr class="data-table__th-row">
+                <th class="data-table__th">Plan</th>
+                <th class="data-table__th">Budget (h)</th>
+                <th class="data-table__th">Allocated (h)</th>
+                <th class="data-table__th">Utilization</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.capacity.plans.map((p) => (
+                <tr key={p.id} class="data-table__row">
+                  <td class="data-table__td">
+                    <a href={`/capacity-plans/${p.id}`}>{p.name}</a>
+                  </td>
+                  <td class="data-table__td">{p.budgetHours ?? "—"}</td>
+                  <td class="data-table__td">{p.allocatedHours}h</td>
+                  <td class="data-table__td analytics__utilization">
+                    <div class="analytics__util-row">
+                      <span>{pct(p.utilizationPct)}</span>
+                      {p.utilizationPct != null && (
+                        <progress
+                          class="progress-bar analytics__util-bar"
+                          value={Math.min(p.utilizationPct, 100)}
+                          max={100}
+                        />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      ),
+  },
+  {
+    key: "invoices",
+    title: "Invoices",
+    cat: "revenue",
+    wide: true,
+    addLabel: "Add Invoice",
+    addRoute: "/invoices/new",
+    stats: (d) => [
+      { label: "Total", value: d.invoices.total },
+      {
+        label: "Revenue",
+        value: formatCurrency(d.invoices.totalAmount, { decimals: 2 }),
+      },
+    ],
+    hasData: (d) => d.invoices.total > 0,
+    emptyMessage: "No invoices yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="line"
+        ariaLabel="Monthly revenue, last 12 months"
+        items={d.invoices.revenueByMonth.map((x) => ({
+          label: `${x.month.slice(5)}/${x.month.slice(2, 4)}`,
+          value: x.amount,
+          display: formatCurrency(x.amount, { decimals: 2 }),
+        }))}
+      />
+    ),
+    drilldowns: (d) =>
+      Object.keys(d.invoices.byStatus).length > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">By Status</summary>
+          <ByTable
+            rows={Object.entries(d.invoices.byStatus).map((
+              [s, count],
+            ) => [
+              capitalize(s),
+              `${count} (${
+                formatCurrency(d.invoices.amountByStatus[s] ?? 0, {
+                  decimals: 2,
+                })
+              })`,
+            ])}
+          />
+        </details>
+      ),
+  },
+  {
+    key: "quotes",
+    title: "Quotes",
+    cat: "revenue",
+    addLabel: "Add Quote",
+    addRoute: "/quotes/new",
+    stats: (d) => [
+      { label: "Total", value: d.quotes.total },
+      {
+        label: "Pipeline",
+        value: formatCurrency(d.quotes.totalAmount, { decimals: 2 }),
+      },
+    ],
+    hasData: (d) => d.quotes.total > 0,
+    emptyMessage: "No quotes yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="donut"
+        ariaLabel="Quotes by stage"
+        items={Object.entries(d.quotes.byStatus).map((
+          [s, count],
+        ) => ({ label: capitalize(s), value: count }))}
+      />
+    ),
+    drilldowns: (d) =>
+      Object.keys(d.quotes.byStatus).length > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">By Status</summary>
+          <ByTable
+            rows={Object.entries(d.quotes.byStatus).map(([s, count]) => [
+              capitalize(s),
+              `${count} (${
+                formatCurrency(d.quotes.amountByStatus[s] ?? 0, {
+                  decimals: 2,
+                })
+              })`,
+            ])}
+          />
+        </details>
+      ),
+  },
+  {
+    key: "meetings",
+    title: "Meetings",
+    cat: "crm",
+    addLabel: "Add Meeting",
+    addRoute: "/meetings/new",
+    stats: (d) => [{ label: "Total", value: d.meetings.total }],
+    hasData: (d) => d.meetings.total > 0,
+    emptyMessage: "No meetings yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="bar"
+        ariaLabel="Meetings per week, last 12 weeks"
+        items={d.meetings.byWeek.map((x) => ({
+          label: `${x.weekStart.slice(5).replace("-", "/")}`,
+          value: x.count,
+        }))}
+      />
+    ),
+    drilldowns: (d) =>
+      Object.keys(d.meetings.byProject).length > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">By Project</summary>
+          <ByTable rows={Object.entries(d.meetings.byProject)} />
+        </details>
+      ),
+  },
+  {
+    key: "customers",
+    title: "Customers",
+    cat: "crm",
+    addLabel: "Add Customer",
+    addRoute: "/customers/new",
+    stats: (d) => [{ label: "Total", value: d.customers.total }],
+  },
+  {
+    key: "notes",
+    title: "Notes",
+    cat: "knowledge",
+    addLabel: "Add Note",
+    addRoute: "/notes/new",
+    stats: (d) => [{ label: "Total", value: d.notes.total }],
+    hasData: (d) => d.notes.total > 0,
+    emptyMessage: "No notes yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="donut"
+        ariaLabel="Notes by type"
+        items={Object.entries(d.notes.byType)
+          .sort(([, a], [, b]) => b - a)
+          .map(([k, v]) => ({ label: capitalize(k), value: v }))}
+      />
+    ),
+    drilldowns: (d) => (
+      <div class="analytics__row">
+        {Object.keys(d.notes.byProject).length > 0 && (
+          <details class="analytics__details">
+            <summary class="analytics__details-summary">By Project</summary>
+            <ByTable
+              rows={Object.entries(d.notes.byProject)
+                .sort(([, a], [, b]) => b - a)
+                .map(([k, v]) => [k, v])}
+            />
+          </details>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "investors",
+    title: "Investors",
+    cat: "revenue",
+    addLabel: "Add Investor",
+    addRoute: "/investors/new",
+    stats: (d) => [
+      { label: "Total", value: d.investors.total },
+      {
+        label: "Target Amount",
+        value: formatCurrency(d.investors.totalTargetAmount, {
+          decimals: 2,
+        }),
+      },
+    ],
+    hasData: (d) => d.investors.total > 0,
+    emptyMessage: "No investors yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="bar"
+        ariaLabel="Target amount by status"
+        items={Object.entries(d.investors.targetAmountByStatus)
+          .sort(([, a], [, b]) => b - a)
+          .map(([k, v]) => ({
+            label: capitalize(k),
+            value: v,
+            display: formatCurrency(v, { decimals: 2 }),
+          }))}
+      />
+    ),
+    drilldowns: (d) =>
+      Object.keys(d.investors.byStatus).length > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">By Status</summary>
+          <ByTable
+            rows={Object.entries(d.investors.byStatus).map(([k, v]) => [
+              capitalize(k),
+              v,
+            ])}
+          />
+        </details>
+      ),
+  },
+  {
+    key: "finances",
+    title: "Finances",
+    cat: "revenue",
+    wide: true,
+    addLabel: "Add Entry",
+    addRoute: "/finances/new",
+    stats: (d) => [
+      {
+        label: "Income",
+        value: formatCurrency(d.finances.totalIncome, { decimals: 2 }),
+      },
+      {
+        label: "Expenses",
+        value: formatCurrency(d.finances.totalExpenses, { decimals: 2 }),
+      },
+      {
+        label: "Balance",
+        value: formatCurrency(d.finances.balance, { decimals: 2 }),
+      },
+    ],
+    hasData: (d) => d.finances.totalIncome + d.finances.totalExpenses > 0,
+    emptyMessage: "No finance entries yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="groupedbar"
+        ariaLabel="Income vs expenses, last 6 months"
+        items={d.finances.byMonth.map((x) => ({
+          label: `${x.month.slice(5)}/${x.month.slice(2, 4)}`,
+          values: [x.income, x.expenses],
+          displays: [
+            formatCurrency(x.income, { decimals: 2 }),
+            formatCurrency(x.expenses, { decimals: 2 }),
+          ],
+        }))}
+      />
+    ),
+    drilldowns: (d) =>
+      Object.keys(d.finances.byType).length > 0 && (
+        <details class="analytics__details">
+          <summary class="analytics__details-summary">By Type</summary>
+          <ByTable
+            rows={Object.entries(d.finances.byType).map(([k, v]) => [
+              capitalize(k),
+              v,
+            ])}
+          />
+        </details>
+      ),
+  },
+  {
+    key: "deals",
+    title: "Deals",
+    cat: "revenue",
+    addLabel: "Add Deal",
+    addRoute: "/deals/new",
+    stats: (d) => [
+      { label: "Total", value: d.deals.total },
+      {
+        label: "Pipeline Value",
+        value: formatCurrency(d.deals.totalValue, { decimals: 2 }),
+      },
+    ],
+    hasData: (d) => d.deals.total > 0,
+    emptyMessage: "No deals yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="funnel"
+        ariaLabel="Deals by stage"
+        items={DEAL_STAGES.map((stage) => ({
+          label: DEAL_STAGE_LABELS[stage],
+          value: d.deals.byStage[stage] ?? 0,
+        }))}
+      />
+    ),
+  },
+  {
+    key: "habits",
+    title: "Habits",
+    cat: "personal",
+    wide: true,
+    addLabel: "Add Habit",
+    addRoute: "/habits/new",
+    stats: (d) => [
+      { label: "Total", value: d.habits.total },
+      {
+        label: "Completion (this month)",
+        value: d.habits.completionRateThisMonth != null
+          ? `${d.habits.completionRateThisMonth}%`
+          : "—",
+      },
+    ],
+    hasData: (d) => d.habits.total > 0,
+    emptyMessage: "No habits yet.",
+    body: (d) => (
+      <div class="analytics__habit-grid">
+        {d.habits.currentMonth.map((h) => (
+          <div class="analytics__habit-row" key={h.habitId}>
+            <span class="analytics__habit-name">{h.habitName}</span>
+            <div class="analytics__habit-cells">
+              {h.completions.map((done, i) => (
+                <span
+                  key={i}
+                  class={`analytics__habit-cell${done ? " is-done" : ""}`}
+                  title={`Day ${i + 1}${done ? " — done" : ""}`}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    key: "journal",
+    title: "Journal",
+    cat: "personal",
+    wide: true,
+    addLabel: "Add Entry",
+    addRoute: "/journal/new",
+    stats: (d) => [
+      { label: "Total Entries", value: d.journal.total },
+      { label: "This Month", value: d.journal.thisMonth },
+      { label: "This Week", value: d.journal.thisWeek },
+      { label: "Current Streak", value: `${d.journal.streak}d` },
+    ],
+    hasData: (d) => d.journal.total > 0,
+    emptyMessage: "No journal entries yet.",
+    body: (d) => (
+      <div class="analytics__heatmap">
+        {d.journal.last90Days.map((x) => {
+          const lvl = x.count === 0
+            ? 0
+            : x.count === 1
+            ? 1
+            : x.count === 2
+            ? 2
+            : 3;
+          return (
+            <span
+              key={x.date}
+              class={`analytics__heat analytics__heat--${lvl}`}
+              title={`${x.date}: ${x.count}`}
+            />
+          );
+        })}
+      </div>
+    ),
+  },
+  {
+    key: "reflections",
+    title: "Reflections",
+    cat: "personal",
+    addLabel: "Add Reflection",
+    addRoute: "/reflections/new",
+    stats: (d) => [
+      { label: "Total", value: d.reflections.total },
+      { label: "This Month", value: d.reflections.thisMonth },
+    ],
+    hasData: (d) => d.reflections.total > 0,
+    emptyMessage: "No reflections yet.",
+    body: (d) => (
+      <AnalyticsChart
+        kind="bar"
+        ariaLabel="Reflections per month, last 12 months"
+        items={d.reflections.byMonth.map((x) => ({
+          label: `${x.month.slice(5)}/${x.month.slice(2, 4)}`,
+          value: x.count,
+        }))}
+      />
+    ),
+  },
+];
+
+const AnalyticsSection: FC<{ spec: SectionSpec; data: AnalyticsData }> = (
+  { spec, data },
+) => (
+  <section
+    class={`analytics__section${spec.wide ? " analytics__section--wide" : ""}`}
+    id={`analytics-${spec.key}`}
+    data-jump-target={spec.key}
+    data-cat={spec.cat}
+  >
+    <SectionHeader
+      title={spec.title}
+      sectionKey={spec.key}
+      addLabel={spec.addLabel}
+      addRoute={spec.addRoute}
+    />
+    <div class="analytics__stat-grid">
+      {spec.stats(data).map((s) => (
+        <StatCard key={s.label} label={s.label} value={s.value} />
+      ))}
+    </div>
+    {spec.body &&
+      (spec.hasData!(data)
+        ? spec.body(data)
+        : <EmptyState message={spec.emptyMessage!} />)}
+    {spec.drilldowns?.(data)}
+  </section>
+);
+
 // ── inner content (partial for htmx, full for SSR) ───────────────────────────
 
 type BodyProps = Omit<AnalyticsViewProps, keyof ViewProps>;
@@ -415,790 +1094,10 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
 
       <CategoryTabs hiddenSections={hiddenSections} />
 
-      {/* Tasks */}
-      {visible("tasks") && (
-        <section
-          class="analytics__section"
-          id="analytics-tasks"
-          data-jump-target="tasks"
-          data-cat="delivery"
-        >
-          <SectionHeader
-            title="Tasks"
-            sectionKey="tasks"
-            addLabel="Add Task"
-            addRoute="/tasks/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.tasks.total} />
-            {Object.entries(data.tasks.bySection).map(([sec, count]) => (
-              <StatCard key={sec} label={sec} value={count} />
-            ))}
-          </div>
-          {data.tasks.total > 0
-            ? (
-              <AnalyticsChart
-                kind="bar"
-                ariaLabel="Tasks by priority"
-                items={Object.entries(data.tasks.byPriority)
-                  .sort(([a], [b]) => Number(a) - Number(b))
-                  .map(([k, v]) => ({
-                    label: TASK_PRIORITY_LABELS[k] ?? `P${k}`,
-                    value: v,
-                  }))}
-              />
-            )
-            : <EmptyState message="No tasks yet." />}
-          <div class="analytics__row">
-            {Object.keys(data.tasks.byProject).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Project</summary>
-                <ByTable
-                  rows={Object.entries(data.tasks.byProject)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([k, v]) => [k, v])}
-                />
-              </details>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Goals */}
-      {visible("goals") && (
-        <section
-          class="analytics__section"
-          id="analytics-goals"
-          data-jump-target="goals"
-          data-cat="delivery"
-        >
-          <SectionHeader
-            title="Goals"
-            sectionKey="goals"
-            addLabel="Add Goal"
-            addRoute="/goals/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.goals.total} />
-          </div>
-          {data.goals.total > 0
-            ? (
-              <AnalyticsChart
-                kind="bar"
-                ariaLabel="Goals by status"
-                items={Object.entries(data.goals.byStatus)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([k, v]) => ({ label: capitalize(k), value: v }))}
-              />
-            )
-            : <EmptyState message="No goals yet." />}
-          <div class="analytics__row">
-            {Object.keys(data.goals.byType).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Type</summary>
-                <ByTable
-                  rows={Object.entries(data.goals.byType).map((
-                    [k, v],
-                  ) => [capitalize(k), v])}
-                />
-              </details>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Milestones */}
-      {visible("milestones") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-milestones"
-          data-jump-target="milestones"
-          data-cat="delivery"
-        >
-          <SectionHeader
-            title="Milestones"
-            sectionKey="milestones"
-            addLabel="Add Milestone"
-            addRoute="/milestones/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.milestones.total} />
-          </div>
-          {data.milestones.total > 0
-            ? (
-              <div class="analytics__milestones analytics__progress-scroll">
-                {[...data.milestones.milestones]
-                  .sort((a, b) =>
-                    b.progress - a.progress || a.name.localeCompare(b.name)
-                  )
-                  .map((m) => (
-                    <MilestoneBar
-                      key={m.id}
-                      name={m.name}
-                      done={m.doneCount}
-                      total={m.taskCount}
-                      progress={m.progress}
-                    />
-                  ))}
-              </div>
-            )
-            : <EmptyState message="No milestones yet." />}
-          {data.milestones.total > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">
-                {data.milestones.total}{" "}
-                milestone{data.milestones.total !== 1 ? "s" : ""}
-              </summary>
-              <div class="analytics__milestones">
-                {data.milestones.milestones.map((m) => (
-                  <MilestoneBar
-                    key={m.id}
-                    name={m.name}
-                    done={m.doneCount}
-                    total={m.taskCount}
-                    progress={m.progress}
-                  />
-                ))}
-              </div>
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Time Entries */}
-      {visible("timeEntries") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-timeEntries"
-          data-jump-target="timeEntries"
-          data-cat="delivery"
-        >
-          <SectionHeader
-            title="Time Tracking"
-            sectionKey="timeEntries"
-            addLabel="Log Time"
-            addRoute="/tasks/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard
-              label="Total Hours"
-              value={`${data.timeEntries.totalHours}h`}
-            />
-            <StatCard label="Entries" value={data.timeEntries.entryCount} />
-          </div>
-          {data.timeEntries.totalHours > 0
-            ? (
-              <AnalyticsChart
-                kind="line"
-                ariaLabel="Hours logged per day, last 30 days"
-                items={data.timeEntries.hoursPerDay.map((d) => ({
-                  label: d.date.slice(5).replace("-", "/"),
-                  value: d.hours,
-                  display: `${d.hours}h`,
-                }))}
-              />
-            )
-            : <EmptyState message="No time logged yet." />}
-          <div class="analytics__row">
-            {Object.keys(data.timeEntries.byPerson).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Person</summary>
-                <ByTable
-                  rows={Object.entries(data.timeEntries.byPerson)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([k, v]) => [k, `${v}h`])}
-                />
-              </details>
-            )}
-            {Object.keys(data.timeEntries.byProject).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Project</summary>
-                <ByTable
-                  rows={Object.entries(data.timeEntries.byProject)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([k, v]) => [k, `${v}h`])}
-                />
-              </details>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Capacity */}
-      {visible("capacity") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-capacity"
-          data-jump-target="capacity"
-          data-cat="delivery"
-        >
-          <SectionHeader
-            title="Capacity Plans"
-            sectionKey="capacity"
-            addLabel="Add Plan"
-            addRoute="/capacity-plans/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Plans" value={data.capacity.plans.length} />
-          </div>
-          {data.capacity.plans.length > 0
-            ? (
-              <div class="analytics__util-chart">
-                {[...data.capacity.plans]
-                  .sort((a, b) =>
-                    (b.utilizationPct ?? -1) - (a.utilizationPct ?? -1)
-                  )
-                  .map((p) => (
-                    <div
-                      key={p.id}
-                      class={`analytics__util-chart-row analytics__util-chart-row--${
-                        utilizationBand(p.utilizationPct)
-                      }`}
-                    >
-                      <a
-                        class="analytics__util-chart-name"
-                        href={`/capacity-plans/${p.id}`}
-                      >
-                        {p.name}
-                      </a>
-                      <progress
-                        class="progress-bar analytics__util-chart-bar"
-                        value={p.utilizationPct != null
-                          ? Math.min(p.utilizationPct, 100)
-                          : 0}
-                        max={100}
-                      />
-                      <span class="analytics__util-chart-value">
-                        {pct(p.utilizationPct)}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            )
-            : <EmptyState message="No capacity plans yet." />}
-          {data.capacity.plans.length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">Details</summary>
-              <table class="data-table analytics__capacity-table">
-                <thead>
-                  <tr class="data-table__th-row">
-                    <th class="data-table__th">Plan</th>
-                    <th class="data-table__th">Budget (h)</th>
-                    <th class="data-table__th">Allocated (h)</th>
-                    <th class="data-table__th">Utilization</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.capacity.plans.map((p) => (
-                    <tr key={p.id} class="data-table__row">
-                      <td class="data-table__td">
-                        <a href={`/capacity-plans/${p.id}`}>{p.name}</a>
-                      </td>
-                      <td class="data-table__td">{p.budgetHours ?? "—"}</td>
-                      <td class="data-table__td">{p.allocatedHours}h</td>
-                      <td class="data-table__td analytics__utilization">
-                        <div class="analytics__util-row">
-                          <span>{pct(p.utilizationPct)}</span>
-                          {p.utilizationPct != null && (
-                            <progress
-                              class="progress-bar analytics__util-bar"
-                              value={Math.min(p.utilizationPct, 100)}
-                              max={100}
-                            />
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Invoices */}
-      {visible("invoices") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-invoices"
-          data-jump-target="invoices"
-          data-cat="revenue"
-        >
-          <SectionHeader
-            title="Invoices"
-            sectionKey="invoices"
-            addLabel="Add Invoice"
-            addRoute="/invoices/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.invoices.total} />
-            <StatCard
-              label="Revenue"
-              value={formatCurrency(data.invoices.totalAmount, { decimals: 2 })}
-            />
-          </div>
-          {data.invoices.total > 0
-            ? (
-              <AnalyticsChart
-                kind="line"
-                ariaLabel="Monthly revenue, last 12 months"
-                items={data.invoices.revenueByMonth.map((d) => ({
-                  label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
-                  value: d.amount,
-                  display: formatCurrency(d.amount, { decimals: 2 }),
-                }))}
-              />
-            )
-            : <EmptyState message="No invoices yet." />}
-          {Object.keys(data.invoices.byStatus).length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">By Status</summary>
-              <ByTable
-                rows={Object.entries(data.invoices.byStatus).map((
-                  [s, count],
-                ) => [
-                  capitalize(s),
-                  `${count} (${
-                    formatCurrency(data.invoices.amountByStatus[s] ?? 0, {
-                      decimals: 2,
-                    })
-                  })`,
-                ])}
-              />
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Quotes */}
-      {visible("quotes") && (
-        <section
-          class="analytics__section"
-          id="analytics-quotes"
-          data-jump-target="quotes"
-          data-cat="revenue"
-        >
-          <SectionHeader
-            title="Quotes"
-            sectionKey="quotes"
-            addLabel="Add Quote"
-            addRoute="/quotes/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.quotes.total} />
-            <StatCard
-              label="Pipeline"
-              value={formatCurrency(data.quotes.totalAmount, { decimals: 2 })}
-            />
-          </div>
-          {data.quotes.total > 0
-            ? (
-              <AnalyticsChart
-                kind="donut"
-                ariaLabel="Quotes by stage"
-                items={Object.entries(data.quotes.byStatus).map((
-                  [s, count],
-                ) => ({ label: capitalize(s), value: count }))}
-              />
-            )
-            : <EmptyState message="No quotes yet." />}
-          {Object.keys(data.quotes.byStatus).length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">By Status</summary>
-              <ByTable
-                rows={Object.entries(data.quotes.byStatus).map(([s, count]) => [
-                  capitalize(s),
-                  `${count} (${
-                    formatCurrency(data.quotes.amountByStatus[s] ?? 0, {
-                      decimals: 2,
-                    })
-                  })`,
-                ])}
-              />
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Meetings */}
-      {visible("meetings") && (
-        <section
-          class="analytics__section"
-          id="analytics-meetings"
-          data-jump-target="meetings"
-          data-cat="crm"
-        >
-          <SectionHeader
-            title="Meetings"
-            sectionKey="meetings"
-            addLabel="Add Meeting"
-            addRoute="/meetings/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.meetings.total} />
-          </div>
-          {data.meetings.total > 0
-            ? (
-              <AnalyticsChart
-                kind="bar"
-                ariaLabel="Meetings per week, last 12 weeks"
-                items={data.meetings.byWeek.map((d) => ({
-                  label: `${d.weekStart.slice(5).replace("-", "/")}`,
-                  value: d.count,
-                }))}
-              />
-            )
-            : <EmptyState message="No meetings yet." />}
-          {Object.keys(data.meetings.byProject).length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">By Project</summary>
-              <ByTable rows={Object.entries(data.meetings.byProject)} />
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Customers */}
-      {visible("customers") && (
-        <section
-          class="analytics__section"
-          id="analytics-customers"
-          data-jump-target="customers"
-          data-cat="crm"
-        >
-          <SectionHeader
-            title="Customers"
-            sectionKey="customers"
-            addLabel="Add Customer"
-            addRoute="/customers/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.customers.total} />
-          </div>
-        </section>
-      )}
-
-      {/* Notes */}
-      {visible("notes") && (
-        <section
-          class="analytics__section"
-          id="analytics-notes"
-          data-jump-target="notes"
-          data-cat="knowledge"
-        >
-          <SectionHeader
-            title="Notes"
-            sectionKey="notes"
-            addLabel="Add Note"
-            addRoute="/notes/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.notes.total} />
-          </div>
-          {data.notes.total > 0
-            ? (
-              <AnalyticsChart
-                kind="donut"
-                ariaLabel="Notes by type"
-                items={Object.entries(data.notes.byType)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([k, v]) => ({ label: capitalize(k), value: v }))}
-              />
-            )
-            : <EmptyState message="No notes yet." />}
-          <div class="analytics__row">
-            {Object.keys(data.notes.byProject).length > 0 && (
-              <details class="analytics__details">
-                <summary class="analytics__details-summary">By Project</summary>
-                <ByTable
-                  rows={Object.entries(data.notes.byProject)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([k, v]) => [k, v])}
-                />
-              </details>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Investors */}
-      {visible("investors") && (
-        <section
-          class="analytics__section"
-          id="analytics-investors"
-          data-jump-target="investors"
-          data-cat="revenue"
-        >
-          <SectionHeader
-            title="Investors"
-            sectionKey="investors"
-            addLabel="Add Investor"
-            addRoute="/investors/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.investors.total} />
-            <StatCard
-              label="Target Amount"
-              value={formatCurrency(data.investors.totalTargetAmount, {
-                decimals: 2,
-              })}
-            />
-          </div>
-          {data.investors.total > 0
-            ? (
-              <AnalyticsChart
-                kind="bar"
-                ariaLabel="Target amount by status"
-                items={Object.entries(data.investors.targetAmountByStatus)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([k, v]) => ({
-                    label: capitalize(k),
-                    value: v,
-                    display: formatCurrency(v, { decimals: 2 }),
-                  }))}
-              />
-            )
-            : <EmptyState message="No investors yet." />}
-          {Object.keys(data.investors.byStatus).length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">By Status</summary>
-              <ByTable
-                rows={Object.entries(data.investors.byStatus).map(([k, v]) => [
-                  capitalize(k),
-                  v,
-                ])}
-              />
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Finances */}
-      {visible("finances") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-finances"
-          data-jump-target="finances"
-          data-cat="revenue"
-        >
-          <SectionHeader
-            title="Finances"
-            sectionKey="finances"
-            addLabel="Add Entry"
-            addRoute="/finances/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard
-              label="Income"
-              value={formatCurrency(data.finances.totalIncome, {
-                decimals: 2,
-              })}
-            />
-            <StatCard
-              label="Expenses"
-              value={formatCurrency(data.finances.totalExpenses, {
-                decimals: 2,
-              })}
-            />
-            <StatCard
-              label="Balance"
-              value={formatCurrency(data.finances.balance, { decimals: 2 })}
-            />
-          </div>
-          {data.finances.totalIncome + data.finances.totalExpenses > 0
-            ? (
-              <AnalyticsChart
-                kind="groupedbar"
-                ariaLabel="Income vs expenses, last 6 months"
-                items={data.finances.byMonth.map((d) => ({
-                  label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
-                  values: [d.income, d.expenses],
-                  displays: [
-                    formatCurrency(d.income, { decimals: 2 }),
-                    formatCurrency(d.expenses, { decimals: 2 }),
-                  ],
-                }))}
-              />
-            )
-            : <EmptyState message="No finance entries yet." />}
-          {Object.keys(data.finances.byType).length > 0 && (
-            <details class="analytics__details">
-              <summary class="analytics__details-summary">By Type</summary>
-              <ByTable
-                rows={Object.entries(data.finances.byType).map(([k, v]) => [
-                  capitalize(k),
-                  v,
-                ])}
-              />
-            </details>
-          )}
-        </section>
-      )}
-
-      {/* Deals */}
-      {visible("deals") && (
-        <section
-          class="analytics__section"
-          id="analytics-deals"
-          data-jump-target="deals"
-          data-cat="revenue"
-        >
-          <SectionHeader
-            title="Deals"
-            sectionKey="deals"
-            addLabel="Add Deal"
-            addRoute="/deals/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.deals.total} />
-            <StatCard
-              label="Pipeline Value"
-              value={formatCurrency(data.deals.totalValue, { decimals: 2 })}
-            />
-          </div>
-          {data.deals.total > 0
-            ? (
-              <AnalyticsChart
-                kind="funnel"
-                ariaLabel="Deals by stage"
-                items={DEAL_STAGES.map((stage) => ({
-                  label: DEAL_STAGE_LABELS[stage],
-                  value: data.deals.byStage[stage] ?? 0,
-                }))}
-              />
-            )
-            : <EmptyState message="No deals yet." />}
-        </section>
-      )}
-
-      {/* Habits */}
-      {visible("habits") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-habits"
-          data-jump-target="habits"
-          data-cat="personal"
-        >
-          <SectionHeader
-            title="Habits"
-            sectionKey="habits"
-            addLabel="Add Habit"
-            addRoute="/habits/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.habits.total} />
-            <StatCard
-              label="Completion (this month)"
-              value={data.habits.completionRateThisMonth != null
-                ? `${data.habits.completionRateThisMonth}%`
-                : "—"}
-            />
-          </div>
-          {data.habits.total > 0
-            ? (
-              <div class="analytics__habit-grid">
-                {data.habits.currentMonth.map((h) => (
-                  <div class="analytics__habit-row" key={h.habitId}>
-                    <span class="analytics__habit-name">{h.habitName}</span>
-                    <div class="analytics__habit-cells">
-                      {h.completions.map((done, i) => (
-                        <span
-                          key={i}
-                          class={`analytics__habit-cell${
-                            done ? " is-done" : ""
-                          }`}
-                          title={`Day ${i + 1}${done ? " — done" : ""}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-            : <EmptyState message="No habits yet." />}
-        </section>
-      )}
-
-      {/* Journal */}
-      {visible("journal") && (
-        <section
-          class="analytics__section analytics__section--wide"
-          id="analytics-journal"
-          data-jump-target="journal"
-          data-cat="personal"
-        >
-          <SectionHeader
-            title="Journal"
-            sectionKey="journal"
-            addLabel="Add Entry"
-            addRoute="/journal/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total Entries" value={data.journal.total} />
-            <StatCard label="This Month" value={data.journal.thisMonth} />
-            <StatCard label="This Week" value={data.journal.thisWeek} />
-            <StatCard
-              label="Current Streak"
-              value={`${data.journal.streak}d`}
-            />
-          </div>
-          {data.journal.total > 0
-            ? (
-              <div class="analytics__heatmap">
-                {data.journal.last90Days.map((d) => {
-                  const lvl = d.count === 0
-                    ? 0
-                    : d.count === 1
-                    ? 1
-                    : d.count === 2
-                    ? 2
-                    : 3;
-                  return (
-                    <span
-                      key={d.date}
-                      class={`analytics__heat analytics__heat--${lvl}`}
-                      title={`${d.date}: ${d.count}`}
-                    />
-                  );
-                })}
-              </div>
-            )
-            : <EmptyState message="No journal entries yet." />}
-        </section>
-      )}
-
-      {/* Reflections */}
-      {visible("reflections") && (
-        <section
-          class="analytics__section"
-          id="analytics-reflections"
-          data-jump-target="reflections"
-          data-cat="personal"
-        >
-          <SectionHeader
-            title="Reflections"
-            sectionKey="reflections"
-            addLabel="Add Reflection"
-            addRoute="/reflections/new"
-          />
-          <div class="analytics__stat-grid">
-            <StatCard label="Total" value={data.reflections.total} />
-            <StatCard label="This Month" value={data.reflections.thisMonth} />
-          </div>
-          {data.reflections.total > 0
-            ? (
-              <AnalyticsChart
-                kind="bar"
-                ariaLabel="Reflections per month, last 12 months"
-                items={data.reflections.byMonth.map((d) => ({
-                  label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
-                  value: d.count,
-                }))}
-              />
-            )
-            : <EmptyState message="No reflections yet." />}
-        </section>
+      {SECTIONS.map((spec) =>
+        visible(spec.key) && (
+          <AnalyticsSection key={spec.key} spec={spec} data={data} />
+        )
       )}
     </main>
   );
