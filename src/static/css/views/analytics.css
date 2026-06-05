@@ -176,7 +176,7 @@
 
 /* Funnel — horizontal bars */
 .analytics__chart-hlabel {
-  fill: var(--color-text-on-accent, #fff);
+  fill: var(--color-text-on-accent);
   font-size: var(--analytics-chart-label-size);
   text-anchor: start;
 }

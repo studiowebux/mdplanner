@@ -285,6 +285,8 @@
   --card-description-max-height: 16rem;
   --card-min-width: 10rem;
   --card-description-fade: 2rem;
+  /* mask-image opaque endpoint for card-description fade — only alpha matters, color is structural/theme-independent */
+  --card-description-fade-color: #000;
   --finance-summary-tile-min-w: 8rem;
   --finance-chart-section-gap: var(--space-lg);
   --finance-chart-axis-font-size: var(--font-size-xs);

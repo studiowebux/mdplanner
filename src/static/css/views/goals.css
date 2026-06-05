@@ -54,12 +54,16 @@
   flex: 1;
   mask-image: linear-gradient(
     to bottom,
-    #000 calc(100% - var(--card-description-fade)),
+    var(--card-description-fade-color) calc(
+      100% - var(--card-description-fade)
+    ),
     transparent
   );
   -webkit-mask-image: linear-gradient(
     to bottom,
-    #000 calc(100% - var(--card-description-fade)),
+    var(--card-description-fade-color) calc(
+      100% - var(--card-description-fade)
+    ),
     transparent
   );
 }
