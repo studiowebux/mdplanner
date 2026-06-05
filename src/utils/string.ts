@@ -39,7 +39,7 @@ export function uniqueValues<T>(
  * Check if any string in an array case-insensitively includes the needle.
  * Replaces `(arr ?? []).some(v => v.toLowerCase().includes(q))`.
  */
-export function ciSomeIncludes(
+function ciSomeIncludes(
   arr: string[] | null | undefined,
   needle: string,
 ): boolean {
@@ -79,24 +79,4 @@ export function createSearchPredicate<T>(
         : ciSomeIncludes(f.get(item) as string[] | null | undefined, q)
     );
   };
-}
-
-// ---------------------------------------------------------------------------
-// Collection helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Extract sorted unique values from an array field on each item.
- * Replaces the flat-map + dedup pattern for tags, departments, etc.
- */
-export function uniqueFlatValues<T>(
-  items: T[],
-  getter: (item: T) => string[] | null | undefined,
-): string[] {
-  const set = new Set<string>();
-  for (const item of items) {
-    const arr = getter(item);
-    if (arr) { for (const v of arr) if (v) set.add(v); }
-  }
-  return [...set].sort();
 }

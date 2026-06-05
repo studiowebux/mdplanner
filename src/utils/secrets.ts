@@ -45,14 +45,6 @@ async function deriveKey(hexKey: string): Promise<CryptoKey> {
 // ---- Public API ---------------------------------------------------------
 
 /**
- * Returns true when an encryption key is configured in the environment.
- */
-export function isEncryptionEnabled(): boolean {
-  const key = Deno.env.get(KEY_ENV);
-  return !!key && key.length === 64;
-}
-
-/**
  * Returns the raw secret key string for HMAC cookie signing.
  * Empty string when MDPLANNER_SECRET_KEY is not set — callers fall back
  * to unsigned cookies in that case (same transparent-fallback pattern
@@ -60,14 +52,6 @@ export function isEncryptionEnabled(): boolean {
  */
 export function getCookieSecret(): string {
   return Deno.env.get(KEY_ENV) ?? "";
-}
-
-/**
- * Generate a new random 32-byte hex key.
- */
-export function generateSecretKey(): string {
-  const buf = crypto.getRandomValues(new Uint8Array(32));
-  return Array.from(buf).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**

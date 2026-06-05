@@ -7,7 +7,7 @@
 // ---------------------------------------------------------------------------
 
 /** Convert a snake_case string to camelCase. */
-export function snakeToCamel(s: string): string {
+function snakeToCamel(s: string): string {
   return s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 
@@ -24,7 +24,7 @@ export function camelToSnake(s: string): string {
 // ---------------------------------------------------------------------------
 
 /** Standard audit field mappings (snake_case → camelCase). */
-export const AUDIT_KEYS: ReadonlyMap<string, string> = new Map([
+const AUDIT_KEYS: ReadonlyMap<string, string> = new Map([
   ["created_at", "createdAt"],
   ["updated_at", "updatedAt"],
   ["created_by", "createdBy"],
@@ -94,17 +94,6 @@ export function mapArrayFromFm(
   return items.map((item) =>
     mapKeysFromFm(item as Record<string, unknown>, overrides)
   );
-}
-
-/**
- * Map keys of each item in an array from camelCase to snake_case.
- * Use for nested structured arrays when serializing.
- */
-export function mapArrayToFm(
-  items: Record<string, unknown>[],
-  overrides?: Readonly<Record<string, string>>,
-): Record<string, unknown>[] {
-  return items.map((item) => mapKeysToFm(item, overrides));
 }
 
 // ---------------------------------------------------------------------------

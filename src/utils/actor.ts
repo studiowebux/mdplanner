@@ -25,7 +25,7 @@ export type UserScope = {
 };
 
 /** Stable identifier for an actor: id when set, else name. */
-export function actorUserId(actor: Actor): string {
+function actorUserId(actor: Actor): string {
   return actor.id ?? actor.name;
 }
 

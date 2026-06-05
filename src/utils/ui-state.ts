@@ -31,18 +31,6 @@ export function writeUiState<T>(c: AppContext, domain: string, state: T): void {
   });
 }
 
-/** Get the current view mode for a domain — query param wins, then cookie, then fallback. */
-export function getViewMode<T extends string = string>(
-  c: AppContext,
-  domain: string,
-  fallback: T = "grid" as T,
-): T {
-  const fromQuery = c.req.query("view") as T | undefined;
-  if (fromQuery) return fromQuery;
-  const saved = readUiState<{ view?: string }>(c, domain);
-  return (saved.view as T) ?? fallback;
-}
-
 type GlobalUiState = { globalProjects?: string[]; globalAssignees?: string[] };
 
 const GLOBAL_KEY = "_global";
@@ -52,19 +40,9 @@ export function readGlobalProjects(c: AppContext): string[] {
   return g.globalProjects ?? [];
 }
 
-export function writeGlobalProjects(c: AppContext, names: string[]): void {
-  const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
-  writeUiState(c, GLOBAL_KEY, { ...g, globalProjects: names });
-}
-
 export function readGlobalAssignees(c: AppContext): string[] {
   const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
   return g.globalAssignees ?? [];
-}
-
-export function writeGlobalAssignees(c: AppContext, names: string[]): void {
-  const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
-  writeUiState(c, GLOBAL_KEY, { ...g, globalAssignees: names });
 }
 
 export function writeGlobalFilters(
