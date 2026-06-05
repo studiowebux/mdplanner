@@ -25,45 +25,6 @@
   grid-column: 1 / -1;
 }
 
-/* ── filter loading indicator (htmx) ────────────────────────────────────── */
-/* Lives outside #analytics-content so it survives the filter swap; htmx adds
-   .htmx-request to it for the duration of the request. */
-
-.analytics__loading {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-  height: var(--analytics-loading-h);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  background: var(--color-bg-secondary);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.analytics__loading.htmx-request {
-  opacity: 1;
-}
-
-.analytics__loading::after {
-  content: "";
-  display: block;
-  height: 100%;
-  width: 40%;
-  border-radius: inherit;
-  background: var(--color-accent);
-  animation: analytics-loading-slide 1s ease-in-out infinite;
-}
-
-@keyframes analytics-loading-slide {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(350%);
-  }
-}
-
 /* ── header ─────────────────────────────────────────────────────────────── */
 
 .analytics__header {

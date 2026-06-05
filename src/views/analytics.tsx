@@ -87,7 +87,7 @@ const CustomizePanel: FC<{ hiddenSections: string[] }> = (
         hx-post="/analytics/customize"
         hx-target="#analytics-content"
         hx-swap="outerHTML"
-        hx-indicator="#analytics-loading"
+        hx-indicator="#global-loading"
       >
         <fieldset class="analytics__customize-fieldset">
           <legend class="analytics__customize-legend">Visible sections</legend>
@@ -312,7 +312,7 @@ const FilterBar: FC<{
     hx-push-url="true"
     hx-target="#analytics-content"
     hx-swap="outerHTML"
-    hx-indicator="#analytics-loading"
+    hx-indicator="#global-loading"
     hx-trigger="change from:select, change from:input[type=date]"
   >
     <div class="analytics__filter-group">
@@ -1217,11 +1217,6 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       scripts={["/js/analytics-charts.js"]}
     >
       <div id="analytics-sidenav-container" />
-      <div
-        id="analytics-loading"
-        class="analytics__loading"
-        aria-hidden="true"
-      />
       <AnalyticsBody
         data={data}
         customers={customers}

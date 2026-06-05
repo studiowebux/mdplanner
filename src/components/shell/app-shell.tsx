@@ -41,6 +41,7 @@ export const AppShell: FC<Props> = (
       navCategories={navCategories}
     />
     <div class="app-shell__main">
+      <div id="global-loading" class="global-loading" aria-hidden="true" />
       <Topbar
         actor={actor}
         activePerson={activePerson}

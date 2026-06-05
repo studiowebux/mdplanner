@@ -353,6 +353,9 @@
   --z-dropdown: 320;
   --z-sidenav: 400;
   --z-toast: 500;
+  /* Global htmx loading bar — a 3px edge strip that must stay visible above
+     every overlay, including toasts. */
+  --z-loading: 550;
   --z-resize-handle: 5;
   --resize-handle-w: 6px;
   --resize-handle-opacity: 0.4;
@@ -480,7 +483,9 @@
   --analytics-heat-cell: 0.85rem;
   --analytics-heat-gap: 3px;
   --analytics-section-min-w: 22rem;
-  --analytics-loading-h: 3px;
+
+  /* Global htmx loading bar height (shared affordance, components.css). */
+  --loading-bar-h: 3px;
 
   /* Org chart — initial value overridden by JS at runtime */
   --orgchart-current-zoom: 1;

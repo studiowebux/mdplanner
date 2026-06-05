@@ -2484,3 +2484,61 @@ div.load-more-sentinel {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
 }
+
+/* -------------------------------------------------------------------------
+   htmx loading affordances (canonical home — always loaded)
+   ------------------------------------------------------------------------- */
+
+/* Generic show/hide for inline indicators. htmx adds .htmx-request to the
+   element pointed at by hx-indicator (or the request-triggering element) for
+   the request duration. Consumers: github pipeline/tab spinners, settings
+   integrity scan spinner. */
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: inline-block;
+}
+
+/* Global top progress bar — a single persistent element rendered once in the
+   app shell. Factory list views (and any view) point hx-indicator at it so
+   every filter/sort/search/pagination swap gets consistent loading feedback.
+   Slim, indeterminate, theme-token-driven, CSP-safe. The reduced-motion block
+   in index.css neutralizes the slide animation globally. */
+.global-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--loading-bar-h);
+  z-index: var(--z-loading);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.global-loading.htmx-request {
+  opacity: 1;
+}
+
+.global-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  animation: global-loading-slide 1s ease-in-out infinite;
+}
+
+@keyframes global-loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}

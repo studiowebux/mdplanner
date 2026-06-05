@@ -662,6 +662,7 @@ export function createDomainPage<T extends Entity>(
           data-domain={cfg.name}
           hx-ext="sse, morph"
           sse-connect="/sse"
+          hx-indicator="#global-loading"
           hx-get={`/${cfg.name}/view`}
           hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted, global-filter:changed from:body`}
           hx-target={`#${cfg.name}-view`}

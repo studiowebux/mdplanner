@@ -270,17 +270,6 @@
   margin-top: var(--space-md);
 }
 
-/* ---- htmx indicator ---- */
-
-.htmx-indicator {
-  display: none;
-}
-
-.htmx-request .htmx-indicator,
-.htmx-request.htmx-indicator {
-  display: inline-block;
-}
-
 /* ---- Task GitHub section ---- */
 
 .task-github {
