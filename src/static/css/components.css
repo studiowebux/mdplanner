@@ -1277,6 +1277,31 @@ a.badge:hover {
   opacity: 1;
 }
 
+/* SSE connection-state pill — bottom-left, out of the toast lane (top-right).
+   Toggled by htmx-triggers.js on htmx:sseError / htmx:sseOpen. */
+.sse-status {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: var(--space-lg);
+  z-index: var(--z-toast);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: var(--border-width) var(--border-style) var(--color-warning-border);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(var(--space-sm));
+  pointer-events: none;
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.sse-status--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* -------------------------------------------------------------------------
    Domain toolbar (search + filters + view toggle + column toggle)
    ------------------------------------------------------------------------- */
