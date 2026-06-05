@@ -13,6 +13,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
+import { formatCurrency } from "../utils/format.ts";
 import {
   INVESTOR_STAGE_VARIANTS,
   INVESTOR_STATUS_LABELS,
@@ -107,7 +108,7 @@ export const InvestorDetailView: FC<
           <InfoItem label="Contact">{investor.contact ?? "—"}</InfoItem>
           <InfoItem label="Target Amount">
             {investor.amountTarget != null
-              ? `$${investor.amountTarget.toLocaleString()}`
+              ? formatCurrency(investor.amountTarget)
               : "—"}
           </InfoItem>
           <InfoItem label="Intro Date">{investor.introDate ?? "—"}</InfoItem>

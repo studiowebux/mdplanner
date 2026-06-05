@@ -7,6 +7,7 @@ import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
 import { DEAL_STAGE_LABELS, DEAL_STAGES } from "../types/deal.types.ts";
 import { utilizationBand } from "../utils/utilization.ts";
 import { formatDate } from "../utils/time.ts";
+import { formatCurrency } from "../utils/format.ts";
 
 import type { ViewProps } from "../types/app.ts";
 import type {
@@ -48,10 +49,6 @@ export const ALL_SECTIONS: { key: string; label: string }[] = [
 ];
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-
-function formatCurrency(n: number): string {
-  return `$${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-}
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -233,11 +230,11 @@ const GlobalKpiStrip: FC<{ data: AnalyticsData }> = ({ data }) => {
       <KpiCard label="Hours Logged" value={`${data.timeEntries.totalHours}h`} />
       <KpiCard
         label="Revenue"
-        value={formatCurrency(data.invoices.totalAmount)}
+        value={formatCurrency(data.invoices.totalAmount, { decimals: 2 })}
       />
       <KpiCard
         label="Open Deals"
-        value={formatCurrency(data.deals.totalValue)}
+        value={formatCurrency(data.deals.totalValue, { decimals: 2 })}
       />
       <KpiCard label="Journal Streak" value={data.journal.streak} />
     </div>
@@ -738,7 +735,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             <StatCard label="Total" value={data.invoices.total} />
             <StatCard
               label="Revenue"
-              value={formatCurrency(data.invoices.totalAmount)}
+              value={formatCurrency(data.invoices.totalAmount, { decimals: 2 })}
             />
           </div>
           {data.invoices.total > 0
@@ -749,7 +746,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 items={data.invoices.revenueByMonth.map((d) => ({
                   label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
                   value: d.amount,
-                  display: formatCurrency(d.amount),
+                  display: formatCurrency(d.amount, { decimals: 2 }),
                 }))}
               />
             )
@@ -763,7 +760,9 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 ) => [
                   capitalize(s),
                   `${count} (${
-                    formatCurrency(data.invoices.amountByStatus[s] ?? 0)
+                    formatCurrency(data.invoices.amountByStatus[s] ?? 0, {
+                      decimals: 2,
+                    })
                   })`,
                 ])}
               />
@@ -790,7 +789,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             <StatCard label="Total" value={data.quotes.total} />
             <StatCard
               label="Pipeline"
-              value={formatCurrency(data.quotes.totalAmount)}
+              value={formatCurrency(data.quotes.totalAmount, { decimals: 2 })}
             />
           </div>
           {data.quotes.total > 0
@@ -811,7 +810,9 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 rows={Object.entries(data.quotes.byStatus).map(([s, count]) => [
                   capitalize(s),
                   `${count} (${
-                    formatCurrency(data.quotes.amountByStatus[s] ?? 0)
+                    formatCurrency(data.quotes.amountByStatus[s] ?? 0, {
+                      decimals: 2,
+                    })
                   })`,
                 ])}
               />
@@ -939,7 +940,9 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             <StatCard label="Total" value={data.investors.total} />
             <StatCard
               label="Target Amount"
-              value={formatCurrency(data.investors.totalTargetAmount)}
+              value={formatCurrency(data.investors.totalTargetAmount, {
+                decimals: 2,
+              })}
             />
           </div>
           {data.investors.total > 0
@@ -952,7 +955,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                   .map(([k, v]) => ({
                     label: capitalize(k),
                     value: v,
-                    display: formatCurrency(v),
+                    display: formatCurrency(v, { decimals: 2 }),
                   }))}
               />
             )
@@ -988,15 +991,19 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
           <div class="analytics__stat-grid">
             <StatCard
               label="Income"
-              value={formatCurrency(data.finances.totalIncome)}
+              value={formatCurrency(data.finances.totalIncome, {
+                decimals: 2,
+              })}
             />
             <StatCard
               label="Expenses"
-              value={formatCurrency(data.finances.totalExpenses)}
+              value={formatCurrency(data.finances.totalExpenses, {
+                decimals: 2,
+              })}
             />
             <StatCard
               label="Balance"
-              value={formatCurrency(data.finances.balance)}
+              value={formatCurrency(data.finances.balance, { decimals: 2 })}
             />
           </div>
           {data.finances.totalIncome + data.finances.totalExpenses > 0
@@ -1008,8 +1015,8 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                   label: `${d.month.slice(5)}/${d.month.slice(2, 4)}`,
                   values: [d.income, d.expenses],
                   displays: [
-                    formatCurrency(d.income),
-                    formatCurrency(d.expenses),
+                    formatCurrency(d.income, { decimals: 2 }),
+                    formatCurrency(d.expenses, { decimals: 2 }),
                   ],
                 }))}
               />
@@ -1047,7 +1054,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
             <StatCard label="Total" value={data.deals.total} />
             <StatCard
               label="Pipeline Value"
-              value={formatCurrency(data.deals.totalValue)}
+              value={formatCurrency(data.deals.totalValue, { decimals: 2 })}
             />
           </div>
           {data.deals.total > 0
