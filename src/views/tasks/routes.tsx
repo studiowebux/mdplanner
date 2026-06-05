@@ -203,8 +203,7 @@ async function resolveGitHubRepo(
 }
 
 async function renderGitHubFragment(
-  // deno-lint-ignore no-explicit-any
-  c: { html: (h: any) => any },
+  c: AppContext,
   taskId: string,
 ) {
   const task = await getTaskService().getById(taskId);

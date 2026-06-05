@@ -55,8 +55,7 @@ export type EntityDef = {
 // Helpers (exported so schema.ts / sync.ts can reuse them)
 // ============================================================
 
-// deno-lint-ignore no-explicit-any
-export function val(v: any): BindValue {
+export function val(v: unknown): BindValue {
   if (v === undefined) return null;
   if (v === null) return null;
   if (typeof v === "string") return v;
@@ -66,8 +65,7 @@ export function val(v: any): BindValue {
   return String(v);
 }
 
-// deno-lint-ignore no-explicit-any
-export function json(v: any): string {
+export function json(v: unknown): string {
   return JSON.stringify(v ?? []);
 }
 

@@ -19,6 +19,9 @@ export interface ReadWriteRepository<T, C, U> {
   archive?(id: string, by?: string): Promise<boolean>;
   restore?(id: string): Promise<boolean>;
   hardDelete?(id: string): Promise<boolean>;
+  // Optional — present on BaseMarkdownRepository-derived repos. When absent,
+  // upsertMany falls back to findById + create/update.
+  upsertEntity?(item: T): Promise<T>;
 }
 
 export abstract class BaseService<
@@ -109,14 +112,12 @@ export abstract class BaseService<
   ): Promise<{ count: number; errors: string[] }> {
     const errors: string[] = [];
     let count = 0;
-    // deno-lint-ignore no-explicit-any
-    const repo = this.repo as any;
-    const hasUpsert = typeof repo.upsertEntity === "function";
+    const upsertEntity = this.repo.upsertEntity?.bind(this.repo);
     for (const item of items) {
       const id = (item as Record<string, unknown>).id as string ?? "?";
       try {
-        if (hasUpsert) {
-          await repo.upsertEntity(item);
+        if (upsertEntity) {
+          await upsertEntity(item);
         } else {
           const existing = await this.repo.findById(id);
           if (existing) {

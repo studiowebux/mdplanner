@@ -51,10 +51,9 @@ import {
 } from "../../../singletons/services.ts";
 import { registerDomain } from "./registry.ts";
 
-// deno-lint-ignore no-explicit-any
 type BackupService = {
-  list(): Promise<any[]>;
-  upsertMany(items: any[]): Promise<{ count: number; errors: string[] }>;
+  list(): Promise<unknown[]>;
+  upsertMany(items: unknown[]): Promise<{ count: number; errors: string[] }>;
 };
 
 function domain(key: string, label: string, get: () => BackupService) {
@@ -67,7 +66,6 @@ function domain(key: string, label: string, get: () => BackupService) {
 }
 
 async function upsertViaRepo<T extends { id: string }>(
-  // deno-lint-ignore no-explicit-any
   repo: { upsertEntity(item: T): Promise<T> },
   items: unknown[],
 ): Promise<{ count: number; errors: string[] }> {

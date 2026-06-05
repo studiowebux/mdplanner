@@ -1,7 +1,9 @@
 // GitHub route helpers — error mapping and portfolio repo resolution.
 
+import type { Context, ErrorHandler } from "hono";
 import { getPortfolioService } from "../../../singletons/services.ts";
 import {
+  type AppError,
   badGateway,
   badRequest,
   notFound,
@@ -9,13 +11,32 @@ import {
 } from "../../../types/api.ts";
 
 /**
- * Map GitHub service errors to HTTP responses via c.json().
+ * HTTP error raised inside a GitHub route. Carries a ready-to-serialize
+ * AppError body plus its status code; mapped to a JSON response by
+ * `githubOnError` (registered as the router's error handler). The status is
+ * constrained to the codes resolveRepo can raise so `c.json` needs no cast.
  */
-// deno-lint-ignore no-explicit-any
-export function githubError(
-  c: { json: (d: any, s: number) => any },
-  err: unknown,
-) {
+export class GitHubHttpError extends Error {
+  constructor(
+    readonly body: AppError,
+    readonly statusCode: 400 | 404,
+  ) {
+    super(body.message);
+    this.name = "GitHubHttpError";
+  }
+}
+
+/**
+ * Router-level error handler for githubRouter. Maps both explicit
+ * GitHubHttpError (config/resolution failures from resolveRepo) and raw
+ * GitHub service errors (token / HTTP-status message strings) to AppError
+ * JSON responses. Registered once via `githubRouter.onError`, so handlers
+ * just throw instead of wrapping every call in try/catch.
+ */
+export const githubOnError: ErrorHandler = (err, c) => {
+  if (err instanceof GitHubHttpError) {
+    return c.json(err.body, err.statusCode);
+  }
   const msg = err instanceof Error ? err.message : String(err);
   if (
     msg.startsWith("GITHUB_TOKEN_NOT_CONFIGURED") ||
@@ -39,26 +60,24 @@ export function githubError(
     );
   }
   return c.json(badGateway(msg, { error: "GITHUB_ERROR" }), 502);
-}
+};
 
 /**
  * Resolve the portfolio item's githubRepo from the parent :id param.
- * Returns the repo string or an error response.
+ * Throws GitHubHttpError (caught by githubOnError) when the portfolio is
+ * missing or has no githubRepo configured, so callers receive the repo
+ * string directly.
  */
-export async function resolveRepo(
-  // deno-lint-ignore no-explicit-any
-  c: {
-    req: { param: (k: string) => string };
-    json: (d: any, s: number) => any;
-  },
-): Promise<string | Response> {
+export async function resolveRepo(c: Context): Promise<string> {
   const portfolioId = c.req.param("id");
-  const item = await getPortfolioService().getById(portfolioId);
+  const item = portfolioId
+    ? await getPortfolioService().getById(portfolioId)
+    : null;
   if (!item) {
-    return c.json(notFound("PORTFOLIO", portfolioId), 404);
+    throw new GitHubHttpError(notFound("PORTFOLIO", portfolioId ?? ""), 404);
   }
   if (!item.githubRepo) {
-    return c.json(
+    throw new GitHubHttpError(
       badRequest(
         `Portfolio item "${item.name}" has no githubRepo configured`,
         { error: "GITHUB_REPO_NOT_CONFIGURED" },

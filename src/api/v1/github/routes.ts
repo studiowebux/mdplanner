@@ -28,9 +28,13 @@ import {
   WorkflowDispatchBodySchema,
   WorkflowIdParam,
 } from "../../../types/github.types.ts";
-import { githubError, resolveRepo } from "./helpers.ts";
+import { githubOnError, resolveRepo } from "./helpers.ts";
 
 export const githubRouter = new OpenAPIHono();
+
+// Map thrown errors (resolveRepo config failures + GitHub service errors) to
+// JSON responses once, so handlers throw instead of repeating try/catch.
+githubRouter.onError(githubOnError);
 
 // ---------------------------------------------------------------------------
 // Repo
@@ -51,13 +55,8 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      return c.json(await getGitHubService().getRepo(repo), 200);
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    return c.json(await getGitHubService().getRepo(repo), 200);
   },
 );
 
@@ -81,17 +80,12 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { state, assignee } = c.req.valid("query");
-      return c.json(
-        await getGitHubService().listIssues(repo, state, assignee),
-        200,
-      );
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { state, assignee } = c.req.valid("query");
+    return c.json(
+      await getGitHubService().listIssues(repo, state, assignee),
+      200,
+    );
   },
 );
 
@@ -111,17 +105,12 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { number } = c.req.valid("param");
-      return c.json(
-        await getGitHubService().getIssue(repo, Number(number)),
-        200,
-      );
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { number } = c.req.valid("param");
+    return c.json(
+      await getGitHubService().getIssue(repo, Number(number)),
+      200,
+    );
   },
 );
 
@@ -146,17 +135,12 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { title, body } = c.req.valid("json");
-      return c.json(
-        await getGitHubService().createIssue(repo, title, body),
-        201,
-      );
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { title, body } = c.req.valid("json");
+    return c.json(
+      await getGitHubService().createIssue(repo, title, body),
+      201,
+    );
   },
 );
 
@@ -182,18 +166,13 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { number } = c.req.valid("param");
-      const { state } = c.req.valid("json");
-      return c.json(
-        await getGitHubService().setIssueState(repo, Number(number), state),
-        200,
-      );
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { number } = c.req.valid("param");
+    const { state } = c.req.valid("json");
+    return c.json(
+      await getGitHubService().setIssueState(repo, Number(number), state),
+      200,
+    );
   },
 );
 
@@ -217,14 +196,9 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { state } = c.req.valid("query");
-      return c.json(await getGitHubService().listPRs(repo, state), 200);
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { state } = c.req.valid("query");
+    return c.json(await getGitHubService().listPRs(repo, state), 200);
   },
 );
 
@@ -244,17 +218,12 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { number } = c.req.valid("param");
-      return c.json(
-        await getGitHubService().getPR(repo, Number(number)),
-        200,
-      );
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { number } = c.req.valid("param");
+    return c.json(
+      await getGitHubService().getPR(repo, Number(number)),
+      200,
+    );
   },
 );
 
@@ -280,22 +249,17 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { number } = c.req.valid("param");
-      const body = c.req.valid("json");
-      return c.json(
-        await getGitHubService().mergePR(
-          repo,
-          Number(number),
-          body?.mergeMethod,
-        ),
-        200,
-      );
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { number } = c.req.valid("param");
+    const body = c.req.valid("json");
+    return c.json(
+      await getGitHubService().mergePR(
+        repo,
+        Number(number),
+        body?.mergeMethod,
+      ),
+      200,
+    );
   },
 );
 
@@ -318,13 +282,8 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      return c.json(await getGitHubService().listMilestones(repo), 200);
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    return c.json(await getGitHubService().listMilestones(repo), 200);
   },
 );
 
@@ -348,15 +307,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const release = await getGitHubService().getLatestRelease(repo);
-      if (!release) return new Response(null, { status: 204 });
-      return c.json(release, 200);
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const release = await getGitHubService().getLatestRelease(repo);
+    if (!release) return c.body(null, 204);
+    return c.json(release, 200);
   },
 );
 
@@ -382,14 +336,9 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { runs } = await getGitHubService().listWorkflowRuns(repo);
-      return c.json(runs, 200);
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { runs } = await getGitHubService().listWorkflowRuns(repo);
+    return c.json(runs, 200);
   },
 );
 
@@ -409,15 +358,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { runId } = c.req.valid("param");
-      await getGitHubService().cancelRun(repo, Number(runId));
-      return new Response(null, { status: 204 });
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { runId } = c.req.valid("param");
+    await getGitHubService().cancelRun(repo, Number(runId));
+    return c.body(null, 204);
   },
 );
 
@@ -437,15 +381,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { runId } = c.req.valid("param");
-      await getGitHubService().rerunRun(repo, Number(runId));
-      return new Response(null, { status: 204 });
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { runId } = c.req.valid("param");
+    await getGitHubService().rerunRun(repo, Number(runId));
+    return c.body(null, 204);
   },
 );
 
@@ -465,15 +404,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { runId } = c.req.valid("param");
-      await getGitHubService().rerunFailedJobs(repo, Number(runId));
-      return new Response(null, { status: 204 });
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { runId } = c.req.valid("param");
+    await getGitHubService().rerunFailedJobs(repo, Number(runId));
+    return c.body(null, 204);
   },
 );
 
@@ -496,13 +430,8 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      return c.json(await getGitHubService().listWorkflows(repo), 200);
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    return c.json(await getGitHubService().listWorkflows(repo), 200);
   },
 );
 
@@ -528,20 +457,15 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    try {
-      const repo = await resolveRepo(c);
-      if (typeof repo !== "string") return repo;
-      const { workflowId } = c.req.valid("param");
-      const { ref, inputs } = c.req.valid("json");
-      await getGitHubService().triggerWorkflowDispatch(
-        repo,
-        workflowId,
-        ref,
-        inputs,
-      );
-      return new Response(null, { status: 204 });
-    } catch (err) {
-      return githubError(c, err);
-    }
+    const repo = await resolveRepo(c);
+    const { workflowId } = c.req.valid("param");
+    const { ref, inputs } = c.req.valid("json");
+    await getGitHubService().triggerWorkflowDispatch(
+      repo,
+      workflowId,
+      ref,
+      inputs,
+    );
+    return c.body(null, 204);
   },
 );

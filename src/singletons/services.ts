@@ -154,10 +154,8 @@ export interface InitOptions {
   cache?: boolean;
 }
 
-// deno-lint-ignore no-explicit-any
-const _svc = new Map<string, any>();
-// deno-lint-ignore no-explicit-any
-const _repo = new Map<string, any>();
+const _svc = new Map<string, unknown>();
+const _repo = new Map<string, unknown>();
 
 function _set<T>(map: Map<string, unknown>, key: string, value: T): T {
   map.set(key, value);

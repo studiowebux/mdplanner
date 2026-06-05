@@ -27,8 +27,7 @@ export type ViewProps = {
 };
 
 /** Typed Hono context with AppVariables. Use in route handlers. */
-// deno-lint-ignore no-explicit-any
-export type AppContext = Context<{ Variables: AppVariables }, any, any>;
+export type AppContext = Context<{ Variables: AppVariables }>;
 
 // View mode for domain list pages — grid (card) or table.
 export type ViewMode = "grid" | "table";
