@@ -14,13 +14,16 @@ export const Sidenav: FC<Props> = ({ id, title, open, children }) => (
   <aside
     class={`sidenav${open ? " is-open" : ""}`}
     id={id}
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby={`${id}-title`}
     aria-hidden={open ? "false" : "true"}
   >
     <div class="sidenav__backdrop" data-sidenav-close />
     <div class="sidenav__panel">
       <div class="sidenav__resize" data-sidenav-resize />
       <div class="sidenav__header">
-        <h2 class="sidenav__title">{title}</h2>
+        <h2 class="sidenav__title" id={`${id}-title`}>{title}</h2>
         <button
           class="btn btn--tertiary btn--sm sidenav__close-btn"
           type="button"

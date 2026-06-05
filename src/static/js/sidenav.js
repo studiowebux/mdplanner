@@ -3,9 +3,45 @@
 
 (function () {
   var dirtyNavs = {};
+  // Element focus returns to when the sidenav closes (the trigger that opened
+  // it). Only one sidenav is open at a time, so a single ref suffices.
+  var lastFocused = null;
+
+  var FOCUSABLE = "a[href], button:not([disabled]), input:not([disabled]), " +
+    "textarea:not([disabled]), select:not([disabled]), " +
+    '[tabindex]:not([tabindex="-1"])';
 
   function getOpenSidenav() {
     return document.querySelector(".sidenav.is-open");
+  }
+
+  function focusablesIn(el) {
+    return el.querySelectorAll(FOCUSABLE);
+  }
+
+  // Move focus into the panel (first form field, else first focusable, else the
+  // panel itself) and remember where it came from so close() can restore it.
+  function focusSidenav(el) {
+    lastFocused = document.activeElement;
+    var panel = el.querySelector(".sidenav__panel");
+    if (!panel) return;
+    var focusables = focusablesIn(panel);
+    var first = null;
+    for (var i = 0; i < focusables.length; i++) {
+      var tag = focusables[i].tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+        first = focusables[i];
+        break;
+      }
+    }
+    (first || focusables[0] || panel).focus();
+  }
+
+  function restoreFocus() {
+    if (lastFocused && typeof lastFocused.focus === "function") {
+      lastFocused.focus();
+    }
+    lastFocused = null;
   }
 
   function openSidenav(id) {
@@ -16,6 +52,7 @@
     dirtyNavs[id] = false;
     updateDirtyIndicator(el, false);
     trackDirty(el, id);
+    focusSidenav(el);
   }
 
   function closeSidenav(el) {
@@ -39,6 +76,7 @@
     el.setAttribute("aria-hidden", "true");
     dirtyNavs[el.id] = false;
     updateDirtyIndicator(el, false);
+    restoreFocus();
   }
 
   function updateDirtyIndicator(el, dirty) {
@@ -112,6 +150,32 @@
       dirtyNavs[nav.id] = false;
       updateDirtyIndicator(nav, false);
       trackDirty(nav, nav.id);
+      focusSidenav(nav);
+    }
+  });
+
+  // Focus trap — keep Tab/Shift+Tab within the open panel and pull escaped
+  // focus back. Tab-only, so it never interferes with mouse/canvas interaction
+  // (e.g. the c4-canvas persistent panel using the same component).
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab") return;
+    var open = getOpenSidenav();
+    if (!open) return;
+    var panel = open.querySelector(".sidenav__panel");
+    if (!panel) return;
+    var focusables = focusablesIn(panel);
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    if (!panel.contains(document.activeElement)) {
+      e.preventDefault();
+      first.focus();
+    } else if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
     }
   });
 
