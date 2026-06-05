@@ -140,7 +140,6 @@ export const riskConfig: DomainConfig<Risk, CreateRisk, UpdateRisk> = {
                 hx-get={`/risks/${r.id}/preview`}
                 hx-target="#risks-form-container"
                 hx-swap="innerHTML"
-                data-sidenav-open
                 class="risk-matrix__chip"
                 title={r.title}
               >

@@ -11,7 +11,6 @@ const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
       hx-get={`/notes/${row.id}/preview`}
       hx-target="#notes-form-container"
       hx-swap="innerHTML"
-      data-sidenav-open
     >
       View
     </button>

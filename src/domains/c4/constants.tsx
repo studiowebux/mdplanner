@@ -33,7 +33,6 @@ export const C4_TABLE_COLUMNS: ColumnDef[] = [
       <button
         type="button"
         class="btn-link"
-        data-sidenav-open="c4-form-container"
         hx-get={`/c4/${row.id}/edit`}
         hx-target="#c4-form-container"
         hx-swap="innerHTML"

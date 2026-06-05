@@ -385,7 +385,6 @@ const RelatedMeetingsSectionComponent: FC<
           hx-get={`/meetings/new?related=${meeting.id}`}
           hx-target="#meetings-form-container"
           hx-swap="innerHTML"
-          data-sidenav-open="meetings-form-container"
         >
           Schedule follow-up
         </button>

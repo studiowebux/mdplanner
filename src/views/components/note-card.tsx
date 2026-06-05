@@ -29,7 +29,6 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
             hx-get={`/notes/${note.id}/preview`}
             hx-target="#notes-form-container"
             hx-swap="innerHTML"
-            data-sidenav-open
           >
             View
           </button>

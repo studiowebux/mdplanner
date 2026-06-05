@@ -189,7 +189,6 @@ const SectionHeader: FC<{
       hx-get={addRoute}
       hx-target="#analytics-sidenav-container"
       hx-swap="innerHTML"
-      data-sidenav-open={`analytics-add-${sectionKey}`}
     >
       + {addLabel}
     </button>

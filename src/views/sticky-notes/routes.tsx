@@ -99,7 +99,6 @@ stickyNotesRouter.get("/", async (c) => {
           <button
             type="button"
             class="btn btn--primary"
-            data-sidenav-open="sticky-notes-board-form"
             hx-get="/sticky-notes/forms/new-board"
             hx-target="#sticky-notes-form-container"
             hx-swap="innerHTML"
