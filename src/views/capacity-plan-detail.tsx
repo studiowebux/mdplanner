@@ -340,7 +340,7 @@ const MembersTable: FC<{
       : (
         <table class="data-table capacity-plan-detail__table">
           <thead>
-            <tr class="data-table__head-row">
+            <tr class="data-table__th-row">
               <th class="data-table__th">Person</th>
               <th class="data-table__th">Hours/Day</th>
               <th class="data-table__th">Working Days</th>
@@ -470,7 +470,7 @@ const AllocationsConfig: FC<{
       : (
         <table class="data-table capacity-plan-detail__table">
           <thead>
-            <tr class="data-table__head-row">
+            <tr class="data-table__th-row">
               <th class="data-table__th">Person</th>
               <th class="data-table__th">Target</th>
               <th class="data-table__th">Type</th>
@@ -563,7 +563,7 @@ const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
       <div class="capacity-plan-detail__grid-scroll">
         <table class="data-table capacity-plan-detail__grid">
           <thead>
-            <tr class="data-table__head-row">
+            <tr class="data-table__th-row">
               <th class="data-table__th capacity-plan-detail__grid-person-col">
                 Person
               </th>

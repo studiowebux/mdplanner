@@ -104,7 +104,7 @@ const RecapTable: FC<{
       <h2 class="time-entries__recap-heading">{label}</h2>
       <table class="data-table time-entries__recap-table">
         <thead>
-          <tr class="data-table__head-row">
+          <tr class="data-table__th-row">
             <th class="data-table__th time-entries__recap-label">
               {label === "By Project" ? "Project" : "Person"}
             </th>
@@ -218,7 +218,7 @@ export const TimeEntriesView: FC<Props> = (props) => {
             : (
               <table class="data-table">
                 <thead>
-                  <tr class="data-table__head-row">
+                  <tr class="data-table__th-row">
                     <th class="data-table__th">Date</th>
                     <th class="data-table__th">Task</th>
                     <th class="data-table__th">Project</th>

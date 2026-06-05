@@ -681,7 +681,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
               <summary class="analytics__details-summary">Details</summary>
               <table class="data-table analytics__capacity-table">
                 <thead>
-                  <tr class="data-table__head-row">
+                  <tr class="data-table__th-row">
                     <th class="data-table__th">Plan</th>
                     <th class="data-table__th">Budget (h)</th>
                     <th class="data-table__th">Allocated (h)</th>
