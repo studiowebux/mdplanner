@@ -6,6 +6,7 @@
 // ever buffering the full JSON in memory.
 
 import type { Context } from "hono";
+import { log } from "../../../singletons/logger.ts";
 
 export type BackupParseEvent =
   | { type: "meta"; key: "version" | "exportedAt"; value: string }
@@ -97,7 +98,7 @@ export async function* parseBackupStream(
     try {
       items = JSON.parse(rawArray);
     } catch {
-      console.warn(`[backup] failed to parse domain "${key}" — skipping`);
+      log.warn(`[backup] failed to parse domain "${key}" — skipping`);
       continue;
     }
     if (!Array.isArray(items)) continue;

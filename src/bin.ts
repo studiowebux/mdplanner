@@ -32,7 +32,7 @@ const cache = Deno.env.get("CACHE") !== "false";
 // Warn when projectDir is the relative default and was not explicitly provided.
 // In production containers this points into the image layer — data is lost on restart.
 if (!Deno.args[0] && !Deno.env.get("PROJECT_DIR")) {
-  console.warn(
+  log.warn(
     "[WARN] PROJECT_DIR is not set and no CLI argument was given. " +
       'Using "./example" as the data directory. ' +
       "Data written here will be lost on container restart. " +

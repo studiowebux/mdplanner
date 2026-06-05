@@ -262,11 +262,19 @@ function analyzeTypeSafety(files: FileInfo[]): Dimension {
 // ---------------------------------------------------------------------------
 function analyzeDebt(files: FileInfo[]): Dimension {
   const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
+  // The log-singleton + no-silent-swallow conventions are SERVER rules: the
+  // `log` singleton is a Deno import browser code cannot use, and static/js has
+  // its own sanctioned guarded-diagnostic patterns. Scope those two checks to
+  // server source; TODO/FIXME markers apply everywhere.
+  const isBrowser = (rel: string) => /static[\/\\]js[\/\\]/.test(rel);
+  const server = src.filter((f) => !isBrowser(f.rel));
   const markers = countMatches(src, /\b(TODO|FIXME|HACK|XXX|WIP)\b/);
   // console.* that bypasses the log singleton (logger.ts itself is exempt).
-  const consoles = countMatches(src, /\bconsole\.(log|error|warn|info|debug)\b/)
-    .filter((h) => !/logger\.ts$/.test(h.rel));
-  const emptyCatch = countMatches(src, /catch\s*(\([^)]*\))?\s*\{\s*\}/);
+  const consoles = countMatches(
+    server,
+    /\bconsole\.(log|error|warn|info|debug)\b/,
+  ).filter((h) => !/logger\.ts$/.test(h.rel));
+  const emptyCatch = countMatches(server, /catch\s*(\([^)]*\))?\s*\{\s*\}/);
   const total = markers.length + consoles.length + emptyCatch.length;
   const score = clamp(
     100 - markers.length * 6 - consoles.length * 3 -

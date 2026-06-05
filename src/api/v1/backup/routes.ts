@@ -12,6 +12,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { APP_VERSION } from "../../../constants/mod.ts";
+import { log } from "../../../singletons/logger.ts";
 import { badRequest } from "../../../types/api.ts";
 import { registerBackupDomains } from "./domains.ts";
 import {
@@ -80,7 +81,7 @@ backupRouter.get("/export", (c) => {
         try {
           items = await d.export();
         } catch (err) {
-          console.error(`[backup] export failed for ${d.key}:`, err);
+          log.error(`[backup] export failed for ${d.key}:`, err);
           items = [];
         }
         if (!first) write(",\n");

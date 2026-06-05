@@ -4,6 +4,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getProjectAnalytics } from "../../../services/analytics.service.ts";
 import { AnalyticsFiltersSchema } from "../../../types/analytics.types.ts";
 import { errorContent, jsonContent } from "../../../types/api.ts";
+import { log } from "../../../singletons/logger.ts";
 
 export const analyticsRouter = new OpenAPIHono();
 
@@ -28,7 +29,7 @@ analyticsRouter.openapi(getAnalyticsRoute, async (c) => {
     const data = await getProjectAnalytics(filters);
     return c.json(data, 200);
   } catch (err) {
-    console.error("[analytics] aggregation failed:", err);
+    log.error("[analytics] aggregation failed:", err);
     return c.json({
       error: "Failed to collect analytics",
       message: String(err),

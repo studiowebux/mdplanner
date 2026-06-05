@@ -371,6 +371,10 @@ export async function createWebDavHandler(
   }
 
   // ── Logger ────────────────────────────────────────────────────────────────
+  // Deliberate: webdav's own self-contained structured logger with a
+  // configurable json/text format (cfg.logFormat) + ANSI levels + [WebDAV]
+  // prefix. Intentionally NOT routed through the app `log` singleton, which is
+  // text-only and would drop the JSON request-log mode.
 
   type LogLevel = "INFO" | "WARN" | "ERROR" | "DEBUG";
 
