@@ -19,7 +19,7 @@ export const BillingDocumentHeader: FC<BillingDocumentHeaderProps> = (
       {config.billingLogoUrl && (
         <img
           src={config.billingLogoUrl}
-          alt={config.billingCompany ?? "Logo"}
+          alt={config.billingCompany ? `${config.billingCompany} logo` : "Logo"}
           class="billing-document-header__logo"
         />
       )}
