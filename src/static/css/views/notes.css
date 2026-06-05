@@ -387,13 +387,23 @@
   background: var(--color-bg-secondary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
+  /* The toolbar is inserted before .note-detail__body, so the body's block
+     gap does not separate it from the first block — add it explicitly. */
+  margin-bottom: var(--space-md);
+}
+
+/* Editable paragraph block: stack its controls, textarea and preview with
+   consistent spacing (the block element otherwise has no styling). */
+.note-editor__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .note-editor__block-controls,
 .note-editor__section-controls {
   display: flex;
   gap: var(--space-xs);
-  padding-bottom: var(--space-xs);
 }
 
 .note-editor__textarea {

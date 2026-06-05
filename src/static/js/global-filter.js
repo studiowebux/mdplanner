@@ -160,6 +160,10 @@
       var btn = e.target.closest("[data-global-filter]");
       if (btn) {
         e.stopPropagation();
+        // Mutual exclusivity: opening a filter closes the person switcher so
+        // two topbar popups are never open at once.
+        var personDetails = document.getElementById("topbar-person-switcher");
+        if (personDetails) personDetails.removeAttribute("open");
         toggleFilterPanel(btn.getAttribute("data-global-filter"));
         return;
       }
@@ -187,6 +191,14 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && openPanel) closeFilterPanel(openPanel);
     });
+
+    // Mutual exclusivity: opening the person switcher closes any open filter.
+    var personDetails = document.getElementById("topbar-person-switcher");
+    if (personDetails) {
+      personDetails.addEventListener("toggle", function () {
+        if (personDetails.open && openPanel) closeFilterPanel(openPanel);
+      });
+    }
 
     // Re-sync after htmx swaps (page navigations restore cookie state)
     document.addEventListener("htmx:afterSettle", syncCheckboxes);

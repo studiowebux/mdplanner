@@ -343,9 +343,13 @@
   --z-table-sticky: 3;
   --z-toolbar: 10;
   --z-sticky: 20;
+  /* Topbar strip owns a stacking context above every content sticky header
+     (max --z-sticky) so its dropdowns clear all table/list headers on every
+     page, but stays below the mobile menu overlay/sidebar so the slide-in menu
+     still covers it. */
+  --z-topbar: 100;
   --z-overlay: 199;
   --z-sidebar: 200;
-  --z-topbar: 210;
   --z-dropdown: 320;
   --z-sidenav: 400;
   --z-toast: 500;

@@ -188,7 +188,11 @@
     if (!sse || sse.dataset.editGuard) return;
     sse.dataset.editGuard = "true";
     sse.addEventListener("htmx:beforeRequest", function (e) {
-      if (editing) e.preventDefault();
+      // Only cancel the SSE element's OWN live-refresh request. htmx:beforeRequest
+      // bubbles, so without the target check this also cancels descendant
+      // requests (e.g. the per-block Preview button), which is why Preview never
+      // populated while editing.
+      if (editing && e.target === sse) e.preventDefault();
     });
   }
 

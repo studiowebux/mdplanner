@@ -321,6 +321,20 @@ html.focus-mode .focus-mode-exit {
     var(--color-border-default);
   background: var(--color-bg-primary);
   flex-shrink: 0;
+  /* Own stacking context above the scrollable content. Without this the topbar
+     and content compete in the root stacking context, so any table/list sticky
+     header (or future content z-index) can paint over the topbar dropdowns
+     (filter, person, search). This is the single shell-level guarantee that
+     topbar dropdowns sit above every page's table headers. */
+  position: relative;
+  z-index: var(--z-topbar);
+  /* Force the topbar onto its own composited layer. A `position: sticky` table
+     header (e.g. the capacity-plans list) gets promoted to a GPU layer and can
+     paint over the topbar dropdowns even though their z-index is higher — the
+     classic flaky bug where the popup only renders correctly after another
+     repaint (e.g. after opening the person menu first). Promoting the topbar
+     too keeps the layer order stable from first paint. */
+  transform: translateZ(0);
 }
 
 .topbar__search {
