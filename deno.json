@@ -34,6 +34,7 @@
     "start": "deno run --allow-net --allow-read --allow-write --allow-env src/bin.ts",
     "mcp": "deno run --allow-read --allow-write --allow-env src/bin-mcp.ts",
     "migrate": "deno run --allow-read --allow-write scripts/migrate-v1-to-v2.ts",
+    "analyze": "deno run --allow-read --allow-run scripts/analyze.ts --deep ./src",
     "test": "deno test --allow-read --allow-write --allow-env tests/",
     "test:watch": "deno test --allow-read --allow-write --allow-env --watch tests/",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --output mdplanner src/bin.ts",
