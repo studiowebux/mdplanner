@@ -56,6 +56,13 @@ export const NoteDetailView: FC<Props> = (props) => {
         />
         <div class="note-detail__top-bar">
           <a href="/notes" class="btn btn--secondary">Back to notes</a>
+          {
+            /* Deliberately NOT the shared <DetailActions>: the note Edit is an
+              inline-editor toggle (data-note-edit-toggle), not an hx-get to a
+              form container, so DetailActions' Edit can't represent it. Full-size
+              Edit pairs with the full-size "Back to notes" anchor — justified
+              exception (cz1i). */
+          }
           <div class="note-detail__top-bar-actions">
             {isArchived
               ? (

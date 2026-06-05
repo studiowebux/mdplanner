@@ -414,7 +414,15 @@ export const TaskDetailView: FC<Props> = (
 
         <ArchivedBanner entity={task} />
 
-        {/* Quick actions bar — move, assign, then mark complete last */}
+        {
+          /* Quick actions bar — move, assign, then mark complete last.
+            Deliberately NOT the shared <DetailActions> (Edit + Delete row):
+            this is a richer quick-actions bar (Move-to select + Assign
+            autocomplete + Mark complete/Reopen toggle alongside Edit/Archive),
+            with full-size buttons matching those neighbors. DetailActions is the
+            standalone Edit+Delete row (margin-left:auto) and can't absorb the
+            bespoke quick-action controls — justified exception (cz1i). */
+        }
         <div class="task-detail__quick-actions">
           <form
             class="task-detail__action-group"
