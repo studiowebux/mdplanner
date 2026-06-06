@@ -58,6 +58,7 @@ function serializeCampaign(
 // Repository
 // ---------------------------------------------------------------------------
 
+/** Persists MarketingPlan entities as markdown (sectioned body) with a SQLite cache mirror. */
 export class MarketingPlanRepository extends CachedMarkdownRepository<
   MarketingPlan,
   CreateMarketingPlan,

@@ -16,6 +16,7 @@ import { STICKY_NOTE_BODY_KEYS } from "../domains/sticky-note/constants.ts";
 import { readMarkdownDir } from "../utils/repo-helpers.ts";
 
 import { stampAuditFields } from "../utils/frontmatter-mapper.ts";
+/** Persists StickyNote entities as markdown with a SQLite cache mirror; adds canvas position/size updates and a build-free active count (countActive). */
 export class StickyNoteRepository extends CachedMarkdownRepository<
   StickyNote,
   CreateStickyNote,

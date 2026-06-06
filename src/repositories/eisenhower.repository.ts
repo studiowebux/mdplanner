@@ -16,6 +16,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Eisenhower matrices as markdown with a SQLite cache mirror. */
 export class EisenhowerRepository extends CachedMarkdownRepository<
   Eisenhower,
   CreateEisenhower,

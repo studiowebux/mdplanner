@@ -19,6 +19,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Retrospective entities as markdown with a SQLite cache mirror. */
 export class RetrospectiveRepository extends CachedMarkdownRepository<
   Retrospective,
   CreateRetrospective,

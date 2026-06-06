@@ -15,6 +15,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Deal entities as markdown with a SQLite cache mirror. */
 export class DealRepository extends CachedMarkdownRepository<
   Deal,
   CreateDeal,

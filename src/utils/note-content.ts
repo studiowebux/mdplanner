@@ -15,6 +15,7 @@ import type { CustomSection, NoteParagraph } from "../types/note.types.ts";
 // Parse — markdown → { paragraphs, customSections }
 // ---------------------------------------------------------------------------
 
+/** Parse a note's enhanced markdown body into typed content blocks (text, embeds, mentions). Inverse of serializeEnhancedContent. */
 export function parseEnhancedContent(
   content: string,
 ): { paragraphs: NoteParagraph[]; customSections: CustomSection[] } {
@@ -354,6 +355,7 @@ function parseContentBlocks(content: string): NoteParagraph[] {
 // Serialize — { paragraphs, customSections } → markdown
 // ---------------------------------------------------------------------------
 
+/** Serialize typed content blocks back to the note's enhanced markdown body. Inverse of parseEnhancedContent. */
 export function serializeEnhancedContent(
   paragraphs: NoteParagraph[],
   customSections: CustomSection[],

@@ -19,6 +19,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists LeanCanvas entities as markdown with a SQLite cache mirror. */
 export class LeanCanvasRepository extends CachedMarkdownRepository<
   LeanCanvas,
   CreateLeanCanvas,

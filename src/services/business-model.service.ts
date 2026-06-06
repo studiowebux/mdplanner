@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Business-model CRUD service; filters by project and text query (q). */
 export class BusinessModelService extends BaseService<
   BusinessModel,
   CreateBusinessModel,

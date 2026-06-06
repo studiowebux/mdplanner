@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Onboarding service: CRUD plus per-step toggling/renaming (toggleStep/updateStepTitle); filters by role, status, and text query (q). */
 export class OnboardingService extends BaseService<
   Onboarding,
   CreateOnboarding,

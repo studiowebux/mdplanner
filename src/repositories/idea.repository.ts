@@ -14,6 +14,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Idea entities as markdown with a SQLite cache mirror; resolves cross-idea backlinks (findAllWithBacklinks) and link mutations (link/unlinkIdeas). */
 export class IdeaRepository extends CachedMarkdownRepository<
   Idea,
   CreateIdea,

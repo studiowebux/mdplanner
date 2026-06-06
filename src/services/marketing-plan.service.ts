@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Marketing-plan CRUD service; filters by status and text query (q). */
 export class MarketingPlanService extends BaseService<
   MarketingPlan,
   CreateMarketingPlan,

@@ -12,6 +12,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Sticky-note service: CRUD plus canvas position/size updates and active count (count); filters by color, project, and text query (q). */
 export class StickyNoteService extends BaseService<
   StickyNote,
   CreateStickyNote,

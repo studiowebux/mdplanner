@@ -31,6 +31,7 @@ const COMPANY_SIZES: readonly CompanySize[] = [
   "1000+",
 ] as const;
 
+/** Persists Company entities as markdown with a SQLite cache mirror. */
 export class CompanyRepository extends CachedMarkdownRepository<
   Company,
   CreateCompany,

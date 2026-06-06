@@ -11,6 +11,7 @@ interface GoalListOptions {
   project?: string;
 }
 
+/** Goal CRUD service; filters by project, status, and type. */
 export class GoalService extends BaseService<
   Goal,
   CreateGoal,

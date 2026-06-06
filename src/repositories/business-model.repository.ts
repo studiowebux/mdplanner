@@ -55,6 +55,7 @@ function matchSection(heading: string): BusinessModelSectionKey | null {
   return null;
 }
 
+/** Persists BusinessModel entities as markdown (nine-block canvas body) with a SQLite cache mirror. */
 export class BusinessModelRepository extends CachedMarkdownRepository<
   BusinessModel,
   CreateBusinessModel,

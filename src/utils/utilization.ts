@@ -3,8 +3,10 @@
 // 60–80% ramping, >100% overallocated; null = no figure (e.g. no budget set).
 // Shared by the capacity plan bandwidth bars and the analytics utilization chart.
 
+/** Capacity utilization band: none (0), under, warn (near full), ok, or over (>100%). */
 export type UtilizationState = "none" | "under" | "warn" | "ok" | "over";
 
+/** Map a utilization percentage to its UtilizationState band; null percent yields "none". */
 export function utilizationBand(pct: number | null): UtilizationState {
   if (pct == null) return "none";
   if (pct > 100) return "over";

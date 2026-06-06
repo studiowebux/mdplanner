@@ -1,3 +1,4 @@
+// Portfolio repository — markdown-backed PortfolioItem store with cache mirror.
 import { join } from "@std/path";
 import { log } from "../singletons/logger.ts";
 import {
@@ -21,6 +22,7 @@ import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
 import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
 import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
 
+/** Persists PortfolioItem entities as markdown with a SQLite cache mirror; standalone (not BaseMarkdownRepository) with disk/cache split reads (findAllFromDisk/findFromDisk), full-text search, soft-delete, and status updates. */
 export class PortfolioRepository {
   private dir: string;
   private writer = new SafeWriter();

@@ -11,6 +11,7 @@ import { WEEKDAYS } from "../constants/mod.ts";
 
 type Weekday = typeof WEEKDAYS[number];
 
+/** Project configuration service (no entity repository): reads/updates project config — features, schedule, tags, links, section order, nav categories, KPI metrics, milestone statuses. */
 export class ProjectService {
   constructor(private repo: ProjectRepository) {}
 

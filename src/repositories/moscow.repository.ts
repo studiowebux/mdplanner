@@ -21,6 +21,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists MoSCoW boards as markdown with a SQLite cache mirror. */
 export class MoscowRepository extends CachedMarkdownRepository<
   Moscow,
   CreateMoscow,

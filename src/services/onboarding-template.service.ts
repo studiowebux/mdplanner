@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Onboarding-template CRUD service; filters by role, tag, and text query (q). */
 export class OnboardingTemplateService extends BaseService<
   OnboardingTemplate,
   CreateOnboardingTemplate,

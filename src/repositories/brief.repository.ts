@@ -16,6 +16,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Brief entities as markdown with a SQLite cache mirror. */
 export class BriefRepository extends CachedMarkdownRepository<
   Brief,
   CreateBrief,

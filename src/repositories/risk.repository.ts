@@ -10,6 +10,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Risk entities as markdown with a SQLite cache mirror. */
 export class RiskRepository extends CachedMarkdownRepository<
   Risk,
   CreateRisk,

@@ -15,6 +15,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Finance entries as markdown with a SQLite cache mirror. */
 export class FinanceRepository extends CachedMarkdownRepository<
   Finance,
   CreateFinance,

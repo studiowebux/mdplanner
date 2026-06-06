@@ -16,6 +16,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists C4 components as markdown with a SQLite cache mirror; adds level queries (findByLevel), position patching, and connection edges (add/remove/getConnectionsFor). */
 export class C4Repository extends CachedMarkdownRepository<
   C4Component,
   CreateC4Component,

@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Sticky-note board service: CRUD plus default-board provisioning (ensureDefaultBoard); filters by text query (q). */
 export class StickyBoardService extends BaseService<
   StickyBoard,
   CreateStickyBoard,

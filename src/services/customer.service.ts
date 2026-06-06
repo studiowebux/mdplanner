@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Customer CRUD service; filters by text query (q). */
 export class CustomerService extends BaseService<
   Customer,
   CreateCustomer,

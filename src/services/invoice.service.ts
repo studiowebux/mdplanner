@@ -12,6 +12,7 @@ import { ciIncludes } from "../utils/string.ts";
 import { computeLineAmount, round2 } from "../utils/billing.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Invoice service: CRUD plus total calculation, overdue/display-status derivation (isOverdue/displayStatus), and paid-amount sync (updatePaidAmount); filters by customerId, status, and text query (q). */
 export class InvoiceService extends BaseService<
   Invoice,
   CreateInvoice,

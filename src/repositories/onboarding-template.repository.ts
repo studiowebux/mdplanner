@@ -26,6 +26,7 @@ const ONBOARDING_TEMPLATE_BODY_KEYS = [] as const;
 
 const VALID_CATEGORIES = new Set<string>(ONBOARDING_STEP_CATEGORIES);
 
+/** Persists OnboardingTemplate entities as markdown with a SQLite cache mirror. */
 export class OnboardingTemplateRepository extends CachedMarkdownRepository<
   OnboardingTemplate,
   CreateOnboardingTemplate,

@@ -14,6 +14,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Investor entities as markdown with a SQLite cache mirror. */
 export class InvestorRepository extends CachedMarkdownRepository<
   Investor,
   CreateInvestor,

@@ -14,6 +14,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Journal entries as markdown with a SQLite cache mirror. */
 export class JournalRepository extends CachedMarkdownRepository<
   JournalEntry,
   CreateJournalEntry,

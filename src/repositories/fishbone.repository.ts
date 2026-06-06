@@ -15,6 +15,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Fishbone diagrams as markdown with a SQLite cache mirror. */
 export class FishboneRepository extends CachedMarkdownRepository<
   Fishbone,
   CreateFishbone,

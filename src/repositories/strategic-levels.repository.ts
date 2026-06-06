@@ -20,6 +20,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists StrategicLevels entities as markdown with a SQLite cache mirror. */
 export class StrategicLevelsRepository extends CachedMarkdownRepository<
   StrategicLevelsBuilder,
   CreateStrategicLevelsBuilder,

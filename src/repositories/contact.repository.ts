@@ -22,6 +22,7 @@ const CONTACT_TYPES: readonly ContactType[] = [
   "other",
 ] as const;
 
+/** Persists Contact entities as markdown with a SQLite cache mirror. */
 export class ContactRepository extends CachedMarkdownRepository<
   Contact,
   CreateContact,

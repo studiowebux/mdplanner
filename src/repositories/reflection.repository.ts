@@ -17,6 +17,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Reflection entities as markdown with a SQLite cache mirror. */
 export class ReflectionRepository extends CachedMarkdownRepository<
   Reflection,
   CreateReflection,

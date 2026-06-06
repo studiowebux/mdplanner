@@ -13,6 +13,7 @@ import { insertPortfolioRow } from "../domains/portfolio/cache.ts";
 import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
 import { CachedService } from "./cached.service.ts";
 
+/** Portfolio service (cached): CRUD plus full-text search and per-item status-update management (add/update/deleteStatusUpdate). */
 export class PortfolioService extends CachedService<
   PortfolioItem,
   CreatePortfolioItem,

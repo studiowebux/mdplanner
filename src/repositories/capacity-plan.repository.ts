@@ -30,6 +30,7 @@ const CAPACITY_PLAN_BODY_KEYS = [
   "allocations",
 ] as const;
 
+/** Persists CapacityPlan entities as markdown with a SQLite cache mirror; team members and allocations are encoded as body tables. */
 export class CapacityPlanRepository extends CachedMarkdownRepository<
   CapacityPlan,
   CreateCapacityPlan,

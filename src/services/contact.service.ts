@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Contact CRUD service; filters by company, type, and text query (q). */
 export class ContactService extends BaseService<
   Contact,
   CreateContact,

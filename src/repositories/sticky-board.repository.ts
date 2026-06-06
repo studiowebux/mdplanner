@@ -16,6 +16,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists sticky-note boards as markdown with a SQLite cache mirror. */
 export class StickyBoardRepository extends CachedMarkdownRepository<
   StickyBoard,
   CreateStickyBoard,

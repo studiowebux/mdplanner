@@ -47,6 +47,7 @@ function matchSection(heading: string): ProjectValueBoardSectionKey | null {
   return null;
 }
 
+/** Persists ProjectValueBoard entities as markdown with a SQLite cache mirror. */
 export class ProjectValueBoardRepository extends CachedMarkdownRepository<
   ProjectValueBoard,
   CreateProjectValueBoard,

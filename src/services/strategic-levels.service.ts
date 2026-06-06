@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Strategic-levels CRUD service; filters by date and text query (q). */
 export class StrategicLevelsService extends BaseService<
   StrategicLevelsBuilder,
   CreateStrategicLevelsBuilder,

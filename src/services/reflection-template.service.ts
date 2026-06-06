@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Reflection-template CRUD service; filters by category, period, and text query (q). */
 export class ReflectionTemplateService extends BaseService<
   ReflectionTemplate,
   CreateReflectionTemplate,

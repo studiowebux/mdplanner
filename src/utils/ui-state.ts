@@ -1,3 +1,4 @@
+// Request-scoped UI state: global project/assignee filters and view prefs.
 import { getCookie, setCookie } from "hono/cookie";
 import { parseJson } from "../database/sqlite/mod.ts";
 import type { AppContext } from "../types/app.ts";
@@ -35,16 +36,19 @@ type GlobalUiState = { globalProjects?: string[]; globalAssignees?: string[] };
 
 const GLOBAL_KEY = "_global";
 
+/** Read the active global project filter from request UI state. */
 export function readGlobalProjects(c: AppContext): string[] {
   const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
   return g.globalProjects ?? [];
 }
 
+/** Read the active global assignee filter from request UI state. */
 export function readGlobalAssignees(c: AppContext): string[] {
   const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
   return g.globalAssignees ?? [];
 }
 
+/** Persist the global project/assignee filters into request UI state. */
 export function writeGlobalFilters(
   c: AppContext,
   projects: string[],

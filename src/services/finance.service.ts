@@ -12,6 +12,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Finance CRUD service: getSummary aggregates totals; filters by type, tag, date range (from/to), and text query (q). */
 export class FinanceService extends BaseService<
   Finance,
   CreateFinance,

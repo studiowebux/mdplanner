@@ -13,6 +13,7 @@ import { generateId } from "../utils/id.ts";
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Meeting service: CRUD plus action-item management (add/toggle/delete/getOpenActions) and meeting linking; filters by project, date range, open-actions-only, and text query (q). */
 export class MeetingService extends BaseService<
   Meeting,
   CreateMeeting,

@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Risk CRUD service; filters by category, project, status, and text query (q). */
 export class RiskService extends BaseService<
   Risk,
   CreateRisk,

@@ -18,6 +18,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Onboarding entities as markdown with a SQLite cache mirror. */
 export class OnboardingRepository extends CachedMarkdownRepository<
   Onboarding,
   CreateOnboarding,

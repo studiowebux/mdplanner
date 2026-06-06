@@ -10,6 +10,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists SAFE-note entities as markdown with a SQLite cache mirror. */
 export class SafeRepository extends CachedMarkdownRepository<
   Safe,
   CreateSafe,

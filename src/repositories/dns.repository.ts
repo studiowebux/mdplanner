@@ -11,6 +11,7 @@ import { DNS_TABLE, rowToDnsDomain } from "../domains/dns/cache.ts";
 import { DNS_BODY_KEYS } from "../domains/dns/constants.ts";
 
 import { stampAuditFields } from "../utils/frontmatter-mapper.ts";
+/** Persists DNS domains as markdown with a SQLite cache mirror; records are managed in the body (add/update/deleteRecord, upsertByDomain). */
 export class DnsRepository extends CachedMarkdownRepository<
   DnsDomain,
   CreateDnsDomain,

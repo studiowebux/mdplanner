@@ -17,6 +17,7 @@ import {
 /** Frontmatter keys whose values live in the markdown body, not frontmatter. */
 const MEETING_BODY_KEYS = ["title", "notes"] as const;
 
+/** Persists Meeting entities as markdown with a SQLite cache mirror; readByName resolves by title. */
 export class MeetingRepository extends CachedMarkdownRepository<
   Meeting,
   CreateMeeting,

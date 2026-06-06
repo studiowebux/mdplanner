@@ -11,6 +11,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** C4 model service: CRUD plus level/diagram/parent queries (findByLevel), node position patching, and connection management (add/remove/getConnectionsFor). */
 export class C4Service extends BaseService<
   C4Component,
   CreateC4Component,

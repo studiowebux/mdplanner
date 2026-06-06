@@ -17,6 +17,7 @@ import {
 import type { QueryResult } from "../database/sqlite/mod.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
+/** Persists Milestone entities as markdown with a SQLite cache mirror. */
 export class MilestoneRepository extends CachedMarkdownRepository<
   MilestoneBase,
   CreateMilestone,

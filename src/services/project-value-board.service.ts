@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Project-value-board CRUD service; filters by project and text query (q). */
 export class ProjectValueBoardService extends BaseService<
   ProjectValueBoard,
   CreateProjectValueBoard,

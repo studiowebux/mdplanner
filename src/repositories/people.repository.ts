@@ -22,6 +22,7 @@ import { PEOPLE_BODY_KEYS, PEOPLE_TABLE } from "../domains/people/constants.ts";
 import type { QueryResult } from "../database/sqlite/mod.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
+/** Persists Person entities as markdown with a SQLite cache mirror. */
 export class PeopleRepository extends CachedMarkdownRepository<
   Person,
   CreatePerson,

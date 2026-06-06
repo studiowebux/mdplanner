@@ -13,6 +13,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Payment entities as markdown with a SQLite cache mirror. */
 export class PaymentRepository extends CachedMarkdownRepository<
   Payment,
   CreatePayment,

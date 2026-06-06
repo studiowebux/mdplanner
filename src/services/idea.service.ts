@@ -11,6 +11,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Idea service: CRUD plus backlink resolution (listWithBacklinks) and idea linking (link/unlinkIdeas); filters by category, status, priority, and text query (q). */
 export class IdeaService extends BaseService<
   Idea,
   CreateIdea,

@@ -1,3 +1,4 @@
+// Markdown-to-HTML rendering helpers (SSR).
 import { marked, Renderer } from "marked";
 
 const renderer = new Renderer();
@@ -32,6 +33,7 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
 
 marked.use({ renderer, gfm: true, breaks: true });
 
+/** Render trusted markdown to sanitized HTML for SSR. */
 export function markdownToHtml(
   markdown: string | undefined | null,
 ): string {

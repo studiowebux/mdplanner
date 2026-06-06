@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Investor CRUD service; filters by type, stage, status, tag, and text query (q). */
 export class InvestorService extends BaseService<
   Investor,
   CreateInvestor,

@@ -19,6 +19,7 @@ import type { UserScope } from "../utils/actor.ts";
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Habit service: CRUD plus per-user completion tracking (markComplete/unmarkComplete/toggleDate/checkToday); filters by frequency, tag, and text query (q). */
 export class HabitService extends BaseService<
   Habit,
   CreateHabit,

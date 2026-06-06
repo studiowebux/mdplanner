@@ -11,6 +11,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Mindmap CRUD service; filters by project and text query (q). */
 export class MindmapService extends BaseService<
   Mindmap,
   CreateMindmap,

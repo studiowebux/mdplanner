@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** SWOT CRUD service; filters by project and text query (q). */
 export class SwotService extends BaseService<
   Swot,
   CreateSwot,

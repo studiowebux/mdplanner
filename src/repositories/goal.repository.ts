@@ -9,6 +9,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Goal entities as markdown with a SQLite cache mirror. */
 export class GoalRepository extends CachedMarkdownRepository<
   Goal,
   CreateGoal,

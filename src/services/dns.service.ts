@@ -11,6 +11,7 @@ import type {
   UpdateDnsDomain,
 } from "../types/dns.types.ts";
 
+/** DNS service (no base repository): domain CRUD plus per-record add/update/delete and Cloudflare sync (syncCloudflare). */
 export class DnsService {
   constructor(
     private repo: DnsRepository,

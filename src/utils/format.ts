@@ -1,3 +1,4 @@
+// Value formatting helpers (numbers, currency, byte sizes, etc.).
 let _locale = "en-US";
 let _currency = "USD";
 

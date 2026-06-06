@@ -1,3 +1,4 @@
+// Search-term highlighting helpers (JSX <mark> wrapping).
 import type { FC } from "hono/jsx";
 
 // Wraps matching substring in <mark> for search highlighting.

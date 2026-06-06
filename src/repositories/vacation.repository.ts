@@ -1,3 +1,4 @@
+// Vacation repository — markdown-backed VacationItem store with cache mirror.
 import type {
   CreateVacationRequest,
   UpdateVacationRequest,
@@ -11,6 +12,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Vacation entities as markdown with a SQLite cache mirror. */
 export class VacationRepository extends CachedMarkdownRepository<
   VacationRequest,
   CreateVacationRequest,

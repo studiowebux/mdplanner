@@ -1,3 +1,4 @@
+// Date/time parsing and locale-aware display helpers.
 let _locale = "en-US";
 
 /** Set locale from project config. Call once after boot. */

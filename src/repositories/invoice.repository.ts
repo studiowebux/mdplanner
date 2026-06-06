@@ -14,6 +14,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Invoice entities as markdown with a SQLite cache mirror; line items live in the body. */
 export class InvoiceRepository extends CachedMarkdownRepository<
   Invoice,
   CreateInvoice,

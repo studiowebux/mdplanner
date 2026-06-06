@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** SAFE-note CRUD service; filters by type, status, and text query (q). */
 export class SafeService extends BaseService<
   Safe,
   CreateSafe,

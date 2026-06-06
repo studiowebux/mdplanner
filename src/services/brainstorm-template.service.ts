@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Brainstorm-template CRUD service; filters by category and text query (q). */
 export class BrainstormTemplateService extends BaseService<
   BrainstormTemplate,
   CreateBrainstormTemplate,

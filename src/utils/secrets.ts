@@ -1,3 +1,4 @@
+// Secret/token storage and retrieval helpers.
 import { log } from "../singletons/logger.ts";
 
 /**

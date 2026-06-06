@@ -153,6 +153,7 @@ type MarkdownJsxProps = {
   bare?: boolean;
 };
 
+/** Render markdown inline as hono/jsx nodes (no dangerouslySetInnerHTML); bare omits the wrapper element. */
 export function MarkdownJsx({ markdown, class: cls, bare }: MarkdownJsxProps) {
   if (!markdown) return null;
   const children = blocks(marked.lexer(markdown));

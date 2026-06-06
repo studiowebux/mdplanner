@@ -45,6 +45,7 @@ function sectionToDir(section: string): string {
   return section.toLowerCase().replace(/\s+/g, "_");
 }
 
+/** Persists Task entities as markdown with a SQLite cache mirror; standalone (not BaseMarkdownRepository) with disk/cache split reads, soft-delete, and section moves (moveToSection). */
 export class TaskRepository {
   private boardDir: string;
   private writer = new SafeWriter();

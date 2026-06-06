@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Retrospective CRUD service; filters by status and text query (q). */
 export class RetrospectiveService extends BaseService<
   Retrospective,
   CreateRetrospective,

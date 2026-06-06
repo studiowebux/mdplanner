@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Eisenhower-matrix CRUD service; filters by project and text query (q). */
 export class EisenhowerService extends BaseService<
   Eisenhower,
   CreateEisenhower,

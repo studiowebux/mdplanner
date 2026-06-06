@@ -11,6 +11,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Note CRUD service: getBatch resolves many ids in one pass; filters by project and title search. */
 export class NoteService extends BaseService<
   Note,
   CreateNote,

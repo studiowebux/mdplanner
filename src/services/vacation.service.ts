@@ -1,3 +1,4 @@
+// Vacation service — CRUD over VacationRepository for time-off requests.
 import type { VacationRepository } from "../repositories/vacation.repository.ts";
 import type {
   CreateVacationRequest,
@@ -8,6 +9,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Vacation CRUD service; filters by personId, type, status, and text query (q). */
 export class VacationService extends BaseService<
   VacationRequest,
   CreateVacationRequest,

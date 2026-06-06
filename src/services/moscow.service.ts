@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** MoSCoW-prioritization CRUD service; filters by project and text query (q). */
 export class MoscowService extends BaseService<
   Moscow,
   CreateMoscow,

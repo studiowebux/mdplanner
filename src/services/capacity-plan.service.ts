@@ -11,6 +11,7 @@ import type {
 import { generateId } from "../utils/id.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Capacity-plan service: CRUD plus team-member and allocation management (add/update/remove member & allocation). */
 export class CapacityPlanService extends BaseService<
   CapacityPlan,
   CreateCapacityPlan,

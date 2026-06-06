@@ -42,6 +42,7 @@ export function resolveMentions(text: string, people: Person[]): string {
   });
 }
 
+/** Options for @mention resolution: the lookup sources and how to render each match. */
 export interface MentionOpts {
   /** Map of person ID → display name for resolving person mentions. */
   personMap?: Map<string, string>;

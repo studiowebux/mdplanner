@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Billing-rate CRUD service; filters lists by text query (q). */
 export class BillingRateService extends BaseService<
   BillingRate,
   CreateBillingRate,

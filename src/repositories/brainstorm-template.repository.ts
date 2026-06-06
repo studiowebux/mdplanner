@@ -17,6 +17,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists BrainstormTemplate entities as markdown with a SQLite cache mirror. */
 export class BrainstormTemplateRepository extends CachedMarkdownRepository<
   BrainstormTemplate,
   CreateBrainstormTemplate,

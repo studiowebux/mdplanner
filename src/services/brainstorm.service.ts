@@ -11,6 +11,7 @@ import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 import { getBrainstormTemplateService } from "../singletons/services.ts";
 
+/** Brainstorm CRUD service; filters by tag and text query (q). */
 export class BrainstormService extends BaseService<
   Brainstorm,
   CreateBrainstorm,

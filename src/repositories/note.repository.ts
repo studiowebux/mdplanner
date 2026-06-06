@@ -28,6 +28,7 @@ import type { CreateNote, Note, UpdateNote } from "../types/note.types.ts";
 // Repository
 // ---------------------------------------------------------------------------
 
+/** Persists Note entities as markdown with a SQLite cache mirror; standalone (not BaseMarkdownRepository) with its own soft-delete (archive/restore/hardDelete) and upsert. */
 export class NoteRepository {
   private notesDir: string;
   private writer = new SafeWriter();

@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Reflection CRUD service; filters by period, tag, date range (from/to), and text query (q). */
 export class ReflectionService extends BaseService<
   Reflection,
   CreateReflection,

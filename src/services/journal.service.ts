@@ -10,6 +10,7 @@ import type {
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Journal CRUD service; filters by mood, tag, date range (from/to), and text query (q). */
 export class JournalService extends BaseService<
   JournalEntry,
   CreateJournalEntry,

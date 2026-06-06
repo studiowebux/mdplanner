@@ -10,6 +10,7 @@ import type { ProjectConfig } from "../types/project.types.ts";
 import { FrontmatterProjectSchema } from "../types/project.types.ts";
 import { encryptSecret } from "../utils/secrets.ts";
 
+/** Reads/writes the single project configuration document (read/write); no entity collection. */
 export class ProjectRepository {
   private filePath: string;
   private configCache: ProjectConfig | null = null;

@@ -16,6 +16,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists SWOT entities as markdown with a SQLite cache mirror. */
 export class SwotRepository extends CachedMarkdownRepository<
   Swot,
   CreateSwot,

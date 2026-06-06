@@ -15,6 +15,7 @@ import {
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+/** Persists Habit entities as markdown with a SQLite cache mirror; per-user completions live in the body. */
 export class HabitRepository extends CachedMarkdownRepository<
   Habit,
   CreateHabit,

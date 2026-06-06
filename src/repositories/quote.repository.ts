@@ -19,6 +19,7 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { QUOTE_TABLE, rowToQuote } from "../domains/quote/cache.ts";
 import { QUOTE_BODY_KEYS } from "../domains/quote/constants.ts";
 
+/** Persists Quote entities as markdown with a SQLite cache mirror; revision history is appended to the body (getRevisions/appendRevision). */
 export class QuoteRepository extends CachedMarkdownRepository<
   Quote,
   CreateQuote,

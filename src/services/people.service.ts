@@ -22,6 +22,7 @@ interface PeopleListOptions {
   department?: string;
 }
 
+/** People service (cached): CRUD plus org tree, direct reports, departments, skill/availability matching, workload, agent heartbeat, and preference updates; filters by department. */
 export class PeopleService extends CachedService<
   Person,
   CreatePerson,

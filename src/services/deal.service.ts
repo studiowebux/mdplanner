@@ -10,6 +10,7 @@ import type {
 import { ciEquals, ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Deal CRUD service; filters by stage, company, assignee, and text query (q). */
 export class DealService extends BaseService<
   Deal,
   CreateDeal,

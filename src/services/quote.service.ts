@@ -13,6 +13,7 @@ import { ciIncludes } from "../utils/string.ts";
 import { computeLineAmount, round2 } from "../utils/billing.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Quote service: CRUD plus total calculation, sending (sendQuote), revision history (getRevisions), and line-item editing; filters by customerId, status, and text query (q). */
 export class QuoteService extends BaseService<
   Quote,
   CreateQuote,

@@ -21,6 +21,7 @@ import type {
   GitHubWorkflowRun,
 } from "../types/github.types.ts";
 
+/** GitHub REST API client (no repository): wraps repos, issues, PRs, milestones, releases, and Actions workflow runs (list/cancel/rerun/dispatch). */
 export class GitHubService {
   constructor(private projectService: ProjectService) {}
 
