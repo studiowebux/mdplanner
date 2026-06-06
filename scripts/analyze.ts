@@ -52,6 +52,18 @@ const CONFIG = {
   longFunctionLoc: 80, // a function body over this many lines is "long"
   typeEscapePer1k: 2, // tolerated type-escape hatches per 1000 source lines
   minTestRatio: 0.25, // tests-LOC : source-LOC target ratio
+  // Documentation is measured over the PUBLIC-API surface only — the reusable
+  // library layers where a doc comment earns its keep. Leaf/wiring layers
+  // (views, domains config, type decls, route handlers) are excluded: a JSDoc
+  // on `export const SomeView` or `export type Row` is noise, not API docs.
+  docApiDirs: [
+    "services",
+    "utils",
+    "repositories",
+    "factories",
+    "components",
+    "providers",
+  ],
   // Weight of each dimension in the overall blend. Dimensions that are not
   // computed (e.g. lint without --deep) are dropped and weights renormalized.
   weights: {
@@ -429,8 +441,12 @@ function analyzeTesting(files: FileInfo[]): Dimension {
 // Dimension 6 — Documentation (heuristic)
 // ---------------------------------------------------------------------------
 function analyzeDocs(files: FileInfo[]): Dimension {
+  const inApiLayer = (rel: string) =>
+    CONFIG.docApiDirs.some((d) =>
+      rel === d || rel.startsWith(d + "/") || rel.startsWith(d + "\\")
+    );
   const src = files.filter((f) =>
-    (f.ext === ".ts" || f.ext === ".tsx") && !f.isTest
+    (f.ext === ".ts" || f.ext === ".tsx") && !f.isTest && inApiLayer(f.rel)
   );
   let exported = 0;
   let documented = 0;
@@ -462,9 +478,9 @@ function analyzeDocs(files: FileInfo[]): Dimension {
     name: "Documentation",
     score,
     grade: grade(score),
-    summary: `${documented}/${exported} exported symbols documented ` +
+    summary: `${documented}/${exported} public-API exports documented ` +
       `(${(docRatio * 100).toFixed(0)}%); ${withHeader}/${src.length} files ` +
-      `have a header comment.`,
+      `have a header comment. Scope: ${CONFIG.docApiDirs.join("/")}.`,
     findings: [],
     recommendations: docRatio >= 0.5 ? [] : [
       "Add doc comments to exported APIs (services, utils, shared components). " +
