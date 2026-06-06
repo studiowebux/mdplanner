@@ -78,11 +78,13 @@ function enrichMilestones(raw: MilestoneBase[], tasks: Task[]): Milestone[] {
   return result;
 }
 
+/** Optional filters for `MilestoneService.list` (by status and/or project). */
 export interface ListMilestoneOptions {
   status?: MilestoneStatus;
   project?: string;
 }
 
+/** A milestone enriched with task rollups (open/done counts, completion %, tasks grouped by section). */
 export interface MilestoneSummary {
   milestone: string;
   id: string;
@@ -95,6 +97,7 @@ export interface MilestoneSummary {
   sections: Record<string, { id: string; title: string; tags: string[] }[]>;
 }
 
+/** CRUD plus task-rollup summaries for milestones; enforces unique name-per-project. */
 export class MilestoneService {
   private cache: CacheSync | null = null;
 
@@ -240,6 +243,7 @@ export class MilestoneService {
   }
 }
 
+/** Thrown when creating a milestone whose name already exists for the project. */
 export class DuplicateMilestoneError extends Error {
   readonly code = "DUPLICATE_MILESTONE";
   constructor(

@@ -24,6 +24,7 @@ import { inDateRange, monthlySeries } from "./series.ts";
 const REVENUE_MONTH_WINDOW = 12;
 const FINANCE_MONTH_WINDOW = 6;
 
+/** Invoice counts/amounts by status plus a 12-month revenue series (keyed on createdAt). */
 export async function collectInvoiceStats(
   filters: AnalyticsFilters,
 ): Promise<InvoiceStats> {
@@ -59,6 +60,7 @@ export async function collectInvoiceStats(
   };
 }
 
+/** Quote counts and amounts grouped by status, within the filter range. */
 export async function collectQuoteStats(
   filters: AnalyticsFilters,
 ): Promise<QuoteStats> {
@@ -90,6 +92,7 @@ export async function collectQuoteStats(
   };
 }
 
+/** Total customer count (filters ignored). */
 export async function collectCustomerStats(
   _filters: AnalyticsFilters,
 ): Promise<CustomerStats> {
@@ -97,6 +100,7 @@ export async function collectCustomerStats(
   return { total: customers.length };
 }
 
+/** Investor counts and target amounts by status; the running total excludes "passed". */
 export async function collectInvestorStats(
   _filters: AnalyticsFilters,
 ): Promise<InvestorStats> {
@@ -126,6 +130,7 @@ export async function collectInvestorStats(
   };
 }
 
+/** Income/expense totals, balance, and a 6-month income-vs-expense series (filters ignored). */
 export async function collectFinanceStats(
   _filters: AnalyticsFilters,
 ): Promise<FinanceStats> {
@@ -166,6 +171,7 @@ export async function collectFinanceStats(
   };
 }
 
+/** Deal counts grouped by pipeline stage (filters ignored). */
 export async function collectDealStats(
   _filters: AnalyticsFilters,
 ): Promise<DealStats> {

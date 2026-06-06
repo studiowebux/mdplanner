@@ -20,6 +20,7 @@ import { inDateRange } from "./series.ts";
 // Hours-per-day line chart window (last N calendar days, anchored to filters.to).
 const HOURS_PER_DAY_WINDOW = 30;
 
+/** Task counts grouped by section, priority, and project for the filtered project. */
 export async function collectTaskStats(
   filters: AnalyticsFilters,
 ): Promise<TaskStats> {
@@ -40,6 +41,7 @@ export async function collectTaskStats(
   return { total: tasks.length, bySection, byPriority, byProject };
 }
 
+/** Goal counts grouped by status and type for the filtered project. */
 export async function collectGoalStats(
   filters: AnalyticsFilters,
 ): Promise<GoalStats> {
@@ -57,6 +59,7 @@ export async function collectGoalStats(
   return { total: goals.length, byStatus, byType };
 }
 
+/** Per-milestone task/done counts and progress (filters ignored). */
 export async function collectMilestoneStats(
   _filters: AnalyticsFilters,
 ): Promise<MilestoneStats> {
@@ -71,6 +74,10 @@ export async function collectMilestoneStats(
   return { total: milestones.length, milestones: result };
 }
 
+/**
+ * Logged hours aggregated by person, project, and day, plus a 0-filled 30-day
+ * series anchored at filters.to (or today). Honors date and person filters.
+ */
 export async function collectTimeEntryStats(
   filters: AnalyticsFilters,
 ): Promise<TimeEntryStats> {
@@ -143,6 +150,7 @@ function memberWeeklyCapacity(
   return hpd * days;
 }
 
+/** Per-plan allocated vs budget hours and utilization, derived from member capacity (filters ignored). */
 export async function collectCapacityStats(
   _filters: AnalyticsFilters,
 ): Promise<CapacityPlanStats> {

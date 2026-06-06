@@ -29,6 +29,7 @@ const REFLECTION_MONTH_WINDOW = 12;
 const MEETING_WEEK_WINDOW = 12;
 const JOURNAL_DAY_WINDOW = 90;
 
+/** Meeting counts (total, by project, and a weekly series) within the filter range. */
 export async function collectMeetingStats(
   filters: AnalyticsFilters,
 ): Promise<MeetingStats> {
@@ -53,6 +54,7 @@ export async function collectMeetingStats(
   };
 }
 
+/** Note counts grouped by `[type]` title prefix and by project (filters ignored). */
 export async function collectNoteStats(
   _filters: AnalyticsFilters,
 ): Promise<NoteStats> {
@@ -69,6 +71,11 @@ export async function collectNoteStats(
   return { total: notes.length, byType, byProject };
 }
 
+/**
+ * Per-user habit completion for the current month (grid + completion rate).
+ * Counts only the acting user's completions; falls back to the project default
+ * user when no scope is given (which also owns legacy untagged entries).
+ */
 export async function collectHabitStats(
   _filters: AnalyticsFilters,
   scope?: UserScope,
@@ -109,6 +116,7 @@ export async function collectHabitStats(
   return { total: habits.length, completionRateThisMonth, currentMonth };
 }
 
+/** Journal totals plus this-month/this-week counts, current streak, and a 90-day daily series. */
 export async function collectJournalStats(
   _filters: AnalyticsFilters,
 ): Promise<JournalStats> {
@@ -155,6 +163,7 @@ export async function collectJournalStats(
   };
 }
 
+/** Reflection totals and a 12-month series (filters ignored). */
 export async function collectReflectionStats(
   _filters: AnalyticsFilters,
 ): Promise<ReflectionStats> {

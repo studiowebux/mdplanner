@@ -14,6 +14,10 @@ import { log } from "../singletons/logger.ts";
 
 const MINDMAP_BODY_KEYS = ["id", "title", "nodes"] as const;
 
+/**
+ * Persists mindmaps as indented-bullet markdown (`# Title` + a 2-space-indented
+ * `- ` tree), not `{x,y}` coordinates; layout is computed at render time.
+ */
 export class MindmapRepository extends CachedMarkdownRepository<
   Mindmap,
   CreateMindmap,
@@ -123,6 +127,7 @@ export class MindmapRepository extends CachedMarkdownRepository<
 // Bullet tree parser — strict 2-space indent, rejects tabs and odd counts
 // ---------------------------------------------------------------------------
 
+/** Parse a 2-space-indented `- ` bullet outline into a node tree; returns null on tabs or odd indents. */
 export function parseBulletTree(body: string): MindmapNode[] | null {
   const root: MindmapNode[] = [];
   const stack: { depth: number; nodes: MindmapNode[] }[] = [
@@ -167,6 +172,7 @@ function appendNodes(
 // Bullet tree serializer — inverse of parseBulletTree (no `# Title` heading)
 // ---------------------------------------------------------------------------
 
+/** Serialize a node tree back to a 2-space-indented `- ` bullet outline (inverse of parseBulletTree, no heading). */
 export function serializeBulletTree(nodes: MindmapNode[]): string {
   const lines: string[] = [];
   appendNodes(lines, nodes, 0);

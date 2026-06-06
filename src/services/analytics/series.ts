@@ -71,6 +71,7 @@ export function monthlySeries(
   return series;
 }
 
+/** True when `date` falls within [from, to] (inclusive); a null/undefined date always passes. */
 export function inDateRange(
   date: string | null | undefined,
   from?: string,

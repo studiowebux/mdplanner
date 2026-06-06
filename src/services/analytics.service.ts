@@ -31,6 +31,11 @@ import {
   collectReflectionStats,
 } from "./analytics/engagement.ts";
 
+/**
+ * Aggregate every analytics dimension (work, finance, engagement) into one
+ * AnalyticsData payload. Honors the optional date/project/customer/person
+ * filters; `scope` selects the acting user for per-user stats (habits).
+ */
 export async function getProjectAnalytics(
   filters: AnalyticsFilters = {},
   scope?: UserScope,

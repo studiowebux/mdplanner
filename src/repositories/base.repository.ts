@@ -17,6 +17,7 @@ import {
 import { mapKeysFromFm, mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import { ciEquals } from "../utils/string.ts";
 
+/** Per-domain wiring for a markdown repository: storage subdir, ID prefix, and name field. */
 export interface RepositoryConfig {
   /** Subdirectory name under projectDir (e.g. "goals", "dns"). */
   directory: string;

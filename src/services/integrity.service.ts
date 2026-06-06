@@ -20,8 +20,10 @@ import {
   getTaskService,
 } from "../singletons/services.ts";
 
+/** Severity of an integrity finding: "error" (blocking) or "warning" (advisory). */
 export type CheckSeverity = "error" | "warning";
 
+/** A single integrity finding against one entity field. */
 export type CheckResult = {
   entityType: string;
   entityId: string;
@@ -30,6 +32,7 @@ export type CheckResult = {
   severity: CheckSeverity;
 };
 
+/** Integrity findings for one domain, with the count of entities scanned. */
 export type DomainCheckResult = {
   /** Stable key, e.g. "task". */
   key: string;
@@ -41,6 +44,7 @@ export type DomainCheckResult = {
   checks: CheckResult[];
 };
 
+/** Full integrity scan output: per-domain results plus aggregate summary and timing. */
 export type IntegrityScanResult = {
   /** One entry per domain scanned, in the order they were checked. */
   domains: DomainCheckResult[];
@@ -66,6 +70,11 @@ function warn(
   return { entityType, entityId, field, issue, severity: "warning" };
 }
 
+/**
+ * Cross-entity referential-integrity scanner. `scan()` validates every domain's
+ * references (e.g. task.project / brainstorm.linkedProjects against portfolio
+ * NAME; contact/deal.company against company name) and reports errors/warnings.
+ */
 export class IntegrityService {
   async scan(): Promise<IntegrityScanResult> {
     const start = performance.now();
@@ -367,6 +376,7 @@ export class IntegrityService {
 
 let _instance: IntegrityService | null = null;
 
+/** Lazily-instantiated singleton accessor for the IntegrityService. */
 export function getIntegrityService(): IntegrityService {
   if (!_instance) _instance = new IntegrityService();
   return _instance;

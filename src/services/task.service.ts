@@ -25,6 +25,7 @@ import { ciEquals } from "../utils/string.ts";
 // Error types
 // ---------------------------------------------------------------------------
 
+/** Thrown on optimistic-lock failure: the task's revision changed since it was read. */
 export class RevisionConflictError extends Error {
   readonly code = "REVISION_CONFLICT";
   constructor(id: string, expected: number, actual: number) {
@@ -33,6 +34,7 @@ export class RevisionConflictError extends Error {
   }
 }
 
+/** Thrown when claiming a task that is no longer in Todo (another agent claimed it first). */
 export class ClaimConflictError extends Error {
   readonly code = "CLAIM_CONFLICT";
   constructor(id: string, currentSection: string) {
@@ -41,6 +43,7 @@ export class ClaimConflictError extends Error {
   }
 }
 
+/** Thrown when updating a task currently claimed by a different agent. */
 export class ClaimGuardError extends Error {
   readonly code = "CLAIM_GUARD";
   constructor(id: string, claimedBy: string) {
@@ -53,6 +56,10 @@ export class ClaimGuardError extends Error {
 // Service
 // ---------------------------------------------------------------------------
 
+/**
+ * Orchestrates task CRUD, claim/approval workflow, comments, and time entries
+ * over the task + people repositories, keeping the SQLite cache mirror in sync.
+ */
 export class TaskService {
   private cache: CacheSync | null = null;
 
