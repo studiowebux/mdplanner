@@ -1,3 +1,4 @@
+// Inline KPI progress gauge.
 import type { FC } from "hono/jsx";
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
   label?: string;
 };
 
+/** Inline KPI progress bar; fills to value/target % (data-pct, styled by CSS). */
 export const KpiGauge: FC<Props> = ({ value, target, label }) => {
   const pct = target > 0
     ? Math.min(100, Math.round((value / target) * 100))

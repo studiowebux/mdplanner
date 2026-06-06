@@ -69,6 +69,7 @@ export function FilterCountBadge(
   );
 }
 
+/** Toolbar from/to date inputs that re-fetch the domain view on change (htmx). */
 export function DateRangeFilter(
   { domain, fromKey, toKey, fromLabel, toLabel, state }: {
     domain: string;
@@ -113,6 +114,7 @@ export function DateRangeFilter(
   );
 }
 
+/** Toolbar grid/table (+ extra modes) view switcher; oobSwap morphs it in place on view change. */
 export function ViewToggleButtons(
   { domain, view, oobSwap, extraModes, hideDefault, hideGrid }: {
     domain: string;
@@ -177,6 +179,7 @@ export function ViewToggleButtons(
   );
 }
 
+/** Table-only column-visibility dropdown (data-column-toggle); excludes the name and actions columns. */
 export function ColumnToggle(
   { domain, columns, view }: {
     domain: string;

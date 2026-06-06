@@ -1,6 +1,7 @@
 // Shared action button renderer factory for domain table columns.
 // Generates the standard View / Edit / Delete button group used by every domain.
 
+/** Options for createActionBtns: delete-confirm name field and wrapper CSS class. */
 export interface ActionBtnsOptions {
   /** Row field used in the delete confirmation message. Defaults to "title". */
   nameField?: string;

@@ -15,6 +15,7 @@ import type { DomainService, Entity } from "./domain.types.ts";
 import { publish } from "../singletons/event-bus.ts";
 import { viewProps } from "../middleware/view-props.ts";
 
+/** Config for a detail page's section-level inline-edit routes (per-section PUT); publishes "<ssePrefix>.updated" after each mutation. */
 export interface SectionEditConfig<T extends Entity, C, U> {
   /** Mount path of the domain, e.g. "/swot" — passed to viewProps. */
   path: string;

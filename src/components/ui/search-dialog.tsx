@@ -1,3 +1,4 @@
+// Global search dialog (one per AppShell).
 import type { FC } from "hono/jsx";
 
 // Global search dialog — one instance in AppShell.

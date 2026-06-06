@@ -1,3 +1,4 @@
+// Generic domain grid card (title, badges, default actions).
 import type { FC } from "hono/jsx";
 import { Highlight } from "../../utils/highlight.tsx";
 
@@ -30,6 +31,7 @@ type Props = {
   oobSwap?: string;
 };
 
+/** Generic domain grid card: linked title with search highlight, badge/leading/subtitle slots, and default View/Edit/Delete actions (overridable via customActions). */
 export const DomainCard: FC<Props> = ({
   href,
   name,

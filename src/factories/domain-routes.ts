@@ -18,6 +18,7 @@ import {
 } from "./domain-routes-collection.ts";
 import { registerEntityRoutes } from "./domain-routes-entity.ts";
 
+/** Factory: builds a domain's full Hono router (state middleware + collection + entity routes) from its DomainConfig, injecting the universal date-range and archived state keys. */
 export function createDomainRoutes<T extends Entity, C, U>(
   cfg: DomainConfig<T, C, U>,
 ) {

@@ -1,3 +1,4 @@
+// Declarative form builder — renders create/edit forms from a FieldDef[].
 import type { FC } from "hono/jsx";
 import { parseJson } from "../../database/sqlite/mod.ts";
 import { AutocompleteWidget } from "./autocomplete-widget.tsx";
@@ -34,6 +35,7 @@ export type ArrayTableItemField =
     autofill?: Record<string, string>;
   };
 
+/** Discriminated union of form field kinds (text, number, date, select, textarea, autocomplete, array-table, sidenav, ...) consumed by FormBuilder. */
 export type FieldDef =
   | { type: "hidden"; name: string }
   | {
@@ -478,6 +480,7 @@ const Field: FC<
   );
 };
 
+/** Renders a complete create/edit form from a FieldDef[]; supports array-table rows, autocomplete, and nested sidenav fields. */
 export const FormBuilder: FC<Props> = (
   {
     id,

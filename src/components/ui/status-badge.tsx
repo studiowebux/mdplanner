@@ -1,5 +1,7 @@
+// Status badge pill + variant helpers.
 import type { FC } from "hono/jsx";
 
+/** Semantic color variants for StatusBadge pills. */
 export type BadgeVariant =
   | "neutral"
   | "accent"

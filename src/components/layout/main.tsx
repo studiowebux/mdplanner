@@ -1,3 +1,4 @@
+// MainLayout — root HTML document wrapping AppShell.
 import type { FC } from "hono/jsx";
 import { APP_NAME, APP_VERSION } from "../../constants/mod.ts";
 import { AppShell } from "../shell/app-shell.tsx";
@@ -20,6 +21,7 @@ type Props = {
   children?: unknown;
 };
 
+/** Root HTML document: <head> (CSP nonce, page styles/scripts) wrapping AppShell + page children. */
 export const MainLayout: FC<Props> = (
   {
     title,

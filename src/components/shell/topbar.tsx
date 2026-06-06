@@ -1,3 +1,4 @@
+// Topbar — search, filters, person switcher, theme/settings actions.
 import {
   getPeopleService,
   getPortfolioService,
@@ -12,6 +13,7 @@ type Props = {
   globalAssignees?: string[];
 };
 
+/** Async topbar: global search, project/assignee filters, person switcher, theme/settings actions; loads people + portfolio for the filter pickers. */
 export async function Topbar(
   { actor, activePerson, globalProjects = [], globalAssignees = [] }: Props,
 ) {

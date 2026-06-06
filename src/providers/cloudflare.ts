@@ -29,6 +29,7 @@ import type {
 
 const CF_API = "https://api.cloudflare.com/client/v4";
 
+/** Cloudflare DNS provider (IDnsProvider): zone/record reads and sync via the Cloudflare v4 REST API. */
 export class CloudflareDnsProvider implements IDnsProvider {
   private token: string;
   private accountId: string | null = null;

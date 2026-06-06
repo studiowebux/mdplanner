@@ -26,6 +26,7 @@ export interface DomainService<T extends Entity, C, U> {
 
 // Dynamic filter option values — plain strings or value/label pairs.
 export type FilterOptionEntry = string | { value: string; label: string };
+/** Map of filter key to runtime-resolved option values (populated by DomainConfig.dynamicOptions). */
 export type DynamicFilterOptions = Record<string, FilterOptionEntry[]>;
 
 // Filter field shown in the toolbar (select dropdown).

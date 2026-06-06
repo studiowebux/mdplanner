@@ -1,3 +1,4 @@
+// Global confirm dialog (one per AppShell), driven by confirmAction().
 import type { FC } from "hono/jsx";
 
 // Global confirm dialog — one instance in AppShell, driven by JS.

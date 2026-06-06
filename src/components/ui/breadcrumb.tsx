@@ -4,6 +4,7 @@
 
 import type { FC } from "hono/jsx";
 
+/** A single breadcrumb crumb; an href-less item renders as the current page. */
 export type BreadcrumbItem = {
   label: string;
   href?: string;
@@ -13,6 +14,7 @@ type BreadcrumbProps = {
   items: BreadcrumbItem[];
 };
 
+/** Detail-page breadcrumb trail; the last crumb is aria-current with no link. */
 export const Breadcrumb: FC<BreadcrumbProps> = ({ items }) => {
   if (items.length === 0) return null;
   return (

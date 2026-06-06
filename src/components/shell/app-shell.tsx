@@ -1,3 +1,4 @@
+// Application shell — sidebar + topbar + content grid.
 import type { FC } from "hono/jsx";
 import { Sidebar } from "./sidebar.tsx";
 import { Topbar } from "./topbar.tsx";
@@ -19,6 +20,7 @@ type Props = {
   children?: unknown;
 };
 
+/** Top-level CSS-grid shell: sidebar + topbar + content slot + global dialogs (confirm/search/shortcuts). */
 export const AppShell: FC<Props> = (
   {
     activePath,

@@ -32,6 +32,7 @@ import type {
 
 const GITHUB_API = "https://api.github.com";
 
+/** GitHub provider (IGitProvider): repos, issues, PRs, milestones, releases, and Actions via the GitHub REST API. */
 export class GitHubProvider implements IGitProvider {
   private token?: string;
 

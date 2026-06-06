@@ -1,3 +1,4 @@
+// Keyboard-shortcuts reference dialog.
 import type { FC } from "hono/jsx";
 
 type ShortcutRow = { keys: string[]; action: string; chord?: boolean };
@@ -58,6 +59,7 @@ const Kbd: FC<{ keys: string[]; chord?: boolean }> = ({ keys, chord }) => (
   </span>
 );
 
+/** Keyboard-shortcuts reference dialog (opened with ?); rows defined in GROUPS. */
 export const ShortcutsDialog: FC = () => (
   <dialog
     class="shortcuts-dialog"

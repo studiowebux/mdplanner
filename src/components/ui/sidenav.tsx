@@ -1,3 +1,4 @@
+// Slide-in side panel (right) for forms and detail panels.
 import type { FC } from "hono/jsx";
 
 type Props = {

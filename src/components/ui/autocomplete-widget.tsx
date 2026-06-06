@@ -3,6 +3,7 @@
 
 import type { FC } from "hono/jsx";
 
+/** Props for AutocompleteWidget: htmx search source, hidden value binding, optional freetext entry and autofillMap (data-autofill keys to sibling row fields). */
 export type AutocompleteWidgetProps = {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ export type AutocompleteWidgetProps = {
   autofillMap?: Record<string, string>;
 };
 
+/** Shared autocomplete: visible search input + hidden value input + htmx-driven results list. */
 export const AutocompleteWidget: FC<AutocompleteWidgetProps> = ({
   id,
   name,

@@ -36,6 +36,8 @@ const NavItem: FC<{
   </li>
 );
 
+/** Inner sidebar content (search filter, category groups, pinned favorites); re-rendered on pin toggle. */
+/** Sidebar wrapper (<aside id=app-sidebar>) hosting SidebarContent. */
 export const SidebarContent: FC<Props> = ({
   activePath,
   enabledFeatures = [],
@@ -89,6 +91,7 @@ export const SidebarContent: FC<Props> = ({
   );
 };
 
+/** Sidebar wrapper (<aside id=app-sidebar>) hosting SidebarContent. */
 export const Sidebar: FC<Props> = (props) => {
   const { activePath } = props;
 

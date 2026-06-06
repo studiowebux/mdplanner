@@ -1,5 +1,7 @@
+// Generic sortable data-table component.
 import type { FC } from "hono/jsx";
 
+/** DataTable column spec: key, label, optional sortable flag and custom cell renderer. */
 export type ColumnDef = {
   key: string;
   label: string;
@@ -27,6 +29,7 @@ type Props = {
   tbodyFooter?: unknown;
 };
 
+/** Generic sortable table; renders rows from ColumnDef[], with an optional tbody footer for load-more sentinels. */
 export const DataTable: FC<Props> = (
   { id, domain, compact, columns, rows, rowId = "id", sort, tbodyFooter },
 ) => (

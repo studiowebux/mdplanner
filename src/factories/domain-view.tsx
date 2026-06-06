@@ -40,6 +40,7 @@ export { createDomainForm } from "./domain-form.tsx";
 // View container — swapped via htmx on filter/toggle/SSE
 // ---------------------------------------------------------------------------
 
+/** Factory: builds the htmx-swappable list container FC (grid/table body + result counts) for a domain. */
 export function createDomainViewContainer<T extends Entity>(
   cfg: DomainConfig<T, unknown, unknown>,
 ) {
@@ -193,6 +194,7 @@ export function createDomainViewContainer<T extends Entity>(
 // Full page — toolbar + view container + form container
 // ---------------------------------------------------------------------------
 
+/** Factory: builds the full domain list page FC — toolbar + view container + form sidenav container. */
 export function createDomainPage<T extends Entity>(
   cfg: DomainConfig<T, unknown, unknown>,
 ) {

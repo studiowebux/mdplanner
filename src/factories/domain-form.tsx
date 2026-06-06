@@ -6,6 +6,7 @@ import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import { type Entity } from "./domain.types.ts";
 
+/** Factory: builds a domain create/edit FormBuilder FC from a FieldDef set; hides inlineEditFields and applies formValueOverrides in edit mode. */
 export function createDomainForm<T extends Entity>(cfg: {
   domain: string;
   singular: string;
