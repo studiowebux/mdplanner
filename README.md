@@ -145,8 +145,9 @@ writes decisions back when done. One place to plan, track, and build.
 
 MD Planner runs locally or on a trusted network. Use `--api-token` to protect
 the REST API and UI with cookie-based authentication. Use `--mcp-token` to
-protect the MCP endpoint with a bearer token. For public-facing deployments,
-combine with a reverse proxy and TLS.
+protect the MCP endpoint with a bearer token, or add a named `api_keys` entry to
+`project.md` to give an MCP connection an identity (e.g. `Claude`). For
+public-facing deployments, combine with a reverse proxy and TLS.
 
 ### Pre-built Binary
 

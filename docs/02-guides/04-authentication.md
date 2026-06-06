@@ -47,16 +47,26 @@ default_user_id: person_1771824811363_phhxpx
 When unset, the first person in the registry (alphabetical by name) is used.
 For single-person installs this is automatic and needs no configuration.
 
-## MCP token
+## MCP token and identity
 
-Protect the `/mcp` endpoint with a bearer token:
+The `/mcp` endpoint accepts two credentials:
 
-```bash
-# Set via environment variable
-MCP_TOKEN=mysecrettoken deno task dev:v2
-```
+- **Shared token** — protect the endpoint with a bearer token. Grants access
+  but carries no identity.
 
-MCP clients send the token as a `Authorization: Bearer <token>` header. See
+  ```bash
+  # Set via environment variable
+  MCP_TOKEN=mysecrettoken deno task dev:v2
+  ```
+
+  Clients send it as an `Authorization: Bearer <token>` header.
+
+- **Named identity** — a project `api_keys` entry. Sent as `X-Api-Key` or
+  `Authorization: Bearer`, the matched key's `name` becomes the acting user
+  (the same mechanism as the REST API), so MCP writes can be attributed to a
+  named principal such as `Claude`.
+
+When neither is configured the endpoint is open. See
 [MCP Integration](05-mcp-integration.md) for client configuration.
 
 ## Integration secret encryption

@@ -8,12 +8,21 @@ MD Planner ships a built-in MCP server. Two transport modes are available.
 
 ## HTTP
 
-The MCP endpoint is at `/mcp` on the running v2 server. Protect it with
-`MCP_TOKEN`:
+The MCP endpoint is at `/mcp` on the running v2 server. It accepts two kinds of
+credential:
 
-```bash
-MCP_TOKEN=mytoken deno task dev:v2
-```
+1. **Shared token** — set `MCP_TOKEN` and send it as `Authorization: Bearer`.
+   Grants access without a named identity.
+
+   ```bash
+   MCP_TOKEN=mytoken deno task dev:v2
+   ```
+
+2. **Named identity** — a project API key (see [Identity](#identity)). The
+   connection is attributed to the key's name (e.g. `Claude`).
+
+When neither `MCP_TOKEN` nor any `api_keys` are configured, the endpoint is open
+(local single-user default).
 
 ## Claude Desktop configuration
 
@@ -38,6 +47,46 @@ Add to `.claude/settings.json` or `~/.claude/settings.json`:
   }
 }
 ```
+
+## Identity
+
+To attribute an MCP connection to a named principal, add an API key to
+`project.md`. The key's `name` becomes the actor (the same `X-Api-Key`
+mechanism the REST API uses).
+
+```yaml
+---
+api_keys:
+  - name: Claude
+    key: your-secret-value
+---
+```
+
+Connect with the key sent as either `X-Api-Key` or `Authorization: Bearer`:
+
+```json
+{
+  "mcpServers": {
+    "mdplanner": {
+      "type": "url",
+      "url": "http://localhost:8003/mcp",
+      "headers": {
+        "X-Api-Key": "your-secret-value"
+      }
+    }
+  }
+}
+```
+
+Or via the CLI:
+
+```bash
+claude mcp add --transport http mdplanner http://localhost:8003/mcp \
+  --header "X-Api-Key: your-secret-value"
+```
+
+The shared `MCP_TOKEN` bearer still works alongside named keys. Set
+`MDPLANNER_SECRET_KEY` to encrypt the stored key values at rest.
 
 ## Available resources
 

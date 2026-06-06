@@ -1,5 +1,6 @@
 // Identity guard — redirects anonymous SSR requests to /identity.
-// Exempt: /identity, /settings/identity, /api/*, /mcp/*, /sse, /css/*, /js/*, /favicon*
+// Exempt: /identity, /settings/identity, /api/*, /mcp, /.well-known/*, /sse,
+// /css/*, /js/*, /favicon*, /webdav
 
 import type { MiddlewareHandler } from "hono";
 import type { AppVariables } from "../types/app.ts";
@@ -8,7 +9,12 @@ const EXEMPT_PREFIXES = [
   "/identity",
   "/settings/identity",
   "/api/",
-  "/mcp/",
+  // "/mcp" (no trailing slash) so the canonical POST /mcp endpoint is exempt,
+  // not just /mcp/* sub-paths. startsWith still covers /mcp/anything.
+  "/mcp",
+  // OAuth discovery probe — must 404 at the route, never 302 to /identity, or
+  // MCP clients mistake the redirect for an OAuth authorization flow.
+  "/.well-known/",
   "/sse",
   "/css/",
   "/js/",
