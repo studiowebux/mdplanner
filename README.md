@@ -11,7 +11,8 @@
 > to manage its own development. Core features work, but rough edges remain and
 > things may change without notice. Screenshots and demo videos will follow once
 > the dust settles. If you're trying it now, run from source and expect sharp
-> corners.
+> corners. Upgrading a project from **0.38 or earlier**? See
+> [Migrating older projects](#migrating-older-projects).
 
 Markdown-based project management with directory storage.
 
@@ -219,6 +220,30 @@ mdplanner --webdav --webdav-user admin --webdav-pass secret ./my-project
 Open `http://localhost:8003`. The project directory contains one `.md` file per
 entity. Edit files directly, use the web UI, or mount via WebDAV — all three
 work.
+
+## Migrating older projects
+
+Projects created on **0.38 or earlier** need their markdown frontmatter
+normalized before 0.39 reads them (snake_case keys, stable ids, `{id}.md`
+filenames). Back up the project directory first, then:
+
+```bash
+deno task migrate --dry-run ./my-project   # preview, writes nothing
+deno task migrate ./my-project             # apply (idempotent)
+```
+
+Then audit what 0.39 reads vs. drops:
+
+```bash
+deno run --allow-read --allow-write --allow-env \
+  scripts/audit-v1-v2-loss.ts ./my-project
+```
+
+The script normalizes frontmatter/filenames only. **Directory renames**
+(`crm/contacts`→`contacts`, `canvas`→`sticky-notes`, …) and **field changes**
+(`people.department`→`departments`) are **not** automatic — see
+[the migration guide](docs/02-guides/09-v1-to-v2-migration.md) for the full
+table and the safe Docker sequence.
 
 ## Contributing
 
