@@ -34,7 +34,17 @@ export class ProjectService {
     if (data.navCategories !== undefined) {
       current.navCategories = data.navCategories;
     }
+    if (data.locale !== undefined) current.locale = data.locale;
+    if (data.currency !== undefined) current.currency = data.currency;
+    if (data.port !== undefined) current.port = data.port;
+    if (data.staleDays !== undefined) current.staleDays = data.staleDays;
+    if (data.hideCompletedAfterDays !== undefined) {
+      current.hideCompletedAfterDays = data.hideCompletedAfterDays;
+    }
     if (data.githubToken !== undefined) current.githubToken = data.githubToken;
+    if (data.cloudflareToken !== undefined) {
+      current.cloudflareToken = data.cloudflareToken;
+    }
     if (data.pipelinesPerPage !== undefined) {
       current.pipelinesPerPage = data.pipelinesPerPage;
     }

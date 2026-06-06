@@ -59,6 +59,9 @@ export class ProjectRepository {
     if (config.staleDays !== undefined) {
       fm.stale_days = config.staleDays;
     }
+    if (config.hideCompletedAfterDays !== undefined) {
+      fm.hide_completed_after_days = config.hideCompletedAfterDays;
+    }
     if (config.stableVersion !== undefined) {
       fm.stable_version = config.stableVersion;
     }

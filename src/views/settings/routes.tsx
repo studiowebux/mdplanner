@@ -96,6 +96,9 @@ settingsViewRouter.post("/project", async (c) => {
       ? hideCompletedAfterDaysRaw
       : undefined,
     githubToken: body.githubToken ? String(body.githubToken) : undefined,
+    cloudflareToken: body.cloudflareToken
+      ? String(body.cloudflareToken)
+      : undefined,
   });
   return new Response(null, {
     status: 204,
