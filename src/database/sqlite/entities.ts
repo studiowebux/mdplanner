@@ -100,6 +100,15 @@ export function auditVals(e: {
   ];
 }
 
+/**
+ * Column DDL fragment for the four standard audit columns plus `synced_at`.
+ * Inline into CREATE TABLE after `ARCHIVE_COLS_DDL`. Pairs on read with
+ * `archiveFieldsFromRow` + the audit fields, and on write with
+ * `auditCols()`/`auditVals()` (+ the trailing `synced_at` bind).
+ */
+export const AUDIT_COLS_DDL =
+  "created_at TEXT,\n  updated_at TEXT,\n  created_by TEXT,\n  updated_by TEXT,\n  synced_at TEXT";
+
 // ============================================================
 // Archive (soft-delete) helpers
 // ============================================================
@@ -256,3 +265,35 @@ export const ENTITIES: EntityDef[] = [
   // Import and push into this array from domain-specific files,
   // or add inline definitions below.
 ];
+
+/**
+ * Register a domain cache entity from a spec, replacing the per-domain
+ * `register<X>Entity` boilerplate (EntityDef literal + identical sync closure
+ * + `ENTITIES.push`). `source` yields the entities to mirror to the cache and
+ * `insert` writes one row; the standard sync closure loops them and returns the
+ * row count. Pass `fts`/`migrations`/`onSyncComplete` only when the domain
+ * needs them. Domain-specific `rowTo<X>`, schema, and `insert` row logic stay
+ * in the domain module — this only owns the invariant registration shape.
+ */
+export function registerEntityCache<T>(spec: {
+  table: string;
+  schema: string;
+  fts?: FTSConfig;
+  migrations?: string[];
+  onSyncComplete?: () => void;
+  source: () => Promise<T[]>;
+  insert: (db: CacheDatabase, item: T, syncedAt: string) => void;
+}): void {
+  ENTITIES.push({
+    table: spec.table,
+    schema: spec.schema,
+    fts: spec.fts,
+    migrations: spec.migrations,
+    onSyncComplete: spec.onSyncComplete,
+    sync: async (db, syncedAt) => {
+      const items = await spec.source();
+      for (const item of items) spec.insert(db, item, syncedAt);
+      return items.length;
+    },
+  });
+}

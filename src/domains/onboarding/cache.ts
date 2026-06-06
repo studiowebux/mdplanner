@@ -6,15 +6,16 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { OnboardingRepository } from "../../repositories/onboarding.repository.ts";
 import type {
   Onboarding,
@@ -52,11 +53,7 @@ const ONBOARDING_SCHEMA = `CREATE TABLE IF NOT EXISTS ${ONBOARDING_TABLE} (
   steps TEXT,
   steps_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertOnboardingRow(
@@ -88,7 +85,7 @@ function insertOnboardingRow(
 export function registerOnboardingEntity(
   repo: OnboardingRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: ONBOARDING_TABLE,
     schema: ONBOARDING_SCHEMA,
     migrations: [
@@ -100,11 +97,7 @@ export function registerOnboardingEntity(
       titleCol: "employee_name",
       contentCol: "steps_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const item of items) insertOnboardingRow(db, item, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertOnboardingRow,
+  });
 }

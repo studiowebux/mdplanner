@@ -6,12 +6,13 @@ import {
   archiveCols,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { NoteRepository } from "../../repositories/note.repository.ts";
 import type { Note } from "../../types/note.types.ts";
 
@@ -23,11 +24,7 @@ const NOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${NOTE_TABLE} (
   content TEXT,
   project TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertNoteRow(
@@ -53,7 +50,7 @@ function insertNoteRow(
 
 /** Register the note cache entity. Call from initServices(). */
 export function registerNoteEntity(repo: NoteRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: NOTE_TABLE,
     schema: NOTE_SCHEMA,
     migrations: [
@@ -66,11 +63,7 @@ export function registerNoteEntity(repo: NoteRepository): void {
       titleCol: "title",
       contentCol: "content",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
-      for (const n of items) insertNoteRow(db, n, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAll(),
+    insert: insertNoteRow,
+  });
 }

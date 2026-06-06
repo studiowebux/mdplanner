@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { EisenhowerRepository } from "../../repositories/eisenhower.repository.ts";
 import type { Eisenhower } from "../../types/eisenhower.types.ts";
 
@@ -54,11 +55,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${EISENHOWER_TABLE} (
   project TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -93,7 +90,7 @@ function insertRow(
 
 /** Register the Eisenhower cache entity. Call from initServices(). */
 export function registerEisenhowerEntity(repo: EisenhowerRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: EISENHOWER_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -113,11 +110,7 @@ export function registerEisenhowerEntity(repo: EisenhowerRepository): void {
       titleCol: "title",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const e of items) insertRow(db, e, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

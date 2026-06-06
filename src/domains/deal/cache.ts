@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { DealRepository } from "../../repositories/deal.repository.ts";
 import type { Deal, DealStage } from "../../types/deal.types.ts";
 
@@ -57,11 +58,7 @@ const DEAL_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DEAL_TABLE} (
   tags TEXT,
   closed_at TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 export function insertDealRow(
@@ -96,7 +93,7 @@ export function insertDealRow(
 
 /** Register the deal cache entity. Call from initServices(). */
 export function registerDealEntity(repo: DealRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: DEAL_TABLE,
     schema: DEAL_SCHEMA,
     migrations: [
@@ -108,11 +105,7 @@ export function registerDealEntity(repo: DealRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const d of items) insertDealRow(db, d, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertDealRow,
+  });
 }

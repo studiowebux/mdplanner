@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { MoscowRepository } from "../../repositories/moscow.repository.ts";
 import type { Moscow } from "../../types/moscow.types.ts";
 
@@ -53,11 +54,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MOSCOW_TABLE} (
   project TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -89,7 +86,7 @@ function insertRow(
 
 /** Register the MoSCoW cache entity. Call from initServices(). */
 export function registerMoscowEntity(repo: MoscowRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: MOSCOW_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -109,11 +106,7 @@ export function registerMoscowEntity(repo: MoscowRepository): void {
       titleCol: "title",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const m of items) insertRow(db, m, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

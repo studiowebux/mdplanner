@@ -6,6 +6,7 @@ export {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
   buildFtsDropSql,
@@ -16,6 +17,7 @@ export {
   json,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "./entities.ts";
 export type { EntityDef, FTSConfig, TableSyncer } from "./entities.ts";

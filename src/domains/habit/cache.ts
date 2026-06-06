@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { HabitRepository } from "../../repositories/habit.repository.ts";
 import type { CompletionEntry, Habit } from "../../types/habit.types.ts";
 
@@ -52,11 +53,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${HABIT_TABLE} (
   color TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(db: CacheDatabase, h: Habit, syncedAt?: string): void {
@@ -84,7 +81,7 @@ function insertRow(db: CacheDatabase, h: Habit, syncedAt?: string): void {
 }
 
 export function registerHabitEntity(repo: HabitRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: HABIT_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -96,11 +93,7 @@ export function registerHabitEntity(repo: HabitRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const h of items) insertRow(db, h, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

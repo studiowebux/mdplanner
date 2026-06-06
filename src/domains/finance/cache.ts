@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { FinanceRepository } from "../../repositories/finance.repository.ts";
 import type { Finance, FinanceType } from "../../types/finance.types.ts";
 
@@ -49,11 +50,7 @@ const FINANCE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${FINANCE_TABLE} (
   description TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 export function insertFinanceRow(
@@ -84,7 +81,7 @@ export function insertFinanceRow(
 }
 
 export function registerFinanceEntity(repo: FinanceRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: FINANCE_TABLE,
     schema: FINANCE_SCHEMA,
     migrations: [
@@ -96,11 +93,7 @@ export function registerFinanceEntity(repo: FinanceRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const f of items) insertFinanceRow(db, f, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertFinanceRow,
+  });
 }

@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { C4Repository } from "../../repositories/c4.repository.ts";
 import type { C4Component, C4Connection } from "../../types/c4.types.ts";
 
@@ -56,11 +57,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${C4_TABLE} (
   children TEXT,
   connections TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 const MIGRATIONS = [
@@ -95,7 +92,7 @@ function insertRow(db: CacheDatabase, c: C4Component, syncedAt?: string): void {
 }
 
 export function registerC4Entity(repo: C4Repository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: C4_TABLE,
     schema: SCHEMA,
     migrations: MIGRATIONS,
@@ -105,11 +102,7 @@ export function registerC4Entity(repo: C4Repository): void {
       titleCol: "name",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const c of items) insertRow(db, c, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

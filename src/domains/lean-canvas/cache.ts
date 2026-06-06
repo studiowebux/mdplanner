@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { LeanCanvasRepository } from "../../repositories/lean-canvas.repository.ts";
 import type { LeanCanvas } from "../../types/lean-canvas.types.ts";
 import { LEAN_CANVAS_SECTIONS } from "../../types/lean-canvas.types.ts";
@@ -83,11 +84,7 @@ const LEAN_CANVAS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${LEAN_CANVAS_TABLE} (
   section_count INTEGER DEFAULT 0,
   completion_pct INTEGER DEFAULT 0,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 export function insertLeanCanvasRow(
@@ -135,7 +132,7 @@ export function insertLeanCanvasRow(
 
 /** Register the lean canvas cache entity. Call from initServices(). */
 export function registerLeanCanvasEntity(repo: LeanCanvasRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: LEAN_CANVAS_TABLE,
     schema: LEAN_CANVAS_SCHEMA,
     migrations: [
@@ -147,11 +144,7 @@ export function registerLeanCanvasEntity(repo: LeanCanvasRepository): void {
       titleCol: "title",
       contentCol: "sections_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const lc of items) insertLeanCanvasRow(db, lc, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertLeanCanvasRow,
+  });
 }

@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { MindmapRepository } from "../../repositories/mindmap.repository.ts";
 import type { Mindmap, MindmapNode } from "../../types/mindmap.types.ts";
 
@@ -59,11 +60,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MINDMAP_TABLE} (
   project TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -91,7 +88,7 @@ function insertRow(
 
 /** Register the Mindmap cache entity. Call from initServices(). */
 export function registerMindmapEntity(repo: MindmapRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: MINDMAP_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -103,11 +100,7 @@ export function registerMindmapEntity(repo: MindmapRepository): void {
       titleCol: "title",
       contentCol: "flat_nodes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const m of items) insertRow(db, m, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

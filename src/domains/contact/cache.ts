@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { ContactRepository } from "../../repositories/contact.repository.ts";
 import type { Contact, ContactType } from "../../types/contact.types.ts";
 
@@ -53,11 +54,7 @@ const CONTACT_SCHEMA = `CREATE TABLE IF NOT EXISTS ${CONTACT_TABLE} (
   notes TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 export function insertContactRow(
@@ -90,7 +87,7 @@ export function insertContactRow(
 
 /** Register the contact cache entity. Call from initServices(). */
 export function registerContactEntity(repo: ContactRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: CONTACT_TABLE,
     schema: CONTACT_SCHEMA,
     migrations: [
@@ -104,11 +101,7 @@ export function registerContactEntity(repo: ContactRepository): void {
       titleCol: "name",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const c of items) insertContactRow(db, c, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertContactRow,
+  });
 }

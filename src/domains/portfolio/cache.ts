@@ -8,12 +8,12 @@ import {
   archiveVals,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { PortfolioRepository } from "../../repositories/portfolio.repository.ts";
 import type {
   PortfolioItem,
@@ -120,7 +120,7 @@ export function insertPortfolioRow(
 
 /** Register the portfolio cache entity. Call from initServices(). */
 export function registerPortfolioEntity(repo: PortfolioRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: PORTFOLIO_TABLE,
     schema: PORTFOLIO_SCHEMA,
     migrations: [
@@ -134,12 +134,8 @@ export function registerPortfolioEntity(repo: PortfolioRepository): void {
       titleCol: "name",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const p of items) insertPortfolioRow(db, p, syncedAt);
-      return items.length;
-    },
+    source: () => repo.findAllFromDisk(),
+    insert: insertPortfolioRow,
     onSyncComplete: () => repo.markClean(),
-  };
-  ENTITIES.push(entity);
+  });
 }

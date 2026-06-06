@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { FishboneRepository } from "../../repositories/fishbone.repository.ts";
 import type { Fishbone, FishboneCause } from "../../types/fishbone.types.ts";
 
@@ -45,11 +46,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${FISHBONE_TABLE} (
   project TEXT,
   causes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -78,7 +75,7 @@ function insertRow(
 
 /** Register the fishbone cache entity. Call from initServices(). */
 export function registerFishboneEntity(repo: FishboneRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: FISHBONE_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -90,11 +87,7 @@ export function registerFishboneEntity(repo: FishboneRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const f of items) insertRow(db, f, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

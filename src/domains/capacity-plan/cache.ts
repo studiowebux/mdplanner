@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { CapacityPlanRepository } from "../../repositories/capacity-plan.repository.ts";
 import type { CapacityPlan } from "../../types/capacity-plan.types.ts";
 
@@ -52,11 +53,7 @@ const CAPACITY_PLAN_SCHEMA =
   team_members TEXT,
   allocations TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 const CAPACITY_PLAN_MIGRATIONS = [
@@ -93,7 +90,7 @@ function insertCapacityPlanRow(
 
 /** Register the capacity plan cache entity. Call from initServices(). */
 export function registerCapacityPlanEntity(repo: CapacityPlanRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: CAPACITY_PLAN_TABLE,
     schema: CAPACITY_PLAN_SCHEMA,
     migrations: CAPACITY_PLAN_MIGRATIONS,
@@ -103,11 +100,7 @@ export function registerCapacityPlanEntity(repo: CapacityPlanRepository): void {
       titleCol: "title",
       contentCol: "title",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const p of items) insertCapacityPlanRow(db, p, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertCapacityPlanRow,
+  });
 }

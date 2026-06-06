@@ -7,12 +7,13 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { PaymentRepository } from "../../repositories/payment.repository.ts";
 import type { Payment } from "../../types/payment.types.ts";
 
@@ -47,11 +48,7 @@ const PAYMENT_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PAYMENT_TABLE} (
   reference TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertPaymentRow(
@@ -81,7 +78,7 @@ function insertPaymentRow(
 
 /** Register the payment cache entity. Call from initServices(). */
 export function registerPaymentEntity(repo: PaymentRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: PAYMENT_TABLE,
     schema: PAYMENT_SCHEMA,
     migrations: [
@@ -93,11 +90,7 @@ export function registerPaymentEntity(repo: PaymentRepository): void {
       titleCol: "reference",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const p of items) insertPaymentRow(db, p, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertPaymentRow,
+  });
 }

@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { RetrospectiveRepository } from "../../repositories/retrospective.repository.ts";
 import type { Retrospective } from "../../types/retrospective.types.ts";
 
@@ -63,11 +64,7 @@ const RETROSPECTIVE_SCHEMA =
   participants_json TEXT,
   sections_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRetrospectiveRow(
@@ -101,7 +98,7 @@ function insertRetrospectiveRow(
 export function registerRetrospectiveEntity(
   repo: RetrospectiveRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: RETROSPECTIVE_TABLE,
     schema: RETROSPECTIVE_SCHEMA,
     migrations: [
@@ -113,11 +110,7 @@ export function registerRetrospectiveEntity(
       titleCol: "title",
       contentCol: "sections_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const r of items) insertRetrospectiveRow(db, r, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRetrospectiveRow,
+  });
 }

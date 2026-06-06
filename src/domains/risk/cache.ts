@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { RiskRepository } from "../../repositories/risk.repository.ts";
 import type { Risk } from "../../types/risk.types.ts";
 
@@ -55,11 +56,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${RISK_TABLE} (
   project TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(db: CacheDatabase, r: Risk, syncedAt?: string): void {
@@ -89,7 +86,7 @@ function insertRow(db: CacheDatabase, r: Risk, syncedAt?: string): void {
 
 /** Register the risk cache entity. Call from initServices(). */
 export function registerRiskEntity(repo: RiskRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: RISK_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -101,11 +98,7 @@ export function registerRiskEntity(repo: RiskRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const r of items) insertRow(db, r, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

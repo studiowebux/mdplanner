@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { ReflectionRepository } from "../../repositories/reflection.repository.ts";
 import type { Reflection } from "../../types/reflection.types.ts";
 
@@ -47,11 +48,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${REFLECTION_TABLE} (
   content TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -79,7 +76,7 @@ function insertRow(
 }
 
 export function registerReflectionEntity(repo: ReflectionRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: REFLECTION_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -91,11 +88,7 @@ export function registerReflectionEntity(repo: ReflectionRepository): void {
       titleCol: "title",
       contentCol: "content",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const r of items) insertRow(db, r, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

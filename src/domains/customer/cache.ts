@@ -7,12 +7,13 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { CustomerRepository } from "../../repositories/customer.repository.ts";
 import type { Customer } from "../../types/customer.types.ts";
 
@@ -61,11 +62,7 @@ const CUSTOMER_SCHEMA = `CREATE TABLE IF NOT EXISTS ${CUSTOMER_TABLE} (
   country TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 export function insertCustomerRow(
@@ -100,7 +97,7 @@ export function insertCustomerRow(
 
 /** Register the customer cache entity. Call from initServices(). */
 export function registerCustomerEntity(repo: CustomerRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: CUSTOMER_TABLE,
     schema: CUSTOMER_SCHEMA,
     migrations: [
@@ -112,11 +109,7 @@ export function registerCustomerEntity(repo: CustomerRepository): void {
       titleCol: "name",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const c of items) insertCustomerRow(db, c, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertCustomerRow,
+  });
 }

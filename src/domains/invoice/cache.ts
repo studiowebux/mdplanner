@@ -9,12 +9,12 @@ import {
   archiveVals,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { InvoiceRepository } from "../../repositories/invoice.repository.ts";
 import type { Invoice } from "../../types/invoice.types.ts";
 import type { LineItem } from "../../types/billing.types.ts";
@@ -123,7 +123,7 @@ function insertInvoiceRow(
 
 /** Register the invoice cache entity. Call from initServices(). */
 export function registerInvoiceEntity(repo: InvoiceRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: INVOICE_TABLE,
     schema: INVOICE_SCHEMA,
     migrations: [
@@ -136,11 +136,7 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
       titleCol: "title",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const inv of items) insertInvoiceRow(db, inv, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertInvoiceRow,
+  });
 }

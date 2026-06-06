@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { DnsRepository } from "../../repositories/dns.repository.ts";
 import type { DnsDomain } from "../../types/dns.types.ts";
 
@@ -61,11 +62,7 @@ const DNS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DNS_TABLE} (
   last_fetched_at TEXT,
   project TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertDnsRow(
@@ -102,7 +99,7 @@ function insertDnsRow(
 
 /** Register the DNS cache entity. Call from initServices(). */
 export function registerDnsEntity(repo: DnsRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: DNS_TABLE,
     schema: DNS_SCHEMA,
     migrations: [
@@ -114,11 +111,7 @@ export function registerDnsEntity(repo: DnsRepository): void {
       titleCol: "domain",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const d of items) insertDnsRow(db, d, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertDnsRow,
+  });
 }

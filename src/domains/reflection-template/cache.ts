@@ -6,15 +6,16 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { ReflectionTemplateRepository } from "../../repositories/reflection-template.repository.ts";
 import type { ReflectionTemplate } from "../../types/reflection-template.types.ts";
 
@@ -48,11 +49,7 @@ const REFLECTION_TEMPLATE_SCHEMA =
   prompts TEXT,
   prompts_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertReflectionTemplateRow(
@@ -83,7 +80,7 @@ function insertReflectionTemplateRow(
 export function registerReflectionTemplateEntity(
   repo: ReflectionTemplateRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: REFLECTION_TEMPLATE_TABLE,
     schema: REFLECTION_TEMPLATE_SCHEMA,
     migrations: [
@@ -95,11 +92,7 @@ export function registerReflectionTemplateEntity(
       titleCol: "name",
       contentCol: "prompts_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const t of items) insertReflectionTemplateRow(db, t, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertReflectionTemplateRow,
+  });
 }

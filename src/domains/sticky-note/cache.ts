@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { StickyNoteRepository } from "../../repositories/sticky-note.repository.ts";
 import type { StickyBoard, StickyNote } from "../../types/sticky-note.types.ts";
 
@@ -75,11 +76,7 @@ const STICKY_NOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${STICKY_NOTE_TABLE} (
   size_height REAL,
   board_id TEXT NOT NULL DEFAULT 'default',
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 const STICKY_BOARD_SCHEMA = `CREATE TABLE IF NOT EXISTS ${STICKY_BOARD_TABLE} (
@@ -88,11 +85,7 @@ const STICKY_BOARD_SCHEMA = `CREATE TABLE IF NOT EXISTS ${STICKY_BOARD_TABLE} (
   description TEXT,
   projects TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertStickyNoteRow(
@@ -144,7 +137,7 @@ function insertStickyBoardRow(
 
 /** Register the sticky note cache entities. Call from initServices(). */
 export function registerStickyNoteEntity(repo: StickyNoteRepository): void {
-  const noteEntity: EntityDef = {
+  registerEntityCache({
     table: STICKY_NOTE_TABLE,
     schema: STICKY_NOTE_SCHEMA,
     migrations: [
@@ -157,21 +150,17 @@ export function registerStickyNoteEntity(repo: StickyNoteRepository): void {
       titleCol: "content",
       contentCol: "content",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const note of items) insertStickyNoteRow(db, note, syncedAt);
-      return items.length;
-    },
     onSyncComplete: () => repo.markClean(),
-  };
-  ENTITIES.push(noteEntity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertStickyNoteRow,
+  });
 }
 
 /** Register the sticky board cache entity. Call from initServices(). */
 export function registerStickyBoardEntity(
   findAll: () => Promise<StickyBoard[]>,
 ): void {
-  const boardEntity: EntityDef = {
+  registerEntityCache({
     table: STICKY_BOARD_TABLE,
     schema: STICKY_BOARD_SCHEMA,
     migrations: [
@@ -183,11 +172,7 @@ export function registerStickyBoardEntity(
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await findAll();
-      for (const board of items) insertStickyBoardRow(db, board, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(boardEntity);
+    source: () => findAll(),
+    insert: insertStickyBoardRow,
+  });
 }

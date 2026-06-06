@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { JournalRepository } from "../../repositories/journal.repository.ts";
 import type { JournalEntry } from "../../types/journal.types.ts";
 
@@ -45,11 +46,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${JOURNAL_TABLE} (
   mood TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -77,7 +74,7 @@ function insertRow(
 }
 
 export function registerJournalEntity(repo: JournalRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: JOURNAL_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -89,11 +86,7 @@ export function registerJournalEntity(repo: JournalRepository): void {
       titleCol: "title",
       contentCol: "content",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const e of items) insertRow(db, e, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

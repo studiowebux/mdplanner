@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { GoalRepository } from "../../repositories/goal.repository.ts";
 import type { Goal } from "../../types/goal.types.ts";
 
@@ -69,11 +70,7 @@ const GOAL_SCHEMA = `CREATE TABLE IF NOT EXISTS ${GOAL_TABLE} (
   linked_portfolio_items TEXT,
   project TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertGoalRow(
@@ -117,7 +114,7 @@ function insertGoalRow(
 
 /** Register the goal cache entity. Call from initServices(). */
 export function registerGoalEntity(repo: GoalRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: GOAL_TABLE,
     schema: GOAL_SCHEMA,
     migrations: [
@@ -134,11 +131,7 @@ export function registerGoalEntity(repo: GoalRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const g of items) insertGoalRow(db, g, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertGoalRow,
+  });
 }

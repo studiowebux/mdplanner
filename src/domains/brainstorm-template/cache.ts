@@ -6,15 +6,16 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { BrainstormTemplateRepository } from "../../repositories/brainstorm-template.repository.ts";
 import type { BrainstormTemplate } from "../../types/brainstorm-template.types.ts";
 
@@ -46,11 +47,7 @@ const BRAINSTORM_TEMPLATE_SCHEMA =
   questions TEXT,
   questions_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertBrainstormTemplateRow(
@@ -81,7 +78,7 @@ function insertBrainstormTemplateRow(
 export function registerBrainstormTemplateEntity(
   repo: BrainstormTemplateRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: BRAINSTORM_TEMPLATE_TABLE,
     schema: BRAINSTORM_TEMPLATE_SCHEMA,
     migrations: [
@@ -94,11 +91,7 @@ export function registerBrainstormTemplateEntity(
       titleCol: "name",
       contentCol: "questions_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const t of items) insertBrainstormTemplateRow(db, t, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertBrainstormTemplateRow,
+  });
 }

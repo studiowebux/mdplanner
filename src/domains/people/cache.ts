@@ -8,12 +8,12 @@ import {
   archiveVals,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { PeopleRepository } from "../../repositories/people.repository.ts";
 import type { Person } from "../../types/person.types.ts";
 import { PEOPLE_SCHEMA, PEOPLE_TABLE } from "./constants.ts";
@@ -114,7 +114,7 @@ export function insertPersonRow(
 
 /** Register the people cache entity. Call from initServices(). */
 export function registerPeopleEntity(repo: PeopleRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: PEOPLE_TABLE,
     schema: PEOPLE_SCHEMA,
     migrations: [
@@ -129,11 +129,7 @@ export function registerPeopleEntity(repo: PeopleRepository): void {
       titleCol: "name",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const people = await repo.findAllFromDisk();
-      for (const p of people) insertPersonRow(db, p, syncedAt);
-      return people.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertPersonRow,
+  });
 }

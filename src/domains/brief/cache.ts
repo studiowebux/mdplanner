@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { BriefRepository } from "../../repositories/brief.repository.ts";
 import type { Brief } from "../../types/brief.types.ts";
 
@@ -72,11 +73,7 @@ const BRIEF_SCHEMA = `CREATE TABLE IF NOT EXISTS ${BRIEF_TABLE} (
   guiding_principles TEXT,
   sections_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertBriefRow(
@@ -117,7 +114,7 @@ function insertBriefRow(
 
 /** Register the brief cache entity. Call from initServices(). */
 export function registerBriefEntity(repo: BriefRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: BRIEF_TABLE,
     schema: BRIEF_SCHEMA,
     fts: {
@@ -129,11 +126,7 @@ export function registerBriefEntity(repo: BriefRepository): void {
     migrations: [
       ...archiveMigrations(BRIEF_TABLE),
     ],
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const b of items) insertBriefRow(db, b, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertBriefRow,
+  });
 }

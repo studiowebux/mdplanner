@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { MarketingPlanRepository } from "../../repositories/marketing-plan.repository.ts";
 import type { MarketingPlan } from "../../types/marketing-plan.types.ts";
 
@@ -73,11 +74,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MARKETING_PLAN_TABLE} (
   learnings TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -122,7 +119,7 @@ function insertRow(
 export function registerMarketingPlanEntity(
   repo: MarketingPlanRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: MARKETING_PLAN_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -134,11 +131,7 @@ export function registerMarketingPlanEntity(
       titleCol: "name",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const p of items) insertRow(db, p, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

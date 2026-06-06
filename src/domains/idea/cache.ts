@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { IdeaRepository } from "../../repositories/idea.repository.ts";
 import type { Idea } from "../../types/idea.types.ts";
 
@@ -63,11 +64,7 @@ const IDEA_SCHEMA = `CREATE TABLE IF NOT EXISTS ${IDEA_TABLE} (
   implemented_at TEXT,
   cancelled_at TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertIdeaRow(
@@ -107,7 +104,7 @@ function insertIdeaRow(
 
 /** Register the idea cache entity. Call from initServices(). */
 export function registerIdeaEntity(repo: IdeaRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: IDEA_TABLE,
     schema: IDEA_SCHEMA,
     fts: {
@@ -120,11 +117,7 @@ export function registerIdeaEntity(repo: IdeaRepository): void {
       `ALTER TABLE ${IDEA_TABLE} ADD COLUMN submitted_by TEXT`,
       ...archiveMigrations(IDEA_TABLE),
     ],
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const i of items) insertIdeaRow(db, i, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertIdeaRow,
+  });
 }

@@ -6,15 +6,16 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { OnboardingTemplateRepository } from "../../repositories/onboarding-template.repository.ts";
 import type {
   OnboardingTemplate,
@@ -51,11 +52,7 @@ const ONBOARDING_TEMPLATE_SCHEMA =
   steps TEXT,
   steps_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertOnboardingTemplateRow(
@@ -86,7 +83,7 @@ function insertOnboardingTemplateRow(
 export function registerOnboardingTemplateEntity(
   repo: OnboardingTemplateRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: ONBOARDING_TEMPLATE_TABLE,
     schema: ONBOARDING_TEMPLATE_SCHEMA,
     migrations: [
@@ -98,11 +95,7 @@ export function registerOnboardingTemplateEntity(
       titleCol: "name",
       contentCol: "steps_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const t of items) insertOnboardingTemplateRow(db, t, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertOnboardingTemplateRow,
+  });
 }

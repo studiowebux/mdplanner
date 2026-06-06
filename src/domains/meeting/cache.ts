@@ -7,14 +7,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   jsonVal,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { MeetingRepository } from "../../repositories/meeting.repository.ts";
 import type { Meeting, MeetingAction } from "../../types/meeting.types.ts";
 
@@ -64,11 +65,7 @@ const MEETING_SCHEMA = `CREATE TABLE IF NOT EXISTS ${MEETING_TABLE} (
   related_meetings_json TEXT,
   search_text TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertMeetingRow(
@@ -102,7 +99,7 @@ function insertMeetingRow(
 
 /** Register the meeting cache entity. Call from initServices(). */
 export function registerMeetingEntity(repo: MeetingRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: MEETING_TABLE,
     schema: MEETING_SCHEMA,
     migrations: [
@@ -118,11 +115,7 @@ export function registerMeetingEntity(repo: MeetingRepository): void {
       titleCol: "title",
       contentCol: "search_text",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const m of items) insertMeetingRow(db, m, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertMeetingRow,
+  });
 }

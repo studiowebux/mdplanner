@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { BusinessModelRepository } from "../../repositories/business-model.repository.ts";
 import type { BusinessModel } from "../../types/business-model.types.ts";
 
@@ -62,11 +63,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${BUSINESS_MODEL_TABLE} (
   project TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -107,7 +104,7 @@ function insertRow(
 export function registerBusinessModelEntity(
   repo: BusinessModelRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: BUSINESS_MODEL_TABLE,
     schema: SCHEMA,
     fts: {
@@ -132,11 +129,7 @@ export function registerBusinessModelEntity(
     migrations: [
       ...archiveMigrations(BUSINESS_MODEL_TABLE),
     ],
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const b of items) insertRow(db, b, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

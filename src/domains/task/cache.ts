@@ -8,12 +8,12 @@ import {
   archiveVals,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { TaskRepository } from "../../repositories/task.repository.ts";
 import type { Task } from "../../types/task.types.ts";
 import { TASK_SCHEMA, TASK_TABLE } from "./constants.ts";
@@ -131,7 +131,7 @@ export function insertTaskRow(
 
 /** Register the task cache entity. Call from initServices(). */
 export function registerTaskEntity(repo: TaskRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: TASK_TABLE,
     schema: TASK_SCHEMA,
     migrations: [
@@ -149,12 +149,8 @@ export function registerTaskEntity(repo: TaskRepository): void {
       titleCol: "title",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const tasks = await repo.findAllFromDisk();
-      for (const t of tasks) insertTaskRow(db, t, syncedAt);
-      return tasks.length;
-    },
     onSyncComplete: () => repo.markClean(),
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertTaskRow,
+  });
 }

@@ -4,12 +4,13 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { VacationRepository } from "../../repositories/vacation.repository.ts";
 import type { VacationRequest } from "../../types/vacation.types.ts";
 
@@ -43,11 +44,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${VACATION_TABLE} (
   status TEXT,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertRow(
@@ -76,7 +73,7 @@ function insertRow(
 }
 
 export function registerVacationEntity(repo: VacationRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: VACATION_TABLE,
     schema: SCHEMA,
     migrations: [
@@ -88,11 +85,7 @@ export function registerVacationEntity(repo: VacationRepository): void {
       titleCol: "person_id",
       contentCol: "notes",
     },
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const r of items) insertRow(db, r, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertRow,
+  });
 }

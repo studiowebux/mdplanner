@@ -7,12 +7,12 @@ import {
   archiveVals,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { MilestoneRepository } from "../../repositories/milestone.repository.ts";
 import type { MilestoneBase } from "../../types/milestone.types.ts";
 import {
@@ -71,7 +71,7 @@ export function insertMilestoneRow(
 
 /** Register the milestone cache entity. Call from initServices(). */
 export function registerMilestoneEntity(repo: MilestoneRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: MILESTONE_TABLE,
     schema: MILESTONE_SCHEMA,
     migrations: MILESTONE_MIGRATIONS,
@@ -81,11 +81,7 @@ export function registerMilestoneEntity(repo: MilestoneRepository): void {
       titleCol: "name",
       contentCol: "description",
     },
-    sync: async (db, syncedAt) => {
-      const milestones = await repo.findAllFromDisk();
-      for (const m of milestones) insertMilestoneRow(db, m, syncedAt);
-      return milestones.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertMilestoneRow,
+  });
 }

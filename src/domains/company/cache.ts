@@ -6,14 +6,15 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
   json,
   parseJson,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { CompanyRepository } from "../../repositories/company.repository.ts";
 import type {
   Company,
@@ -59,11 +60,7 @@ const COMPANY_SCHEMA = `CREATE TABLE IF NOT EXISTS ${COMPANY_TABLE} (
   notes TEXT,
   tags TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 export function insertCompanyRow(
@@ -97,7 +94,7 @@ export function insertCompanyRow(
 }
 
 export function registerCompanyEntity(repo: CompanyRepository): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: COMPANY_TABLE,
     schema: COMPANY_SCHEMA,
     fts: {
@@ -109,13 +106,9 @@ export function registerCompanyEntity(repo: CompanyRepository): void {
     migrations: [
       ...archiveMigrations(COMPANY_TABLE),
     ],
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const c of items) insertCompanyRow(db, c, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertCompanyRow,
+  });
 }
 
 export const COMPANY_BODY_KEYS = ["id", "notes"] as const;

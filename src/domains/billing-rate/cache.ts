@@ -7,12 +7,13 @@ import {
   archiveFieldsFromRow,
   archiveMigrations,
   archiveVals,
+  AUDIT_COLS_DDL,
   auditCols,
   auditVals,
-  ENTITIES,
+  registerEntityCache,
   val,
 } from "../../database/sqlite/mod.ts";
-import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { BillingRateRepository } from "../../repositories/billing-rate.repository.ts";
 import type { BillingRate } from "../../types/billing-rate.types.ts";
 
@@ -49,11 +50,7 @@ const BILLING_RATE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${BILLING_RATE_TABLE} (
   is_default INTEGER,
   notes TEXT,
   ${ARCHIVE_COLS_DDL},
-  created_at TEXT,
-  updated_at TEXT,
-  created_by TEXT,
-  updated_by TEXT,
-  synced_at TEXT
+  ${AUDIT_COLS_DDL}
 )`;
 
 function insertBillingRateRow(
@@ -87,7 +84,7 @@ function insertBillingRateRow(
 export function registerBillingRateEntity(
   repo: BillingRateRepository,
 ): void {
-  const entity: EntityDef = {
+  registerEntityCache({
     table: BILLING_RATE_TABLE,
     schema: BILLING_RATE_SCHEMA,
     fts: {
@@ -99,11 +96,7 @@ export function registerBillingRateEntity(
     migrations: [
       ...archiveMigrations(BILLING_RATE_TABLE),
     ],
-    sync: async (db, syncedAt) => {
-      const items = await repo.findAllFromDisk();
-      for (const r of items) insertBillingRateRow(db, r, syncedAt);
-      return items.length;
-    },
-  };
-  ENTITIES.push(entity);
+    source: () => repo.findAllFromDisk(),
+    insert: insertBillingRateRow,
+  });
 }
