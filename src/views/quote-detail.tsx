@@ -242,10 +242,10 @@ export const QuoteDetailView: FC<
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Description</th>
-                  <th>%</th>
-                  <th>Amount</th>
-                  <th>Due</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">%</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Due</th>
                 </tr>
               </thead>
               <tbody>
@@ -336,12 +336,12 @@ export const QuoteDetailView: FC<
               <table class="data-table quote-detail__revisions-table">
                 <thead>
                   <tr>
-                    <th>Rev</th>
-                    <th>Sent</th>
-                    <th>Line Items</th>
-                    <th>Subtotal</th>
-                    <th>Total</th>
-                    <th>Sent By</th>
+                    <th scope="col">Rev</th>
+                    <th scope="col">Sent</th>
+                    <th scope="col">Line Items</th>
+                    <th scope="col">Subtotal</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Sent By</th>
                   </tr>
                 </thead>
                 <tbody>

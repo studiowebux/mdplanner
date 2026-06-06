@@ -125,12 +125,12 @@ export const GitHubIssuesTable: FC<{
         <table class="data-table data-table--uppercase data-table--no-last-border">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Title</th>
-              <th>Labels</th>
-              <th>Assignee</th>
-              <th>Date</th>
-              <th>Actions</th>
+              <th scope="col">#</th>
+              <th scope="col">Title</th>
+              <th scope="col">Labels</th>
+              <th scope="col">Assignee</th>
+              <th scope="col">Date</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -194,12 +194,12 @@ export const GitHubPRsTable: FC<{
         <table class="data-table data-table--uppercase data-table--no-last-border">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Title</th>
-              <th>Branch</th>
-              <th>Status</th>
-              <th>Assignee</th>
-              <th>Date</th>
+              <th scope="col">#</th>
+              <th scope="col">Title</th>
+              <th scope="col">Branch</th>
+              <th scope="col">Status</th>
+              <th scope="col">Assignee</th>
+              <th scope="col">Date</th>
             </tr>
           </thead>
           <tbody>
@@ -394,12 +394,12 @@ export const GitHubPipelineResults: FC<{
         <table class="data-table data-table--uppercase data-table--no-last-border">
           <thead>
             <tr>
-              <th>Status</th>
-              <th>Workflow</th>
-              <th>Branch</th>
-              <th>Event</th>
-              <th>Started</th>
-              <th>Actions</th>
+              <th scope="col">Status</th>
+              <th scope="col">Workflow</th>
+              <th scope="col">Branch</th>
+              <th scope="col">Event</th>
+              <th scope="col">Started</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>

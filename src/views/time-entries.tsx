@@ -105,15 +105,21 @@ const RecapTable: FC<{
       <table class="data-table time-entries__recap-table">
         <thead>
           <tr class="data-table__th-row">
-            <th class="data-table__th time-entries__recap-label">
+            <th scope="col" class="data-table__th time-entries__recap-label">
               {label === "By Project" ? "Project" : "Person"}
             </th>
             {periods.map((p) => (
-              <th key={p} class="data-table__th time-entries__recap-period">
+              <th
+                scope="col"
+                key={p}
+                class="data-table__th time-entries__recap-period"
+              >
                 {p}
               </th>
             ))}
-            <th class="data-table__th time-entries__recap-total">Total</th>
+            <th scope="col" class="data-table__th time-entries__recap-total">
+              Total
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -219,12 +225,12 @@ export const TimeEntriesView: FC<Props> = (props) => {
               <table class="data-table">
                 <thead>
                   <tr class="data-table__th-row">
-                    <th class="data-table__th">Date</th>
-                    <th class="data-table__th">Task</th>
-                    <th class="data-table__th">Project</th>
-                    <th class="data-table__th">Hours</th>
-                    <th class="data-table__th">Person</th>
-                    <th class="data-table__th">Description</th>
+                    <th scope="col" class="data-table__th">Date</th>
+                    <th scope="col" class="data-table__th">Task</th>
+                    <th scope="col" class="data-table__th">Project</th>
+                    <th scope="col" class="data-table__th">Hours</th>
+                    <th scope="col" class="data-table__th">Person</th>
+                    <th scope="col" class="data-table__th">Description</th>
                   </tr>
                 </thead>
                 <tbody>

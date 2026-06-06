@@ -106,11 +106,15 @@ export const BillingSection: FC<{
             <table class="data-table data-table--compact">
               <thead class="data-table__head">
                 <tr>
-                  <th class="data-table__th">Number</th>
-                  <th class="data-table__th">Title</th>
-                  <th class="data-table__th" data-col="status">Status</th>
-                  <th class="data-table__th data-table__th--right">Total</th>
-                  <th class="data-table__th">Expires</th>
+                  <th scope="col" class="data-table__th">Number</th>
+                  <th scope="col" class="data-table__th">Title</th>
+                  <th scope="col" class="data-table__th" data-col="status">
+                    Status
+                  </th>
+                  <th scope="col" class="data-table__th data-table__th--right">
+                    Total
+                  </th>
+                  <th scope="col" class="data-table__th">Expires</th>
                 </tr>
               </thead>
               <tbody class="data-table__body">
@@ -158,12 +162,18 @@ export const BillingSection: FC<{
             <table class="data-table data-table--compact">
               <thead class="data-table__head">
                 <tr>
-                  <th class="data-table__th">Number</th>
-                  <th class="data-table__th">Title</th>
-                  <th class="data-table__th" data-col="status">Status</th>
-                  <th class="data-table__th data-table__th--right">Total</th>
-                  <th class="data-table__th data-table__th--right">Paid</th>
-                  <th class="data-table__th">Due</th>
+                  <th scope="col" class="data-table__th">Number</th>
+                  <th scope="col" class="data-table__th">Title</th>
+                  <th scope="col" class="data-table__th" data-col="status">
+                    Status
+                  </th>
+                  <th scope="col" class="data-table__th data-table__th--right">
+                    Total
+                  </th>
+                  <th scope="col" class="data-table__th data-table__th--right">
+                    Paid
+                  </th>
+                  <th scope="col" class="data-table__th">Due</th>
                 </tr>
               </thead>
               <tbody class="data-table__body">

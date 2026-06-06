@@ -281,11 +281,11 @@ export const TimeEntriesSection: FC<{
         <table class="data-table data-table--compact">
           <thead>
             <tr>
-              <th class="data-table__th">Date</th>
-              <th class="data-table__th">Hours</th>
-              <th class="data-table__th">Person</th>
-              <th class="data-table__th">Description</th>
-              <th class="data-table__th" />
+              <th scope="col" class="data-table__th">Date</th>
+              <th scope="col" class="data-table__th">Hours</th>
+              <th scope="col" class="data-table__th">Person</th>
+              <th scope="col" class="data-table__th">Description</th>
+              <th scope="col" class="data-table__th" />
             </tr>
           </thead>
           <tbody>

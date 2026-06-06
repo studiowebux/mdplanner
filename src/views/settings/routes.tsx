@@ -272,8 +272,8 @@ settingsViewRouter.get("/cache/stats", (c) => {
     )
     .join("");
   const html = `<table class="settings-cache__table">` +
-    `<thead><tr><th class="settings-cache__cell">Entity</th>` +
-    `<th class="settings-cache__cell">Rows</th></tr></thead>` +
+    `<thead><tr><th scope="col" class="settings-cache__cell">Entity</th>` +
+    `<th scope="col" class="settings-cache__cell">Rows</th></tr></thead>` +
     `<tbody>${rows}</tbody>` +
     `<tfoot><tr><td class="settings-cache__cell"><strong>Total</strong></td>` +
     `<td class="settings-cache__cell"><strong>${
@@ -527,7 +527,7 @@ settingsViewRouter.get("/integrity/scan", async (c) => {
       )
       .join("");
 
-    return `<details class="settings-integrity__domain settings-integrity__domain--${state}" open><summary class="settings-integrity__domain-summary">${summaryText}</summary><table class="settings-integrity__table"><thead><tr><th class="settings-integrity__cell">Severity</th><th class="settings-integrity__cell">ID</th><th class="settings-integrity__cell">Field</th><th class="settings-integrity__cell">Issue</th></tr></thead><tbody>${rows}</tbody></table></details>`;
+    return `<details class="settings-integrity__domain settings-integrity__domain--${state}" open><summary class="settings-integrity__domain-summary">${summaryText}</summary><table class="settings-integrity__table"><thead><tr><th scope="col" class="settings-integrity__cell">Severity</th><th scope="col" class="settings-integrity__cell">ID</th><th scope="col" class="settings-integrity__cell">Field</th><th scope="col" class="settings-integrity__cell">Issue</th></tr></thead><tbody>${rows}</tbody></table></details>`;
   }).join("");
 
   return c.html(`${overall}${items}`);

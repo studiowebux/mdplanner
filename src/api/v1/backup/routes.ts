@@ -255,7 +255,7 @@ function renderPreviewHtml(p: {
   const confirm =
     `<div class="settings-data__confirm-row"><button type="button" class="btn btn--primary" hx-post="/api/v1/backup/import" hx-include="#backup-import-form" hx-encoding="multipart/form-data" hx-target="#backup-import-result" hx-swap="innerHTML">Confirm &amp; Restore</button></div>`;
 
-  return `${warning}${unknownNote}${metaLine}${summary}<table class="settings-data__result-table"><thead><tr><th>Domain</th><th>In backup</th><th>New</th><th>Overwrite</th></tr></thead><tbody>${rows}</tbody></table>${confirm}`;
+  return `${warning}${unknownNote}${metaLine}${summary}<table class="settings-data__result-table"><thead><tr><th scope="col">Domain</th><th scope="col">In backup</th><th scope="col">New</th><th scope="col">Overwrite</th></tr></thead><tbody>${rows}</tbody></table>${confirm}`;
 }
 
 // POST /import — accepts multipart/form-data with a 'file' field or raw JSON.
@@ -318,7 +318,7 @@ backupRouter.post("/import", async (c) => {
         Object.keys(imported).length
       } domains (${totalErrors} error${
         totalErrors !== 1 ? "s" : ""
-      }).</p><table class="settings-data__result-table"><thead><tr><th>Domain</th><th>Restored</th><th>Errors</th></tr></thead><tbody>${rows}</tbody></table>`;
+      }).</p><table class="settings-data__result-table"><thead><tr><th scope="col">Domain</th><th scope="col">Restored</th><th scope="col">Errors</th></tr></thead><tbody>${rows}</tbody></table>`;
     return c.html(html);
   }
 

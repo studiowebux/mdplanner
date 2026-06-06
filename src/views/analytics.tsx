@@ -630,10 +630,10 @@ const SECTIONS: SectionSpec[] = [
           <table class="data-table analytics__capacity-table">
             <thead>
               <tr class="data-table__th-row">
-                <th class="data-table__th">Plan</th>
-                <th class="data-table__th">Budget (h)</th>
-                <th class="data-table__th">Allocated (h)</th>
-                <th class="data-table__th">Utilization</th>
+                <th scope="col" class="data-table__th">Plan</th>
+                <th scope="col" class="data-table__th">Budget (h)</th>
+                <th scope="col" class="data-table__th">Allocated (h)</th>
+                <th scope="col" class="data-table__th">Utilization</th>
               </tr>
             </thead>
             <tbody>

@@ -81,18 +81,25 @@ export const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
         <table class="data-table capacity-plan-detail__grid">
           <thead>
             <tr class="data-table__th-row">
-              <th class="data-table__th capacity-plan-detail__grid-person-col">
+              <th
+                scope="col"
+                class="data-table__th capacity-plan-detail__grid-person-col"
+              >
                 Person
               </th>
               {weeks.map((w) => (
                 <th
+                  scope="col"
                   key={w.monday}
                   class="data-table__th capacity-plan-detail__grid-week-col"
                 >
                   {w.label}
                 </th>
               ))}
-              <th class="data-table__th capacity-plan-detail__grid-total-col">
+              <th
+                scope="col"
+                class="data-table__th capacity-plan-detail__grid-total-col"
+              >
                 Total
               </th>
             </tr>

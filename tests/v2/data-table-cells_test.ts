@@ -15,6 +15,7 @@ import { renderToString } from "hono/jsx/dom/server";
 import { BillingSection } from "../../src/views/customer-detail.tsx";
 import { TimeEntriesSection } from "../../src/views/task-detail.tsx";
 import { SubGoalsTable } from "../../src/views/goal-detail.tsx";
+import { DataTable } from "../../src/components/ui/data-table.tsx";
 
 /** Every `<td>` carries `data-table__td`; every `<th>` carries `data-table__th`. */
 function assertCanonicalCells(html: string, label: string): void {
@@ -33,6 +34,12 @@ function assertCanonicalCells(html: string, label: string): void {
   assert(
     !/<th\b(?![^>]*data-table__th)/.test(html),
     `${label}: every <th> must carry the canonical data-table__th class`,
+  );
+  // a11y: every header cell must carry a scope so screen readers can
+  // associate it with its column/row.
+  assert(
+    !/<th\b(?![^>]*scope=)/.test(html),
+    `${label}: every <th> must carry a scope attribute`,
   );
 }
 
@@ -106,4 +113,20 @@ Deno.test("goal sub-goals table uses canonical data-table cells", () => {
     ),
   );
   assertCanonicalCells(html, "goal sub-goals");
+});
+
+Deno.test("shared DataTable root marks every header with scope=col", () => {
+  const html = renderToString(
+    DataTable({
+      columns: [
+        { key: "name", label: "Name" },
+        { key: "status", label: "Status" },
+      ],
+      rows: [{ id: "r1", name: "Alpha", status: "open" }],
+    }),
+  );
+  assert(
+    !/<th\b(?![^>]*scope="col")/.test(html),
+    'every DataTable header <th> must carry scope="col"',
+  );
 });

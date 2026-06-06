@@ -67,7 +67,7 @@ function block(t: Token): Child {
           <thead>
             <tr>
               {tb.header.map((cell, i) => (
-                <th key={i}>{inlines(cell.tokens)}</th>
+                <th key={i} scope="col">{inlines(cell.tokens)}</th>
               ))}
             </tr>
           </thead>

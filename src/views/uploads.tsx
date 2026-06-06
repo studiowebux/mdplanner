@@ -145,12 +145,12 @@ export const FilesTable: FC<
       <table class="data-table uploads__table">
         <thead>
           <tr class="data-table__th-row">
-            <th class="data-table__th">Filename</th>
-            <th class="data-table__th">Task</th>
-            <th class="data-table__th">Type</th>
-            <th class="data-table__th">Size</th>
-            <th class="data-table__th">Uploaded</th>
-            <th class="data-table__th">Actions</th>
+            <th scope="col" class="data-table__th">Filename</th>
+            <th scope="col" class="data-table__th">Task</th>
+            <th scope="col" class="data-table__th">Type</th>
+            <th scope="col" class="data-table__th">Size</th>
+            <th scope="col" class="data-table__th">Uploaded</th>
+            <th scope="col" class="data-table__th">Actions</th>
           </tr>
         </thead>
         <tbody id="uploads-table-body">

@@ -215,18 +215,27 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => (
       <table class="line-items-table qli-table">
         <thead>
           <tr>
-            <th class="line-items-table__th">Type</th>
-            <th class="line-items-table__th">Description</th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th scope="col" class="line-items-table__th">Type</th>
+            <th scope="col" class="line-items-table__th">Description</th>
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Qty
             </th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Rate
             </th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Amount
             </th>
-            <th class="line-items-table__th" />
+            <th scope="col" class="line-items-table__th" />
           </tr>
         </thead>
         <tbody>

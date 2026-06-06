@@ -131,11 +131,11 @@ const ActionsTableComponent: FC<
         <table class="data-table data-table--compact meeting-detail__actions-table">
           <thead class="data-table__head">
             <tr>
-              <th class="data-table__th">Description</th>
-              <th class="data-table__th">Owner</th>
-              <th class="data-table__th">Due</th>
-              <th class="data-table__th">Status</th>
-              <th class="data-table__th" />
+              <th scope="col" class="data-table__th">Description</th>
+              <th scope="col" class="data-table__th">Owner</th>
+              <th scope="col" class="data-table__th">Due</th>
+              <th scope="col" class="data-table__th">Status</th>
+              <th scope="col" class="data-table__th" />
             </tr>
           </thead>
           <tbody class="data-table__body">

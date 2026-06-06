@@ -46,6 +46,7 @@ export const DataTable: FC<Props> = (
             return (
               <th
                 key={col.key}
+                scope="col"
                 class={`data-table__th${
                   col.sortable ? " data-table__th--sortable" : ""
                 }${isSorted ? " data-table__th--sorted" : ""}${

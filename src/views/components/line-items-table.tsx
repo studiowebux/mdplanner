@@ -116,18 +116,30 @@ export const LineItemsTable: FC<LineItemsTableProps> = (
       <table class="line-items-table">
         <thead>
           <tr>
-            <th class="line-items-table__th">Type</th>
-            <th class="line-items-table__th">Description</th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th scope="col" class="line-items-table__th">Type</th>
+            <th scope="col" class="line-items-table__th">Description</th>
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Qty
             </th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Rate
             </th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Discount
             </th>
-            <th class="line-items-table__th line-items-table__th--right">
+            <th
+              scope="col"
+              class="line-items-table__th line-items-table__th--right"
+            >
               Amount
             </th>
           </tr>

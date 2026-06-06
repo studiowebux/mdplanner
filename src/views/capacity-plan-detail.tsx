@@ -96,10 +96,10 @@ const MembersTable: FC<{
         <table class="data-table capacity-plan-detail__table">
           <thead>
             <tr class="data-table__th-row">
-              <th class="data-table__th">Person</th>
-              <th class="data-table__th">Hours/Day</th>
-              <th class="data-table__th">Working Days</th>
-              <th class="data-table__th"></th>
+              <th scope="col" class="data-table__th">Person</th>
+              <th scope="col" class="data-table__th">Hours/Day</th>
+              <th scope="col" class="data-table__th">Working Days</th>
+              <th scope="col" class="data-table__th"></th>
             </tr>
           </thead>
           <tbody>
@@ -226,12 +226,12 @@ const AllocationsConfig: FC<{
         <table class="data-table capacity-plan-detail__table">
           <thead>
             <tr class="data-table__th-row">
-              <th class="data-table__th">Person</th>
-              <th class="data-table__th">Target</th>
-              <th class="data-table__th">Type</th>
-              <th class="data-table__th">Allocation</th>
-              <th class="data-table__th">Notes</th>
-              <th class="data-table__th"></th>
+              <th scope="col" class="data-table__th">Person</th>
+              <th scope="col" class="data-table__th">Target</th>
+              <th scope="col" class="data-table__th">Type</th>
+              <th scope="col" class="data-table__th">Allocation</th>
+              <th scope="col" class="data-table__th">Notes</th>
+              <th scope="col" class="data-table__th"></th>
             </tr>
           </thead>
           <tbody>

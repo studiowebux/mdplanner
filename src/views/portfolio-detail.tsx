@@ -301,10 +301,10 @@ export const PortfolioDetailView: FC<Props> = (
             <table class="data-table data-table--header-bg">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                  <th>Target</th>
-                  <th>Unit</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Target</th>
+                  <th scope="col">Unit</th>
                 </tr>
               </thead>
               <tbody>
@@ -380,12 +380,12 @@ export const PortfolioDetailView: FC<Props> = (
             <table class="data-table data-table--header-bg">
               <thead>
                 <tr>
-                  <th>Goal</th>
-                  <th>Status</th>
-                  <th>KPI</th>
-                  <th>Metric</th>
-                  <th>Value</th>
-                  <th>Target</th>
+                  <th scope="col">Goal</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">KPI</th>
+                  <th scope="col">Metric</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Target</th>
                 </tr>
               </thead>
               <tbody>

@@ -855,7 +855,7 @@ h2{margin-bottom:1rem}table{width:100%;border-collapse:collapse}
 td,th{padding:6px 12px;text-align:left;border-bottom:1px solid #eee}
 a{text-decoration:none;color:#0070f3}a:hover{text-decoration:underline}</style>
 </head><body><h2>Index of ${xe(reqPath)}</h2><table>
-<tr><th>Name</th></tr>
+<tr><th scope="col">Name</th></tr>
 ${parent !== null ? `<tr><td><a href="${parent}">..</a></td></tr>` : ""}
 ${rows}</table></body></html>`;
       return new Response(html, {

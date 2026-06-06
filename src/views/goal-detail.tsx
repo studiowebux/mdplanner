@@ -165,9 +165,9 @@ export const SubGoalsTable: FC<{ childGoals: Goal[] }> = ({ childGoals }) => (
     <table class="data-table">
       <thead>
         <tr>
-          <th class="data-table__th">Title</th>
-          <th class="data-table__th">Status</th>
-          <th class="data-table__th">Progress</th>
+          <th scope="col" class="data-table__th">Title</th>
+          <th scope="col" class="data-table__th">Status</th>
+          <th scope="col" class="data-table__th">Progress</th>
         </tr>
       </thead>
       <tbody>

@@ -195,9 +195,9 @@ export const MarketingPlanDetailView: FC<
             <table class="data-table data-table--compact data-table--uppercase">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Size</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Size</th>
                 </tr>
               </thead>
               <tbody>
@@ -222,10 +222,10 @@ export const MarketingPlanDetailView: FC<
             <table class="data-table data-table--compact data-table--uppercase">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Budget</th>
-                  <th>Status</th>
-                  <th>Goals</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Budget</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Goals</th>
                 </tr>
               </thead>
               <tbody>
@@ -266,13 +266,13 @@ export const MarketingPlanDetailView: FC<
             <table class="data-table data-table--compact data-table--uppercase">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Channel</th>
-                  <th>Budget</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th>Status</th>
-                  <th>Goals</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Channel</th>
+                  <th scope="col">Budget</th>
+                  <th scope="col">Start</th>
+                  <th scope="col">End</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Goals</th>
                 </tr>
               </thead>
               <tbody>

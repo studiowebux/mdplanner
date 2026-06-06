@@ -55,12 +55,12 @@ export const DnsRecordsTable: FC<{ domain: DnsDomain }> = ({ domain }) => {
             <table class="data-table dns-detail__records-table">
               <thead>
                 <tr>
-                  <th>Type</th>
-                  <th>Name</th>
-                  <th>Value</th>
-                  <th>TTL</th>
-                  <th>Proxied</th>
-                  <th></th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">TTL</th>
+                  <th scope="col">Proxied</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>

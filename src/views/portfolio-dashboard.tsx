@@ -120,6 +120,7 @@ const DashboardTable: FC<TableProps> = (
 
     return (
       <th
+        scope="col"
         class={cls}
         data-col={col}
         hx-get={`/portfolio/dashboard/view?${params}`}
@@ -133,7 +134,7 @@ const DashboardTable: FC<TableProps> = (
   };
 
   const staticHeader = (col: string, label: string) => (
-    <th class="data-table__th" data-col={col}>{label}</th>
+    <th scope="col" class="data-table__th" data-col={col}>{label}</th>
   );
 
   return (
