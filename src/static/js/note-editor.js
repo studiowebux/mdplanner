@@ -612,7 +612,9 @@
   // falls back to individual sub-blocks.
   function collectContainerContent(parent) {
     var rawEl = qs("[data-raw-markdown] .note-editor__textarea", parent);
-    if (rawEl) return parseMarkdownToBlocks(rawEl.value);
+    if (rawEl) {
+      return globalThis.NoteMarkdown.parseMarkdownToBlocks(rawEl.value, genId);
+    }
 
     // Fallback: collect individual sub-blocks (for newly created sections)
     var blocks = [];
@@ -625,60 +627,6 @@
         order: blocks.length,
       });
     });
-    return blocks;
-  }
-
-  // Parse raw markdown string into NoteParagraph-like blocks.
-  // Splits on code fences and blank-line-separated paragraphs.
-  function parseMarkdownToBlocks(md) {
-    var blocks = [];
-    var lines = md.split("\n");
-    var current = [];
-    var inCode = false;
-    var codeLang = "";
-    var order = 0;
-
-    function flush() {
-      var text = current.join("\n").trim();
-      if (text) {
-        blocks.push({
-          id: genId("block"),
-          type: "text",
-          content: text,
-          order: order++,
-        });
-      }
-      current = [];
-    }
-
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      if (line.startsWith("```")) {
-        if (!inCode) {
-          flush();
-          inCode = true;
-          codeLang = line.slice(3).trim();
-        } else {
-          var codeContent = current.join("\n");
-          if (codeContent.trim()) {
-            blocks.push({
-              id: genId("code"),
-              type: "code",
-              content: codeContent,
-              language: codeLang || undefined,
-              order: order++,
-            });
-          }
-          current = [];
-          inCode = false;
-          codeLang = "";
-        }
-        continue;
-      }
-      current.push(line);
-    }
-
-    flush();
     return blocks;
   }
 
