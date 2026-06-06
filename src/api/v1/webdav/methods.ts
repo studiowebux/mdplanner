@@ -410,7 +410,7 @@ export async function handleDelete(
   const info = await fsStat(fsPath);
   if (!info) return httpErr(404, "Not Found");
   await ctx.trashResource(fsPath);
-  ctx.props.cleanUnder(fsPath);
+  await ctx.props.cleanUnder(fsPath);
   return new Response(null, { status: 204, headers: corsHeaders() });
 }
 
@@ -502,7 +502,7 @@ export async function handleMove(
   if (destInfo) await ctx.trashResource(destFsPath);
   await ensureDir(dirname(destFsPath));
   await atomicMove(fsPath, destFsPath, srcInfo.isDirectory);
-  ctx.props.move(fsPath, destFsPath);
+  await ctx.props.move(fsPath, destFsPath);
   return new Response(null, {
     status: destInfo ? 204 : 201,
     headers: corsHeaders(),
@@ -606,8 +606,11 @@ export async function handleProppatch(
   const ops = parsePropPatch(bodyText);
   const stats: string[] = [];
   for (const op of ops) {
-    if (op.type === "set") ctx.props.set(fsPath, op.ns, op.local, op.value);
-    else ctx.props.remove(fsPath, op.ns, op.local);
+    if (op.type === "set") {
+      await ctx.props.set(fsPath, op.ns, op.local, op.value);
+    } else {
+      await ctx.props.remove(fsPath, op.ns, op.local);
+    }
     stats.push(`<D:propstat>
       <D:prop><Z:${op.local} xmlns:Z="${xe(op.ns)}"/></D:prop>
       <D:status>HTTP/1.1 200 OK</D:status>
@@ -688,7 +691,7 @@ export async function handleLock(
     .get("If")
     ?.match(/<(urn:uuid:[^>]+)>/)?.[1];
   if (!bodyText.trim() && refreshToken) {
-    const existing = ctx.locks.refresh(refreshToken, timeoutSec);
+    const existing = await ctx.locks.refresh(refreshToken, timeoutSec);
     if (!existing) {
       return httpErr(412, "Precondition Failed: lock token not found");
     }
@@ -725,7 +728,7 @@ export async function handleLock(
     timeout: Date.now() + timeoutSec * 1000,
     created: Date.now(),
   };
-  ctx.locks.add(lock);
+  await ctx.locks.add(lock);
   ctx.log("INFO", "Lock acquired", {
     token: lock.token,
     path: reqPath,
@@ -750,7 +753,7 @@ export async function handleUnlock(
   if (lock.path !== fsPath) {
     return httpErr(409, "Conflict: token does not match resource");
   }
-  ctx.locks.remove(token);
+  await ctx.locks.remove(token);
   ctx.log("INFO", "Lock released", { token });
   return new Response(null, { status: 204, headers: corsHeaders() });
 }

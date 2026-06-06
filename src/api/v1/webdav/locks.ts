@@ -1,8 +1,8 @@
 /**
  * WebDAV lock store (RFC 4918 Class 2) — in-memory locks indexed by token and
  * by path, persisted to `<stateDir>/locks.json`. Expired locks are pruned
- * lazily on read. Persistence is fire-and-forget (matches the original
- * inline behaviour: never awaited on the request path).
+ * lazily on read. Mutations await persistence before returning so no write op
+ * leaks past the request (durable locks + no op-sanitizer flake in tests).
  */
 
 import { join } from "@std/path";
@@ -64,51 +64,54 @@ export class LockStore {
     return this.locks.get(token);
   }
 
-  add(lock: Lock): void {
+  async add(lock: Lock): Promise<void> {
     this.locks.set(lock.token, lock);
     if (!this.pathLocks.has(lock.path)) {
       this.pathLocks.set(lock.path, new Set());
     }
     this.pathLocks.get(lock.path)!.add(lock.token);
-    this.persist();
+    await this.persist();
   }
 
-  remove(token: string): void {
+  async remove(token: string): Promise<void> {
     const lock = this.locks.get(token);
     if (!lock) return;
     this.locks.delete(token);
     this.pathLocks.get(lock.path)?.delete(token);
-    this.persist();
+    await this.persist();
   }
 
   /** Refresh an existing lock's timeout (LOCK with no body + If token). */
-  refresh(token: string, timeoutSec: number): Lock | null {
+  async refresh(token: string, timeoutSec: number): Promise<Lock | null> {
     const existing = this.locks.get(token);
     if (!existing) return null;
     existing.timeout = Date.now() + timeoutSec * 1000;
     this.locks.set(token, existing);
-    this.persist();
+    await this.persist();
     return existing;
   }
 
+  /**
+   * Active (non-expired) locks for a path. Expired locks are pruned from memory
+   * here; the on-disk file is not rewritten on prune (the next mutation rewrites
+   * it, and `load()` re-filters expired entries) so this read path starts no
+   * write op.
+   */
   getActive(path: string): Lock[] {
     const tokens = this.pathLocks.get(path);
     if (!tokens) return [];
     const now = Date.now();
     const active: Lock[] = [];
-    let pruned = false;
     for (const t of [...tokens]) {
       const l = this.locks.get(t);
       if (!l) continue;
       if (l.timeout < now) {
         this.locks.delete(t);
         tokens.delete(t);
-        pruned = true;
       } else {
         active.push(l);
       }
     }
-    if (pruned) this.persist();
     return active;
   }
 

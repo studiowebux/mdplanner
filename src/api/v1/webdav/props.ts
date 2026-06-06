@@ -1,8 +1,8 @@
 /**
  * WebDAV dead-property store (RFC 4918 PROPPATCH) — arbitrary client XML
  * properties keyed by `fsPath` → `ns:local` → raw XML, persisted to
- * `<stateDir>/props.json`. Persistence is fire-and-forget (matches the
- * original inline behaviour: never awaited on the request path).
+ * `<stateDir>/props.json`. Mutations await persistence before returning so no
+ * write op leaks past the request (durable props + no op-sanitizer flake).
  */
 
 import { join } from "@std/path";
@@ -45,31 +45,36 @@ export class DeadPropStore {
     } catch { /* first run */ }
   }
 
-  set(path: string, ns: string, local: string, xml: string): void {
+  async set(
+    path: string,
+    ns: string,
+    local: string,
+    xml: string,
+  ): Promise<void> {
     if (!this.props.has(path)) this.props.set(path, new Map());
     this.props.get(path)!.set(`${ns}:${local}`, xml);
-    this.persist();
+    await this.persist();
   }
 
-  remove(path: string, ns: string, local: string): void {
+  async remove(path: string, ns: string, local: string): Promise<void> {
     this.props.get(path)?.delete(`${ns}:${local}`);
-    this.persist();
+    await this.persist();
   }
 
   get(path: string): Map<string, string> {
     return this.props.get(path) ?? new Map();
   }
 
-  cleanUnder(fsPath: string): void {
+  async cleanUnder(fsPath: string): Promise<void> {
     for (const key of [...this.props.keys()]) {
       if (key === fsPath || key.startsWith(fsPath + "/")) {
         this.props.delete(key);
       }
     }
-    this.persist();
+    await this.persist();
   }
 
-  move(srcPath: string, destPath: string): void {
+  async move(srcPath: string, destPath: string): Promise<void> {
     for (const [key, val] of [...this.props.entries()]) {
       if (key === srcPath) {
         this.props.set(destPath, val);
@@ -79,6 +84,6 @@ export class DeadPropStore {
         this.props.delete(key);
       }
     }
-    this.persist();
+    await this.persist();
   }
 }
