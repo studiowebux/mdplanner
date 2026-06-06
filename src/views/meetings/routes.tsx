@@ -20,6 +20,7 @@ import {
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { toHtml } from "../../utils/html.ts";
 import type { AppContext, AppVariables } from "../../types/app.ts";
 
 const MeetingForm = createDomainForm({
@@ -202,7 +203,7 @@ meetingsRouter.get("/new", async (c) => {
     }
   }
 
-  return c.html(MeetingForm({ prefillValues }) as unknown as string);
+  return c.html(toHtml(MeetingForm({ prefillValues })));
 });
 
 // Mount all factory routes (including factory's /new, edit, delete, list, etc.)

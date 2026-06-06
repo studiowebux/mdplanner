@@ -193,10 +193,7 @@ export class PeopleRepository extends CachedMarkdownRepository<
 
   protected serialize(item: Person): string {
     const fm = mapKeysToFm(
-      buildFrontmatter(
-        item as unknown as Record<string, unknown>,
-        PEOPLE_BODY_KEYS,
-      ),
+      buildFrontmatter(item, PEOPLE_BODY_KEYS),
     );
     const body = `# ${item.name}\n\n${item.notes ?? ""}`.trimEnd();
     return serializeFrontmatter(fm, body);

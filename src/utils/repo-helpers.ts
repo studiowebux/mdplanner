@@ -61,7 +61,7 @@ export async function findFileById<T>(
  * Build a frontmatter record from an entity, excluding body-only keys.
  * serializeFrontmatter already strips undefined/null, so no per-field guards needed.
  */
-export function buildFrontmatter<T extends Record<string, unknown>>(
+export function buildFrontmatter<T extends object>(
   entity: T,
   excludeKeys: readonly string[],
 ): Record<string, unknown> {

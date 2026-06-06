@@ -357,7 +357,7 @@ export abstract class BaseMarkdownRepository<
     body: string,
   ): string {
     const fm = mapKeysToFm(
-      buildFrontmatter(item as unknown as Record<string, unknown>, bodyKeys),
+      buildFrontmatter(item, bodyKeys),
     );
     return serializeFrontmatter(fm, body);
   }

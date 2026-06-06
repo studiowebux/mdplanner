@@ -1,3 +1,16 @@
+/**
+ * Narrow a Hono JSX component result to the `string | Promise<string>` that
+ * `c.html()` accepts. Function components widen their return type to include
+ * `null` (a component may render nothing); this collapses that to an empty
+ * string so call sites render cast-free. `HtmlEscapedString` is already a
+ * branded `string`, so no other coercion is needed.
+ */
+export function toHtml(
+  node: string | Promise<string> | null | undefined,
+): string | Promise<string> {
+  return node ?? "";
+}
+
 /** Escape HTML special characters. */
 export function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")

@@ -133,10 +133,7 @@ export class MilestoneRepository extends CachedMarkdownRepository<
 
   protected serialize(item: MilestoneBase): string {
     const fm = mapKeysToFm(
-      buildFrontmatter(
-        item as unknown as Record<string, unknown>,
-        MILESTONE_BODY_KEYS,
-      ),
+      buildFrontmatter(item, MILESTONE_BODY_KEYS),
     );
     // Preserve archive fields — custom serializers must round-trip these.
     if (item.archived) fm.archived = item.archived;

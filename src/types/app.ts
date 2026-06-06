@@ -29,8 +29,8 @@ export type ViewProps = {
 /** Typed Hono context with AppVariables. Use in route handlers. */
 export type AppContext = Context<{ Variables: AppVariables }>;
 
-// View mode for domain list pages — grid (card) or table.
-export type ViewMode = "grid" | "table";
+// View mode for domain list pages — grid (card), table, or canvas (free-form).
+export type ViewMode = "grid" | "table" | "canvas";
 
 /** Maps person name → person ID for linking people in views. */
 export type PersonByName = Record<string, string>;

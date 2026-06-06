@@ -67,9 +67,9 @@ export async function collectMilestoneStats(
   const result = milestones.map((m) => ({
     id: m.id,
     name: m.name,
-    taskCount: (m as unknown as { taskCount?: number }).taskCount ?? 0,
-    doneCount: (m as unknown as { doneCount?: number }).doneCount ?? 0,
-    progress: (m as unknown as { progress?: number }).progress ?? 0,
+    taskCount: m.taskCount,
+    doneCount: m.completedCount,
+    progress: m.progress,
   }));
   return { total: milestones.length, milestones: result };
 }

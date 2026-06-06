@@ -10,6 +10,7 @@ import {
   readGlobalProjects,
 } from "../utils/ui-state.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
+import { toHtml } from "../utils/html.ts";
 import { viewProps } from "../middleware/view-props.ts";
 import type { AppContext, AppVariables, ViewMode } from "../types/app.ts";
 import {
@@ -405,18 +406,20 @@ export function createDomainRoutes<T extends Entity, C, U>(
       : undefined;
     const topSlotContent = cfg.topSlot ? await cfg.topSlot(c) : undefined;
     return c.html(
-      await DomainPage({
-        ...viewProps(c, cfg.path),
-        items,
-        totalCount: all.length,
-        filteredCount: filtered.length,
-        hasMore,
-        nextOffset,
-        state,
-        dynamicFilterOptions,
-        customContent,
-        topSlotContent,
-      }) as unknown as string,
+      toHtml(
+        await DomainPage({
+          ...viewProps(c, cfg.path),
+          items,
+          totalCount: all.length,
+          filteredCount: filtered.length,
+          hasMore,
+          nextOffset,
+          state,
+          dynamicFilterOptions,
+          customContent,
+          topSlotContent,
+        }),
+      ),
     );
   });
 
@@ -444,7 +447,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
       )
       : undefined;
     return c.html(
-      DomainViewContainer({
+      toHtml(DomainViewContainer({
         items,
         totalCount: all.length,
         filteredCount: filtered.length,
@@ -453,7 +456,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
         state,
         fragment: true,
         customContent,
-      }) as unknown as string,
+      })),
       200,
       { "HX-Replace-Url": buildCanonicalUrl(state) },
     );
@@ -486,13 +489,13 @@ export function createDomainRoutes<T extends Entity, C, U>(
       const view = state.view === "table" ? "table" : "grid";
 
       return c.html(
-        MoreFragment({
+        toHtml(MoreFragment({
           items: slice,
           state,
           hasMore,
           nextOffset,
           view,
-        }) as unknown as string,
+        })),
       );
     });
   }
@@ -507,7 +510,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const query = c.req.query();
     const prefillValues = Object.keys(query).length > 0 ? query : undefined;
     return c.html(
-      DomainForm({ dynamicOptions, prefillValues }) as unknown as string,
+      toHtml(DomainForm({ dynamicOptions, prefillValues })),
     );
   });
 
@@ -556,12 +559,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const arrayDisplayValues = await cfg.resolveArrayDisplayValues?.(item);
     const dynamicOptions = await cfg.extractFormOptions?.();
     return c.html(
-      DomainForm({
+      toHtml(DomainForm({
         item,
         displayValues,
         arrayDisplayValues,
         dynamicOptions,
-      }) as unknown as string,
+      })),
     );
   });
 
@@ -695,10 +698,10 @@ export function createDomainRoutes<T extends Entity, C, U>(
       const item = await cfg.getService().getById(id);
       if (!item) return c.notFound();
       return c.html(
-        cfg.DetailView!({
+        toHtml(cfg.DetailView!({
           ...viewProps(c, cfg.path),
           item,
-        }) as unknown as string,
+        })),
       );
     });
   }

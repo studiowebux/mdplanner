@@ -17,12 +17,10 @@ import { PEOPLE_TABLE_COLUMNS, personToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 
 /** Convert array-table rows [{ key, value }] to Record<string, string>. */
-function accountsFromRows(
-  rows: { key?: string; value?: string }[] | null | undefined,
-): Record<string, string> | undefined {
+function accountsFromRows(rows: unknown): Record<string, string> | undefined {
   if (!Array.isArray(rows) || rows.length === 0) return undefined;
   const acc: Record<string, string> = {};
-  for (const row of rows) {
+  for (const row of rows as { key?: string; value?: string }[]) {
     // First occurrence wins — duplicates silently dropped (client blocks them too).
     if (row.key && row.value && !acc[row.key]) acc[row.key] = row.value;
   }
@@ -138,9 +136,7 @@ export const peopleConfig: DomainConfig<
 
   parseCreate: (body) => {
     const parsed = parseFormBody(PEOPLE_FORM_FIELDS, body) as CreatePerson;
-    parsed.accounts = accountsFromRows(
-      parsed.accounts as unknown as { key?: string; value?: string }[],
-    );
+    parsed.accounts = accountsFromRows(parsed.accounts);
     return parsed;
   },
 
@@ -149,9 +145,7 @@ export const peopleConfig: DomainConfig<
       clearEmpty: true,
     }) as Partial<UpdatePerson>;
     if (parsed.accounts !== undefined) {
-      parsed.accounts = accountsFromRows(
-        parsed.accounts as unknown as { key?: string; value?: string }[],
-      );
+      parsed.accounts = accountsFromRows(parsed.accounts);
     }
     return parsed;
   },

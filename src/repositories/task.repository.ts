@@ -242,10 +242,7 @@ export class TaskRepository {
     }
 
     const fm = mapKeysToFm(
-      buildFrontmatter(
-        updated as unknown as Record<string, unknown>,
-        TASK_BODY_KEYS,
-      ),
+      buildFrontmatter(updated, TASK_BODY_KEYS),
     );
     const body = this.toBody(updated);
     await this.writer.write(
@@ -417,10 +414,7 @@ export class TaskRepository {
     const sectionPath = join(this.boardDir, dir);
     await Deno.mkdir(sectionPath, { recursive: true });
     const fm = mapKeysToFm(
-      buildFrontmatter(
-        task as unknown as Record<string, unknown>,
-        TASK_BODY_KEYS,
-      ),
+      buildFrontmatter(task, TASK_BODY_KEYS),
     );
     const body = this.toBody(task);
     const filePath = join(sectionPath, `${task.id}.md`);

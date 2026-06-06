@@ -23,6 +23,7 @@ import {
 } from "../task-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { toHtml } from "../../utils/html.ts";
 import { deleteUiStateKeys } from "../../utils/ui-state.ts";
 import type { Task } from "../../types/task.types.ts";
 
@@ -74,7 +75,7 @@ tasksRouter.get("/prefill-new", (c) => {
   const prefillValues: Record<string, string> = {};
   if (title) prefillValues.title = title;
   if (description) prefillValues.description = description;
-  return c.html(TaskForm({ prefillValues }) as unknown as string);
+  return c.html(toHtml(TaskForm({ prefillValues })));
 });
 
 // ---------------------------------------------------------------------------

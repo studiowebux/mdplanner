@@ -30,7 +30,7 @@ export const stickyNoteConfig: DomainConfig<
   styles: ["/css/views/sticky-notes.css"],
   scripts: ["/js/sticky-note-canvas.js"],
   emptyMessage: "No sticky notes yet. Double-click the canvas to add one.",
-  defaultView: "canvas" as unknown as ViewMode,
+  defaultView: "canvas",
 
   stateKeys: ["view", "color", "q"],
   columns: STICKY_NOTE_TABLE_COLUMNS,
