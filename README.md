@@ -4,17 +4,15 @@
 
 # MD Planner
 
-> **⚠️ Heavy work in progress.**
+> **⚠️ Very early work in progress.**
 >
-> The `main` branch currently ships **v1** — a working but older architecture.
-> **v2** is a full rewrite (Hono JSX SSR, clean domain architecture, single SSE
-> bus) that has been developed in parallel *using v1 itself* as the project
-> management tool. Yes, we dogfooded a broken thing for months to build the new
-> thing — and it worked surprisingly well.
->
-> Once v2 is merged it will **still be WIP**. Core features work, but rough
-> edges remain. Screenshots and demo videos will follow once the dust settles.
-> If you're trying it now, run from source and expect sharp corners.
+> MD Planner is at **v0.39.x** and under heavy active development (Hono JSX SSR,
+> clean domain architecture, single SSE bus). It has been built while using it
+> to manage its own development. Core features work, but rough edges remain and
+> things may change without notice. Screenshots and demo videos will follow once
+> the dust settles. If you're trying it now, run from source and expect sharp
+> corners. Upgrading a project from **0.38 or earlier**? See
+> [Migrating older projects](#migrating-older-projects).
 
 Markdown-based project management with directory storage.
 
@@ -223,18 +221,18 @@ Open `http://localhost:8003`. The project directory contains one `.md` file per
 entity. Edit files directly, use the web UI, or mount via WebDAV — all three
 work.
 
-## Migrating from v1
+## Migrating older projects
 
-Projects created on v1 (≤ 0.38.x) need their markdown frontmatter normalized
-before v2 reads them (snake_case keys, stable ids, `{id}.md` filenames). Back
-up the project directory first, then:
+Projects created on **0.38 or earlier** need their markdown frontmatter
+normalized before 0.39 reads them (snake_case keys, stable ids, `{id}.md`
+filenames). Back up the project directory first, then:
 
 ```bash
 deno task migrate --dry-run ./my-project   # preview, writes nothing
 deno task migrate ./my-project             # apply (idempotent)
 ```
 
-Then audit what v2 reads vs. drops:
+Then audit what 0.39 reads vs. drops:
 
 ```bash
 deno run --allow-read --allow-write --allow-env \
@@ -244,8 +242,8 @@ deno run --allow-read --allow-write --allow-env \
 The script normalizes frontmatter/filenames only. **Directory renames**
 (`crm/contacts`→`contacts`, `canvas`→`sticky-notes`, …) and **field changes**
 (`people.department`→`departments`) are **not** automatic — see
-[Migrating v1 → v2](docs/02-guides/09-v1-to-v2-migration.md) for the full table
-and the safe Docker sequence.
+[the migration guide](docs/02-guides/09-v1-to-v2-migration.md) for the full
+table and the safe Docker sequence.
 
 ## Contributing
 
