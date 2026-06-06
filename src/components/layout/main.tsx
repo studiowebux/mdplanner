@@ -101,6 +101,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/vendor/htmx-2.0.8.min.js" />
         <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
         <script src="/js/vendor/idiomorph-ext-0.3.0.min.js" />
+        <script src="/js/select-morph-sync.js" />
         <script src="/js/vendor/sortablejs-1.15.6.min.js" />
         <script src="/js/sortable-init.js" />
         <script src="/js/theme-toggle.js" />

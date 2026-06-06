@@ -73,7 +73,7 @@ const TaskRow: FC<
                 name="assignee"
                 aria-label="Assign"
               >
-                <option value="">Unassigned</option>
+                <option value="" selected={!task.assignee}>Unassigned</option>
                 {peopleOptions.map((p) => (
                   <option
                     key={p.value}
