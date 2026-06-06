@@ -51,4 +51,9 @@ export class StickyNoteService extends BaseService<
   ): Promise<StickyNote | null> {
     return this.stickyNoteRepo.updateSize(id, size);
   }
+
+  /** Count of non-archived notes — avoids loading full notes for board cards. */
+  count(): Promise<number> {
+    return this.stickyNoteRepo.countActive();
+  }
 }

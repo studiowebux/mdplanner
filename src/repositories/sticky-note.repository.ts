@@ -13,6 +13,7 @@ import {
   STICKY_NOTE_TABLE,
 } from "../domains/sticky-note/cache.ts";
 import { STICKY_NOTE_BODY_KEYS } from "../domains/sticky-note/constants.ts";
+import { readMarkdownDir } from "../utils/repo-helpers.ts";
 
 export class StickyNoteRepository extends CachedMarkdownRepository<
   StickyNote,
@@ -47,6 +48,19 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
 
   async updateSize(id: string, size: UpdateSize): Promise<StickyNote | null> {
     return this.update(id, { size });
+  }
+
+  /**
+   * Count non-archived notes without building full entities or sorting.
+   * Same read + frontmatter-parse path and non-archived semantics as
+   * `findAll`, used by the board card grid which only needs `.length`.
+   */
+  async countActive(): Promise<number> {
+    const rows = await readMarkdownDir(
+      this.dir,
+      (_filename, fm) => (fm.archived === true ? null : true),
+    );
+    return rows.length;
   }
 
   protected fromCreateInput(

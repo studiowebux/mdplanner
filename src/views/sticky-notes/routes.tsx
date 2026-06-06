@@ -28,8 +28,8 @@ async function boardCardGrid() {
   const boards = await boardService.list();
   const boardsWithCounts = await Promise.all(
     boards.map(async (board) => {
-      const notes = await getStickyNoteServiceForBoard(board.id).list();
-      return { board, noteCount: notes.length };
+      const noteCount = await getStickyNoteServiceForBoard(board.id).count();
+      return { board, noteCount };
     }),
   );
 
