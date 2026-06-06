@@ -14,18 +14,24 @@
  *                    @ts-ignore / deno-lint-ignore density per KLOC.
  *   3. Debt        — TODO/FIXME/HACK/XXX markers, console.* bypassing the log
  *                    singleton, empty `catch {}` swallows.
- *   4. Complexity  — heuristic max nesting depth (indent) + longest function
- *                    (brace tracking) per file. HEURISTIC, not AST-accurate.
- *   5. Testing     — test-file count + test:source ratio.
- *   6. Docs        — exported symbols preceded by a doc comment; file headers.
- *   7. Lint/Format — (--deep only) deno lint --json + deno fmt --check counts.
+ *   4. Complexity  — cyclomatic (decision-point) count per function. Token
+ *                    heuristic (if/for/while/case/catch/&&/||/?:), not AST.
+ *   5. Duplication — % of meaningful lines inside a recurring N-line clone,
+ *                    via line-window hashing. Catches copy-paste, misses
+ *                    renamed/reordered clones.
+ *   6. Testing     — test-file count + test:source ratio.
+ *   7. Docs        — public-API exports preceded by a doc comment (scoped to
+ *                    CONFIG.docApiDirs); file headers.
+ *   8. Lint/Format — (--deep only) deno lint --json + deno fmt --check counts.
  *
  * The overall grade is a weighted blend of the available dimensions.
  *
- * LIMITATION (be honest): complexity + docs are line/regex heuristics, NOT a
- * type-aware AST walk. They approximate hotspots, they do not certify them. A
- * generated/minified file can skew them — such files are excluded (vendor/,
- * *.min.*). Lint/Format/Duplication are only computed with --deep (subprocess).
+ * LIMITATION (be honest): complexity, duplication, and docs are token/line
+ * heuristics, NOT a type-aware AST walk. Cyclomatic is a decision-token count;
+ * duplication is line-window hashing (catches copy-paste, misses renamed or
+ * reordered clones). They approximate hotspots, they do not certify them.
+ * Generated/minified files are excluded (vendor/, *.min.*). Lint/Format are
+ * only computed with --deep (subprocess).
  *
  * Usage:
  *   deno run --allow-read scripts/analyze.ts [root]
@@ -34,7 +40,7 @@
  *     --deep --json report.json [root]
  *
  * Flags:
- *   --deep            also run deno lint/fmt (+ jscpd if available). Needs --allow-run.
+ *   --deep            also run deno lint + fmt --check (subprocess). Needs --allow-run.
  *   --json <path>     write the full machine-readable report (needs --allow-write).
  *   --min-score <n>   exit non-zero if the overall score is below n (default 0).
  *   root              directory to analyze (default ./src). A sibling tests/
@@ -48,10 +54,11 @@ import { dirname, join } from "@std/path";
 // ---------------------------------------------------------------------------
 const CONFIG = {
   godFileLoc: 600, // a single source file over this many lines is a god-file
-  maxNesting: 5, // indentation depth (in 2-space steps) considered too deep
-  longFunctionLoc: 80, // a function body over this many lines is "long"
+  maxCyclomatic: 15, // McCabe-ish decision-point count over which a fn is flagged
   typeEscapePer1k: 2, // tolerated type-escape hatches per 1000 source lines
   minTestRatio: 0.25, // tests-LOC : source-LOC target ratio
+  dupWindow: 6, // consecutive meaningful lines that constitute a clone
+  maxDupPct: 5, // tolerated % of meaningful lines inside a clone
   // Documentation is measured over the PUBLIC-API surface only — the reusable
   // library layers where a doc comment earns its keep. Leaf/wiring layers
   // (views, domains config, type decls, route handlers) are excluded: a JSDoc
@@ -71,6 +78,7 @@ const CONFIG = {
     typeSafety: 2,
     debt: 1.5,
     complexity: 1.5,
+    duplication: 1.5,
     testing: 1.5,
     docs: 1,
     lintFormat: 2,
@@ -328,81 +336,158 @@ function analyzeDebt(files: FileInfo[]): Dimension {
 }
 
 // ---------------------------------------------------------------------------
-// Dimension 4 — Complexity (heuristic)
+// Dimension 4 — Complexity (cyclomatic / decision-point count)
 // ---------------------------------------------------------------------------
+// McCabe cyclomatic complexity ≈ 1 + number of decision points in a function.
+// We count if/for/while/case/catch + && + || + ternary ( ? ) per brace-tracked
+// function body. Token-based, not AST: `?.`/`?:` are excluded by requiring
+// whitespace around the ternary `?` (deno fmt guarantees it). Approximate but a
+// real signal, unlike raw indentation (which JSX inflates).
+const DECISION_RE = /\b(if|for|while|case|catch)\b|&&|\|\||\s\?\s/g;
+const FN_SIG_RE = /\b(function\b|=>\s*\{|\)\s*\{|\)\s*:\s*[\w<>,.\[\] ]+\{)/;
+
 function analyzeComplexity(files: FileInfo[]): Dimension {
   const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
-  const deepNest: Array<{ rel: string; depth: number; line: number }> = [];
-  const longFns: Array<{ rel: string; loc: number; line: number }> = [];
+  const complex: Array<{ rel: string; cc: number; loc: number; line: number }> =
+    [];
 
   for (const f of src) {
     const lines = f.text.split("\n");
-    // Max indentation depth (2-space steps), ignoring blank/comment lines.
-    let maxDepth = 0;
-    let maxDepthLine = 0;
     for (let i = 0; i < lines.length; i++) {
-      const l = lines[i];
-      if (
-        l.trim() === "" || l.trim().startsWith("*") || l.trim().startsWith("//")
-      ) {
-        continue;
-      }
-      const indent = l.length - l.trimStart().length;
-      const depth = Math.floor(indent / 2);
-      if (depth > maxDepth) {
-        maxDepth = depth;
-        maxDepthLine = i + 1;
-      }
-    }
-    if (maxDepth > CONFIG.maxNesting) {
-      deepNest.push({ rel: f.rel, depth: maxDepth, line: maxDepthLine });
-    }
-
-    // Longest function body via brace tracking from a function-ish signature.
-    const fnRe = /\b(function\b|=>\s*\{|\)\s*\{|\)\s*:\s*[\w<>,.\[\] ]+\{)/;
-    for (let i = 0; i < lines.length; i++) {
-      if (!fnRe.test(lines[i]) || !lines[i].includes("{")) continue;
+      if (!FN_SIG_RE.test(lines[i]) || !lines[i].includes("{")) continue;
       let depth = 0;
       let started = false;
       let bodyLoc = 0;
+      let cc = 1;
       for (let j = i; j < lines.length; j++) {
-        for (const ch of lines[j]) {
+        const line = lines[j];
+        for (const ch of line) {
           if (ch === "{") {
             depth++;
             started = true;
           } else if (ch === "}") depth--;
         }
-        if (started) bodyLoc++;
+        if (started) {
+          bodyLoc++;
+          const m = line.match(DECISION_RE);
+          if (m) cc += m.length;
+        }
         if (started && depth <= 0) break;
       }
-      if (bodyLoc > CONFIG.longFunctionLoc) {
-        longFns.push({ rel: f.rel, loc: bodyLoc, line: i + 1 });
+      if (cc > CONFIG.maxCyclomatic) {
+        complex.push({ rel: f.rel, cc, loc: bodyLoc, line: i + 1 });
       }
     }
   }
 
-  deepNest.sort((a, b) => b.depth - a.depth);
-  longFns.sort((a, b) => b.loc - a.loc);
-  const score = clamp(100 - deepNest.length * 2 - longFns.length * 2.5);
-  const findings = [
-    ...deepNest.slice(0, 6).map((d) =>
-      `deep nesting (${d.depth} levels): ${d.rel}:${d.line}`
-    ),
-    ...longFns.slice(0, 6).map((d) =>
-      `long function (~${d.loc} LOC): ${d.rel}:${d.line}`
-    ),
-  ];
+  complex.sort((a, b) => b.cc - a.cc);
+  // Penalize each over-threshold function, weighted by how far over it is.
+  const penalty = complex.reduce(
+    (n, c) => n + 2 + (c.cc - CONFIG.maxCyclomatic) * 0.6,
+    0,
+  );
+  const score = clamp(100 - penalty);
   return {
     name: "Complexity",
     score,
     grade: grade(score),
-    summary: `${deepNest.length} file(s) nest >${CONFIG.maxNesting} deep; ` +
-      `${longFns.length} function(s) >${CONFIG.longFunctionLoc} LOC. ` +
-      `(heuristic, not AST)`,
-    findings,
-    recommendations: deepNest.length + longFns.length === 0 ? [] : [
-      "Extract guard clauses / helpers to flatten nesting and split long " +
-      "functions. Heuristic — confirm hotspots by reading the file.",
+    summary:
+      `${complex.length} function(s) over cyclomatic ${CONFIG.maxCyclomatic} ` +
+      `(decision-point count; heuristic, not AST).` +
+      (complex.length
+        ? ` Worst: ${complex[0].cc} at ${complex[0].rel}:${complex[0].line}.`
+        : ""),
+    findings: complex.slice(0, 8).map((c) =>
+      `cyclomatic ${c.cc} (~${c.loc} LOC): ${c.rel}:${c.line}`
+    ),
+    recommendations: complex.length === 0 ? [] : [
+      "Split high-cyclomatic functions: extract branch groups into helpers, " +
+      "replace long condition/switch chains with lookup tables + early returns.",
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Dimension 5 — Duplication (line-window clone detection)
+// ---------------------------------------------------------------------------
+// Slide a window of `dupWindow` *meaningful* lines (blank / punctuation-only /
+// import / comment lines dropped) over every source file, hash each window, and
+// flag windows whose content recurs at ≥2 positions. Reports the % of
+// meaningful lines inside a clone + the top hotspots. Line-based, not token-AST:
+// it catches copy-paste, misses renamed/reordered clones — documented like the
+// other heuristics.
+function analyzeDuplication(files: FileInfo[]): Dimension {
+  const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
+  const W = CONFIG.dupWindow;
+  const trivial = (s: string) =>
+    s === "" || /^[{}()[\];,.]+$/.test(s) ||
+    s.startsWith("//") || s.startsWith("*") || s.startsWith("/*") ||
+    /^(import|export)\b/.test(s);
+
+  type PerFile = {
+    rel: string;
+    entries: { line: number; norm: string }[];
+    hashes: string[];
+  };
+  const perFile: PerFile[] = [];
+  const hashLocs = new Map<string, Array<{ rel: string; line: number }>>();
+  let totalMeaningful = 0;
+
+  for (const f of src) {
+    const lines = f.text.split("\n");
+    const entries: { line: number; norm: string }[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      const norm = lines[i].trim().replace(/\s+/g, " ");
+      if (trivial(norm)) continue;
+      entries.push({ line: i + 1, norm });
+    }
+    totalMeaningful += entries.length;
+    const hashes: string[] = [];
+    for (let i = 0; i + W <= entries.length; i++) {
+      const hash = entries.slice(i, i + W).map((e) => e.norm).join("\n");
+      hashes.push(hash);
+      const arr = hashLocs.get(hash) ?? [];
+      arr.push({ rel: f.rel, line: entries[i].line });
+      hashLocs.set(hash, arr);
+    }
+    perFile.push({ rel: f.rel, entries, hashes });
+  }
+
+  // Mark meaningful-line indices covered by any clone window (hash seen ≥2×).
+  let dupLines = 0;
+  for (const pf of perFile) {
+    const covered = new Array(pf.entries.length).fill(false);
+    for (let i = 0; i < pf.hashes.length; i++) {
+      if ((hashLocs.get(pf.hashes[i]) ?? []).length < 2) continue;
+      for (let k = 0; k < W; k++) covered[i + k] = true;
+    }
+    dupLines += covered.filter(Boolean).length;
+  }
+
+  // Top clone hotspots by occurrence count (distinct content blocks).
+  const hotspots = [...hashLocs.entries()]
+    .filter(([, locs]) => locs.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 6);
+
+  const dupPct = totalMeaningful === 0 ? 0 : (dupLines / totalMeaningful) * 100;
+  const score = clamp(
+    100 - Math.max(0, dupPct - CONFIG.maxDupPct) * 9 - dupPct,
+  );
+  return {
+    name: "Duplication",
+    score,
+    grade: grade(score),
+    summary: `${dupPct.toFixed(1)}% of meaningful lines inside a ${W}-line ` +
+      `clone (target ≤${CONFIG.maxDupPct}%); ${hotspots.length} hotspot(s).`,
+    findings: hotspots.map(([, locs]) =>
+      `×${locs.length}: ${locs[0].rel}:${locs[0].line} ↔ ${locs[1].rel}:${
+        locs[1].line
+      }`
+    ),
+    recommendations: dupPct <= CONFIG.maxDupPct ? [] : [
+      "Extract the recurring blocks into a shared helper/component. " +
+      "Parse/format logic belongs in utils/, not copy-pasted per module.",
     ],
   };
 }
@@ -656,6 +741,7 @@ async function main(): Promise<void> {
     analyzeTypeSafety(files),
     analyzeDebt(files),
     analyzeComplexity(files),
+    analyzeDuplication(files),
     analyzeTesting(files),
     analyzeDocs(files),
   ];
