@@ -30,7 +30,7 @@ export const c4Config: DomainConfig<
   path: "/c4",
   ssePrefix: "c4",
   styles: ["/css/views/c4.css"],
-  scripts: ["/js/c4-canvas.js"],
+  scripts: ["/js/c4-layout.js", "/js/c4-canvas.js"],
   emptyMessage: "No C4 components yet. Switch to edit mode to add components.",
   defaultView: "canvas",
 
