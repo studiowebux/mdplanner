@@ -248,9 +248,12 @@ export const FrontmatterProjectSchema = z.object({
         ? (fm.tags as unknown[]).map(String)
         : undefined,
       links: Array.isArray(fm.links)
-        ? (fm.links as Record<string, unknown>[]).filter(
-          (l) => typeof l.url === "string" && typeof l.title === "string",
-        ) as ProjectLink[]
+        ? (fm.links as unknown[]).filter(
+          (l): l is ProjectLink =>
+            typeof l === "object" && l !== null &&
+            typeof (l as Record<string, unknown>).url === "string" &&
+            typeof (l as Record<string, unknown>).title === "string",
+        )
         : undefined,
       features: Array.isArray(fm.features)
         ? (fm.features as unknown[]).map(String)
