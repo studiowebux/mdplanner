@@ -51,7 +51,7 @@ jobs:
         run: deno lint
 
       - name: Type check
-        run: deno check v2/bin.ts
+        run: deno check src/bin.ts
 
       - name: Test
         run: deno task test

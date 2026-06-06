@@ -40,7 +40,7 @@ jobs:
         run: deno lint
 
       - name: Type check
-        run: deno check main.ts
+        run: deno check src/bin.ts
 
       - name: Test
         run: deno task test
