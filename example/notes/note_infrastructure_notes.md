@@ -4,7 +4,7 @@ created_at: "2025-12-15T09:00:00Z"
 updated_at: "2026-03-01T11:00:00Z"
 revision: 3
 mode: simple
-project: Infrastructure
+project: Internal Tools
 tags: [mdplanner/notes]
 ---
 

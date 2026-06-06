@@ -4,7 +4,7 @@ created_at: "2026-04-06T08:00:00Z"
 updated_at: "2026-04-06T08:30:00Z"
 revision: 1
 mode: simple
-project: MDPlanner
+project: MD Planner
 tags: [mdplanner/notes]
 ---
 
