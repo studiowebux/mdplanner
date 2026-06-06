@@ -203,24 +203,26 @@ export abstract class BaseMarkdownRepository<
   }
 
   async update(id: string, data: U): Promise<T | null> {
-    const resolved = await this.resolveFile(id);
-    if (!resolved) return null;
+    // Resolve + write inside the per-id lock so a concurrent hardDelete cannot
+    // remove the file between our read and our write (which would resurrect the
+    // deleted entity from this stale snapshot). Mirrors hardDelete/archive.
+    return this.writer.write(id, async () => {
+      const resolved = await this.resolveFile(id);
+      if (!resolved) return null;
 
-    const updated = mergeFields(
-      { ...resolved.item },
-      data as Record<string, unknown>,
-    );
-    (updated as Record<string, unknown>).updatedAt = new Date().toISOString();
+      const updated = mergeFields(
+        { ...resolved.item },
+        data as Record<string, unknown>,
+      );
+      (updated as Record<string, unknown>).updatedAt = new Date().toISOString();
 
-    // Write back to the file's existing path — never force-rename to <id>.md.
-    // v1 slug-named files (e.g. `dev-agency.md` with fm id `customer_agency`)
-    // must keep their filename so external references stay valid.
-    await this.writer.write(
-      id,
-      () => atomicWrite(resolved.filePath, this.serialize(updated)),
-    );
+      // Write back to the file's existing path — never force-rename to <id>.md.
+      // v1 slug-named files (e.g. `dev-agency.md` with fm id `customer_agency`)
+      // must keep their filename so external references stay valid.
+      await atomicWrite(resolved.filePath, this.serialize(updated));
 
-    return updated;
+      return updated;
+    });
   }
 
   /**

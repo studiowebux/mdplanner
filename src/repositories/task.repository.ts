@@ -212,58 +212,59 @@ export class TaskRepository {
   }
 
   async update(id: string, data: UpdateTask): Promise<Task | null> {
-    const { file, task } = await this.findFileById(id);
-    if (!file || !task) return null;
+    // Resolve + write inside the per-id lock so a concurrent hardDelete cannot
+    // remove the file between our read and our write (which would resurrect the
+    // deleted task — possibly at a new section path on a section move). Mirrors
+    // hardDelete, which already resolves inside its own writer.write.
+    return this.writer.write(id, async () => {
+      const { file, task } = await this.findFileById(id);
+      if (!file || !task) return null;
 
-    const now = new Date().toISOString();
+      const now = new Date().toISOString();
 
-    // Extract special-case fields before generic merge
-    const { completed, section, ...simpleFields } = data;
+      // Extract special-case fields before generic merge
+      const { completed, section, ...simpleFields } = data;
 
-    const updated: Task = mergeFields(
-      { ...task, updatedAt: now, revision: (task.revision ?? 1) + 1 },
-      simpleFields as Record<string, unknown>,
-    );
+      const updated: Task = mergeFields(
+        { ...task, updatedAt: now, revision: (task.revision ?? 1) + 1 },
+        simpleFields as Record<string, unknown>,
+      );
 
-    // Special case: completed triggers completedAt
-    if (completed !== undefined) {
-      updated.completed = completed;
-      if (completed && !task.completed) {
-        updated.completedAt = now;
-      } else if (!completed) {
-        updated.completedAt = undefined;
-      }
-    }
-
-    // Special case: section change triggers file move
-    let targetFile = file;
-    if (section !== undefined && section !== task.section) {
-      updated.section = section;
-      const newDir = sectionToDir(section);
-      const newSectionPath = join(this.boardDir, newDir);
-      await Deno.mkdir(newSectionPath, { recursive: true });
-      targetFile = join(newSectionPath, `${id}.md`);
-    }
-
-    const fm = mapKeysToFm(
-      buildFrontmatter(updated, TASK_BODY_KEYS),
-    );
-    const body = this.toBody(updated);
-    await this.writer.write(
-      id,
-      async () => {
-        await atomicWrite(targetFile, serializeFrontmatter(fm, body));
-        if (targetFile !== file) {
-          try {
-            await Deno.remove(file);
-          } catch (err) {
-            if (!(err instanceof Deno.errors.NotFound)) throw err;
-          }
+      // Special case: completed triggers completedAt
+      if (completed !== undefined) {
+        updated.completed = completed;
+        if (completed && !task.completed) {
+          updated.completedAt = now;
+        } else if (!completed) {
+          updated.completedAt = undefined;
         }
-      },
-    );
+      }
 
-    return updated;
+      // Special case: section change triggers file move
+      let targetFile = file;
+      if (section !== undefined && section !== task.section) {
+        updated.section = section;
+        const newDir = sectionToDir(section);
+        const newSectionPath = join(this.boardDir, newDir);
+        await Deno.mkdir(newSectionPath, { recursive: true });
+        targetFile = join(newSectionPath, `${id}.md`);
+      }
+
+      const fm = mapKeysToFm(
+        buildFrontmatter(updated, TASK_BODY_KEYS),
+      );
+      const body = this.toBody(updated);
+      await atomicWrite(targetFile, serializeFrontmatter(fm, body));
+      if (targetFile !== file) {
+        try {
+          await Deno.remove(file);
+        } catch (err) {
+          if (!(err instanceof Deno.errors.NotFound)) throw err;
+        }
+      }
+
+      return updated;
+    });
   }
 
   /** Default delete = soft delete (archive). Hard removal requires an
