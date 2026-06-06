@@ -11,6 +11,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { DEAL_TABLE, rowToDeal } from "../domains/deal/cache.ts";
 import { DEAL_BODY_KEYS } from "../domains/deal/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class DealRepository extends CachedMarkdownRepository<
   Deal,
   CreateDeal,
@@ -41,8 +45,7 @@ export class DealRepository extends CachedMarkdownRepository<
       id,
       stage: data.stage ?? "lead",
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -52,7 +55,7 @@ export class DealRepository extends CachedMarkdownRepository<
     body: string,
   ): Deal | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const stageRaw = fm.stage != null ? String(fm.stage) : undefined;
     const stage: DealStage =

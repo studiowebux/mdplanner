@@ -14,6 +14,10 @@ import {
 } from "../domains/brainstorm/cache.ts";
 import { BRAINSTORM_BODY_KEYS } from "../domains/brainstorm/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class BrainstormRepository extends CachedMarkdownRepository<
   Brainstorm,
   CreateBrainstorm,
@@ -45,8 +49,7 @@ export class BrainstormRepository extends CachedMarkdownRepository<
       ...data,
       id,
       questions: data.questions ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -56,7 +59,7 @@ export class BrainstormRepository extends CachedMarkdownRepository<
     body: string,
   ): Brainstorm | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

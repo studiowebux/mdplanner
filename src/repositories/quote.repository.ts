@@ -8,7 +8,11 @@ import type {
   QuoteRevision,
   UpdateQuote,
 } from "../types/quote.types.ts";
-import { mapArrayFromFm } from "../utils/frontmatter-mapper.ts";
+import {
+  mapArrayFromFm,
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 import { parseBillingBody, parseLineItems } from "../utils/billing-parse.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
@@ -49,8 +53,7 @@ export class QuoteRepository extends CachedMarkdownRepository<
       subtotal: 0,
       total: 0,
       revision: 1,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -60,7 +63,7 @@ export class QuoteRepository extends CachedMarkdownRepository<
     body: string,
   ): Quote | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const { title, notes } = parseBillingBody(fm.title, body);
     const lineItems = parseLineItems(fm.lineItems);

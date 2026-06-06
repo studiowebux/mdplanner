@@ -10,7 +10,12 @@ import {
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
-import { mapKeysFromFm, mapKeysToFm } from "../utils/frontmatter-mapper.ts";
+import {
+  mapKeysFromFm,
+  mapKeysToFm,
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 import { TaskBuilder } from "../builders/task.builder.ts";
 import type { CreateTask, Task, UpdateTask } from "../types/task.types.ts";
 import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
@@ -180,8 +185,7 @@ export class TaskRepository {
     const fm = mapKeysToFm({
       id,
       completed: false,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
       revision: 1,
       ...buildFrontmatter(rest as Record<string, unknown>, []),
     });
@@ -198,8 +202,7 @@ export class TaskRepository {
       id,
       title,
       completed: false,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
       revision: 1,
       section: dirToSection(dir),
       ...rest,

@@ -12,6 +12,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { BRIEF_TABLE, rowToBrief } from "../domains/brief/cache.ts";
 import { BRIEF_BODY_KEYS } from "../domains/brief/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class BriefRepository extends CachedMarkdownRepository<
   Brief,
   CreateBrief,
@@ -40,8 +44,7 @@ export class BriefRepository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -55,7 +58,7 @@ export class BriefRepository extends CachedMarkdownRepository<
     // id/title live in the body (BRIEF_BODY_KEYS) once serialized — accept a
     // file whose title is only the body `# heading`, else it 404s post-save.
     if (!fm.id && !fm.title && !headingMatch) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const title = fm.title
       ? String(fm.title)

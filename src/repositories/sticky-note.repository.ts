@@ -15,6 +15,7 @@ import {
 import { STICKY_NOTE_BODY_KEYS } from "../domains/sticky-note/constants.ts";
 import { readMarkdownDir } from "../utils/repo-helpers.ts";
 
+import { stampAuditFields } from "../utils/frontmatter-mapper.ts";
 export class StickyNoteRepository extends CachedMarkdownRepository<
   StickyNote,
   CreateStickyNote,
@@ -74,8 +75,7 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
       color: data.color ?? "yellow",
       position: data.position ?? { x: 100, y: 100 },
       boardId: this.boardId,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 

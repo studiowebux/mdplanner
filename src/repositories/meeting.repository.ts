@@ -10,6 +10,10 @@ import type {
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { MEETING_TABLE, rowToMeeting } from "../domains/meeting/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 /** Frontmatter keys whose values live in the markdown body, not frontmatter. */
 const MEETING_BODY_KEYS = ["title", "notes"] as const;
 
@@ -46,8 +50,7 @@ export class MeetingRepository extends CachedMarkdownRepository<
       attendees: data.attendees ?? [],
       actions: data.actions ?? [],
       relatedMeetings: data.relatedMeetings ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -57,7 +60,7 @@ export class MeetingRepository extends CachedMarkdownRepository<
     body: string,
   ): Meeting | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     // Extract title from first H1; remainder is notes
     const lines = body.trim().split("\n");

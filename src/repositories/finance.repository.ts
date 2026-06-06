@@ -11,6 +11,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { FINANCE_TABLE, rowToFinance } from "../domains/finance/cache.ts";
 import { FINANCE_BODY_KEYS } from "../domains/finance/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class FinanceRepository extends CachedMarkdownRepository<
   Finance,
   CreateFinance,
@@ -40,8 +44,7 @@ export class FinanceRepository extends CachedMarkdownRepository<
       ...data,
       id,
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -51,7 +54,7 @@ export class FinanceRepository extends CachedMarkdownRepository<
     body: string,
   ): Finance | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const typeRaw = fm.type != null ? String(fm.type) : undefined;
     const type: FinanceType =

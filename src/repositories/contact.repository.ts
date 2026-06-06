@@ -10,6 +10,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { CONTACT_TABLE, rowToContact } from "../domains/contact/cache.ts";
 import { CONTACT_BODY_KEYS } from "../domains/contact/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 const CONTACT_TYPES: readonly ContactType[] = [
   "lead",
   "customer",
@@ -47,8 +51,7 @@ export class ContactRepository extends CachedMarkdownRepository<
       ...data,
       id,
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -58,7 +61,7 @@ export class ContactRepository extends CachedMarkdownRepository<
     body: string,
   ): Contact | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

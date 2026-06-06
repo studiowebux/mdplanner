@@ -12,6 +12,10 @@ import {
   STICKY_BOARD_TABLE,
 } from "../domains/sticky-note/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class StickyBoardRepository extends CachedMarkdownRepository<
   StickyBoard,
   CreateStickyBoard,
@@ -45,8 +49,7 @@ export class StickyBoardRepository extends CachedMarkdownRepository<
       title: data.title,
       description: data.description,
       projects: data.projects ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -56,7 +59,7 @@ export class StickyBoardRepository extends CachedMarkdownRepository<
     _body: string,
   ): StickyBoard | null {
     // Board files use sboard_ prefix — skip note files and subdirectory markers
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
     if (!id.startsWith("sboard")) return null;
     if (!fm.title) return null;
 

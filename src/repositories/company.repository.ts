@@ -11,6 +11,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { COMPANY_TABLE, rowToCompany } from "../domains/company/cache.ts";
 import { COMPANY_BODY_KEYS } from "../domains/company/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 const COMPANY_TYPES: readonly CompanyType[] = [
   "prospect",
   "customer",
@@ -56,8 +60,7 @@ export class CompanyRepository extends CachedMarkdownRepository<
       ...data,
       id,
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -67,7 +70,7 @@ export class CompanyRepository extends CachedMarkdownRepository<
     body: string,
   ): Company | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

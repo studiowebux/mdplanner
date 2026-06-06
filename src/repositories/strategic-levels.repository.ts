@@ -16,6 +16,10 @@ import {
   STRATEGIC_LEVELS_TABLE,
 } from "../domains/strategic-levels/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class StrategicLevelsRepository extends CachedMarkdownRepository<
   StrategicLevelsBuilder,
   CreateStrategicLevelsBuilder,
@@ -48,8 +52,7 @@ export class StrategicLevelsRepository extends CachedMarkdownRepository<
       id,
       date: data.date ?? new Date().toISOString().slice(0, 10),
       levels: data.levels ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -63,7 +66,7 @@ export class StrategicLevelsRepository extends CachedMarkdownRepository<
     body: string,
   ): StrategicLevelsBuilder | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let title = "Untitled Strategic Levels";

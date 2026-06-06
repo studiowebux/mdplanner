@@ -12,6 +12,10 @@ import {
 } from "../domains/billing-rate/cache.ts";
 import { BILLING_RATE_BODY_KEYS } from "../domains/billing-rate/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class BillingRateRepository extends CachedMarkdownRepository<
   BillingRate,
   CreateBillingRate,
@@ -42,8 +46,7 @@ export class BillingRateRepository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -53,7 +56,7 @@ export class BillingRateRepository extends CachedMarkdownRepository<
     body: string,
   ): BillingRate | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

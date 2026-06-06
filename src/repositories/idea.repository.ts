@@ -10,6 +10,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { IDEA_TABLE, rowToIdea } from "../domains/idea/cache.ts";
 import { IDEA_BODY_KEYS } from "../domains/idea/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class IdeaRepository extends CachedMarkdownRepository<
   Idea,
   CreateIdea,
@@ -112,8 +116,7 @@ export class IdeaRepository extends CachedMarkdownRepository<
       ...data,
       id,
       status: data.status ?? "new",
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -123,7 +126,7 @@ export class IdeaRepository extends CachedMarkdownRepository<
     body: string,
   ): Idea | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

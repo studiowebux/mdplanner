@@ -10,6 +10,7 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { DNS_TABLE, rowToDnsDomain } from "../domains/dns/cache.ts";
 import { DNS_BODY_KEYS } from "../domains/dns/constants.ts";
 
+import { stampAuditFields } from "../utils/frontmatter-mapper.ts";
 export class DnsRepository extends CachedMarkdownRepository<
   DnsDomain,
   CreateDnsDomain,
@@ -98,8 +99,7 @@ export class DnsRepository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 

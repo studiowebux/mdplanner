@@ -15,6 +15,10 @@ import {
 } from "../domains/retrospective/cache.ts";
 import { RETROSPECTIVE_BODY_KEYS } from "../domains/retrospective/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class RetrospectiveRepository extends CachedMarkdownRepository<
   Retrospective,
   CreateRetrospective,
@@ -50,8 +54,7 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
       stop: data.stop ?? [],
       start: data.start ?? [],
       participants: data.participants ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -70,7 +73,7 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
     // made every retrospective unreadable after its first update.
     if (!fm.id && !fm.title && !headingMatch) return null;
 
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
     const title = fm.title
       ? String(fm.title)
       : headingMatch

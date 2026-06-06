@@ -15,6 +15,10 @@ import {
 } from "../domains/lean-canvas/cache.ts";
 import { LEAN_CANVAS_BODY_KEYS } from "../domains/lean-canvas/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class LeanCanvasRepository extends CachedMarkdownRepository<
   LeanCanvas,
   CreateLeanCanvas,
@@ -61,8 +65,7 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
       completedSections: 0,
       sectionCount: 0,
       completionPct: 0,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -72,7 +75,7 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
     body: string,
   ): LeanCanvas | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

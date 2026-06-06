@@ -9,6 +9,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { PAYMENT_TABLE, rowToPayment } from "../domains/payment/cache.ts";
 import { PAYMENT_BODY_KEYS } from "../domains/payment/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class PaymentRepository extends CachedMarkdownRepository<
   Payment,
   CreatePayment,
@@ -37,8 +41,7 @@ export class PaymentRepository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -48,7 +51,7 @@ export class PaymentRepository extends CachedMarkdownRepository<
     body: string,
   ): Payment | null {
     if (!fm.id) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

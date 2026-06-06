@@ -12,6 +12,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { parseQuadrantMarkdown } from "../utils/quadrant-parse.ts";
 import { rowToSwot, SWOT_TABLE } from "../domains/swot/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class SwotRepository extends CachedMarkdownRepository<
   Swot,
   CreateSwot,
@@ -41,8 +45,7 @@ export class SwotRepository extends CachedMarkdownRepository<
       weaknesses: data.weaknesses ?? [],
       opportunities: data.opportunities ?? [],
       threats: data.threats ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -56,7 +59,7 @@ export class SwotRepository extends CachedMarkdownRepository<
     body: string,
   ): Swot | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const { title, quadrants, notes } = parseQuadrantMarkdown(
       body,

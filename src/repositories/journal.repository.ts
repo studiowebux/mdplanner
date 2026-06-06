@@ -10,6 +10,10 @@ import type {
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { JOURNAL_TABLE, rowToJournalEntry } from "../domains/journal/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class JournalRepository extends CachedMarkdownRepository<
   JournalEntry,
   CreateJournalEntry,
@@ -42,8 +46,7 @@ export class JournalRepository extends CachedMarkdownRepository<
       id,
       date: data.date,
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -53,7 +56,7 @@ export class JournalRepository extends CachedMarkdownRepository<
     body: string,
   ): JournalEntry | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const title = fm.title
       ? String(fm.title)

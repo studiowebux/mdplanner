@@ -5,6 +5,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { GOAL_TABLE, rowToGoal } from "../domains/goal/cache.ts";
 import { GOAL_BODY_KEYS } from "../domains/goal/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class GoalRepository extends CachedMarkdownRepository<
   Goal,
   CreateGoal,
@@ -35,8 +39,7 @@ export class GoalRepository extends CachedMarkdownRepository<
       startDate: data.startDate ?? "",
       endDate: data.endDate ?? "",
       status: data.status ?? "planning",
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -46,7 +49,7 @@ export class GoalRepository extends CachedMarkdownRepository<
     body: string,
   ): Goal | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

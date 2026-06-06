@@ -136,3 +136,38 @@ export function parseAuditFields(
   if (updatedBy != null) result.updatedBy = String(updatedBy);
   return result;
 }
+
+/**
+ * Derive an entity id from frontmatter, falling back to the filename stem.
+ *
+ * The canonical preamble of every repository `parse()`: a persisted `fm.id`
+ * wins, otherwise the filename without its `.md` extension. Use after the
+ * domain's identity guard:
+ *
+ *   const id = resolveEntityId(filename, fm);
+ *
+ * Replaces the line-for-line duplication that appeared in 39 repositories.
+ */
+export function resolveEntityId(
+  filename: string,
+  fm: Record<string, unknown>,
+): string {
+  return fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+}
+
+/**
+ * Stamp the audit timestamps for a freshly created entity — `createdAt` and
+ * `updatedAt` both take the creation instant. The write-side counterpart to
+ * `parseAuditFields` (read side); spread into the entity built by a
+ * repository's `fromCreateInput`:
+ *
+ *   return { ...data, id, ...stampAuditFields(now) };
+ *
+ * Replaces the `createdAt: now, updatedAt: now,` pair duplicated across 44
+ * repositories.
+ */
+export function stampAuditFields(
+  now: string,
+): { createdAt: string; updatedAt: string } {
+  return { createdAt: now, updatedAt: now };
+}

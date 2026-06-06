@@ -12,6 +12,10 @@ import {
   rowToEisenhower,
 } from "../domains/eisenhower/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class EisenhowerRepository extends CachedMarkdownRepository<
   Eisenhower,
   CreateEisenhower,
@@ -47,8 +51,7 @@ export class EisenhowerRepository extends CachedMarkdownRepository<
       notUrgentImportant: data.notUrgentImportant ?? [],
       urgentNotImportant: data.urgentNotImportant ?? [],
       notUrgentNotImportant: data.notUrgentNotImportant ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -62,7 +65,7 @@ export class EisenhowerRepository extends CachedMarkdownRepository<
     body: string,
   ): Eisenhower | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const headingMatch = body.match(/^#\s+(.+)$/m);
     const title = fm.title

@@ -10,6 +10,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { CUSTOMER_TABLE, rowToCustomer } from "../domains/customer/cache.ts";
 import { CUSTOMER_BODY_KEYS } from "../domains/customer/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class CustomerRepository extends CachedMarkdownRepository<
   Customer,
   CreateCustomer,
@@ -38,8 +42,7 @@ export class CustomerRepository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -49,7 +52,7 @@ export class CustomerRepository extends CachedMarkdownRepository<
     body: string,
   ): Customer | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

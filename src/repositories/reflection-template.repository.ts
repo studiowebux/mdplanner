@@ -13,6 +13,10 @@ import {
 } from "../domains/reflection-template/cache.ts";
 import { REFLECTION_TEMPLATE_BODY_KEYS } from "../domains/reflection-template/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class ReflectionTemplateRepository extends CachedMarkdownRepository<
   ReflectionTemplate,
   CreateReflectionTemplate,
@@ -45,8 +49,7 @@ export class ReflectionTemplateRepository extends CachedMarkdownRepository<
       id,
       name: data.name ?? "",
       prompts: data.prompts ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -56,7 +59,7 @@ export class ReflectionTemplateRepository extends CachedMarkdownRepository<
     body: string,
   ): ReflectionTemplate | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
     const name = fm.name ? String(fm.name) : "";
 
     return {

@@ -20,6 +20,10 @@ import {
   rowToCapacityPlan,
 } from "../domains/capacity-plan/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 const CAPACITY_PLAN_BODY_KEYS = [
   "title",
   "teamMembers",
@@ -58,8 +62,7 @@ export class CapacityPlanRepository extends CachedMarkdownRepository<
       id,
       teamMembers: data.teamMembers ?? [],
       allocations: data.allocations ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -69,7 +72,7 @@ export class CapacityPlanRepository extends CachedMarkdownRepository<
     body: string,
   ): CapacityPlan | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);

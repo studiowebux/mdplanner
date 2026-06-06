@@ -6,6 +6,10 @@ import type { CreateSafe, Safe, UpdateSafe } from "../types/safe.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { rowToSafe, SAFE_TABLE } from "../domains/safe/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class SafeRepository extends CachedMarkdownRepository<
   Safe,
   CreateSafe,
@@ -34,8 +38,7 @@ export class SafeRepository extends CachedMarkdownRepository<
       discount: data.discount ?? 0,
       type: data.type ?? "post-money",
       status: data.status ?? "draft",
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -49,7 +52,7 @@ export class SafeRepository extends CachedMarkdownRepository<
     _body: string,
   ): Safe | null {
     if (!fm.id && !fm.investor) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     return {
       id,

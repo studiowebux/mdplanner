@@ -14,6 +14,10 @@ import {
   rowToOnboardingTemplate,
 } from "../domains/onboarding-template/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 // No body fields — the markdown body is empty, every field lives in
 // frontmatter. id and name MUST stay in frontmatter: serializeStandard
 // excludes body keys from frontmatter, and name is not recoverable from the
@@ -54,8 +58,7 @@ export class OnboardingTemplateRepository extends CachedMarkdownRepository<
       id,
       name: data.name ?? "",
       steps: data.steps ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -65,7 +68,7 @@ export class OnboardingTemplateRepository extends CachedMarkdownRepository<
     _body: string,
   ): OnboardingTemplate | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     return {
       id,

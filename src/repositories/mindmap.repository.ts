@@ -12,6 +12,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { MINDMAP_TABLE, rowToMindmap } from "../domains/mindmap/cache.ts";
 import { log } from "../singletons/logger.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 const MINDMAP_BODY_KEYS = ["id", "title", "nodes"] as const;
 
 /**
@@ -49,8 +53,7 @@ export class MindmapRepository extends CachedMarkdownRepository<
       ...data,
       id,
       nodes: data.nodes ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -65,7 +68,7 @@ export class MindmapRepository extends CachedMarkdownRepository<
   ): Mindmap | null {
     const headingMatch = body.match(/^#\s+(.+)$/m);
     if (!fm.id && !fm.title && !headingMatch) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const title = fm.title
       ? String(fm.title)

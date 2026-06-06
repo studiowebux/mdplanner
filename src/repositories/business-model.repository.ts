@@ -15,6 +15,10 @@ import {
   rowToBusinessModel,
 } from "../domains/business-model/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 // Maps ## heading prefixes (lowercase) to section keys
 const SECTION_HEADER_MAP: Array<{
   prefixes: string[];
@@ -91,8 +95,7 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
       customerSegments: data.customerSegments ?? [],
       costStructure: data.costStructure ?? [],
       revenueStreams: data.revenueStreams ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -106,7 +109,7 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
     body: string,
   ): BusinessModel | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let title = fm.title ? String(fm.title) : "";

@@ -6,6 +6,10 @@ import type { CreateRisk, Risk, UpdateRisk } from "../types/risk.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { RISK_TABLE, rowToRisk } from "../domains/risk/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class RiskRepository extends CachedMarkdownRepository<
   Risk,
   CreateRisk,
@@ -35,8 +39,7 @@ export class RiskRepository extends CachedMarkdownRepository<
       impact: data.impact ?? 3,
       status: data.status ?? "open",
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -50,7 +53,7 @@ export class RiskRepository extends CachedMarkdownRepository<
     body: string,
   ): Risk | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let title = fm.title ? String(fm.title) : "";

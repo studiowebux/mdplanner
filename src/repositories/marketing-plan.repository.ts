@@ -15,6 +15,10 @@ import {
   rowToMarketingPlan,
 } from "../domains/marketing-plan/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 // ---------------------------------------------------------------------------
 // snake_case ↔ camelCase helpers for nested array fields in frontmatter
 // ---------------------------------------------------------------------------
@@ -85,8 +89,7 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
       ...data,
       id,
       status: data.status ?? "draft",
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -100,7 +103,7 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
     body: string,
   ): MarketingPlan | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     return {
       id,

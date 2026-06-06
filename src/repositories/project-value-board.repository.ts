@@ -15,6 +15,10 @@ import {
   rowToProjectValueBoard,
 } from "../domains/project-value-board/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 const SECTION_HEADER_MAP: Array<{
   prefixes: string[];
   key: ProjectValueBoardSectionKey;
@@ -78,8 +82,7 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
       problem: data.problem ?? [],
       solution: data.solution ?? [],
       benefit: data.benefit ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -93,7 +96,7 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
     body: string,
   ): ProjectValueBoard | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let title = fm.title ? String(fm.title) : "";

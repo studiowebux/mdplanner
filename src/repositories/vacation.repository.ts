@@ -7,6 +7,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { rowToVacation, VACATION_TABLE } from "../domains/vacation/cache.ts";
 import { VACATION_BODY_KEYS } from "../domains/vacation/constants.tsx";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class VacationRepository extends CachedMarkdownRepository<
   VacationRequest,
   CreateVacationRequest,
@@ -39,8 +43,7 @@ export class VacationRepository extends CachedMarkdownRepository<
       id,
       type: data.type ?? "vacation",
       status: data.status ?? "pending",
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -50,7 +53,7 @@ export class VacationRepository extends CachedMarkdownRepository<
     body: string,
   ): VacationRequest | null {
     if (!fm.id && !fm.personId) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
     return {
       id,
       personId: fm.personId ? String(fm.personId) : "",

@@ -12,6 +12,10 @@ import type {
 import { C4_TABLE, rowToC4 } from "../domains/c4/cache.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class C4Repository extends CachedMarkdownRepository<
   C4Component,
   CreateC4Component,
@@ -46,8 +50,7 @@ export class C4Repository extends CachedMarkdownRepository<
       position: data.position ?? { x: 0, y: 0 },
       connections: [],
       children: [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -61,7 +64,7 @@ export class C4Repository extends CachedMarkdownRepository<
     body: string,
   ): C4Component | null {
     if (!fm.id && !filename) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let name = "";

@@ -11,6 +11,10 @@ import type {
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { FISHBONE_TABLE, rowToFishbone } from "../domains/fishbone/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class FishboneRepository extends CachedMarkdownRepository<
   Fishbone,
   CreateFishbone,
@@ -42,8 +46,7 @@ export class FishboneRepository extends CachedMarkdownRepository<
       ...data,
       id,
       causes: data.causes ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -57,7 +60,7 @@ export class FishboneRepository extends CachedMarkdownRepository<
     body: string,
   ): Fishbone | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let title = fm.title ? String(fm.title) : "";

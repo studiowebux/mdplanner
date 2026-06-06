@@ -13,6 +13,10 @@ import {
   rowToReflection,
 } from "../domains/reflection/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class ReflectionRepository extends CachedMarkdownRepository<
   Reflection,
   CreateReflection,
@@ -46,8 +50,7 @@ export class ReflectionRepository extends CachedMarkdownRepository<
       period: data.period ?? "weekly",
       date: data.date,
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -57,7 +60,7 @@ export class ReflectionRepository extends CachedMarkdownRepository<
     body: string,
   ): Reflection | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     let title = fm.title ? String(fm.title) : "";
     const contentLines: string[] = [];

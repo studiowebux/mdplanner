@@ -10,7 +10,12 @@ import {
 import { generateId } from "../utils/id.ts";
 import { findFileById, mergeFields } from "../utils/repo-helpers.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { mapKeysToFm, parseAuditFields } from "../utils/frontmatter-mapper.ts";
+import {
+  mapKeysToFm,
+  parseAuditFields,
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 import { ciEquals } from "../utils/string.ts";
 import {
   parseEnhancedContent,
@@ -102,8 +107,7 @@ export class NoteRepository {
       ...data,
       id,
       content: data.content ?? "",
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
       revision: 1,
     };
 

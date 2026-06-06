@@ -10,6 +10,10 @@ import type {
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { INVESTOR_TABLE, rowToInvestor } from "../domains/investor/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class InvestorRepository extends CachedMarkdownRepository<
   Investor,
   CreateInvestor,
@@ -44,8 +48,7 @@ export class InvestorRepository extends CachedMarkdownRepository<
       stage: data.stage ?? "lead",
       status: data.status ?? "not_started",
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -59,7 +62,7 @@ export class InvestorRepository extends CachedMarkdownRepository<
     body: string,
   ): Investor | null {
     if (!fm.id && !fm.name) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const notes = body.trim() || undefined;
 

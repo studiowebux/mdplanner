@@ -17,6 +17,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { parseQuadrantMarkdown } from "../utils/quadrant-parse.ts";
 import { MOSCOW_TABLE, rowToMoscow } from "../domains/moscow/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class MoscowRepository extends CachedMarkdownRepository<
   Moscow,
   CreateMoscow,
@@ -50,8 +54,7 @@ export class MoscowRepository extends CachedMarkdownRepository<
       should: data.should ?? [],
       could: data.could ?? [],
       wont: data.wont ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -65,7 +68,7 @@ export class MoscowRepository extends CachedMarkdownRepository<
     body: string,
   ): Moscow | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const { title, quadrants, notes } = parseQuadrantMarkdown(
       body,

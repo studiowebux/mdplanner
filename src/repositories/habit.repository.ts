@@ -11,6 +11,10 @@ import type {
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { HABIT_TABLE, rowToHabit } from "../domains/habit/cache.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class HabitRepository extends CachedMarkdownRepository<
   Habit,
   CreateHabit,
@@ -39,8 +43,7 @@ export class HabitRepository extends CachedMarkdownRepository<
       targetPerPeriod: data.targetPerPeriod ?? 1,
       completedDates: data.completedDates ?? [],
       tags: data.tags ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -50,7 +53,7 @@ export class HabitRepository extends CachedMarkdownRepository<
     body: string,
   ): Habit | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const lines = body.split("\n");
     let title = fm.title ? String(fm.title) : fm.name ? String(fm.name) : "";

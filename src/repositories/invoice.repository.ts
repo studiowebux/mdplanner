@@ -10,6 +10,10 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { INVOICE_TABLE, rowToInvoice } from "../domains/invoice/cache.ts";
 import { INVOICE_BODY_KEYS } from "../domains/invoice/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class InvoiceRepository extends CachedMarkdownRepository<
   Invoice,
   CreateInvoice,
@@ -44,8 +48,7 @@ export class InvoiceRepository extends CachedMarkdownRepository<
       subtotal: 0,
       total: 0,
       paidAmount: 0,
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -55,7 +58,7 @@ export class InvoiceRepository extends CachedMarkdownRepository<
     body: string,
   ): Invoice | null {
     if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     const { title, notes } = parseBillingBody(fm.title, body);
     const lineItems = parseLineItems(fm.lineItems);

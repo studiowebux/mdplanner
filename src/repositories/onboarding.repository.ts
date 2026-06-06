@@ -14,6 +14,10 @@ import {
 } from "../domains/onboarding/cache.ts";
 import { ONBOARDING_BODY_KEYS } from "../domains/onboarding/constants.ts";
 
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 export class OnboardingRepository extends CachedMarkdownRepository<
   Onboarding,
   CreateOnboarding,
@@ -47,8 +51,7 @@ export class OnboardingRepository extends CachedMarkdownRepository<
       employeeName: data.employeeName ?? "",
       role: data.role ?? "",
       steps: data.steps ?? [],
-      createdAt: now,
-      updatedAt: now,
+      ...stampAuditFields(now),
     };
   }
 
@@ -58,7 +61,7 @@ export class OnboardingRepository extends CachedMarkdownRepository<
     body: string,
   ): Onboarding | null {
     if (!fm.id && !fm.employeeName) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+    const id = resolveEntityId(filename, fm);
 
     return {
       id,
