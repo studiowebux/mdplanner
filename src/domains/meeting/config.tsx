@@ -16,7 +16,7 @@ import {
 } from "./constants.tsx";
 import { MeetingCard } from "../../views/components/meeting-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
-import { buildActionPersonById } from "./owners.ts";
+import { attachAttendeeMaps, buildActionPersonById } from "./owners.ts";
 
 export const meetingConfig: DomainConfig<
   Meeting,
@@ -67,6 +67,11 @@ export const meetingConfig: DomainConfig<
     const projectNames = await extractProjectNames();
     return { project: projectNames };
   },
+
+  // Pre-resolve attendee IDs → Person once per request so the sync list card
+  // and table can link to /people/:id (meetings have no archived view).
+  listForRequest: async () =>
+    attachAttendeeMaps(await getMeetingService().list()),
 
   toRow: meetingToRow,
 

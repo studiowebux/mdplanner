@@ -1,10 +1,11 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
-import type { Meeting } from "../../types/meeting.types.ts";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
+import type { MeetingWithAttendees, ResolvedAttendee } from "./owners.ts";
+import { AttendeePills } from "../../views/components/meeting-attendee-pills.tsx";
 
 // ---------------------------------------------------------------------------
 // Action buttons
@@ -39,29 +40,9 @@ export const MEETING_TABLE_COLUMNS: ColumnDef[] = [
     render: (_v, row) => {
       const all = (row.attendees as string[]) ?? [];
       if (all.length === 0) return <span class="text-muted">—</span>;
-      const visible = all.slice(0, 3);
-      const hidden = all.slice(3);
-      return (
-        <span class="meeting-attendees-pills">
-          {visible.map((name) => (
-            <a
-              key={name}
-              href={`/people?q=${encodeURIComponent(name)}`}
-              class="badge badge--neutral"
-            >
-              {name}
-            </a>
-          ))}
-          {hidden.length > 0 && (
-            <span
-              class="badge badge--neutral meeting-attendees-overflow"
-              title={hidden.join(", ")}
-            >
-              +{hidden.length}
-            </span>
-          )}
-        </span>
-      );
+      const attendeeById =
+        (row.attendeeById as Record<string, ResolvedAttendee>) ?? {};
+      return <AttendeePills attendees={all} attendeeById={attendeeById} />;
     },
   },
   {
@@ -194,18 +175,13 @@ export const MEETING_FORM_FIELDS: FieldDef[] = [
 // Row mapper
 // ---------------------------------------------------------------------------
 
-export function meetingToRow(m: Meeting): Record<string, unknown> {
-  const attendees = m.attendees ?? [];
-  const attendeesDisplay = attendees.length > 3
-    ? `${attendees.slice(0, 3).join(", ")} +${attendees.length - 3}`
-    : attendees.join(", ");
-
+export function meetingToRow(m: MeetingWithAttendees): Record<string, unknown> {
   return {
     id: m.id,
     title: m.title,
     date: m.date,
-    attendeesDisplay,
-    attendees,
+    attendees: m.attendees ?? [],
+    attendeeById: m.attendeeById ?? {},
     actionCount: m.actions.length,
     openActions: m.actions.filter((a) => a.status === "open").length,
     createdAtDisplay: formatDate(m.createdAt),
