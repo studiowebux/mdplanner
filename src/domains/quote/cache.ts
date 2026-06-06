@@ -9,6 +9,7 @@ import {
   archiveVals,
   AUDIT_COLS_DDL,
   auditCols,
+  auditFieldsFromRow,
   auditVals,
   jsonVal,
   parseJson,
@@ -43,13 +44,10 @@ export function rowToQuote(row: Record<string, string | number | null>): Quote {
     footer: row.footer as string | undefined,
     revision: row.revision != null ? Number(row.revision) : undefined,
     convertedToInvoice: row.converted_to_invoice as string | undefined,
-    createdAt: (row.created_at as string) ?? new Date().toISOString(),
-    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     sentAt: row.sent_at as string | undefined,
     acceptedAt: row.accepted_at as string | undefined,
     ...archiveFieldsFromRow(row),
-    createdBy: row.created_by as string | undefined,
-    updatedBy: row.updated_by as string | undefined,
+    ...auditFieldsFromRow(row),
   };
 }
 

@@ -6,6 +6,7 @@ import {
   archiveVals,
   AUDIT_COLS_DDL,
   auditCols,
+  auditFieldsFromRow,
   auditVals,
   registerEntityCache,
   val,
@@ -28,10 +29,7 @@ export function rowToVacation(
     status: (row.status as VacationRequest["status"]) ?? "pending",
     notes: row.notes as string | undefined,
     ...archiveFieldsFromRow(row),
-    createdAt: (row.created_at as string) ?? new Date().toISOString(),
-    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
-    createdBy: row.created_by as string | undefined,
-    updatedBy: row.updated_by as string | undefined,
+    ...auditFieldsFromRow(row),
   };
 }
 

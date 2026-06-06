@@ -8,6 +8,7 @@ export {
   archiveVals,
   AUDIT_COLS_DDL,
   auditCols,
+  auditFieldsFromRow,
   auditVals,
   buildFtsDropSql,
   buildFtsSql,

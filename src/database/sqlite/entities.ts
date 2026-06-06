@@ -153,6 +153,28 @@ export function archiveFieldsFromRow(
 }
 
 /**
+ * Deserialize the four standard audit columns from a cache row. Spread into
+ * the object literal returned by a domain's `rowTo<X>` mapper, alongside
+ * `archiveFieldsFromRow`. Missing timestamps fall back to now; ids stay
+ * optional. The SQLite-row read-side sibling of `auditCols`/`auditVals`.
+ */
+export function auditFieldsFromRow(
+  row: Record<string, string | number | null>,
+): {
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
+} {
+  return {
+    createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+    createdBy: row.created_by as string | undefined,
+    updatedBy: row.updated_by as string | undefined,
+  };
+}
+
+/**
  * Idempotent ALTER TABLE statements for the three archive columns. Append
  * to a domain's `EntityDef.migrations` array — failures are swallowed so
  * pre-existing columns are a no-op.

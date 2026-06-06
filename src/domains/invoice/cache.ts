@@ -8,6 +8,7 @@ import {
   archiveMigrations,
   archiveVals,
   auditCols,
+  auditFieldsFromRow,
   auditVals,
   jsonVal,
   parseJson,
@@ -43,13 +44,10 @@ export function rowToInvoice(
     paidAmount: Number(row.paid_amount) || 0,
     notes: row.notes as string | undefined,
     footer: row.footer as string | undefined,
-    ...archiveFieldsFromRow(row),
-    createdAt: (row.created_at as string) ?? new Date().toISOString(),
-    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     sentAt: row.sent_at as string | undefined,
     paidAt: row.paid_at as string | undefined,
-    createdBy: row.created_by as string | undefined,
-    updatedBy: row.updated_by as string | undefined,
+    ...archiveFieldsFromRow(row),
+    ...auditFieldsFromRow(row),
   };
 }
 

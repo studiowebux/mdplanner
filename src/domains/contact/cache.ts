@@ -9,6 +9,7 @@ import {
   archiveVals,
   AUDIT_COLS_DDL,
   auditCols,
+  auditFieldsFromRow,
   auditVals,
   json,
   parseJson,
@@ -36,10 +37,7 @@ export function rowToContact(
     notes: row.notes as string | undefined,
     tags: parseJson<string[]>(row.tags) ?? [],
     ...archiveFieldsFromRow(row),
-    createdAt: (row.created_at as string) ?? new Date().toISOString(),
-    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
-    createdBy: row.created_by as string | undefined,
-    updatedBy: row.updated_by as string | undefined,
+    ...auditFieldsFromRow(row),
   };
 }
 
