@@ -620,6 +620,28 @@
       }
     },
     {
+      "name": "get_context_pack",
+      "description": "Single-call agent boot. Returns people, active milestone, in-progress tasks, top-10 todo tasks, most recent progress note excerpt, decision/architecture/constraint/feature/investigation note titles, a summary, and a suggested next action. Replaces 8+ sequential MCP calls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project name to scope all entities (e.g. 'MD Planner')"
+          },
+          "milestone": {
+            "type": "string",
+            "description": "Milestone name. Defaults to the most recently created open milestone."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "request_approval",
       "description": "Submit a task for human review. Call this instead of moving the task to Done. Attaches a structured summary (with optional commit hash) and moves the task to 'Pending Review'. At the next boot session the verdict will appear in inProgress tasks (if rejected) or the task will be in Done (if approved).",
       "inputSchema": {

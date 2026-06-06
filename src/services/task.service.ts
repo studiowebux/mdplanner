@@ -20,6 +20,12 @@ import { insertTaskRow } from "../domains/task/cache.ts";
 import { TASK_TABLE } from "../domains/task/constants.ts";
 import { generateId } from "../utils/id.ts";
 import { ciEquals } from "../utils/string.ts";
+import {
+  DONE_SECTION,
+  IN_PROGRESS_SECTION,
+  PENDING_REVIEW_SECTION,
+  TODO_SECTION,
+} from "../constants/mod.ts";
 
 // ---------------------------------------------------------------------------
 // Error types
@@ -190,7 +196,7 @@ export class TaskService {
       }
       if (
         agentId &&
-        current.section === "In Progress" &&
+        current.section === IN_PROGRESS_SECTION &&
         current.claimedBy &&
         current.claimedBy !== agentId
       ) {
@@ -241,7 +247,7 @@ export class TaskService {
   async claimTask(
     id: string,
     assignee: string,
-    expectedSection = "Todo",
+    expectedSection: string = TODO_SECTION,
   ): Promise<Task | null> {
     const task = await this.taskRepo.findById(id);
     if (!task) return null;
@@ -252,7 +258,7 @@ export class TaskService {
 
     const now = new Date().toISOString();
     const updated = await this.taskRepo.update(id, {
-      section: "In Progress",
+      section: IN_PROGRESS_SECTION,
       assignee,
       claimedBy: assignee,
       claimedAt: now,
@@ -326,7 +332,7 @@ export class TaskService {
     agentId: string,
     agentSkills?: string[],
   ): Promise<Task | null> {
-    const tasks = await this.list({ section: "Todo", ready: true });
+    const tasks = await this.list({ section: TODO_SECTION, ready: true });
     if (tasks.length === 0) return null;
 
     const sorted = [...tasks].sort((a, b) => {
@@ -441,7 +447,7 @@ export class TaskService {
     };
 
     const updated = await this.taskRepo.update(id, {
-      section: "Pending Review",
+      section: PENDING_REVIEW_SECTION,
       approvalRequest: approval,
     });
     if (updated) this.cacheUpsert(updated);
@@ -468,7 +474,7 @@ export class TaskService {
       : undefined;
 
     const updated = await this.taskRepo.update(id, {
-      section: "Done",
+      section: DONE_SECTION,
       completed: true,
       claimedBy: null,
       claimedAt: null,
@@ -500,7 +506,7 @@ export class TaskService {
       : undefined;
 
     const updated = await this.taskRepo.update(id, {
-      section: "In Progress",
+      section: IN_PROGRESS_SECTION,
       claimedBy: null,
       claimedAt: null,
       approvalRequest: approvalRequest ?? null,

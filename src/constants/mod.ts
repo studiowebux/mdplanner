@@ -36,8 +36,24 @@ export const WEEKDAYS = [
   "Sun",
 ] as const;
 
+// Canonical workflow section names. The board display ORDER is project-
+// configurable (SECTION_DISPLAY_ORDER / getSectionOrder), but the workflow
+// transitions (claim → In Progress, request approval → Pending Review,
+// approve → Done) key off these names. Single source so no module hardcodes
+// the literals.
+export const BACKLOG_SECTION = "Backlog" as const;
+export const TODO_SECTION = "Todo" as const;
+export const IN_PROGRESS_SECTION = "In Progress" as const;
+export const PENDING_REVIEW_SECTION = "Pending Review" as const;
 /** The section name that represents completed tasks. */
 export const DONE_SECTION = "Done" as const;
+
+// Context-pack assembler tunables (see services/context-pack.service.ts).
+export const CONTEXT_PACK_TODO_LIMIT = 10;
+export const CONTEXT_PACK_NEXT_MILESTONE_CANDIDATES = 10;
+export const CONTEXT_PACK_PROGRESS_EXCERPT_CHARS = 500;
+export const CONTEXT_PACK_DESCRIPTION_EXCERPT_CHARS = 300;
+export const CONTEXT_PACK_CHECKPOINT_EXCERPT_CHARS = 120;
 
 /** Default milestone status values — used when project has none configured. */
 export const DEFAULT_MILESTONE_STATUSES: string[] = ["open", "completed"];

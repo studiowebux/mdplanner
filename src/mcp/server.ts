@@ -33,6 +33,7 @@ import { registerNoteTools } from "./tools/notes.ts";
 import { registerPeopleTools } from "./tools/people.ts";
 import { registerPortfolioTools } from "./tools/portfolio.ts";
 import { registerTaskTools } from "./tools/tasks.ts";
+import { registerContextPackTools } from "./tools/context-pack.ts";
 import { registerStickyNoteTools } from "./tools/sticky-notes.ts";
 import { registerC4Tools } from "./tools/c4.ts";
 import { registerCapacityPlanTools } from "./tools/capacity-plans.ts";
@@ -87,6 +88,7 @@ export function createMcpServer(): McpServer {
   registerPeopleTools(server);
   registerPortfolioTools(server);
   registerTaskTools(server);
+  registerContextPackTools(server);
   registerStickyNoteTools(server);
   registerC4Tools(server);
   registerCapacityPlanTools(server);

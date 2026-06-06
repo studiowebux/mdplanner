@@ -17,6 +17,7 @@ import type {
   ReflectionStats,
 } from "../../types/analytics.types.ts";
 import { defaultScope, type UserScope } from "../../utils/actor.ts";
+import { noteType } from "../../utils/note-type.ts";
 import {
   dailySeries,
   inDateRange,
@@ -62,8 +63,7 @@ export async function collectNoteStats(
   const byType: Record<string, number> = {};
   const byProject: Record<string, number> = {};
   for (const n of notes) {
-    const titleMatch = n.title.match(/^\[([^\]]+)\]/);
-    const type = titleMatch ? titleMatch[1] : "note";
+    const type = noteType(n.title);
     byType[type] = (byType[type] ?? 0) + 1;
     const proj = n.project ?? "Unassigned";
     byProject[proj] = (byProject[proj] ?? 0) + 1;
