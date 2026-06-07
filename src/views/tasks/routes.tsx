@@ -6,10 +6,12 @@ import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
 import type { AppContext } from "../../types/app.ts";
 import {
   getGitHubService,
+  getPeopleService,
   getPortfolioService,
   getProjectDir,
   getTaskService,
 } from "../../singletons/services.ts";
+import { personLabel } from "../../utils/person-name-match.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import {
   TaskGitHubEmpty,
@@ -162,9 +164,17 @@ tasksRouter.post("/:id/assign", async (c) => {
   if ("response" in guard) return guard.response;
   await getTaskService().update(id, { assignee });
   publish("task.updated");
+  // assignee is a person ID — resolve to the name for the toast (falls back to
+  // the raw value for legacy free-text data).
+  const assigneeName = assignee
+    ? personLabel(assignee, await getPeopleService().list())
+    : "";
   c.header(
     "HX-Trigger",
-    hxTrigger("success", assignee ? `Assigned to ${assignee}` : "Unassigned"),
+    hxTrigger(
+      "success",
+      assignee ? `Assigned to ${assigneeName}` : "Unassigned",
+    ),
   );
   return renderDetailPage(c, id);
 });

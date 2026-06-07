@@ -39,6 +39,21 @@ export function resolvePersonByName(
 }
 
 /**
+ * Resolve a stored person field to its display label. Handles both id-backed
+ * fields (task.assignee, goal.owner, etc. store a person id) and legacy
+ * free-text names: returns the Person's `name` when `value` is a known id or a
+ * resolvable name, otherwise the raw value unchanged (never blank for non-empty
+ * input). The universal id→name display helper.
+ */
+export function personLabel(value: string, people: Person[]): string {
+  if (!value) return "";
+  const byId = people.find((p) => p.id === value);
+  if (byId) return byId.name;
+  const byName = resolvePersonByName(value, people);
+  return byName ? byName.name : value;
+}
+
+/**
  * Build a name → personId map for a set of source names against a Person list.
  * Names that resolve unambiguously become keyed entries; unresolved names are
  * omitted so callers can fall back to plain text rendering.
