@@ -1,31 +1,49 @@
-// Keep <select> controls in sync with their server-rendered selection after a
-// morph swap.
+// Keep <select> controls showing their server-rendered selection after an
+// idiomorph (morph:outerHTML) swap.
 //
-// idiomorph (morph:outerHTML, used by the SSE view refresh) updates the
-// `selected` ATTRIBUTE on <option> elements, but a <select> the user has
-// already interacted with keeps its old live value (the `.value` property does
-// not follow an attribute change once the control is "dirty"). Result: e.g. the
-// task-list assignee <select> snaps back to "Unassigned" right after assigning,
-// even though the morphed-in HTML marks the correct option selected.
+// idiomorph reconciles element attributes (incl. an option's `selected` and a
+// `data-*`) to match the server HTML, but it does NOT update a <select>'s live
+// `.value` property once the user has dirtied the control. So after the SSE view
+// refresh the task-list assignee select snaps back to "Unassigned" right after
+// assigning, even though the morphed-in HTML marks the correct option.
 //
-// After every htmx settle, force each <select> in the just-swapped subtree to
-// display its server-rendered [selected] option. Scoped to the swapped node so
-// open sidenav forms and unrelated controls are never touched. Only acts when
-// the server explicitly marked an option selected and the live value disagrees.
-(function () {
-  function syncSelect(sel) {
+// Fix: after every htmx content load/settle, force each <select>'s value back to
+// what the server rendered. We register on htmx.onLoad — the same hook
+// sortable-init uses, which re-runs over morph-reconciled subtrees (plain
+// htmx:afterSettle did not fire reliably for the SSE morph) — plus a settle and
+// DOMContentLoaded pass. The wanted value comes from an explicit
+// `data-selected-value` attribute when present (reliably reconciled by
+// idiomorph), falling back to the marked `option[selected]`.
+(function (root) {
+  "use strict";
+
+  function desiredValue(sel) {
+    if (sel.hasAttribute("data-selected-value")) {
+      return sel.getAttribute("data-selected-value");
+    }
     var marked = sel.querySelector("option[selected]");
-    if (marked && sel.value !== marked.value) sel.value = marked.value;
+    return marked ? marked.value : null;
   }
 
-  function syncWithin(root) {
-    if (!root || !root.querySelectorAll) return;
-    if (root.tagName === "SELECT") syncSelect(root);
-    var selects = root.querySelectorAll("select");
+  function syncSelect(sel) {
+    var want = desiredValue(sel);
+    if (want !== null && sel.value !== want) sel.value = want;
+  }
+
+  function syncWithin(el) {
+    if (!el || !el.querySelectorAll) return;
+    if (el.tagName === "SELECT") syncSelect(el);
+    var selects = el.querySelectorAll("select");
     for (var i = 0; i < selects.length; i++) syncSelect(selects[i]);
   }
 
+  if (root.htmx && typeof root.htmx.onLoad === "function") {
+    root.htmx.onLoad(syncWithin);
+  }
   document.addEventListener("htmx:afterSettle", function (e) {
     syncWithin(e.target);
   });
-})();
+  document.addEventListener("DOMContentLoaded", function () {
+    syncWithin(document);
+  });
+})(typeof window !== "undefined" ? window : this);
