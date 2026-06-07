@@ -12,6 +12,7 @@
 
 import type { Actor } from "../types/actor.ts";
 import type { AppContext } from "../types/app.ts";
+import type { Person } from "../types/person.types.ts";
 import { getPeopleService, getProjectService } from "../singletons/services.ts";
 
 const LEGACY_BUCKET = "_legacy";
@@ -27,6 +28,25 @@ export type UserScope = {
 /** Stable identifier for an actor: id when set, else name. */
 function actorUserId(actor: Actor): string {
   return actor.id ?? actor.name;
+}
+
+/**
+ * Resolve the "active" Person for preference / UI-state scoping: the actor's
+ * own record when identified, else the first human-type person. Mirrors the
+ * per-call-site resolveCurrentPerson copies it replaces (preferences routes +
+ * MCP tools). Distinct from getDefaultUserId, which resolves a stable string
+ * id for legacy per-user data ownership, not a Person record.
+ */
+export async function resolveActivePerson(
+  actorId?: string,
+): Promise<Person | null> {
+  const svc = getPeopleService();
+  if (actorId) {
+    const p = await svc.getById(actorId);
+    if (p) return p;
+  }
+  const all = await svc.list();
+  return all.find((p) => p.agentType === "human") ?? null;
 }
 
 /**

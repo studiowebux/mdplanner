@@ -5,18 +5,9 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getPeopleService } from "../../singletons/services.ts";
+import { resolveActivePerson } from "../../utils/actor.ts";
 import { PersonPreferencesSchema } from "../../types/person.types.ts";
 import { err, ok } from "../utils.ts";
-
-async function resolveCurrentPerson(personId?: string) {
-  const svc = getPeopleService();
-  if (personId) {
-    const p = await svc.getById(personId);
-    if (p) return p;
-  }
-  const all = await svc.list();
-  return all.find((p) => p.agentType === "human") ?? null;
-}
 
 export function registerPreferenceTools(server: McpServer): void {
   const svc = getPeopleService();
@@ -35,7 +26,7 @@ export function registerPreferenceTools(server: McpServer): void {
       },
     },
     async ({ personId }) => {
-      const person = await resolveCurrentPerson(personId);
+      const person = await resolveActivePerson(personId);
       if (!person) return err("No person found to resolve preferences for");
       return ok({ personId: person.id, preferences: person.preferences ?? {} });
     },
@@ -60,7 +51,7 @@ export function registerPreferenceTools(server: McpServer): void {
       },
     },
     async ({ personId, preferences }) => {
-      const person = await resolveCurrentPerson(personId);
+      const person = await resolveActivePerson(personId);
       if (!person) return err("No person found to update preferences for");
       const updated = await svc.updatePreferences(person.id, preferences);
       if (!updated) return err(`Person '${person.id}' not found after update`);

@@ -2,8 +2,9 @@
 // navCategories, and CSP header.
 
 import type { MiddlewareHandler } from "hono";
-import { getPeopleService, getProjectService } from "../singletons/services.ts";
+import { getProjectService } from "../singletons/services.ts";
 import { readUiState } from "../utils/ui-state.ts";
+import { resolveActivePerson } from "../utils/actor.ts";
 import { getCookieSecret } from "../utils/secrets.ts";
 import { resolveActor } from "./identity.ts";
 import type { AppVariables } from "../types/app.ts";
@@ -21,10 +22,8 @@ export const contextMiddleware: MiddlewareHandler<{
   const actor = await resolveActor(c, config.apiKeys ?? [], getCookieSecret());
   c.set("actor", actor);
 
-  if (actor.id) {
-    const person = await getPeopleService().getById(actor.id);
-    if (person) c.set("activePerson", person);
-  }
+  const person = await resolveActivePerson(actor.id);
+  if (person) c.set("activePerson", person);
 
   const sidebarState = readUiState<{ pinned?: string[] }>(c, "sidebar");
   c.set(

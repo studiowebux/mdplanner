@@ -6,8 +6,8 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppVariables } from "../../../types/app.ts";
 import { PersonPreferencesSchema } from "../../../types/person.types.ts";
 import { getPeopleService } from "../../../singletons/services.ts";
+import { resolveActivePerson } from "../../../utils/actor.ts";
 import { jsonContent, notFound } from "../../../types/api.ts";
-import type { Person } from "../../../types/person.types.ts";
 
 export const preferencesRouter = new OpenAPIHono<
   { Variables: AppVariables }
@@ -16,22 +16,6 @@ export const preferencesRouter = new OpenAPIHono<
 const PreferencesResponseSchema = z.object({
   preferences: PersonPreferencesSchema.unwrap(),
 }).openapi("PreferencesResponse");
-
-// ---------------------------------------------------------------------------
-// Resolve the current person from actor context, fallback to first human.
-// ---------------------------------------------------------------------------
-
-async function resolveCurrentPerson(
-  actorId: string | undefined,
-): Promise<Person | null> {
-  const svc = getPeopleService();
-  if (actorId) {
-    const p = await svc.getById(actorId);
-    if (p) return p;
-  }
-  const all = await svc.list();
-  return all.find((p) => p.agentType === "human") ?? null;
-}
 
 // ---------------------------------------------------------------------------
 // GET / — return current person's preferences
@@ -55,7 +39,7 @@ const getPreferencesRoute = createRoute({
 
 preferencesRouter.openapi(getPreferencesRoute, async (c) => {
   const actorId = c.var.actor?.id;
-  const person = await resolveCurrentPerson(actorId);
+  const person = await resolveActivePerson(actorId);
   if (!person) return c.json(notFound("Person", actorId ?? ""), 404);
   return c.json({ preferences: person.preferences ?? {} }, 200);
 });
@@ -91,7 +75,7 @@ const patchPreferencesRoute = createRoute({
 
 preferencesRouter.openapi(patchPreferencesRoute, async (c) => {
   const actorId = c.var.actor?.id;
-  const person = await resolveCurrentPerson(actorId);
+  const person = await resolveActivePerson(actorId);
   if (!person) return c.json(notFound("Person", actorId ?? ""), 404);
 
   const patch = c.req.valid("json");
