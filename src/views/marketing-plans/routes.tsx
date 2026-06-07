@@ -9,6 +9,7 @@ import { marketingPlanConfig } from "../../domains/marketing-plan/config.tsx";
 import {
   getGoalService,
   getMarketingPlanService,
+  getPeopleService,
 } from "../../singletons/services.ts";
 import { MarketingPlanDetailView } from "../marketing-plan-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
@@ -32,6 +33,12 @@ async function renderDetail(c: AppContext, id: string) {
     }
   }
 
+  // plan.responsible is id-backed (source:"people") — map id→name for display.
+  const personById: Record<string, string> = {};
+  if (plan.responsible) {
+    for (const p of await getPeopleService().list()) personById[p.id] = p.name;
+  }
+
   const editing = c.req.query("editing") === "true";
 
   return c.html(
@@ -39,6 +46,7 @@ async function renderDetail(c: AppContext, id: string) {
       {...viewProps(c, "/marketing-plans")}
       item={plan}
       goals={goals}
+      personById={personById}
       editing={editing}
     />,
   );

@@ -23,9 +23,17 @@ export const RetrospectiveDetailView: FC<
     editing?: boolean;
     /** Name → person ID lookup for linking participants to People. */
     personByName?: Record<string, string>;
+    /** Person ID → name lookup for id-backed participants. */
+    personById?: Record<string, string>;
   }
 > = (
-  { item: retro, editing = false, personByName = {}, ...viewProps },
+  {
+    item: retro,
+    editing = false,
+    personByName = {},
+    personById = {},
+    ...viewProps
+  },
 ) => {
   return (
     <MainLayout
@@ -96,7 +104,13 @@ export const RetrospectiveDetailView: FC<
             <ul class="retro-detail__participants-list">
               {retro.participants.map((p, i) => (
                 <li key={i}>
-                  {personByName[p]
+                  {personById[p]
+                    ? (
+                      <a href={`/people/${p}`} class="badge">
+                        {personById[p]}
+                      </a>
+                    )
+                    : personByName[p]
                     ? (
                       <a href={`/people/${personByName[p]}`} class="badge">
                         {p}

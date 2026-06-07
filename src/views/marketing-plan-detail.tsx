@@ -62,9 +62,14 @@ const NotesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
 // ---------------------------------------------------------------------------
 
 export const MarketingPlanDetailView: FC<
-  ViewProps & { item: MarketingPlan; goals?: Goal[]; editing?: boolean }
+  ViewProps & {
+    item: MarketingPlan;
+    goals?: Goal[];
+    personById?: Record<string, string>;
+    editing?: boolean;
+  }
 > = (
-  { item: plan, goals = [], editing = false, ...viewProps },
+  { item: plan, goals = [], personById = {}, editing = false, ...viewProps },
 ) => {
   const budget = plan.budgetTotal != null
     ? `${plan.budgetCurrency ?? ""} ${plan.budgetTotal.toLocaleString()}`
@@ -147,7 +152,7 @@ export const MarketingPlanDetailView: FC<
             {plan.responsible && (
               <InfoItem label="Responsible">
                 <a href={`/people/${plan.responsible}`}>
-                  {plan.responsible}
+                  {personById[plan.responsible] ?? plan.responsible}
                 </a>
               </InfoItem>
             )}

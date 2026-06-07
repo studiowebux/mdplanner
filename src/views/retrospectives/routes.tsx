@@ -24,9 +24,14 @@ registerSectionEditRoutes(retrospectivesRouter, {
   // to their People page. Tolerant matching (exact → ci → first-word) handles
   // common drift between full-name participants and short-name Person records.
   resolveViewProps: async (retro) => {
-    if (retro.participants.length === 0) return { personByName: {} };
+    if (retro.participants.length === 0) {
+      return { personByName: {}, personById: {} };
+    }
     const people = await getPeopleService().list();
     const personByName = buildPersonByNameMap(retro.participants, people);
-    return { personByName };
+    // participants are now id-backed (source:"people") — id→name for display.
+    const personById: Record<string, string> = {};
+    for (const p of people) personById[p.id] = p.name;
+    return { personByName, personById };
   },
 });
