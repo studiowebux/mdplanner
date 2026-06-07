@@ -5,7 +5,7 @@ import { serveStatic } from "hono/deno";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { log } from "./singletons/logger.ts";
 import { bootCacheSync, initServices } from "./singletons/services.ts";
-import { closeAll, subscribe } from "./singletons/event-bus.ts";
+import { closeAll, publish, subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
 import { views } from "./views/mod.tsx";
 import { createMcpHonoRouter } from "./mcp/mod.ts";
@@ -136,6 +136,10 @@ const shutdown = async (signal: string) => {
   shuttingDown = true;
   log.info(`Received ${signal} — shutting down`);
   try {
+    // Tell connected clients we're going down so the UI can show a notice
+    // before its SSE stream ends; brief pause lets the event flush to sockets.
+    publish("server.shutdown");
+    await new Promise((r) => setTimeout(r, 150));
     // End open SSE streams first so the graceful drain below returns promptly.
     closeAll();
     await server.shutdown();
