@@ -81,7 +81,6 @@ export const TaskQuickActions: FC<{
           autocomplete="off"
           name="q"
           data-autocomplete-target="assign-hidden"
-          data-freetext="true"
           hx-get="/autocomplete/people"
           hx-trigger="input changed delay:150ms, focus"
           hx-target="#assign-results"
