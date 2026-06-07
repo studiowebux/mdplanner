@@ -30,3 +30,16 @@ export function publish(type: string, data?: unknown): void {
     }
   }
 }
+
+// End every open stream so a graceful server shutdown can drain promptly —
+// SSE responses never complete on their own and would otherwise block exit.
+export function closeAll(): void {
+  for (const ctrl of subscribers) {
+    try {
+      ctrl.close();
+    } catch (_) {
+      // Already closed/errored — nothing to do
+    }
+  }
+  subscribers.clear();
+}
