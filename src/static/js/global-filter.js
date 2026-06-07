@@ -1,207 +1,181 @@
-// Global filter dropdowns — project and assignee multi-select in the topbar.
-// HTML contract:
-//   [data-global-filter="projects"]      — trigger button
-//   [data-global-filter-panel="projects"] — floating panel (.is-hidden by default)
-//   [data-global-filter-item="projects"]  — <label><input type="checkbox" value="..."> inside panel
-//   [data-global-filter-badge="projects"] — count badge span on trigger button
-// Same pattern repeated for "assignees".
+// Global filter dropdowns — project + assignee multi-select in the topbar.
+// HTML contract (rendered by components/shell/global-filter-dropdown.tsx):
+//   [data-global-filter="<type>"]        — trigger button
+//   [data-global-filter-panel="<type>"]  — floating panel (.is-hidden default)
+//   [data-global-filter-search="<type>"] — search input inside the panel
+//   [data-global-filter-all="<type>"]    — "All" button (visible options)
+//   [data-global-filter-none="<type>"]   — "None" button (visible options)
+//   [data-global-filter-list="<type>"]   — option list container
+//   [data-global-filter-item="<type>"]   — <label> wrapping one checkbox
+//   [data-global-filter-badge="<type>"]  — count badge on the trigger button
+//
+// Serialization is PURE htmx: the panels live in one shared <form> that POSTs
+// on change, so FormData carries every checked box (see the .tsx component).
+// This script only does UI: open/close, search, All/None, badge counts.
+// Checkbox checked-state is rendered server-side; no client state sync needed.
 
 (function () {
-  // -------------------------------------------------------------------------
-  // Initial state from server-rendered data-active attributes.
-  // ui_state cookie is httpOnly — JS cannot read it.
-  // -------------------------------------------------------------------------
-
-  function readActiveAttr(type) {
-    var panel = document.querySelector(
-      '[data-global-filter-panel="' + type + '"]',
-    );
-    if (!panel) return [];
-    try {
-      var val = JSON.parse(panel.getAttribute("data-active") || "[]");
-      return Array.isArray(val) ? val : [];
-    } catch (_) {
-      return [];
-    }
-  }
-
-  function readGlobalState() {
-    return {
-      globalProjects: readActiveAttr("projects"),
-      globalAssignees: readActiveAttr("assignees"),
-    };
-  }
+  var Core = globalThis.GlobalFilterCore;
 
   // -------------------------------------------------------------------------
-  // In-memory filter state — source of truth after page load.
-  // Reading from cookie on every htmx:afterSettle caused a race: an SSE-
-  // triggered view reload could fire syncCheckboxes before the POST response
-  // had updated the cookie, unchecking boxes the user had just checked.
-  // -------------------------------------------------------------------------
-
-  var memState = null; // null = not yet initialised
-
-  function getMemState() {
-    if (memState === null) memState = readGlobalState();
-    return memState;
-  }
-
-  function setMemState(projects, assignees) {
-    memState = { globalProjects: projects, globalAssignees: assignees };
-  }
-
-  // -------------------------------------------------------------------------
-  // Panel state
+  // Panel open/close (one open at a time)
   // -------------------------------------------------------------------------
 
   var openPanel = null;
 
+  function panelEl(type) {
+    return document.querySelector('[data-global-filter-panel="' + type + '"]');
+  }
+
   function openFilterPanel(type) {
     if (openPanel && openPanel !== type) closeFilterPanel(openPanel);
-    var panel = document.querySelector(
-      '[data-global-filter-panel="' + type + '"]',
-    );
+    var panel = panelEl(type);
     if (panel) panel.classList.remove("is-hidden");
     openPanel = type;
   }
 
   function closeFilterPanel(type) {
-    var panel = document.querySelector(
-      '[data-global-filter-panel="' + type + '"]',
-    );
+    var panel = panelEl(type);
     if (panel) panel.classList.add("is-hidden");
     if (openPanel === type) openPanel = null;
   }
 
   function toggleFilterPanel(type) {
-    var panel = document.querySelector(
-      '[data-global-filter-panel="' + type + '"]',
-    );
+    var panel = panelEl(type);
     if (!panel) return;
-    if (panel.classList.contains("is-hidden")) {
-      openFilterPanel(type);
-    } else {
-      closeFilterPanel(type);
-    }
+    if (panel.classList.contains("is-hidden")) openFilterPanel(type);
+    else closeFilterPanel(type);
   }
 
   // -------------------------------------------------------------------------
-  // Badge update
+  // Badge — reflects the number of checked boxes in a panel
   // -------------------------------------------------------------------------
 
-  function updateBadge(type, count) {
+  function updateBadge(type) {
     var badge = document.querySelector(
       '[data-global-filter-badge="' + type + '"]',
     );
     if (!badge) return;
-    badge.textContent = count;
+    var count = document.querySelectorAll(
+      '[data-global-filter-item="' + type +
+        '"] input[type="checkbox"]:checked',
+    ).length;
+    badge.textContent = String(count);
     badge.classList.toggle("is-hidden", count === 0);
   }
 
   // -------------------------------------------------------------------------
-  // Checkbox sync from cookie
+  // Search — hide options whose label does not match
   // -------------------------------------------------------------------------
 
-  function syncCheckboxes() {
-    var state = getMemState();
-    syncType("projects", state.globalProjects);
-    syncType("assignees", state.globalAssignees);
-  }
-
-  function syncType(type, activeValues) {
-    var items = document.querySelectorAll(
-      '[data-global-filter-item="' + type + '"] input[type="checkbox"]',
+  function applySearch(type, query) {
+    var labels = document.querySelectorAll(
+      '[data-global-filter-item="' + type + '"]',
     );
-    var count = 0;
-    items.forEach(function (cb) {
-      var checked = activeValues.indexOf(cb.value) !== -1;
-      cb.checked = checked;
-      if (checked) count++;
+    labels.forEach(function (label) {
+      var text = (label.textContent || "").trim();
+      var visible = Core ? Core.matchesQuery(text, query) : true;
+      label.classList.toggle("is-hidden", !visible);
     });
-    updateBadge(type, count);
   }
 
   // -------------------------------------------------------------------------
-  // Local UI state on change. The network POST is handled by htmx (hx-post on
-  // the filter wrap); the server replies HX-Trigger: global-filter:changed,
-  // which the domain-view listeners (from:body) use to reload.
+  // All / None — toggle only the currently-visible (search-filtered) options,
+  // then fire ONE change so the shared form POSTs the full state once.
   // -------------------------------------------------------------------------
 
-  function getCheckedValues(type) {
-    var items = document.querySelectorAll(
-      '[data-global-filter-item="' + type + '"] input[type="checkbox"]:checked',
+  function setVisible(type, checked) {
+    var labels = document.querySelectorAll(
+      '[data-global-filter-item="' + type + '"]',
     );
-    var values = [];
-    items.forEach(function (cb) {
-      values.push(cb.value);
+    var changed = false;
+    var lastBox = null;
+    labels.forEach(function (label) {
+      if (label.classList.contains("is-hidden")) return;
+      var box = label.querySelector('input[type="checkbox"]');
+      if (!box) return;
+      if (box.checked !== checked) {
+        box.checked = checked;
+        changed = true;
+      }
+      lastBox = box;
     });
-    return values;
-  }
-
-  function onFilterChange() {
-    var projects = getCheckedValues("projects");
-    var assignees = getCheckedValues("assignees");
-    updateBadge("projects", projects.length);
-    updateBadge("assignees", assignees.length);
-    // Update in-memory state immediately so syncCheckboxes called by any
-    // concurrent htmx:afterSettle does not revert the user's selection.
-    setMemState(projects, assignees);
+    updateBadge(type);
+    if (changed && lastBox) {
+      lastBox.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   }
 
   // -------------------------------------------------------------------------
-  // Event delegation
+  // Wiring
   // -------------------------------------------------------------------------
 
   function init() {
-    syncCheckboxes();
+    document.querySelectorAll("[data-global-filter]").forEach(function (btn) {
+      updateBadge(btn.getAttribute("data-global-filter"));
+    });
 
     document.addEventListener("click", function (e) {
-      // Trigger buttons
       var btn = e.target.closest("[data-global-filter]");
       if (btn) {
         e.stopPropagation();
-        // Mutual exclusivity: opening a filter closes the person switcher so
-        // two topbar popups are never open at once.
+        // Mutual exclusivity with the person switcher.
         var personDetails = document.getElementById("topbar-person-switcher");
         if (personDetails) personDetails.removeAttribute("open");
         toggleFilterPanel(btn.getAttribute("data-global-filter"));
         return;
       }
 
-      // Checkboxes inside panels
-      var item = e.target.closest("[data-global-filter-item]");
-      if (item) {
-        // Let the checkbox change fire naturally (htmx posts on change), then
-        // refresh badges + in-memory state.
-        setTimeout(onFilterChange, 0);
+      var allBtn = e.target.closest("[data-global-filter-all]");
+      if (allBtn) {
+        setVisible(allBtn.getAttribute("data-global-filter-all"), true);
         return;
       }
 
-      // Outside click — close any open panel
+      var noneBtn = e.target.closest("[data-global-filter-none]");
+      if (noneBtn) {
+        setVisible(noneBtn.getAttribute("data-global-filter-none"), false);
+        return;
+      }
+
+      // Outside click closes the open panel.
       if (openPanel) {
-        var panel = document.querySelector(
-          '[data-global-filter-panel="' + openPanel + '"]',
-        );
-        if (panel && !panel.contains(e.target)) {
-          closeFilterPanel(openPanel);
-        }
+        var panel = panelEl(openPanel);
+        if (panel && !panel.contains(e.target)) closeFilterPanel(openPanel);
       }
     });
+
+    // Search input — filter options. Stop its change from reaching the form so
+    // typing never fires a filter POST (the search field carries no name).
+    document.addEventListener("input", function (e) {
+      var search = e.target.closest("[data-global-filter-search]");
+      if (!search) return;
+      applySearch(
+        search.getAttribute("data-global-filter-search"),
+        search.value,
+      );
+    });
+    document.addEventListener("change", function (e) {
+      var search = e.target.closest("[data-global-filter-search]");
+      if (search) {
+        e.stopPropagation();
+        return;
+      }
+      // Checkbox toggled — recount its panel's badge.
+      var item = e.target.closest("[data-global-filter-item]");
+      if (item) updateBadge(item.getAttribute("data-global-filter-item"));
+    }, true);
 
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && openPanel) closeFilterPanel(openPanel);
     });
 
-    // Mutual exclusivity: opening the person switcher closes any open filter.
     var personDetails = document.getElementById("topbar-person-switcher");
     if (personDetails) {
       personDetails.addEventListener("toggle", function () {
         if (personDetails.open && openPanel) closeFilterPanel(openPanel);
       });
     }
-
-    // Re-sync after htmx swaps (page navigations restore cookie state)
-    document.addEventListener("htmx:afterSettle", syncCheckboxes);
   }
 
   if (document.readyState === "loading") {

@@ -5,6 +5,7 @@ import {
 } from "../../singletons/services.ts";
 import type { Actor } from "../../types/actor.ts";
 import type { Person } from "../../types/person.types.ts";
+import { GlobalFilterDropdown } from "./global-filter-dropdown.tsx";
 
 type Props = {
   actor?: Actor;
@@ -97,98 +98,41 @@ export async function Topbar(
         &#8942;
       </button>
       <div id="topbar-actions" class="topbar__actions">
-        {/* Project filter */}
-        {portfolioItems.length > 0 && (
-          <div
-            class="topbar__filter-wrap"
+        {
+          /* Project + assignee filters share ONE form so every change serializes
+            the full state of both via FormData (repeated keys) — pure-htmx
+            multi-select, avoids htmx #1541. */
+        }
+        {(portfolioItems.length > 0 || people.length > 0) && (
+          <form
+            class="topbar__filters"
             hx-post="/settings/global-filters"
             hx-trigger="change"
-            hx-include="[data-global-filter-item] input"
             hx-swap="none"
-            hx-sync="closest .topbar__actions:queue last"
+            hx-sync="this:replace"
           >
-            <button
-              type="button"
-              class="topbar__filter-btn"
-              data-global-filter="projects"
-              aria-label="Filter by project"
-            >
-              Project
-              <span
-                data-global-filter-badge="projects"
-                class="topbar__filter-badge is-hidden"
-              >
-                0
-              </span>
-            </button>
-            <div
-              data-global-filter-panel="projects"
-              data-active={JSON.stringify(globalProjects)}
-              class="topbar__filter-panel is-hidden"
-            >
-              {portfolioItems.map((p) => (
-                <label
-                  key={p.id}
-                  data-global-filter-item="projects"
-                  class="topbar__filter-option"
-                >
-                  <input
-                    type="checkbox"
-                    name="globalProjects"
-                    value={p.name}
-                  />
-                  {p.name}
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Assignee filter */}
-        {people.length > 0 && (
-          <div
-            class="topbar__filter-wrap"
-            hx-post="/settings/global-filters"
-            hx-trigger="change"
-            hx-include="[data-global-filter-item] input"
-            hx-swap="none"
-            hx-sync="closest .topbar__actions:queue last"
-          >
-            <button
-              type="button"
-              class="topbar__filter-btn"
-              data-global-filter="assignees"
-              aria-label="Filter by assignee"
-            >
-              Assignee
-              <span
-                data-global-filter-badge="assignees"
-                class="topbar__filter-badge is-hidden"
-              >
-                0
-              </span>
-            </button>
-            <div
-              data-global-filter-panel="assignees"
-              data-active={JSON.stringify(globalAssignees)}
-              class="topbar__filter-panel is-hidden"
-            >
-              {people.map((p) => (
-                <label
-                  key={p.id}
-                  data-global-filter-item="assignees"
-                  class="topbar__filter-option"
-                >
-                  <input
-                    type="checkbox"
-                    name="globalAssignees"
-                    value={p.name}
-                  />
-                  {p.name}
-                </label>
-              ))}
-            </div>
-          </div>
+            {portfolioItems.length > 0 && (
+              <GlobalFilterDropdown
+                type="projects"
+                label="Project"
+                name="globalProjects"
+                options={portfolioItems.map((p) => ({
+                  value: p.name,
+                  label: p.name,
+                }))}
+                active={globalProjects}
+              />
+            )}
+            {people.length > 0 && (
+              <GlobalFilterDropdown
+                type="assignees"
+                label="Assignee"
+                name="globalAssignees"
+                options={people.map((p) => ({ value: p.name, label: p.name }))}
+                active={globalAssignees}
+              />
+            )}
+          </form>
         )}
 
         <button

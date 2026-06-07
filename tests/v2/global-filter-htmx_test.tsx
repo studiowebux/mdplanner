@@ -2,15 +2,19 @@
  * Global-filter (htmx) suite.
  *
  * Locks the topbar global filter (project/assignee multi-select) running on
- * pure htmx instead of fetch():
+ * PURE htmx form serialization:
  * - POST /settings/global-filters parses a form body (repeated globalProjects /
- *   globalAssignees keys), writes the ui_state cookie, and returns 204 +
- *   HX-Trigger: global-filter:changed so domain views (from:body) reload.
- * - The topbar filter wraps carry hx-post + hx-include and the checkboxes carry
- *   name="globalProjects" / name="globalAssignees" for hx-include serialization.
+ *   globalAssignees keys via parseBody({all:true})), writes the ui_state cookie,
+ *   and returns 204 + HX-Trigger: global-filter:changed so domain views
+ *   (from:body) reload.
+ * - The project + assignee dropdowns share ONE <form hx-post hx-trigger=change>
+ *   so the browser serializes every checked box via FormData as repeated keys.
  *
- * Regression: global-filter.js previously fetch'd JSON to /settings/global-filters
- * and fired global-filter:changed client-side.
+ * Regression — htmx #1541: the dropdowns previously gathered LOOSE checkboxes
+ * via hx-include, which collapses duplicate names to the FIRST value (only the
+ * first selected project/assignee applied). The shared <form> fixes it; this
+ * suite pins the form wiring + that hx-include is NOT used. Checked state is
+ * rendered server-side from the active list (no client state sync).
  */
 
 import { Hono } from "hono";
@@ -84,22 +88,22 @@ Deno.test("global-filter htmx — topbar markup wiring", async (t) => {
     const app = new Hono();
     app.get(
       "/__topbar",
-      (c) => c.html(<Topbar globalProjects={[]} globalAssignees={[]} />),
+      (c) => c.html(<Topbar globalProjects={["Alpha"]} globalAssignees={[]} />),
     );
 
     await t.step(
-      "filter wraps are htmx-wired + checkboxes carry name",
+      "both filters share one form posting to /settings/global-filters on change",
       async () => {
         const res = await app.request("/__topbar");
         assertEquals(res.status, 200);
         const html = await res.text();
         assert(
           html.includes('hx-post="/settings/global-filters"'),
-          "filter wrap must POST to /settings/global-filters via htmx",
+          "filters must POST to /settings/global-filters via htmx",
         );
         assert(
-          html.includes('hx-include="[data-global-filter-item] input"'),
-          "filter wrap must include both panels' checkboxes",
+          html.includes('hx-trigger="change"'),
+          "filter form must POST on change",
         );
         assert(
           html.includes('name="globalProjects"'),
@@ -109,12 +113,35 @@ Deno.test("global-filter htmx — topbar markup wiring", async (t) => {
           html.includes('name="globalAssignees"'),
           "assignee checkbox must carry name=globalAssignees",
         );
-        // Serialize filter POSTs through one shared queue so the last full-state
-        // write wins (regression: concurrent posts raced, collapsing the cookie
-        // to a stale subset — "only the first project applied").
+      },
+    );
+
+    await t.step(
+      "hx-include is NOT used (loose-input gather hits htmx #1541)",
+      async () => {
+        const html = await (await app.request("/__topbar")).text();
         assert(
-          html.includes('hx-sync="closest .topbar__actions:queue last"'),
-          "filter wraps must share an hx-sync queue to avoid the cookie write race",
+          !html.includes("hx-include"),
+          "must serialize via shared <form>, never hx-include of loose checkboxes",
+        );
+      },
+    );
+
+    await t.step(
+      "checked state is rendered server-side from the active list",
+      async () => {
+        const html = await (await app.request("/__topbar")).text();
+        // globalProjects=["Alpha"] → exactly one box pre-checked. hono renders a
+        // true boolean attr as a bare `checked` (tag-closing `checked>`).
+        const checkedCount = html.split(" checked>").length - 1;
+        assertEquals(
+          checkedCount,
+          1,
+          "exactly the active project must render checked",
+        );
+        assert(
+          html.includes('value="Alpha"'),
+          "active project option must be present",
         );
       },
     );

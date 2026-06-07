@@ -450,6 +450,7 @@ html.focus-mode .focus-mode-exit {
   right: 0;
   z-index: var(--z-dropdown);
   min-width: 200px;
+  max-width: 320px;
   background: var(--color-bg-primary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
@@ -475,6 +476,50 @@ html.focus-mode .focus-mode-exit {
 .topbar__filter-option input[type="checkbox"] {
   accent-color: var(--color-accent);
   cursor: pointer;
+}
+
+.topbar__filter-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Search box — inset to match option padding; input fills via box-sizing. */
+.topbar__filter-search-wrap {
+  padding: var(--space-xs) var(--space-md) var(--space-sm);
+}
+
+/* All / None controls. */
+.topbar__filter-actions {
+  display: flex;
+  gap: var(--space-xs);
+  padding: 0 var(--space-md) var(--space-xs);
+}
+
+.topbar__filter-action {
+  flex: 1;
+  padding: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.topbar__filter-action:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* Scrollable option list — fixed height so long lists never blow up the panel. */
+.topbar__filter-list {
+  max-height: 240px;
+  overflow-y: auto;
 }
 
 .topbar__actions > form {
