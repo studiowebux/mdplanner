@@ -334,6 +334,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Flex item defaults to min-width:auto and won't shrink below its content,
+     so a long title overflowed the row. Allow it to shrink → ellipsis. */
+  min-width: 0;
 }
 
 .task-list__row-title:hover,
