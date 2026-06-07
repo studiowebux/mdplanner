@@ -1,12 +1,10 @@
 // Shared action button renderer factory for domain table columns.
 // Generates the standard View / Edit / Delete button group used by every domain.
 
-/** Options for createActionBtns: delete-confirm name field and wrapper CSS class. */
+/** Options for createActionBtns: delete-confirm name field. */
 export interface ActionBtnsOptions {
   /** Row field used in the delete confirmation message. Defaults to "title". */
   nameField?: string;
-  /** CSS class for the wrapper div. Defaults to "domain-card__actions". */
-  actionsClass?: string;
 }
 
 /**
@@ -14,7 +12,7 @@ export interface ActionBtnsOptions {
  *
  * @param path           URL path prefix, e.g. "goals" → /goals/:id
  * @param formContainer  ID of the sidenav form container, e.g. "goals-form-container"
- * @param opts           Optional overrides for nameField and actionsClass
+ * @param opts           Optional override for nameField
  */
 export function createActionBtns(
   path: string,
@@ -22,10 +20,9 @@ export function createActionBtns(
   opts: ActionBtnsOptions = {},
 ): (_value: unknown, row: Record<string, unknown>) => unknown {
   const nameField = opts.nameField ?? "title";
-  const actionsClass = opts.actionsClass ?? "domain-card__actions";
 
   return (_value, row) => (
-    <div class={actionsClass}>
+    <div class="card__actions">
       <a class="btn btn--secondary btn--sm" href={`/${path}/${row.id}`}>
         View
       </a>
@@ -65,10 +62,9 @@ export function createArchiveActionBtns(
   opts: ActionBtnsOptions = {},
 ): (_value: unknown, row: Record<string, unknown>) => unknown {
   const nameField = opts.nameField ?? "title";
-  const actionsClass = opts.actionsClass ?? "domain-card__actions";
 
   return (_value, row) => (
-    <div class={actionsClass}>
+    <div class="card__actions">
       <a class="btn btn--secondary btn--sm" href={`/${path}/${row.id}`}>
         View
       </a>

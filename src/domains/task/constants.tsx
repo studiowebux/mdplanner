@@ -24,9 +24,7 @@ export const TASK_SECTION_VARIANTS: Record<string, BadgeVariant> = {
   "done": "success",
 };
 
-const actionBtns = createActionBtns("tasks", "tasks-form-container", {
-  actionsClass: "task-card__actions",
-});
+const actionBtns = createActionBtns("tasks", "tasks-form-container");
 
 export const TASK_TABLE_COLUMNS: ColumnDef[] = [
   {

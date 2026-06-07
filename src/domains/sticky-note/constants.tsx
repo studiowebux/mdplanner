@@ -29,7 +29,7 @@ export const STICKY_NOTE_COLOR_OPTIONS = STICKY_NOTE_COLORS.map((c) => ({
 
 function actionBtns(_value: unknown, row: Record<string, unknown>) {
   return (
-    <div class="domain-card__actions">
+    <div class="card__actions">
       <button
         class="btn btn--secondary btn--sm"
         type="button"

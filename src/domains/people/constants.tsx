@@ -21,7 +21,6 @@ export const PERSON_STATUS_VARIANTS: Record<string, BadgeVariant> = {
 
 const actionBtns = createActionBtns("people", "people-form-container", {
   nameField: "name",
-  actionsClass: "person-card__actions",
 });
 
 export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [

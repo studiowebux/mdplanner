@@ -70,7 +70,7 @@ export const DomainCard: FC<Props> = ({
     {children}
 
     {customActions ?? (
-      <div class="domain-card__actions">
+      <div class="card__actions">
         <a class="btn btn--secondary btn--sm" href={href}>View</a>
         <button
           class="btn btn--secondary btn--sm"

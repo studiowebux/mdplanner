@@ -3,11 +3,6 @@
 
 /* Person card — uses shared DomainCard, only domain-specific styles here */
 
-.person-card__actions {
-  display: flex;
-  gap: var(--space-sm);
-}
-
 .person-card__avatar {
   display: flex;
   align-items: center;

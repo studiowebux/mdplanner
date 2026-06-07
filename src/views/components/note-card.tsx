@@ -22,7 +22,7 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
       domain="notes"
       id={note.id}
       customActions={
-        <div class="domain-card__actions">
+        <div class="card__actions">
           <button
             class="btn btn--secondary btn--sm"
             type="button"

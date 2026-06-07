@@ -31,7 +31,7 @@ function vacationActionBtns(
   row: Record<string, unknown>,
 ): unknown {
   return (
-    <div class="domain-card__actions">
+    <div class="card__actions">
       <button
         class="btn btn--secondary btn--sm"
         type="button"

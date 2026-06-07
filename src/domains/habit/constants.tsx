@@ -183,7 +183,7 @@ export const HABIT_TABLE_COLUMNS: ColumnDef[] = [
     render: (_v, row) => {
       const id = row.id as string;
       return (
-        <div class="domain-card__actions">
+        <div class="card__actions">
           <a href={`/habits/${id}`} class="btn btn--secondary btn--sm">
             View
           </a>

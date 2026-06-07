@@ -4,7 +4,7 @@ import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate, timeAgo } from "../../utils/time.ts";
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="note-card__actions">
+  <div class="card__actions">
     <button
       class="btn btn--secondary btn--sm"
       type="button"

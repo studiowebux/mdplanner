@@ -341,7 +341,7 @@ a.badge:hover {
 
 /* domain-card__meta-value links — uses shared .content-area a rule below */
 
-.domain-card__actions {
+.card__actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-sm);
@@ -1774,7 +1774,7 @@ a.badge:hover {
   }
 
   /* Keep action buttons in a single row — wrapping causes 3-row layout */
-  .data-table [data-col="_actions"] .domain-card__actions {
+  .data-table [data-col="_actions"] .card__actions {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
@@ -1782,7 +1782,7 @@ a.badge:hover {
   }
 
   /* Shrink button text + padding so 3 buttons fit in the sticky column */
-  .data-table [data-col="_actions"] .domain-card__actions .btn {
+  .data-table [data-col="_actions"] .card__actions .btn {
     font-size: var(--font-size-xs);
     padding: var(--space-xs) var(--space-sm);
     white-space: nowrap;

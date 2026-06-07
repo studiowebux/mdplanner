@@ -23,7 +23,7 @@ export const VacationCard: FC<Props> = ({ item, q }) => {
       }
       confirmMessage={`Delete request for "${name}"? This cannot be undone.`}
       customActions={
-        <div class="domain-card__actions">
+        <div class="card__actions">
           <button
             class="btn btn--secondary btn--sm"
             type="button"

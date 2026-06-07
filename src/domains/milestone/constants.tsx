@@ -23,7 +23,6 @@ export const MILESTONE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
 
 const actionBtns = createActionBtns("milestones", "milestones-form-container", {
   nameField: "name",
-  actionsClass: "milestone-card__actions",
 });
 
 export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
