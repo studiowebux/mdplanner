@@ -18,6 +18,13 @@ import { parseFormBody } from "../../utils/form-parser.ts";
 /** Name → person ID lookup, refreshed on every list render. */
 export let goalPersonByName: Record<string, string> = {};
 
+/**
+ * Person ID → name lookup, refreshed on every list render. goal.owner is now
+ * id-backed (source:"people"); this resolves the id to a display name (cards
+ * fall back to the raw value for legacy free-text owners).
+ */
+export let goalPersonById: Record<string, string> = {};
+
 export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   name: "goals",
   singular: "Goal",
@@ -96,10 +103,15 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
       ),
     ].sort();
 
-    // Refresh person name → ID lookup for cards
+    // Refresh person name → ID and ID → name lookups for cards
     const lookup: Record<string, string> = {};
-    for (const p of people) lookup[p.name] = p.id;
+    const byId: Record<string, string> = {};
+    for (const p of people) {
+      lookup[p.name] = p.id;
+      byId[p.id] = p.name;
+    }
     goalPersonByName = lookup;
+    goalPersonById = byId;
 
     return {
       project: projectNames,

@@ -3,7 +3,10 @@
 import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { milestoneConfig } from "../../domains/milestone/config.tsx";
-import { getMilestoneService } from "../../singletons/services.ts";
+import {
+  getMilestoneService,
+  getPeopleService,
+} from "../../singletons/services.ts";
 import { MilestoneDetailView } from "../milestone-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { publish } from "../../singletons/event-bus.ts";
@@ -16,12 +19,17 @@ async function renderDetail(c: AppContext, id: string) {
   const milestone = await svc.getById(id);
   if (!milestone) return c.notFound();
   const tasks = await svc.getTasksForMilestone(milestone.name);
+  // task.assignee stores a person id — map id→name so the task list shows the
+  // name, not the raw id (falls back to the raw value for legacy free-text).
+  const personById: Record<string, string> = {};
+  for (const p of await getPeopleService().list()) personById[p.id] = p.name;
   const editing = c.req.query("editing") === "true";
   return c.html(
     <MilestoneDetailView
       {...viewProps(c, "/milestones")}
       milestone={milestone}
       tasks={tasks}
+      personById={personById}
       editing={editing}
     />,
   );

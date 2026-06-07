@@ -20,6 +20,8 @@ import { InlineEditable } from "./components/inline-editable.tsx";
 type Props = ViewProps & {
   milestone: Milestone;
   tasks: Task[];
+  /** person id → name, for resolving task.assignee to a display name. */
+  personById?: Record<string, string>;
   editing?: boolean;
 };
 
@@ -37,7 +39,7 @@ const DescriptionSection: FC<{ milestone: Milestone }> = ({ milestone }) => (
 );
 
 export const MilestoneDetailView: FC<Props> = (
-  { milestone, tasks, editing = false, ...viewProps },
+  { milestone, tasks, personById = {}, editing = false, ...viewProps },
 ) => {
   const sections = groupBy(tasks, (t) => t.section ?? "Uncategorized");
 
@@ -182,7 +184,7 @@ export const MilestoneDetailView: FC<Props> = (
                           </span>
                           {t.assignee && (
                             <span class="milestone-detail__task-assignee">
-                              {t.assignee}
+                              {personById[t.assignee] ?? t.assignee}
                             </span>
                           )}
                         </li>

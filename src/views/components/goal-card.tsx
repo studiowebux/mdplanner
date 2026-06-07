@@ -4,7 +4,10 @@ import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
 import { PRIORITY_LABELS } from "../../constants/mod.ts";
-import { goalPersonByName } from "../../domains/goal/config.tsx";
+import {
+  goalPersonById,
+  goalPersonByName,
+} from "../../domains/goal/config.tsx";
 import { GOAL_STATUS_VARIANTS } from "../../domains/goal/constants.tsx";
 import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { dueIn, parseDate } from "../../utils/time.ts";
@@ -72,11 +75,13 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
         {item.owner && (
           <CardMetaItem label="Owner">
             <a
-              href={goalPersonByName[item.owner!]
-                ? `/people/${goalPersonByName[item.owner!]}`
-                : `/people?q=${encodeURIComponent(item.owner!)}`}
+              href={goalPersonById[item.owner]
+                ? `/people/${item.owner}`
+                : goalPersonByName[item.owner]
+                ? `/people/${goalPersonByName[item.owner]}`
+                : `/people?q=${encodeURIComponent(item.owner)}`}
             >
-              {item.owner}
+              {goalPersonById[item.owner] ?? item.owner}
             </a>
           </CardMetaItem>
         )}

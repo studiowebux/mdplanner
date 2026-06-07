@@ -210,6 +210,7 @@ export const GoalDetailView: FC<
     linkedMilestones?: MilestoneBase[];
     childGoals?: Goal[];
     personByName?: Record<string, string>;
+    personById?: Record<string, string>;
     editing?: boolean;
   }
 > = (
@@ -220,6 +221,7 @@ export const GoalDetailView: FC<
     linkedMilestones = [],
     childGoals = [],
     personByName = {},
+    personById = {},
     editing = false,
     ...viewProps
   },
@@ -326,7 +328,13 @@ export const GoalDetailView: FC<
             )}
             {goal.owner && (
               <InfoItem label="Owner">
-                {personByName[goal.owner]
+                {personById[goal.owner]
+                  ? (
+                    <a href={`/people/${goal.owner}`}>
+                      {personById[goal.owner]}
+                    </a>
+                  )
+                  : personByName[goal.owner]
                   ? (
                     <a href={`/people/${personByName[goal.owner]}`}>
                       {goal.owner}
@@ -407,7 +415,13 @@ export const GoalDetailView: FC<
               <InfoItem label="Contributors">
                 <span class="goal-detail__links">
                   {(goal.contributors ?? []).map((c) => (
-                    personByName[c]
+                    personById[c]
+                      ? (
+                        <a href={`/people/${c}`} class="badge">
+                          {personById[c]}
+                        </a>
+                      )
+                      : personByName[c]
                       ? (
                         <a href={`/people/${personByName[c]}`} class="badge">
                           {c}

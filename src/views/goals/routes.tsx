@@ -46,12 +46,15 @@ async function renderDetail(c: AppContext, id: string) {
       peopleNames.size > 0 ? getPeopleService().list() : Promise.resolve([]),
     ]);
 
-  // Build name → person ID lookup
+  // Build name → person ID lookup, plus an ID → name lookup so id-backed
+  // owner/contributor fields (source:"people") resolve to a display name.
   const personByName: Record<string, string> = {};
+  const personById: Record<string, string> = {};
   for (const p of allPeople) {
     if (peopleNames.has(p.name)) {
       personByName[p.name] = p.id;
     }
+    personById[p.id] = p.name;
   }
 
   const editing = c.req.query("editing") === "true";
@@ -65,6 +68,7 @@ async function renderDetail(c: AppContext, id: string) {
       linkedMilestones={linkedMilestones}
       childGoals={childGoals}
       personByName={personByName}
+      personById={personById}
       editing={editing}
     />,
   );

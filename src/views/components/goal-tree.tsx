@@ -6,6 +6,7 @@ import {
   GOAL_TYPE_VARIANTS,
 } from "../../domains/goal/constants.tsx";
 import { badgeClass } from "../../components/ui/status-badge.tsx";
+import { goalPersonById } from "../../domains/goal/config.tsx";
 
 type GoalNode = Goal & { children: GoalNode[] };
 
@@ -81,7 +82,11 @@ const GoalTreeNode: FC<{ node: GoalNode; depth: number }> = (
             {node.progress}%
           </span>
         )}
-        {node.owner && <span class="goal-tree__owner">{node.owner}</span>}
+        {node.owner && (
+          <span class="goal-tree__owner">
+            {goalPersonById[node.owner] ?? node.owner}
+          </span>
+        )}
       </div>
       {node.children.length > 0 && (
         <ul class="goal-tree__children">
