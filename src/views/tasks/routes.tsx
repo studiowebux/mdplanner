@@ -1,14 +1,28 @@
 // Task view routes — factory-generated + custom detail + quick actions.
 
-import { createDomainRoutes } from "../../factories/domain-routes.ts";
+import {
+  createDomainRoutes,
+  resolveDomainHelpers,
+} from "../../factories/domain-routes.ts";
 import { createDomainForm } from "../../factories/domain-view.tsx";
+import { loadFilteredItems } from "../../factories/domain-routes-collection.ts";
 import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
+import {
+  DEFAULT_TASKS_PER_SECTION,
+  sortTasks,
+  sortTasksInSection,
+} from "../../domains/task/constants.tsx";
+import { TaskRow } from "../components/task-list.tsx";
+import { BoardCard } from "../components/task-board.tsx";
+import { SectionLoadMore } from "../components/task-pagination.tsx";
 import type { AppContext } from "../../types/app.ts";
+import type { DomainFilterState } from "../../factories/domain.types.ts";
 import {
   getGitHubService,
   getPeopleService,
   getPortfolioService,
   getProjectDir,
+  getProjectService,
   getTaskService,
 } from "../../singletons/services.ts";
 import { personLabel } from "../../utils/person-name-match.ts";
@@ -92,6 +106,87 @@ async function renderDetailPage(c: AppContext, id: string) {
     <TaskDetailView {...viewProps(c, "/tasks")} task={task} {...props} />,
   );
 }
+
+// ---------------------------------------------------------------------------
+// GET /more-section — per-section pagination for the list/board views.
+// Registered BEFORE GET /:id so the literal path is not captured as an id.
+// Reads the target `section`, the `view` (list|board), and the `offset` already
+// rendered above; carries the current filter state forward in the query so the
+// next chunk matches exactly what the view shows. Rebuilds the IDENTICAL filter
+// pipeline via resolveDomainHelpers + loadFilteredItems (shared with /view) so
+// pagination never drifts from the rendered set. Returns the next chunk of
+// rows/cards plus a fresh load-more control while more remain.
+// ---------------------------------------------------------------------------
+
+tasksRouter.get("/more-section", async (c) => {
+  const section = c.req.query("section") ?? "";
+  const view = c.req.query("view") === "board" ? "board" : "list";
+  const offset = Math.max(0, parseInt(c.req.query("offset") ?? "0", 10) || 0);
+  if (!section) return c.body(null, 204);
+
+  const state = c.get("filterState" as never) as DomainFilterState;
+  const { helpers } = resolveDomainHelpers(taskConfig);
+  const { filtered } = await loadFilteredItems(c, taskConfig, helpers, state);
+
+  const sectionTasks = filtered.filter((t) => t.section === section);
+  const sorted = view === "board"
+    ? sortTasks(sectionTasks)
+    : sortTasksInSection(sectionTasks, state.sort, state.order);
+
+  const config = await getProjectService().getConfig();
+  const pageSize = config.tasksPerSection ?? DEFAULT_TASKS_PER_SECTION;
+  const chunk = sorted.slice(offset, offset + pageSize);
+  const nextOffset = offset + chunk.length;
+  const remaining = sorted.length - nextOffset;
+
+  if (view === "board") {
+    return c.html(
+      toHtml(
+        <>
+          {chunk.map((t) => <BoardCard key={t.id} task={t} />)}
+          {remaining > 0 && (
+            <SectionLoadMore
+              state={state}
+              section={section}
+              view="board"
+              offset={nextOffset}
+              remaining={remaining}
+            />
+          )}
+        </>,
+      ),
+    );
+  }
+
+  const people = await getPeopleService().list();
+  const peopleOptions = people
+    .map((p) => ({ value: p.id, label: p.name }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  return c.html(
+    toHtml(
+      <>
+        {chunk.map((t, i) => (
+          <TaskRow
+            key={t.id}
+            task={t}
+            peopleOptions={peopleOptions}
+            index={offset + i}
+            archived={state.archived === "true"}
+          />
+        ))}
+        {remaining > 0 && (
+          <SectionLoadMore
+            state={state}
+            section={section}
+            view="list"
+            offset={nextOffset}
+            remaining={remaining}
+          />
+        )}
+      </>,
+    ),
+  );
+});
 
 // ---------------------------------------------------------------------------
 // GET /:id — detail page

@@ -48,6 +48,9 @@ export class ProjectService {
     if (data.pipelinesPerPage !== undefined) {
       current.pipelinesPerPage = data.pipelinesPerPage;
     }
+    if (data.tasksPerSection !== undefined) {
+      current.tasksPerSection = data.tasksPerSection;
+    }
     await this.repo.write(current);
     return current;
   }

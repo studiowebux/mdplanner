@@ -84,6 +84,9 @@ settingsViewRouter.post("/project", async (c) => {
       body.hideCompletedAfterDays !== ""
     ? Number(body.hideCompletedAfterDays)
     : undefined;
+  const tasksPerSectionRaw = body.tasksPerSection
+    ? Number(body.tasksPerSection)
+    : undefined;
   await getProjectService().updateConfig({
     name: String(body.name ?? ""),
     description: body.description ? String(body.description) : undefined,
@@ -94,6 +97,9 @@ settingsViewRouter.post("/project", async (c) => {
     hideCompletedAfterDays: hideCompletedAfterDaysRaw !== undefined &&
         !isNaN(hideCompletedAfterDaysRaw)
       ? hideCompletedAfterDaysRaw
+      : undefined,
+    tasksPerSection: tasksPerSectionRaw && !isNaN(tasksPerSectionRaw)
+      ? tasksPerSectionRaw
       : undefined,
     githubToken: body.githubToken ? String(body.githubToken) : undefined,
     cloudflareToken: body.cloudflareToken

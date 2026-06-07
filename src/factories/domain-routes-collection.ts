@@ -8,7 +8,7 @@ import { getPeopleService } from "../singletons/services.ts";
 import { mergeParams } from "../utils/ui-state.ts";
 import { toHtml } from "../utils/html.ts";
 import { viewProps } from "../middleware/view-props.ts";
-import type { AppVariables } from "../types/app.ts";
+import type { AppContext, AppVariables } from "../types/app.ts";
 import {
   type DomainConfig,
   type DomainFilterState,
@@ -18,6 +18,37 @@ import { createDomainPage, createMoreFragment } from "./domain-view.tsx";
 import type { FilterHelpers } from "./domain-routes-helpers.ts";
 
 type Router = Hono<{ Variables: AppVariables }>;
+
+/**
+ * Load a domain's items and apply the full filter pipeline (source switch →
+ * per-domain filters → global filters). Single source of truth shared by the
+ * generated `/` and `/view` endpoints and by custom routes (e.g. the task
+ * per-section paginator) so filtering can never drift between them.
+ */
+export async function loadFilteredItems<T extends Entity, C, U>(
+  c: AppContext,
+  cfg: DomainConfig<T, C, U>,
+  helpers: FilterHelpers<T>,
+  state: DomainFilterState,
+): Promise<{
+  all: T[];
+  filtered: T[];
+  dynamicFilterOptions:
+    | Awaited<
+      ReturnType<
+        NonNullable<DomainConfig<T, C, U>["extractFilterOptions"]>
+      >
+    >
+    | undefined;
+}> {
+  const all = await helpers.loadItems(c, state);
+  const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
+  const filtered = await helpers.applyGlobalFilters(
+    helpers.applyFilters(all, state, dynamicFilterOptions),
+    c,
+  );
+  return { all, filtered, dynamicFilterOptions };
+}
 
 /**
  * UI-state middleware: resolve filter state from query params + the user's saved
@@ -119,11 +150,11 @@ export function registerCollectionRoutes<T extends Entity, C, U>(
   // Full page
   router.get("/", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
-    const all = await helpers.loadItems(c, state);
-    const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = await helpers.applyGlobalFilters(
-      helpers.applyFilters(all, state, dynamicFilterOptions),
+    const { all, filtered, dynamicFilterOptions } = await loadFilteredItems(
       c,
+      cfg,
+      helpers,
+      state,
     );
     const pageSize = state.limit
       ? parseInt(String(state.limit), 10)
@@ -161,12 +192,7 @@ export function registerCollectionRoutes<T extends Entity, C, U>(
   // View fragment
   router.get("/view", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
-    const all = await helpers.loadItems(c, state);
-    const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = await helpers.applyGlobalFilters(
-      helpers.applyFilters(all, state, dynamicFilterOptions),
-      c,
-    );
+    const { all, filtered } = await loadFilteredItems(c, cfg, helpers, state);
     const pageSize = state.limit
       ? parseInt(String(state.limit), 10)
       : cfg.pageSize;

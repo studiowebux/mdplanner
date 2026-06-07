@@ -1291,3 +1291,43 @@ a.task-board__card-avatar:hover {
 .task-board__card.is-sortable-chosen {
   cursor: grabbing;
 }
+
+/* ---------------------------------------------------------------------------
+ * Per-section "Load more" control (task list + board pagination).
+ * Rendered as the last child of a section's sortable container; clicking it
+ * fetches and appends the next chunk of rows/cards via GET /tasks/more-section.
+ * --------------------------------------------------------------------------- */
+
+.task-load-more {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  background: transparent;
+  border: none;
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  cursor: pointer;
+  text-align: center;
+}
+
+.task-load-more:hover {
+  background: var(--color-bg-hover);
+}
+
+.task-load-more--board {
+  border-top: none;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+}
+
+.task-load-more--board:hover {
+  background: var(--color-bg-hover);
+}
+
+.task-load-more.htmx-request {
+  opacity: 0.6;
+  pointer-events: none;
+}

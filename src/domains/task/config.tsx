@@ -18,6 +18,7 @@ import { TaskBoardView } from "../../views/components/task-board.tsx";
 import { TaskTimelineView } from "../../views/components/task-timeline.tsx";
 import {
   buildSectionOptions,
+  DEFAULT_TASKS_PER_SECTION,
   TASK_PRIORITY_OPTIONS,
   TASK_STATE_KEYS,
   TASK_TABLE_COLUMNS,
@@ -248,6 +249,8 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   ],
 
   customViewRenderer: async (view, state, items) => {
+    const config = await getProjectService().getConfig();
+    const pageSize = config.tasksPerSection ?? DEFAULT_TASKS_PER_SECTION;
     if (view === "list") {
       const people = await getPeopleService().list();
       const peopleOptions = people
@@ -260,11 +263,13 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
           order={state.order}
           peopleOptions={peopleOptions}
           archived={state.archived === "true"}
+          pageSize={pageSize}
+          state={state}
         />
       );
     }
     if (view === "board") {
-      return <TaskBoardView tasks={items} />;
+      return <TaskBoardView tasks={items} pageSize={pageSize} state={state} />;
     }
     if (view === "timeline") {
       const zoom = parseInt(String(state.zoom ?? "1")) || 1;

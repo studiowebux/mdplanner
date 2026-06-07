@@ -18,12 +18,15 @@ import {
 } from "./domain-routes-collection.ts";
 import { registerEntityRoutes } from "./domain-routes-entity.ts";
 
-/** Factory: builds a domain's full Hono router (state middleware + collection + entity routes) from its DomainConfig, injecting the universal date-range and archived state keys. */
-export function createDomainRoutes<T extends Entity, C, U>(
+/**
+ * Resolve the injected state keys + bound filter helpers for a domain. Shared by
+ * `createDomainRoutes` and any custom route (e.g. the task per-section paginator)
+ * that needs the *identical* filter pipeline — so filtering never drifts from
+ * what the generated `/` and `/view` endpoints produce. Pure (no router).
+ */
+export function resolveDomainHelpers<T extends Entity, C, U>(
   cfg: DomainConfig<T, C, U>,
 ) {
-  const router = new Hono<{ Variables: AppVariables }>();
-
   // Injected state keys — added here so every domain gets them without editing
   // 40+ domain configs' stateKeys arrays:
   //  - date range from/to keys: the universal date range filter.
@@ -45,6 +48,19 @@ export function createDomainRoutes<T extends Entity, C, U>(
     dateRange,
     archiveEnabled,
   );
+  return { dateRange, archiveEnabled, stateKeys, extraKeys, helpers };
+}
+
+/** Factory: builds a domain's full Hono router (state middleware + collection + entity routes) from its DomainConfig, injecting the universal date-range and archived state keys. */
+export function createDomainRoutes<T extends Entity, C, U>(
+  cfg: DomainConfig<T, C, U>,
+) {
+  const router = new Hono<{ Variables: AppVariables }>();
+
+  const { archiveEnabled, stateKeys, extraKeys, helpers } =
+    resolveDomainHelpers(
+      cfg,
+    );
 
   // Middleware first so its `*` matcher wraps every route registered after it.
   registerStateMiddleware(router, cfg, { stateKeys, archiveEnabled, helpers });

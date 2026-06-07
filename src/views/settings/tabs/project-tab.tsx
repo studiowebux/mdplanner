@@ -107,6 +107,24 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label class="settings-field__label" for="cfg-tasks-per-section">
+          Tasks per section (list / board)
+        </label>
+        <input
+          type="number"
+          id="cfg-tasks-per-section"
+          name="tasksPerSection"
+          value={config.tasksPerSection ?? 25}
+          min={1}
+          class="settings-field__input settings-field__input--narrow"
+        />
+        <span class="settings-field__hint">
+          How many tasks each section renders before a "Load more" control
+          appears in the task list and board.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label
           class="settings-field__label"
           for="cfg-hide-completed-after-days"

@@ -3,6 +3,7 @@
 
 import type { FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
+import type { DomainFilterState } from "../../factories/domain.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
 import { formatDate } from "../../utils/time.ts";
@@ -12,6 +13,7 @@ import {
   TASK_PRIORITY_LABELS,
   TASK_SORTABLE_COLS,
 } from "../../domains/task/constants.tsx";
+import { SectionLoadMore } from "./task-pagination.tsx";
 
 // ---------------------------------------------------------------------------
 // Task row
@@ -19,7 +21,7 @@ import {
 
 type PeopleOption = { value: string; label: string };
 
-const TaskRow: FC<
+export const TaskRow: FC<
   {
     task: Task;
     peopleOptions?: PeopleOption[];
@@ -331,10 +333,12 @@ type ListProps = TaskViewProps & {
   order?: string;
   peopleOptions?: { value: string; label: string }[];
   archived?: boolean;
+  pageSize?: number;
+  state?: DomainFilterState;
 };
 
 export const TaskListView: FC<ListProps> = (
-  { tasks, sort, order, peopleOptions, archived },
+  { tasks, sort, order, peopleOptions, archived, pageSize, state },
 ) => {
   if (tasks.length === 0) {
     return <EmptyState message="No tasks match the current filters." />;
@@ -369,6 +373,9 @@ export const TaskListView: FC<ListProps> = (
       </div>
       {sectionNames.map((name) => {
         const sorted = sortTasksInSection(grouped[name], sort, order);
+        const limit = pageSize && pageSize > 0 ? pageSize : sorted.length;
+        const shown = sorted.slice(0, limit);
+        const remaining = sorted.length - shown.length;
         return (
           <div key={name} class="task-list__section">
             <SectionHeader name={name} count={sorted.length} />
@@ -385,7 +392,7 @@ export const TaskListView: FC<ListProps> = (
               hx-swap="none"
             >
               <input type="hidden" name="reorderSection" value={name} />
-              {sorted.map((t, i) => (
+              {shown.map((t, i) => (
                 <TaskRow
                   key={t.id}
                   task={t}
@@ -394,6 +401,15 @@ export const TaskListView: FC<ListProps> = (
                   archived={archived}
                 />
               ))}
+              {remaining > 0 && state && (
+                <SectionLoadMore
+                  state={state}
+                  section={name}
+                  view="list"
+                  offset={shown.length}
+                  remaining={remaining}
+                />
+              )}
             </div>
           </div>
         );

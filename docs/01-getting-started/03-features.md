@@ -9,11 +9,15 @@ with what you need, enable the rest when you grow into it.
 
 ## Tasks
 
-| Feature      | Description                                                            |
-| ------------ | ---------------------------------------------------------------------- |
-| **List**     | Filterable task list with sections, assignees, milestones, and sorting |
-| **Board**    | Kanban board organized by section columns                              |
-| **Timeline** | Gantt chart for task schedules and dependencies                        |
+| Feature      | Description                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| **List**     | Filterable task list with sections, assignees, milestones, sorting, and per-section "Load more" paging |
+| **Board**    | Kanban board organized by section columns, with per-column "Load more" paging                |
+| **Timeline** | Gantt chart for task schedules and dependencies                                              |
+
+The number of tasks each section/column shows before a "Load more" control
+appears is configurable in **Settings → Project → Tasks per section** (default
+25).
 
 ## Planning
 

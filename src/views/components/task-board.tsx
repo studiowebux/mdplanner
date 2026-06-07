@@ -2,6 +2,7 @@
 
 import type { FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
+import type { DomainFilterState } from "../../factories/domain.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
 import { EmptyState } from "../../components/ui/empty-state.tsx";
@@ -9,6 +10,7 @@ import {
   sortTasks,
   TASK_PRIORITY_LABELS,
 } from "../../domains/task/constants.tsx";
+import { SectionLoadMore } from "./task-pagination.tsx";
 import {
   taskMilestoneByName,
   taskPersonById,
@@ -20,7 +22,7 @@ import { dueIn } from "../../utils/time.ts";
 // Board card
 // ---------------------------------------------------------------------------
 
-const BoardCard: FC<{ task: Task }> = ({ task }) => {
+export const BoardCard: FC<{ task: Task }> = ({ task }) => {
   const deadline = task.due_date ? dueIn(task.due_date) : "";
   const isOverdue = deadline.includes("overdue");
   const assigneeName = task.assignee
@@ -121,38 +123,59 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => {
 // Board column
 // ---------------------------------------------------------------------------
 
-const BoardColumn: FC<{ name: string; tasks: Task[] }> = ({ name, tasks }) => (
-  <div class="task-board__column" data-section={name}>
-    <div class="task-board__column-header">
-      <h3 class="task-board__column-title">{name}</h3>
-      <span class="task-board__column-count">{tasks.length}</span>
+const BoardColumn: FC<
+  { name: string; tasks: Task[]; pageSize?: number; state?: DomainFilterState }
+> = ({ name, tasks, pageSize, state }) => {
+  const limit = pageSize && pageSize > 0 ? pageSize : tasks.length;
+  const shown = tasks.slice(0, limit);
+  const remaining = tasks.length - shown.length;
+  return (
+    <div class="task-board__column" data-section={name}>
+      <div class="task-board__column-header">
+        <h3 class="task-board__column-title">{name}</h3>
+        <span class="task-board__column-count">{tasks.length}</span>
+      </div>
+      <div
+        class="task-board__column-body"
+        data-section={name}
+        data-sortable
+        data-sortable-group="task-board"
+        data-sortable-item=".task-board__card"
+        hx-post="/tasks/reorder"
+        hx-trigger="end"
+        hx-include="this"
+        hx-params="sid,reorderSection"
+        hx-swap="none"
+      >
+        <input type="hidden" name="reorderSection" value={name} />
+        {shown.map((t) => <BoardCard key={t.id} task={t} />)}
+        {tasks.length === 0 && (
+          <div class="task-board__column-empty">No tasks</div>
+        )}
+        {remaining > 0 && state && (
+          <SectionLoadMore
+            state={state}
+            section={name}
+            view="board"
+            offset={shown.length}
+            remaining={remaining}
+          />
+        )}
+      </div>
     </div>
-    <div
-      class="task-board__column-body"
-      data-section={name}
-      data-sortable
-      data-sortable-group="task-board"
-      data-sortable-item=".task-board__card"
-      hx-post="/tasks/reorder"
-      hx-trigger="end"
-      hx-include="this"
-      hx-params="sid,reorderSection"
-      hx-swap="none"
-    >
-      <input type="hidden" name="reorderSection" value={name} />
-      {tasks.map((t) => <BoardCard key={t.id} task={t} />)}
-      {tasks.length === 0 && (
-        <div class="task-board__column-empty">No tasks</div>
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
-export const TaskBoardView: FC<TaskViewProps> = ({ tasks }) => {
+type BoardProps = TaskViewProps & {
+  pageSize?: number;
+  state?: DomainFilterState;
+};
+
+export const TaskBoardView: FC<BoardProps> = ({ tasks, pageSize, state }) => {
   if (tasks.length === 0) {
     return <EmptyState message="No tasks match the current filters." />;
   }
@@ -162,7 +185,13 @@ export const TaskBoardView: FC<TaskViewProps> = ({ tasks }) => {
   return (
     <div class="task-board">
       {Object.entries(grouped).map(([name, items]) => (
-        <BoardColumn key={name} name={name} tasks={sortTasks(items)} />
+        <BoardColumn
+          key={name}
+          name={name}
+          tasks={sortTasks(items)}
+          pageSize={pageSize}
+          state={state}
+        />
       ))}
     </div>
   );

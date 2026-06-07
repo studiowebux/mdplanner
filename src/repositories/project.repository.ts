@@ -56,6 +56,9 @@ export class ProjectRepository {
     if (config.pipelinesPerPage !== undefined) {
       fm.pipelines_per_page = config.pipelinesPerPage;
     }
+    if (config.tasksPerSection !== undefined) {
+      fm.tasks_per_section = config.tasksPerSection;
+    }
     if (config.staleDays !== undefined) {
       fm.stale_days = config.staleDays;
     }

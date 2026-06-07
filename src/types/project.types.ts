@@ -109,6 +109,11 @@ export const ProjectConfigSchema = z.object({
     description: "Number of pipeline runs per page (default: 10)",
     example: 10,
   }),
+  tasksPerSection: z.number().optional().openapi({
+    description:
+      "Number of tasks rendered per section in the task list/board before a 'Load more' control appears (default: 25).",
+    example: 25,
+  }),
   kpiMetrics: stringArray.optional().openapi({
     description:
       "Configurable KPI metric keys shown in goal form (e.g. mrr, arr, active_users)",
@@ -214,6 +219,7 @@ export const FrontmatterProjectSchema = z.object({
   github_token: z.string().optional(),
   cloudflare_token: z.string().optional(),
   pipelines_per_page: z.number().optional(),
+  tasks_per_section: z.number().optional(),
   kpi_metrics: z.array(z.unknown()).optional(),
   stale_days: z.number().optional(),
   hide_completed_after_days: z.number().optional(),
@@ -268,6 +274,9 @@ export const FrontmatterProjectSchema = z.object({
       githubToken,
       cloudflareToken,
       pipelinesPerPage: fm.pipelines_per_page,
+      tasksPerSection: typeof fm.tasks_per_section === "number"
+        ? fm.tasks_per_section
+        : undefined,
       kpiMetrics: Array.isArray(fm.kpi_metrics)
         ? (fm.kpi_metrics as unknown[]).map(String)
         : undefined,

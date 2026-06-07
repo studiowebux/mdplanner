@@ -90,6 +90,10 @@ export const TASK_TABLE_COLUMNS: ColumnDef[] = [
 
 export const TASK_DOMAIN = "tasks";
 
+/** Default tasks rendered per section before a "Load more" control appears.
+ * Overridden by the `tasksPerSection` project config setting. */
+export const DEFAULT_TASKS_PER_SECTION = 25;
+
 export const TASK_STATE_KEYS = [
   "view",
   "section",
