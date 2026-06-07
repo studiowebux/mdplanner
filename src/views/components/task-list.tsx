@@ -77,6 +77,11 @@ const TaskRow: FC<
                 hx-swap="none"
                 hx-trigger="change"
                 hx-include="this"
+                // Override the hx-params="sid,reorderSection" inherited from the
+                // SortableJS reorder container below — without this, htmx filters
+                // the POST body down to sid/reorderSection and drops `assignee`,
+                // so the server unassigns ("Unassigned" toast).
+                hx-params="assignee"
                 name="assignee"
                 aria-label="Assign"
               >
@@ -161,6 +166,10 @@ const TaskRow: FC<
               hx-swap="none"
               hx-trigger="change"
               hx-include="this"
+              // Override the inherited hx-params="sid,reorderSection" from the
+              // SortableJS reorder container — otherwise `section` is filtered
+              // out of the POST body and /move returns 400 (Missing section).
+              hx-params="section"
               name="section"
               aria-label="Move section"
             >

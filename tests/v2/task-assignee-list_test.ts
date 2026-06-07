@@ -83,6 +83,27 @@ Deno.test("assignee round-trip — list select + detail link (AI agent)", async 
           html.includes(`id="move-${task.id}"`),
           "move select must carry a stable id for idiomorph keying",
         );
+        // The assign/move selects are descendants of the SortableJS reorder
+        // container, which carries hx-params="sid,reorderSection". htmx inherits
+        // hx-params, so without an explicit override the selects' own field is
+        // filtered out of the POST body (empty assignee -> "Unassigned" toast;
+        // empty section -> /move 400). These overrides are the real fix.
+        const assignSelect = html.slice(
+          html.indexOf(`id="assignee-${task.id}"`),
+        );
+        assert(
+          /hx-params="assignee"/.test(
+            assignSelect.slice(0, assignSelect.indexOf("</select>")),
+          ),
+          'assignee select must override inherited hx-params with hx-params="assignee"',
+        );
+        const moveSelect = html.slice(html.indexOf(`id="move-${task.id}"`));
+        assert(
+          /hx-params="section"/.test(
+            moveSelect.slice(0, moveSelect.indexOf("</select>")),
+          ),
+          'move select must override inherited hx-params with hx-params="section"',
+        );
       },
     );
 
