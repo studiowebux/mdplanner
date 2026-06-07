@@ -5,19 +5,30 @@ import type { Child } from "hono/jsx";
 import { marked } from "marked";
 import type { Token, Tokens } from "marked";
 
-function blocks(tokens: Token[]): Child[] {
-  return tokens.map(block);
+/**
+ * Optional transform applied to prose text leaves (not code/codespan) so
+ * callers can linkify @mentions, task ids, commit hashes, etc. inside the
+ * rendered markdown. Undefined = emit the raw string (default behaviour).
+ */
+type TextRender = (text: string) => Child;
+
+function applyText(text: string, render?: TextRender): Child {
+  return render ? render(text) : text;
 }
 
-function block(t: Token): Child {
+function blocks(tokens: Token[], render?: TextRender): Child[] {
+  return tokens.map((t) => block(t, render));
+}
+
+function block(t: Token, render?: TextRender): Child {
   switch (t.type) {
     case "space":
       return null;
     case "paragraph":
-      return <p>{inlines((t as Tokens.Paragraph).tokens)}</p>;
+      return <p>{inlines((t as Tokens.Paragraph).tokens, render)}</p>;
     case "heading": {
       const h = t as Tokens.Heading;
-      const c = inlines(h.tokens);
+      const c = inlines(h.tokens, render);
       if (h.depth === 1) return <h1>{c}</h1>;
       if (h.depth === 2) return <h2>{c}</h2>;
       if (h.depth === 3) return <h3>{c}</h3>;
@@ -26,7 +37,11 @@ function block(t: Token): Child {
       return <h6>{c}</h6>;
     }
     case "blockquote":
-      return <blockquote>{blocks((t as Tokens.Blockquote).tokens)}</blockquote>;
+      return (
+        <blockquote>
+          {blocks((t as Tokens.Blockquote).tokens, render)}
+        </blockquote>
+      );
     case "hr":
       return <hr />;
     case "code": {
@@ -54,7 +69,7 @@ function block(t: Token): Child {
     case "list": {
       const l = t as Tokens.List;
       const items = l.items.map((item, i) => (
-        <li key={i}>{blocks(item.tokens)}</li>
+        <li key={i}>{blocks(item.tokens, render)}</li>
       ));
       return l.ordered
         ? <ol start={l.start || undefined}>{items}</ol>
@@ -67,15 +82,16 @@ function block(t: Token): Child {
           <thead>
             <tr>
               {tb.header.map((cell, i) => (
-                <th key={i} scope="col">{inlines(cell.tokens)}</th>
+                <th key={i} scope="col">{inlines(cell.tokens, render)}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {tb.rows.map((row) => (
               <tr>
-                {row.map((cell, ci) => <td key={ci}>{inlines(cell.tokens)}
-                </td>)}
+                {row.map((cell, ci) => (
+                  <td key={ci}>{inlines(cell.tokens, render)}</td>
+                ))}
               </tr>
             ))}
           </tbody>
@@ -84,7 +100,9 @@ function block(t: Token): Child {
     }
     case "text": {
       const tx = t as Tokens.Text;
-      return tx.tokens ? <>{inlines(tx.tokens)}</> : tx.text;
+      return tx.tokens
+        ? <>{inlines(tx.tokens, render)}</>
+        : applyText(tx.text, render);
     }
     case "html":
       return null;
@@ -93,24 +111,26 @@ function block(t: Token): Child {
   }
 }
 
-function inlines(tokens: Token[]): Child[] {
-  return tokens.map(inline);
+function inlines(tokens: Token[], render?: TextRender): Child[] {
+  return tokens.map((t) => inline(t, render));
 }
 
-function inline(t: Token): Child {
+function inline(t: Token, render?: TextRender): Child {
   switch (t.type) {
     case "text": {
       const tx = t as Tokens.Text;
-      return tx.tokens ? <>{inlines(tx.tokens)}</> : tx.text;
+      return tx.tokens
+        ? <>{inlines(tx.tokens, render)}</>
+        : applyText(tx.text, render);
     }
     case "escape":
       return (t as Tokens.Escape).text;
     case "strong":
-      return <strong>{inlines((t as Tokens.Strong).tokens)}</strong>;
+      return <strong>{inlines((t as Tokens.Strong).tokens, render)}</strong>;
     case "em":
-      return <em>{inlines((t as Tokens.Em).tokens)}</em>;
+      return <em>{inlines((t as Tokens.Em).tokens, render)}</em>;
     case "del":
-      return <del>{inlines((t as Tokens.Del).tokens)}</del>;
+      return <del>{inlines((t as Tokens.Del).tokens, render)}</del>;
     case "codespan":
       return <code>{(t as Tokens.Codespan).text}</code>;
     case "br":
@@ -124,7 +144,7 @@ function inline(t: Token): Child {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {inlines(l.tokens)}
+          {inlines(l.tokens, render)}
         </a>
       );
     }
@@ -151,12 +171,16 @@ type MarkdownJsxProps = {
   class?: string;
   /** Render children only, no wrapper div. */
   bare?: boolean;
+  /** Transform prose text leaves (e.g. linkify @mentions/task ids). */
+  renderText?: TextRender;
 };
 
 /** Render markdown inline as hono/jsx nodes (no dangerouslySetInnerHTML); bare omits the wrapper element. */
-export function MarkdownJsx({ markdown, class: cls, bare }: MarkdownJsxProps) {
+export function MarkdownJsx(
+  { markdown, class: cls, bare, renderText }: MarkdownJsxProps,
+) {
   if (!markdown) return null;
-  const children = blocks(marked.lexer(markdown));
+  const children = blocks(marked.lexer(markdown), renderText);
   if (bare) return <>{children}</>;
   return <div class={cls ?? "markdown-body"}>{children}</div>;
 }

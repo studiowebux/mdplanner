@@ -22,6 +22,7 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { type MentionOpts } from "../utils/mentions.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
 import { MentionText } from "./components/mention-text.tsx";
+import { MarkdownJsx } from "../utils/markdown-jsx.tsx";
 import { resolveLinkedItems } from "../utils/resolve-links.ts";
 import {
   MetaField,
@@ -419,16 +420,18 @@ export const TaskDetailView: FC<Props> = (
             {task.description && task.description.length > 0 && (
               <section class="detail-section task-detail__section">
                 <h2>Description</h2>
-                <div class="task-detail__description">
-                  {task.description.map((p, i) => (
-                    <p key={i}>
+                <div class="task-detail__description markdown-body">
+                  <MarkdownJsx
+                    markdown={task.description.join("\n\n")}
+                    bare
+                    renderText={(t) => (
                       <MentionText
-                        text={p}
+                        text={t}
                         people={people}
                         githubRepo={mentionOpts.githubRepo}
                       />
-                    </p>
-                  ))}
+                    )}
+                  />
                 </div>
               </section>
             )}
