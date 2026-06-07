@@ -89,9 +89,17 @@ settingsViewRouter.post("/project", async (c) => {
     : undefined;
   await getProjectService().updateConfig({
     name: String(body.name ?? ""),
-    description: body.description ? String(body.description) : undefined,
-    locale: body.locale ? String(body.locale).trim() : undefined,
-    currency: body.currency ? String(body.currency).trim() : undefined,
+    // Clearable free-text fields: a present-but-empty input means "clear", not
+    // "leave unchanged". Inputs are pre-filled, so an untouched save resends the
+    // current value; `undefined` (field absent) still skips. updateConfig
+    // applies "" because it only skips on `undefined`.
+    description: body.description !== undefined
+      ? String(body.description)
+      : undefined,
+    locale: body.locale !== undefined ? String(body.locale).trim() : undefined,
+    currency: body.currency !== undefined
+      ? String(body.currency).trim()
+      : undefined,
     port: portRaw && !isNaN(portRaw) ? portRaw : undefined,
     staleDays: staleDaysRaw && !isNaN(staleDaysRaw) ? staleDaysRaw : undefined,
     hideCompletedAfterDays: hideCompletedAfterDaysRaw !== undefined &&
@@ -101,8 +109,10 @@ settingsViewRouter.post("/project", async (c) => {
     tasksPerSection: tasksPerSectionRaw && !isNaN(tasksPerSectionRaw)
       ? tasksPerSectionRaw
       : undefined,
-    githubToken: body.githubToken ? String(body.githubToken) : undefined,
-    cloudflareToken: body.cloudflareToken
+    githubToken: body.githubToken !== undefined
+      ? String(body.githubToken)
+      : undefined,
+    cloudflareToken: body.cloudflareToken !== undefined
       ? String(body.cloudflareToken)
       : undefined,
   });
