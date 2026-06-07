@@ -3,7 +3,6 @@
 
 import type { MiddlewareHandler } from "hono";
 import { getProjectService } from "../singletons/services.ts";
-import { readUiState } from "../utils/ui-state.ts";
 import { resolveActivePerson } from "../utils/actor.ts";
 import { getCookieSecret } from "../utils/secrets.ts";
 import { resolveActor } from "./identity.ts";
@@ -25,11 +24,8 @@ export const contextMiddleware: MiddlewareHandler<{
   const person = await resolveActivePerson(actor.id);
   if (person) c.set("activePerson", person);
 
-  const sidebarState = readUiState<{ pinned?: string[] }>(c, "sidebar");
-  c.set(
-    "pinnedKeys",
-    Array.isArray(sidebarState.pinned) ? sidebarState.pinned : [],
-  );
+  const pinnedNav = person?.preferences?.pinnedNav;
+  c.set("pinnedKeys", Array.isArray(pinnedNav) ? pinnedNav : []);
 
   await next();
 

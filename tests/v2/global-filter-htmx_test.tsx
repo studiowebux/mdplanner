@@ -4,9 +4,9 @@
  * Locks the topbar global filter (project/assignee multi-select) running on
  * PURE htmx form serialization:
  * - POST /settings/global-filters parses a form body (repeated globalProjects /
- *   globalAssignees keys via parseBody({all:true})), writes the ui_state cookie,
- *   and returns 204 + HX-Trigger: global-filter:changed so domain views
- *   (from:body) reload.
+ *   globalAssignees keys via parseBody({all:true})), writes the acting person's
+ *   UI state (PersonPreferences.uiState._global), and returns 204 + HX-Trigger:
+ *   global-filter:changed so domain views (from:body) reload.
  * - The project + assignee dropdowns share ONE <form hx-post hx-trigger=change>
  *   so the browser serializes every checked box via FormData as repeated keys.
  *
@@ -21,6 +21,7 @@ import { Hono } from "hono";
 import { assert, assertEquals } from "@std/assert";
 import { settingsViewRouter } from "../../src/views/settings/routes.tsx";
 import { Topbar } from "../../src/components/shell/topbar.tsx";
+import type { AppVariables } from "../../src/types/app.ts";
 import {
   getPeopleService,
   getPortfolioService,
@@ -43,33 +44,47 @@ Deno.test("global-filter htmx — server contract", async (t) => {
   initServices(dir, { cache: false });
 
   try {
+    // The route writes filters into the acting person's PersonPreferences (the
+    // ui_state cookie is gone). Stand up an app that injects an activePerson the
+    // way contextMiddleware does in production.
+    const person = await getPeopleService().create({ name: "Tester" });
+    const app = new Hono<{ Variables: AppVariables }>();
+    app.use("*", async (c, next) => {
+      c.set("activePerson", person);
+      await next();
+    });
+    app.route("/", settingsViewRouter);
+
     await t.step(
-      "POST writes filters + returns 204 HX-Trigger global-filter:changed",
+      "POST writes filters to PersonPreferences + returns 204 HX-Trigger",
       async () => {
-        const res = await settingsViewRouter.request(
+        const res = await app.request(
           filtersRequest(["Alpha", "Beta"], ["Alice"]),
         );
         assertEquals(res.status, 204);
         assertEquals(res.headers.get("HX-Trigger"), "global-filter:changed");
-        const cookie = res.headers.get("Set-Cookie") ?? "";
-        assert(cookie.includes("ui_state"), "ui_state cookie must be written");
-        // Aggregation: ALL selected projects/assignees must round-trip into the
-        // cookie, not just the first (regression: multi-select collapsed to one).
-        const raw = cookie.match(/ui_state=([^;]+)/)?.[1] ?? "";
-        const state = JSON.parse(decodeURIComponent(raw));
-        assertEquals(state._global.globalProjects, ["Alpha", "Beta"]);
-        assertEquals(state._global.globalAssignees, ["Alice"]);
         await res.body?.cancel();
+        // Aggregation: ALL selected projects/assignees must round-trip into the
+        // backend store, not just the first (regression: multi-select collapsed
+        // to one).
+        const updated = await getPeopleService().getById(person.id);
+        const global = updated?.preferences?.uiState?._global;
+        assertEquals(global?.globalProjects, ["Alpha", "Beta"]);
+        assertEquals(global?.globalAssignees, ["Alice"]);
       },
     );
 
     await t.step(
       "empty form clears filters (still 204 + trigger)",
       async () => {
-        const res = await settingsViewRouter.request(filtersRequest([], []));
+        const res = await app.request(filtersRequest([], []));
         assertEquals(res.status, 204);
         assertEquals(res.headers.get("HX-Trigger"), "global-filter:changed");
         await res.body?.cancel();
+        const updated = await getPeopleService().getById(person.id);
+        const global = updated?.preferences?.uiState?._global;
+        assertEquals(global?.globalProjects, []);
+        assertEquals(global?.globalAssignees, []);
       },
     );
   } finally {

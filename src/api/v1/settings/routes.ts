@@ -160,16 +160,16 @@ settingsRouter.openapi(setIdentityRoute, async (c) => {
   return c.body(null, 204);
 });
 
-// POST /global-filters — write globalProjects + globalAssignees into ui_state cookie
+// POST /global-filters — write globalProjects + globalAssignees into PersonPreferences UI state
 const setGlobalFiltersRoute = createRoute({
   method: "post",
   path: "/global-filters",
   tags: ["Settings"],
   summary: "Set global filters",
   description:
-    "Writes globalProjects and globalAssignees into the ui_state cookie under " +
-    "the _global key. Empty arrays clear the respective filter. " +
-    "All other ui_state keys are preserved.",
+    "Writes globalProjects and globalAssignees into the current user's UI " +
+    "state (PersonPreferences) under the _global key. Empty arrays clear the " +
+    "respective filter. All other UI-state keys are preserved.",
   operationId: "setGlobalFilters",
   request: {
     body: {
@@ -182,9 +182,9 @@ const setGlobalFiltersRoute = createRoute({
   },
 });
 
-settingsRouter.openapi(setGlobalFiltersRoute, (c) => {
+settingsRouter.openapi(setGlobalFiltersRoute, async (c) => {
   const { globalProjects, globalAssignees } = c.req.valid("json");
-  writeGlobalFilters(c, globalProjects ?? [], globalAssignees ?? []);
+  await writeGlobalFilters(c, globalProjects ?? [], globalAssignees ?? []);
   return c.body(null, 204);
 });
 

@@ -80,7 +80,7 @@ analyticsViewRouter.post("/customize", async (c) => {
     c,
     "analytics",
   );
-  writeUiState(c, "analytics", {
+  await writeUiState(c, "analytics", {
     ...existing,
     analyticsHiddenSections: hidden,
   });

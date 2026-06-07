@@ -1,34 +1,37 @@
-// Request-scoped UI state: global project/assignee filters and view prefs.
-import { getCookie, setCookie } from "hono/cookie";
-import { parseJson } from "../database/sqlite/mod.ts";
+// Request-scoped UI state: global project/assignee filters and per-domain view
+// prefs. Persisted per-user in PersonPreferences.uiState (backend store, keyed
+// by the resolved activePerson), NOT a cookie. The former single ui_state
+// cookie crammed every domain into one ~4KB blob and silently truncated once
+// enough domains accumulated state.
+//
+// Reads are sync: activePerson is loaded once per request by contextMiddleware,
+// so its preferences are already in memory. Writes are async: they patch
+// person.preferences.uiState via the people service (one-level-deep per-domain
+// merge — a write to one domain leaves the others untouched).
+import { getPeopleService } from "../singletons/services.ts";
 import type { AppContext } from "../types/app.ts";
 
-const COOKIE_NAME = "ui_state";
+// One domain's UI state: string view/sort values or string-array multi-selects.
+type DomainUiState = Record<string, string | string[]>;
 
-function parseUiCookie(
-  raw: string | undefined,
-): Record<string, Record<string, unknown>> {
-  if (!raw) return {};
-  const parsed = parseJson<Record<string, Record<string, unknown>>>(raw);
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-  return parsed;
-}
-
-// Read a domain's saved UI state from the shared cookie.
+// Read a domain's saved UI state from the active person's preferences.
 export function readUiState<T>(c: AppContext, domain: string): Partial<T> {
-  const all = parseUiCookie(getCookie(c, COOKIE_NAME));
+  const all: Record<string, Record<string, unknown>> =
+    c.var.activePerson?.preferences?.uiState ?? {};
   return (all[domain] ?? {}) as Partial<T>;
 }
 
-// Persist a domain's UI state into the shared cookie.
-export function writeUiState<T>(c: AppContext, domain: string, state: T): void {
-  const all = parseUiCookie(getCookie(c, COOKIE_NAME));
-  all[domain] = state as Record<string, unknown>;
-  setCookie(c, COOKIE_NAME, JSON.stringify(all), {
-    path: "/",
-    maxAge: 31536000,
-    sameSite: "Lax",
-    httpOnly: true,
+// Persist a domain's UI state into the active person's preferences. No-op when
+// there is no person to scope to (anonymous request with no human fallback).
+export async function writeUiState(
+  c: AppContext,
+  domain: string,
+  state: DomainUiState,
+): Promise<void> {
+  const personId = c.var.activePerson?.id;
+  if (!personId) return;
+  await getPeopleService().updatePreferences(personId, {
+    uiState: { [domain]: state },
   });
 }
 
@@ -49,26 +52,29 @@ export function readGlobalAssignees(c: AppContext): string[] {
 }
 
 /** Persist the global project/assignee filters into request UI state. */
-export function writeGlobalFilters(
+export async function writeGlobalFilters(
   c: AppContext,
   projects: string[],
   assignees: string[],
-): void {
-  writeUiState(c, GLOBAL_KEY, {
+): Promise<void> {
+  await writeUiState(c, GLOBAL_KEY, {
     globalProjects: projects,
     globalAssignees: assignees,
   });
 }
 
 // Delete specific keys from a domain's saved UI state, leaving everything else intact.
-export function deleteUiStateKeys(
+export async function deleteUiStateKeys(
   c: AppContext,
   domain: string,
   keys: string[],
-): void {
-  const saved = readUiState<Record<string, unknown>>(c, domain);
-  for (const key of keys) delete saved[key];
-  writeUiState(c, domain, saved);
+): Promise<void> {
+  const saved = readUiState<DomainUiState>(c, domain);
+  const next: DomainUiState = {};
+  for (const [key, value] of Object.entries(saved)) {
+    if (!keys.includes(key) && value !== undefined) next[key] = value;
+  }
+  await writeUiState(c, domain, next);
 }
 
 // Merge query params over saved state. Params take precedence when present.

@@ -357,7 +357,7 @@ settingsViewRouter.post("/cache/rebuild-fts", (c) => {
   }
 });
 
-// -- Global filters — htmx form POST, writes globalProjects + globalAssignees into ui_state cookie --
+// -- Global filters — htmx form POST, writes globalProjects + globalAssignees into PersonPreferences UI state --
 settingsViewRouter.post("/global-filters", async (c) => {
   const body = await c.req.parseBody({ all: true });
   const toNames = (raw: typeof body[string]): string[] =>
@@ -366,7 +366,7 @@ settingsViewRouter.post("/global-filters", async (c) => {
       : raw !== undefined
       ? [String(raw)]
       : [];
-  writeGlobalFilters(
+  await writeGlobalFilters(
     c,
     toNames(body["globalProjects"]),
     toNames(body["globalAssignees"]),

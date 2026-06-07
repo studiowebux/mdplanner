@@ -179,8 +179,8 @@ export function registerTaskWorkflowRoutes(tasksRouter: TasksRouter): void {
         return c.json(notFound("TASK", id), 404);
       }
 
-      // Clear any column sort from the cookie so F5 respects drag order.
-      deleteUiStateKeys(c, "tasks", ["sort", "order"]);
+      // Clear any column sort from UI state so F5 respects drag order.
+      await deleteUiStateKeys(c, "tasks", ["sort", "order"]);
 
       publish("task.updated");
       return c.json(updated, 200);

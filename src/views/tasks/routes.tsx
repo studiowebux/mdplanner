@@ -440,7 +440,7 @@ tasksRouter.post("/reorder", async (c) => {
   );
 
   // Clear sort state so a page refresh respects the new drag order.
-  deleteUiStateKeys(c, "tasks", ["sort", "order"]);
+  await deleteUiStateKeys(c, "tasks", ["sort", "order"]);
   publish("task.updated");
   return c.body(null, 204);
 });
