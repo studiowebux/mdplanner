@@ -822,7 +822,9 @@ a.task-board__card-avatar:hover {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-md);
-  align-items: stretch;
+  /* start, not stretch: each column takes its natural height. Stretching made
+     the shorter column's last section (GitHub/Files) balloon to fill the gap. */
+  align-items: start;
 }
 
 .task-detail__col-left,
@@ -830,11 +832,6 @@ a.task-board__card-avatar:hover {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-}
-
-.task-detail__col-left > :last-child,
-.task-detail__col-right > :last-child {
-  flex: 1;
 }
 
 .task-detail__header {
@@ -1130,6 +1127,12 @@ a.task-board__card-avatar:hover {
   flex-direction: column;
   gap: var(--space-sm);
   margin-top: var(--space-md);
+}
+
+/* Keep the submit button at its natural width — the column flex would
+   otherwise stretch it full-width (the textarea above stays full-width). */
+.task-detail__add-comment .btn {
+  align-self: flex-start;
 }
 
 .task-detail__comment-input {
