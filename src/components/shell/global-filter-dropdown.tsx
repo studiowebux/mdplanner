@@ -51,8 +51,13 @@ export function GlobalFilterDropdown(
         class="topbar__filter-panel is-hidden"
       >
         <div class="topbar__filter-search-wrap">
+          {
+            /* type="text" (not "search"): Safari ignores autocomplete="off" on
+              type=search and shows a native history dropdown whose interaction
+              closes the panel via the outside-click handler. */
+          }
           <input
-            type="search"
+            type="text"
             class="topbar__filter-search form__input form__input--sm"
             data-global-filter-search={type}
             placeholder={`Search ${label.toLowerCase()}...`}
@@ -77,7 +82,13 @@ export function GlobalFilterDropdown(
           </button>
         </div>
         <div class="topbar__filter-list" data-global-filter-list={type}>
-          {options.map((opt) => (
+          {
+            /* Checked options first (stable sort preserves intra-group order).
+              Render-order only; global-filter.js keys off data-* + label text. */
+          }
+          {[...options].sort((a, b) =>
+            Number(active.includes(b.value)) - Number(active.includes(a.value))
+          ).map((opt) => (
             <label
               key={opt.value}
               data-global-filter-item={type}
