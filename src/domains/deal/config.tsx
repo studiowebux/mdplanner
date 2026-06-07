@@ -123,7 +123,15 @@ export const dealConfig: DomainConfig<Deal, CreateDeal, UpdateDeal> = {
                   : stageDeals.map((deal) => {
                     const tags = deal.tags ?? [];
                     return (
-                      <div key={deal.id} class="deal-pipeline__card">
+                      <div
+                        key={deal.id}
+                        // Stable id so idiomorph keys the card by identity
+                        // through the #deals-view SSE morph (un-keyed cards
+                        // soft-match positionally and scramble across stages
+                        // when a deal moves stage).
+                        id={`deal-card-${deal.id}`}
+                        class="deal-pipeline__card"
+                      >
                         <a
                           href={`/deals/${deal.id}`}
                           class="deal-pipeline__card-link"

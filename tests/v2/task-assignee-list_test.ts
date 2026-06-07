@@ -67,6 +67,22 @@ Deno.test("assignee round-trip — list select + detail link (AI agent)", async 
           selectedClaude.test(html),
           "list assignee select must mark the assigned person's option selected",
         );
+        // Stable ids so idiomorph keys the row + its interactive selects by
+        // identity during the #tasks-view SSE morph (un-keyed rows get
+        // soft-matched positionally and reset the assignee select → spurious
+        // empty-assignee POST). Guards the keying fix.
+        assert(
+          html.includes(`id="task-row-${task.id}"`),
+          "list row must carry a stable id for idiomorph keying",
+        );
+        assert(
+          html.includes(`id="assignee-${task.id}"`),
+          "assignee select must carry a stable id for idiomorph keying",
+        );
+        assert(
+          html.includes(`id="move-${task.id}"`),
+          "move select must carry a stable id for idiomorph keying",
+        );
       },
     );
 

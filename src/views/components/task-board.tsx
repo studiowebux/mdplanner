@@ -34,6 +34,10 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => {
 
   return (
     <div
+      // Stable id so idiomorph keys the card by identity through the
+      // #tasks-view SSE morph (un-keyed cards get positionally soft-matched and
+      // scramble across columns on reorder/assign).
+      id={`task-board-card-${task.id}`}
       class={`task-board__card${
         task.completed ? " task-board__card--completed" : ""
       }`}

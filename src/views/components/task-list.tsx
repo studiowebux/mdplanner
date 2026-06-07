@@ -30,6 +30,12 @@ const TaskRow: FC<
   { task, peopleOptions, index, archived },
 ) => (
   <div
+    // Stable id so idiomorph keys this row by identity during the SSE morph of
+    // #tasks-view. Without it idiomorph soft-matches rows positionally and, when
+    // assigning re-sorts the list, reconciles each row's <select> against a
+    // different task's markup — scrambling the view and resetting the assignee
+    // select the user just used (the source of the spurious empty-assignee POST).
+    id={`task-row-${task.id}`}
     class={`task-list__row${
       task.completed ? " task-list__row--completed" : ""
     }`}
@@ -65,6 +71,7 @@ const TaskRow: FC<
           {peopleOptions && peopleOptions.length > 0
             ? (
               <select
+                id={`assignee-${task.id}`}
                 class="form__select form__select--sm"
                 hx-post={`/tasks/${task.id}/assign`}
                 hx-swap="none"
@@ -148,6 +155,7 @@ const TaskRow: FC<
         : (
           <>
             <select
+              id={`move-${task.id}`}
               class="form__select form__select--sm"
               hx-post={`/tasks/${task.id}/move`}
               hx-swap="none"
