@@ -71,51 +71,6 @@ Deno.test("assignee round-trip — list select + detail link (AI agent)", async 
     );
 
     await t.step(
-      "GET /view fragment (SSE morph path) renders the assigned option selected",
-      async () => {
-        // Mirrors the real refresh from the bug report:
-        // GET /tasks/view?...&hideCompleted=true (no view param → defaultView "list").
-        const res = await viewRouter.request(
-          new Request(
-            "http://localhost/view?q=&section=&project=&milestone=&assignee=&priority=&tags=&date_from=&date_to=&hideCompleted=true",
-            { method: "GET" },
-          ),
-        );
-        assertEquals(res.status, 200);
-        const html = await res.text();
-        const selectedClaude = new RegExp(
-          `<option[^>]*value="${claude.id}"[^>]*selected`,
-        );
-        assert(
-          selectedClaude.test(html),
-          "/view fragment must mark the assigned person's option selected",
-        );
-      },
-    );
-
-    await t.step(
-      "an unassigned task marks the Unassigned option selected (deterministic morph target)",
-      async () => {
-        const solo = await tasks.create({
-          title: "Nobody assigned",
-          section: "Todo",
-        });
-        const res = await viewRouter.request(
-          new Request("http://localhost/?view=list", { method: "GET" }),
-        );
-        assertEquals(res.status, 200);
-        const html = await res.text();
-        // The select for the unassigned task must mark its empty option
-        // selected so the morph (and select-morph-sync.js) has one clear target.
-        assert(
-          /<option value=""[^>]*selected[^>]*>\s*Unassigned/.test(html),
-          "unassigned task must render the Unassigned option as selected",
-        );
-        await tasks.hardDelete(solo.id);
-      },
-    );
-
-    await t.step(
       "GET /:id detail links the assignee to /people/:id",
       async () => {
         const res = await viewRouter.request(

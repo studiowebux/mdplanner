@@ -72,9 +72,8 @@ const TaskRow: FC<
                 hx-include="this"
                 name="assignee"
                 aria-label="Assign"
-                data-selected-value={task.assignee ?? ""}
               >
-                <option value="" selected={!task.assignee}>Unassigned</option>
+                <option value="">Unassigned</option>
                 {peopleOptions.map((p) => (
                   <option
                     key={p.value}
