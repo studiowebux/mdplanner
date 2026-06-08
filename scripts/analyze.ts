@@ -388,6 +388,10 @@ function analyzeComplexity(files: FileInfo[]): Dimension {
 // meaningful lines inside a clone + the top hotspots. Line-based, not token-AST:
 // it catches copy-paste, misses renamed/reordered clones — documented like the
 // other heuristics.
+//
+// Multi-line `import {…}` / `export {…}` specifier BODIES are dropped whole: the
+// continuation lines (`  someSymbol,`) are not code, and 40 domains importing
+// the same shared-cache API otherwise dominate the hotspots with pure noise.
 function analyzeDuplication(files: FileInfo[]): Dimension {
   const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
   const W = CONFIG.dupWindow;
@@ -408,8 +412,23 @@ function analyzeDuplication(files: FileInfo[]): Dimension {
   for (const f of src) {
     const lines = f.text.split("\n");
     const entries: { line: number; norm: string }[] = [];
+    let inSpecifierBlock = false;
     for (let i = 0; i < lines.length; i++) {
       const norm = lines[i].trim().replace(/\s+/g, " ");
+      // Inside a multi-line import/export specifier block: skip every line up to
+      // and including the closing brace.
+      if (inSpecifierBlock) {
+        if (norm.includes("}")) inSpecifierBlock = false;
+        continue;
+      }
+      // Open one: starts with import/export, opens `{`, no close on the same line.
+      if (
+        /^(import|export)\b/.test(norm) && norm.includes("{") &&
+        !norm.includes("}")
+      ) {
+        inSpecifierBlock = true;
+        continue;
+      }
       if (trivial(norm)) continue;
       entries.push({ line: i + 1, norm });
     }
