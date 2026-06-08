@@ -146,3 +146,67 @@ export function collectComplexity(rel: string, text: string): FnComplexity[] {
   visit(sf);
   return out;
 }
+
+export interface StructuralClone {
+  rel: string;
+  name: string;
+  line: number;
+  size: number; // AST node count of the function body
+  key: string; // structural fingerprint — `${size}:${hash}`
+}
+
+// djb2 hash over a node-kind sequence → short hex. Kinds-only on purpose:
+// identifiers and literals are excluded, so two functions with the same shape
+// but different variable names collapse to the same fingerprint.
+function hashKinds(kinds: number[]): string {
+  let h = 5381;
+  for (const k of kinds) h = ((h << 5) + h + k) >>> 0;
+  return h.toString(16);
+}
+
+/**
+ * Fingerprint every function body by its AST STRUCTURE (node kinds only),
+ * ignoring identifier/literal text. This is what catches renamed/reordered
+ * clones the line-hasher misses: copy-paste-then-rename produces an identical
+ * structural key. Only bodies with >= `minNodes` nodes are returned, to keep
+ * trivial one-liners (every `return x;`) out of the results.
+ */
+export function collectStructuralClones(
+  rel: string,
+  text: string,
+  minNodes: number,
+): StructuralClone[] {
+  const sf = ts.createSourceFile(
+    rel,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKind(rel),
+  );
+  const out: StructuralClone[] = [];
+  const visit = (n: ts.Node): void => {
+    if (isFunctionLike(n)) {
+      const body = (n as ts.FunctionLikeDeclaration).body;
+      if (body) {
+        const kinds: number[] = [];
+        const collect = (m: ts.Node): void => {
+          kinds.push(m.kind);
+          ts.forEachChild(m, collect);
+        };
+        collect(body);
+        if (kinds.length >= minNodes) {
+          out.push({
+            rel,
+            name: fnName(n, sf),
+            line: sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1,
+            size: kinds.length,
+            key: `${kinds.length}:${hashKinds(kinds)}`,
+          });
+        }
+      }
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}

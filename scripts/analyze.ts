@@ -17,9 +17,10 @@
  *   4. Complexity  — cyclomatic (decision-point) count per function via a real
  *                    TypeScript AST walk (counts each real function, including
  *                    those nested inside classic-script IIFEs).
- *   5. Duplication — % of meaningful lines inside a recurring N-line clone,
- *                    via line-window hashing. Catches copy-paste, misses
- *                    renamed/reordered clones.
+ *   5. Duplication — three layers: line-window hashing (verbatim copy-paste),
+ *                    AST structural fingerprints (renamed/reordered clones via
+ *                    node-kinds-only hashing), and CSS declaration-body hashing
+ *                    (same styles under a different selector).
  *   6. Testing     — test-file count + test:source ratio.
  *   7. Docs        — public-API exports preceded by a doc comment (scoped to
  *                    CONFIG.docApiDirs); file headers.
@@ -27,10 +28,11 @@
  *
  * The overall grade is a weighted blend of the available dimensions.
  *
- * LIMITATION (be honest): duplication and docs are line/regex heuristics, NOT a
- * type-aware AST walk. Duplication is line-window hashing (catches copy-paste,
- * misses renamed or reordered clones). They approximate hotspots, they do not
- * certify them. Complexity is a real per-function AST decision count.
+ * LIMITATION (be honest): docs is a regex heuristic, not a type-aware walk.
+ * Duplication's line-window pass misses renamed clones, but the AST structural
+ * pass catches those (kinds-only — may over-match different logic of identical
+ * shape; confirm hotspots by reading). Complexity is a real per-function AST
+ * decision count. The structural/CSS passes approximate; they do not certify.
  * Generated/minified files are excluded (vendor/, *.min.*). Lint/Format are
  * only computed with --deep (subprocess).
  *
@@ -49,7 +51,8 @@
  */
 
 import { dirname, join } from "@std/path";
-import { collectComplexity } from "./analyze/ast.ts";
+import { collectComplexity, collectStructuralClones } from "./analyze/ast.ts";
+import { collectCssRules, type CssRule } from "./analyze/css.ts";
 
 // ---------------------------------------------------------------------------
 // Tunables — thresholds that define "good". Adjust per project, not per run.
@@ -61,6 +64,8 @@ const CONFIG = {
   minTestRatio: 0.25, // tests-LOC : source-LOC target ratio
   dupWindow: 6, // consecutive meaningful lines that constitute a clone
   maxDupPct: 5, // tolerated % of meaningful lines inside a clone
+  minCloneNodes: 40, // min AST node count for a fn to be a structural-clone candidate
+  minCssDecls: 3, // min declarations for a CSS rule to be a duplicate-body candidate
   // Documentation is measured over the PUBLIC-API surface only — the reusable
   // library layers where a doc comment earns its keep. Leaf/wiring layers
   // (views, domains config, type decls, route handlers) are excluded: a JSDoc
@@ -462,23 +467,88 @@ function analyzeDuplication(files: FileInfo[]): Dimension {
     .slice(0, 6);
 
   const dupPct = totalMeaningful === 0 ? 0 : (dupLines / totalMeaningful) * 100;
+
+  // Structural clones (TS/JS): functions with the same AST shape but different
+  // identifier names — the renamed copies the line-hasher cannot see.
+  const structByKey = new Map<
+    string,
+    Array<{ rel: string; name: string; line: number; size: number }>
+  >();
+  for (const f of src) {
+    for (
+      const c of collectStructuralClones(f.rel, f.text, CONFIG.minCloneNodes)
+    ) {
+      const arr = structByKey.get(c.key) ?? [];
+      arr.push({ rel: c.rel, name: c.name, line: c.line, size: c.size });
+      structByKey.set(c.key, arr);
+    }
+  }
+  const structClones = [...structByKey.values()]
+    .filter((locs) => locs.length >= 2)
+    .sort((a, b) => b[0].size - a[0].size)
+    .slice(0, 6);
+
+  // CSS contextual duplication: identical declaration body under ≥2 selectors.
+  const cssByBody = new Map<string, CssRule[]>();
+  for (const f of files.filter((f) => f.ext === ".css" && !f.isTest)) {
+    for (const r of collectCssRules(f.rel, f.text, CONFIG.minCssDecls)) {
+      const arr = cssByBody.get(r.bodyKey) ?? [];
+      arr.push(r);
+      cssByBody.set(r.bodyKey, arr);
+    }
+  }
+  const cssDups = [...cssByBody.values()]
+    .filter((rules) => new Set(rules.map((r) => r.selector)).size >= 2)
+    .sort((a, b) => b[0].declCount - a[0].declCount)
+    .slice(0, 6);
+
   const score = clamp(
-    100 - Math.max(0, dupPct - CONFIG.maxDupPct) * 9 - dupPct,
+    100 - Math.max(0, dupPct - CONFIG.maxDupPct) * 9 - dupPct -
+      structClones.length * 2 - cssDups.length * 2,
   );
   return {
     name: "Duplication",
     score,
     grade: grade(score),
     summary: `${dupPct.toFixed(1)}% of meaningful lines inside a ${W}-line ` +
-      `clone (target ≤${CONFIG.maxDupPct}%); ${hotspots.length} hotspot(s).`,
-    findings: hotspots.map(([, locs]) =>
-      `×${locs.length}: ${locs[0].rel}:${locs[0].line} ↔ ${locs[1].rel}:${
-        locs[1].line
-      }`
-    ),
-    recommendations: dupPct <= CONFIG.maxDupPct ? [] : [
-      "Extract the recurring blocks into a shared helper/component. " +
-      "Parse/format logic belongs in utils/, not copy-pasted per module.",
+      `clone (target ≤${CONFIG.maxDupPct}%); ${hotspots.length} line + ` +
+      `${structClones.length} structural + ${cssDups.length} CSS hotspot(s).`,
+    findings: [
+      ...hotspots.map(([, locs]) =>
+        `line ×${locs.length}: ${locs[0].rel}:${locs[0].line} ↔ ` +
+        `${locs[1].rel}:${locs[1].line}`
+      ),
+      ...structClones.map((locs) =>
+        `struct ×${locs.length} (~${locs[0].size} nodes): ` +
+        `${locs[0].name} ${locs[0].rel}:${locs[0].line} ↔ ` +
+        `${locs[1].name} ${locs[1].rel}:${locs[1].line}`
+      ),
+      ...cssDups.map((rules) =>
+        `css ×${rules.length} (${rules[0].declCount} decls): ` +
+        rules.slice(0, 2).map((r) => `${r.selector} ${r.rel}:${r.line}`).join(
+          " ↔ ",
+        )
+      ),
+    ],
+    recommendations: [
+      ...(dupPct > CONFIG.maxDupPct
+        ? [
+          "Extract the recurring blocks into a shared helper/component. " +
+          "Parse/format logic belongs in utils/, not copy-pasted per module.",
+        ]
+        : []),
+      ...(structClones.length
+        ? [
+          "Structural clones (same shape, renamed names): factor into a " +
+          "generic helper/factory instead of copy-paste-then-rename.",
+        ]
+        : []),
+      ...(cssDups.length
+        ? [
+          "CSS rules share a declaration body under different selectors: " +
+          "consolidate to one class or a shared utility/token.",
+        ]
+        : []),
     ],
   };
 }
