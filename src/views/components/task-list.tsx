@@ -349,6 +349,12 @@ type ListProps = TaskViewProps & {
    * current view (e.g. Cancelled, Scope Creep) drop out of the dropdowns.
    */
   moveSections: string[];
+  /**
+   * Sections rendered collapsed (header + count visible, body hidden behind a
+   * native <details> toggle). Used when hideCompleted is on so the Done section
+   * collapses instead of the filter silently emptying it.
+   */
+  collapsedSections?: string[];
 };
 
 export const TaskListView: FC<ListProps> = (
@@ -361,6 +367,7 @@ export const TaskListView: FC<ListProps> = (
     pageSize,
     state,
     moveSections,
+    collapsedSections,
   },
 ) => {
   if (tasks.length === 0) {
@@ -369,6 +376,52 @@ export const TaskListView: FC<ListProps> = (
 
   const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);
   const sectionNames = Object.keys(grouped);
+  const collapsed = new Set(collapsedSections ?? []);
+
+  // Sortable rows + load-more body — shared by open and collapsed sections so
+  // the reorder wiring and pagination stay identical in both.
+  const SectionRows = (name: string) => {
+    const sorted = sortTasksInSection(grouped[name], sort, order);
+    const limit = pageSize && pageSize > 0 ? pageSize : sorted.length;
+    const shown = sorted.slice(0, limit);
+    const remaining = sorted.length - shown.length;
+    return (
+      <div
+        class="task-list__rows"
+        data-section={name}
+        data-sortable
+        data-sortable-group="task-list"
+        data-sortable-item=".task-list__row"
+        hx-post="/tasks/reorder"
+        hx-trigger="end"
+        hx-include="this"
+        hx-params="sid,reorderSection"
+        hx-swap="none"
+      >
+        <input type="hidden" name="reorderSection" value={name} />
+        {shown.map((t, i) => (
+          <TaskRow
+            key={t.id}
+            task={t}
+            peopleOptions={peopleOptions}
+            moveSections={moveSections}
+            index={i}
+            archived={archived}
+          />
+        ))}
+        {remaining > 0 && state && (
+          <SectionLoadMore
+            state={state}
+            section={name}
+            view="list"
+            offset={shown.length}
+            remaining={remaining}
+            pageSize={limit}
+          />
+        )}
+      </div>
+    );
+  };
 
   return (
     <div class="task-list" data-column-table="tasks" data-sort={sort ?? ""}>
@@ -395,51 +448,32 @@ export const TaskListView: FC<ListProps> = (
         </div>
         <ColumnHeader sort={sort} order={order} />
       </div>
-      {sectionNames.map((name) => {
-        const sorted = sortTasksInSection(grouped[name], sort, order);
-        const limit = pageSize && pageSize > 0 ? pageSize : sorted.length;
-        const shown = sorted.slice(0, limit);
-        const remaining = sorted.length - shown.length;
-        return (
-          <div key={name} class="task-list__section">
-            <SectionHeader name={name} count={sorted.length} />
-            <div
-              class="task-list__rows"
-              data-section={name}
-              data-sortable
-              data-sortable-group="task-list"
-              data-sortable-item=".task-list__row"
-              hx-post="/tasks/reorder"
-              hx-trigger="end"
-              hx-include="this"
-              hx-params="sid,reorderSection"
-              hx-swap="none"
+      {sectionNames.map((name) =>
+        collapsed.has(name)
+          ? (
+            <details
+              key={name}
+              class="task-list__section task-list__section--collapsed"
             >
-              <input type="hidden" name="reorderSection" value={name} />
-              {shown.map((t, i) => (
-                <TaskRow
-                  key={t.id}
-                  task={t}
-                  peopleOptions={peopleOptions}
-                  moveSections={moveSections}
-                  index={i}
-                  archived={archived}
-                />
-              ))}
-              {remaining > 0 && state && (
-                <SectionLoadMore
-                  state={state}
-                  section={name}
-                  view="list"
-                  offset={shown.length}
-                  remaining={remaining}
-                  pageSize={limit}
-                />
-              )}
+              <summary
+                class="task-list__section-header task-list__section-summary"
+                id={`section-${name.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                <h2 class="section-heading">{name}</h2>
+                <span class="task-list__section-count">
+                  {grouped[name].length}
+                </span>
+              </summary>
+              {SectionRows(name)}
+            </details>
+          )
+          : (
+            <div key={name} class="task-list__section">
+              <SectionHeader name={name} count={grouped[name].length} />
+              {SectionRows(name)}
             </div>
-          </div>
-        );
-      })}
+          )
+      )}
       <div
         id="task-bulk-bar"
         class="task-list__bulk-bar is-hidden"

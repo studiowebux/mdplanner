@@ -130,11 +130,19 @@ export function createFilterHelpers<T extends Entity, C, U>(
 
     // Hide completed
     if (state.hideCompleted && cfg.hideCompleted) {
-      const { field, value } = cfg.hideCompleted;
+      const { field, value, exceptField, exceptValue } = cfg.hideCompleted;
       const values = Array.isArray(value) ? value : [value];
-      result = result.filter((item) =>
-        !values.includes(String(item[field as keyof T] ?? ""))
-      );
+      result = result.filter((item) => {
+        // Exempt matching items (e.g. the Done section) from the strip — the
+        // view collapses them instead of the filter silently emptying them.
+        if (
+          exceptField &&
+          String(item[exceptField as keyof T] ?? "") === exceptValue
+        ) {
+          return true;
+        }
+        return !values.includes(String(item[field as keyof T] ?? ""));
+      });
     }
 
     // Dynamic filters (status, project, etc.)

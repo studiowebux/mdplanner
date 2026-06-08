@@ -150,7 +150,12 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     },
   ],
 
-  hideCompleted: { field: "completed", value: "true" },
+  hideCompleted: {
+    field: "completed",
+    value: "true",
+    exceptField: "section",
+    exceptValue: "Done",
+  },
 
   showHiddenToggle: true,
 
@@ -271,6 +276,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
           pageSize={pageSize}
           state={state}
           moveSections={getMoveSectionOrder(allTasks)}
+          collapsedSections={state.hideCompleted ? ["Done"] : undefined}
         />
       );
     }

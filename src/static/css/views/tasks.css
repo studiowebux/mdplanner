@@ -247,6 +247,17 @@
   line-height: var(--line-height-tight);
 }
 
+/* Collapsed section (e.g. Done when hideCompleted is on) — native <details>
+   keeps the header + count visible and toggles the body. */
+.task-list__section--collapsed {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-list__section-summary {
+  cursor: pointer;
+}
+
 /* Task rows */
 
 .task-list__rows {

@@ -3,7 +3,10 @@
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { renderToString } from "hono/jsx/dom/server";
-import { TaskRow } from "../../src/views/components/task-list.tsx";
+import {
+  TaskListView,
+  TaskRow,
+} from "../../src/views/components/task-list.tsx";
 import type { Task } from "../../src/types/task.types.ts";
 
 function task(overrides: Partial<Task> = {}): Task {
@@ -50,4 +53,36 @@ Deno.test("TaskRow — project meta renders empty (no badge) when unset", () => 
       html.includes('task-list__meta--project"></span>'),
     true,
   );
+});
+
+Deno.test("TaskListView — collapsedSections renders the section as a closed <details> with count", () => {
+  const html = render(
+    TaskListView({
+      tasks: [
+        task({ id: "d1", section: "Done", completed: true }),
+        task({ id: "d2", section: "Done", completed: true }),
+        task({ id: "t1", section: "Todo" }),
+      ],
+      moveSections: ["Todo", "Done"],
+      collapsedSections: ["Done"],
+    }),
+  );
+  // Done is a collapsed <details> with NO open attr (asserting the exact
+  // opening tag proves both class and the closed state) carrying its count.
+  // Closing `">` right after the class proves there is no `open` attr.
+  assertStringIncludes(html, "<details ");
+  assertStringIncludes(html, 'task-list__section--collapsed">');
+  assertStringIncludes(html, "task-list__section-count");
+  // Todo stays a normal (non-details) section
+  assertStringIncludes(html, 'class="task-list__section">');
+});
+
+Deno.test("TaskListView — no collapsedSections keeps every section open", () => {
+  const html = render(
+    TaskListView({
+      tasks: [task({ id: "d1", section: "Done", completed: true })],
+      moveSections: ["Done"],
+    }),
+  );
+  assertEquals(html.includes("task-list__section--collapsed"), false);
 });

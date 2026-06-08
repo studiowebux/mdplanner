@@ -92,7 +92,15 @@ export type DomainConfig<T extends Entity, C, U> = {
   filters?: FilterDef[];
   // Optional: field + value for the "hide completed" toggle.
   // Omit entirely if the domain has no completion concept.
-  hideCompleted?: { field: string; value: string | string[] };
+  // `exceptField`/`exceptValue` exempt matching items from the strip — e.g.
+  // tasks keep the "Done" section visible (collapsed in the view) instead of
+  // emptying it, while still hiding stray completed items in other sections.
+  hideCompleted?: {
+    field: string;
+    value: string | string[];
+    exceptField?: string;
+    exceptValue?: string;
+  };
 
   // Row mapper — converts domain item to flat Record for DataTable.
   toRow: (item: T) => Record<string, unknown>;
