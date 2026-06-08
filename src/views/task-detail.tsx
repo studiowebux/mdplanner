@@ -22,7 +22,10 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { type MentionOpts } from "../utils/mentions.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
 import { MentionText } from "./components/mention-text.tsx";
-import { MarkdownJsx } from "../utils/markdown-jsx.tsx";
+import {
+  MarkdownJsx,
+  normalizeEscapedNewlines,
+} from "../utils/markdown-jsx.tsx";
 import { resolveLinkedItems } from "../utils/resolve-links.ts";
 import {
   MetaField,
@@ -427,7 +430,9 @@ export const TaskDetailView: FC<Props> = (
                 <h2>Description</h2>
                 <div class="task-detail__description markdown-body">
                   <MarkdownJsx
-                    markdown={task.description.join("\n\n")}
+                    markdown={normalizeEscapedNewlines(
+                      task.description.join("\n\n"),
+                    )}
                     bare
                     renderText={(t) => (
                       <MentionText

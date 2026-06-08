@@ -5,7 +5,10 @@
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { renderToString } from "hono/jsx/dom/server";
-import { MarkdownJsx } from "../../src/utils/markdown-jsx.tsx";
+import {
+  MarkdownJsx,
+  normalizeEscapedNewlines,
+} from "../../src/utils/markdown-jsx.tsx";
 
 function render(node: ReturnType<typeof MarkdownJsx>): string {
   // deno-lint-ignore no-explicit-any
@@ -68,4 +71,26 @@ Deno.test("MarkdownJsx — renderText also applies inside formatting", () => {
 Deno.test("MarkdownJsx — no markdown yields null (empty render)", () => {
   assertEquals(render(MarkdownJsx({ markdown: "", bare: true })), "");
   assertEquals(render(MarkdownJsx({ markdown: null, bare: true })), "");
+});
+
+Deno.test("normalizeEscapedNewlines — escaped \\n becomes real newline", () => {
+  assertEquals(
+    normalizeEscapedNewlines("a.\\n\\n## B\\n- x"),
+    "a.\n\n## B\n- x",
+  );
+  assertEquals(normalizeEscapedNewlines("a.\\r\\nb"), "a.\nb");
+  // real newlines are untouched
+  assertEquals(normalizeEscapedNewlines("a\nb"), "a\nb");
+});
+
+Deno.test("MarkdownJsx — description stored with escaped newlines renders headings/lists", () => {
+  // Regression: task ap2q description was one line with literal \n escapes,
+  // which rendered as a garbled inline run (no headings/lists).
+  const raw = "Install CloudNativePG.\\n\\n## Done\\n- Operator running";
+  const html = render(
+    MarkdownJsx({ markdown: normalizeEscapedNewlines(raw), bare: true }),
+  );
+  assertStringIncludes(html, "<h2>Done</h2>");
+  assertStringIncludes(html, "<ul>");
+  assertStringIncludes(html, ">Operator running</li>");
 });

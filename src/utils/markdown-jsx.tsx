@@ -175,6 +175,17 @@ type MarkdownJsxProps = {
   renderText?: TextRender;
 };
 
+/**
+ * Convert literal escaped newline sequences (`\n`, `\r\n` as backslash-n text)
+ * into real newlines. Some content was stored with escaped newlines instead of
+ * real ones (e.g. a description written as a single line `"a.\n\n## B"`), which
+ * makes marked treat headings/lists as inline prose and renders a garbled run.
+ * Scoped to newline escapes only — the observed failing construct.
+ */
+export function normalizeEscapedNewlines(s: string): string {
+  return s.replace(/\\r\\n|\\n/g, "\n");
+}
+
 /** Render markdown inline as hono/jsx nodes (no dangerouslySetInnerHTML); bare omits the wrapper element. */
 export function MarkdownJsx(
   { markdown, class: cls, bare, renderText }: MarkdownJsxProps,
