@@ -111,6 +111,7 @@ export const TASK_STATE_KEYS = [
 export const TASK_SORTABLE_COLS: TaskSortableCol[] = [
   { key: "assignee", label: "Assignee", cls: "task-list__meta--assignee" },
   { key: "milestone", label: "Milestone", cls: "task-list__meta--milestone" },
+  { key: "project", label: "Project", cls: "task-list__meta--project" },
   { key: "due_date", label: "Due", cls: "task-list__meta--due" },
   { key: "effort", label: "Effort", cls: "task-list__meta--effort" },
 ];

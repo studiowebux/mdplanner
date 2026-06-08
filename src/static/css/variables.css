@@ -436,6 +436,7 @@
   --task-dep-arrow-size: 5;
   --task-meta-assignee-w: 8rem;
   --task-meta-milestone-w: 10rem;
+  --task-meta-project-w: 9rem;
   --task-meta-due-w: 6rem;
   --task-meta-effort-w: 3rem;
   --task-actions-w: 18rem;

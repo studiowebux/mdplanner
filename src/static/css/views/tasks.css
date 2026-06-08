@@ -28,6 +28,11 @@
   color: var(--color-text-secondary);
 }
 
+.task-list__meta--project {
+  width: var(--task-meta-project-w);
+  color: var(--color-text-secondary);
+}
+
 .task-list__meta--due {
   width: var(--task-meta-due-w);
   color: var(--color-text-secondary);

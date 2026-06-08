@@ -118,6 +118,12 @@ export const TaskRow: FC<
             )
             : ""}
         </span>
+        <span
+          class="task-list__meta task-list__meta--project"
+          data-col="project"
+        >
+          {task.project ?? ""}
+        </span>
         <span class="task-list__meta task-list__meta--due" data-col="due">
           {task.due_date ? formatDate(task.due_date) : ""}
         </span>
@@ -375,6 +381,7 @@ export const TaskListView: FC<ListProps> = (
               {[
                 { key: "assignee", label: "Assignee" },
                 { key: "milestone", label: "Milestone" },
+                { key: "project", label: "Project" },
                 { key: "due", label: "Due" },
                 { key: "effort", label: "Effort" },
               ].map((col) => (
