@@ -17,6 +17,7 @@ import { SwotService } from "../services/swot.service.ts";
 import { GitHubService } from "../services/github.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import { TaskService } from "../services/task.service.ts";
+import { BaseService } from "../services/base.service.ts";
 import {
   CacheDatabase,
   CacheSync,
@@ -153,6 +154,58 @@ import { registerInvestorEntity } from "../domains/investor/cache.ts";
 export interface InitOptions {
   cache?: boolean;
 }
+
+/**
+ * SSE event prefix per service-registry key, mirroring each domain's
+ * `DomainConfig.ssePrefix`. Wired onto BaseService-derived services at init so
+ * service-layer mutations (REST *or* MCP) broadcast `<prefix>.updated`/.deleted
+ * and connected browsers live-refresh. Standalone services (task/milestone/dns)
+ * publish from their own methods with a hardcoded prefix and are not listed.
+ */
+const SSE_PREFIX_BY_KEY: Record<string, string> = {
+  billingRate: "billing-rate",
+  brainstorm: "brainstorm",
+  brainstormTemplate: "btemplate",
+  brief: "brief",
+  businessModel: "business-model",
+  c4: "c4",
+  capacityPlan: "capacity-plan",
+  company: "company",
+  contact: "contact",
+  customer: "customer",
+  deal: "deal",
+  eisenhower: "eisenhower",
+  finance: "finance",
+  fishbone: "fishbone",
+  goal: "goal",
+  habit: "habit",
+  idea: "idea",
+  investor: "investor",
+  invoice: "invoice",
+  journal: "journal",
+  leanCanvas: "lean-canvas",
+  marketingPlan: "marketing-plan",
+  meeting: "meeting",
+  mindmap: "mindmap",
+  moscow: "moscow",
+  note: "note",
+  onboarding: "onboarding",
+  onboardingTemplate: "onboarding-template",
+  payment: "payment",
+  people: "person",
+  portfolio: "portfolio",
+  projectValueBoard: "project-value-board",
+  quote: "quote",
+  reflection: "reflection",
+  reflectionTemplate: "rtemplate",
+  retrospective: "retrospective",
+  risk: "risk",
+  safe: "safe",
+  stickyNote: "sticky-note",
+  strategicLevels: "strategic-levels",
+  swot: "swot",
+  vacation: "vacation",
+};
 
 const _svc = new Map<string, unknown>();
 const _repo = new Map<string, unknown>();
@@ -421,6 +474,14 @@ export function initServices(
     peopleService.setCache(cacheSync);
     _get<PortfolioService>(_svc, "portfolio").setCache(cacheSync);
     cacheEnabled = true;
+  }
+
+  // Wire each domain service's SSE event prefix from the authoritative config
+  // value (see SSE_PREFIX_BY_KEY) so service-layer mutations broadcast the same
+  // event the client subscribes to. Runs regardless of cache mode.
+  for (const [key, prefix] of Object.entries(SSE_PREFIX_BY_KEY)) {
+    const svc = _svc.get(key);
+    if (svc instanceof BaseService) svc.setSsePrefix(prefix);
   }
 }
 

@@ -17,6 +17,7 @@ import { ciEquals } from "../utils/string.ts";
 import { insertMilestoneRow } from "../domains/milestone/cache.ts";
 import { MILESTONE_TABLE } from "../domains/milestone/constants.ts";
 import { DONE_SECTION, getSectionOrder } from "../constants/mod.ts";
+import { publish } from "../singletons/event-bus.ts";
 
 function tasksByMilestone(tasks: Task[], name: string): Task[] {
   const result: Task[] = [];
@@ -191,6 +192,7 @@ export class MilestoneService {
     const tasks = await this.taskRepo.findAll();
     const enriched = enrichMilestone(created, tasks);
     this.cacheUpsert(enriched);
+    this.publishChange();
     return enriched;
   }
 
@@ -200,13 +202,23 @@ export class MilestoneService {
     const tasks = await this.taskRepo.findAll();
     const enriched = enrichMilestone(updated, tasks);
     this.cacheUpsert(enriched);
+    this.publishChange();
     return enriched;
   }
 
   async delete(id: string): Promise<boolean> {
     const deleted = await this.milestoneRepo.delete(id);
-    if (deleted) this.cache?.remove("milestones", id);
+    if (deleted) {
+      this.cache?.remove("milestones", id);
+      this.publishChange("deleted");
+    }
     return deleted;
+  }
+
+  // Standalone service (no BaseService) — publish the SSE refresh directly,
+  // same contract as BaseService.publishChange, prefix = "milestone".
+  private publishChange(event: "updated" | "deleted" = "updated"): void {
+    publish(`milestone.${event}`);
   }
 
   async getTasksForMilestone(milestoneName: string): Promise<Task[]> {

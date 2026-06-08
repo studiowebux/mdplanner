@@ -20,6 +20,7 @@ import { insertTaskRow } from "../domains/task/cache.ts";
 import { TASK_TABLE } from "../domains/task/constants.ts";
 import { generateId } from "../utils/id.ts";
 import { ciEquals } from "../utils/string.ts";
+import { publish } from "../singletons/event-bus.ts";
 import {
   DONE_SECTION,
   IN_PROGRESS_SECTION,
@@ -86,6 +87,13 @@ export class TaskService {
 
   private cacheRemove(id: string): void {
     this.cache?.remove(TASK_TABLE, id);
+  }
+
+  // Standalone service (no BaseService) — publish the SSE refresh directly so
+  // mutations via REST *or* MCP live-update browsers. Same contract as
+  // BaseService.publishChange; prefix = "task".
+  private publishChange(event: "updated" | "deleted" = "updated"): void {
+    publish(`task.${event}`);
   }
 
   // -------------------------------------------------------------------------
@@ -172,6 +180,7 @@ export class TaskService {
   async create(data: CreateTask): Promise<Task> {
     const created = await this.taskRepo.create(data);
     this.cacheUpsert(created);
+    this.publishChange();
     return created;
   }
 
@@ -205,13 +214,19 @@ export class TaskService {
     }
 
     const updated = await this.taskRepo.update(id, data);
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 
   async delete(id: string): Promise<boolean> {
     const deleted = await this.taskRepo.delete(id);
-    if (deleted) this.cacheRemove(id);
+    if (deleted) {
+      this.cacheRemove(id);
+      this.publishChange("deleted");
+    }
     return deleted;
   }
 
@@ -219,7 +234,10 @@ export class TaskService {
    * `[architecture] MD Planner — Soft-delete (archive) pattern`. */
   async archive(id: string, by?: string): Promise<boolean> {
     const ok = await this.taskRepo.archive(id, by);
-    if (ok) this.cacheRemove(id);
+    if (ok) {
+      this.cacheRemove(id);
+      this.publishChange();
+    }
     return ok;
   }
 
@@ -229,6 +247,7 @@ export class TaskService {
     if (ok) {
       const restored = await this.taskRepo.findById(id);
       if (restored) this.cacheUpsert(restored);
+      this.publishChange();
     }
     return ok;
   }
@@ -236,7 +255,10 @@ export class TaskService {
   /** Permanently delete the task file from disk. No recovery. */
   async hardDelete(id: string): Promise<boolean> {
     const ok = await this.taskRepo.hardDelete(id);
-    if (ok) this.cacheRemove(id);
+    if (ok) {
+      this.cacheRemove(id);
+      this.publishChange("deleted");
+    }
     return ok;
   }
 
@@ -263,13 +285,19 @@ export class TaskService {
       claimedBy: assignee,
       claimedAt: now,
     });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 
   async moveTask(id: string, newSection: string): Promise<Task | null> {
     const updated = await this.taskRepo.moveToSection(id, newSection);
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 
@@ -295,6 +323,7 @@ export class TaskService {
       }
     }
 
+    if (swept.length > 0) this.publishChange();
     return swept;
   }
 
@@ -377,7 +406,10 @@ export class TaskService {
 
     const comments = [...(task.comments ?? []), comment];
     const updated = await this.taskRepo.update(id, { comments });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return comment;
   }
 
@@ -395,7 +427,10 @@ export class TaskService {
     const entry: TimeEntry = { id: generateId("te"), ...data };
     const time_entries = [...(task.time_entries ?? []), entry];
     const updated = await this.taskRepo.update(id, { time_entries });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return entry;
   }
 
@@ -408,7 +443,10 @@ export class TaskService {
       e.id !== entryId
     );
     const updated = await this.taskRepo.update(id, { time_entries });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return true;
   }
 
@@ -422,7 +460,10 @@ export class TaskService {
 
     const attachments = [...(task.attachments ?? []), ...paths];
     const updated = await this.taskRepo.update(id, { attachments });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 
@@ -450,7 +491,10 @@ export class TaskService {
       section: PENDING_REVIEW_SECTION,
       approvalRequest: approval,
     });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 
@@ -480,7 +524,10 @@ export class TaskService {
       claimedAt: null,
       approvalRequest: approvalRequest ?? null,
     });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 
@@ -511,7 +558,10 @@ export class TaskService {
       claimedAt: null,
       approvalRequest: approvalRequest ?? null,
     });
-    if (updated) this.cacheUpsert(updated);
+    if (updated) {
+      this.cacheUpsert(updated);
+      this.publishChange();
+    }
     return updated;
   }
 }

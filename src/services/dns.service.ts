@@ -1,6 +1,7 @@
 // DNS service — orchestrates DnsRepository + Cloudflare sync via IDnsProvider.
 
 import { CloudflareDnsProvider } from "../providers/cloudflare.ts";
+import { publish } from "../singletons/event-bus.ts";
 import type { DnsRepository } from "../repositories/dns.repository.ts";
 import type { ProjectService } from "./project.service.ts";
 import type {
@@ -18,6 +19,12 @@ export class DnsService {
     private projectService: ProjectService,
   ) {}
 
+  // No BaseService here (no standard repo), so publish the SSE refresh event
+  // directly — same contract as BaseService.publishChange, prefix = "dns".
+  private publishChange(event: "updated" | "deleted" = "updated"): void {
+    publish(`dns.${event}`);
+  }
+
   async list(): Promise<DnsDomain[]> {
     return this.repo.findAll();
   }
@@ -31,15 +38,21 @@ export class DnsService {
   }
 
   async create(data: CreateDnsDomain): Promise<DnsDomain> {
-    return this.repo.create(data);
+    const created = await this.repo.create(data);
+    this.publishChange();
+    return created;
   }
 
   async update(id: string, data: UpdateDnsDomain): Promise<DnsDomain | null> {
-    return this.repo.update(id, data);
+    const updated = await this.repo.update(id, data);
+    if (updated) this.publishChange();
+    return updated;
   }
 
   async delete(id: string): Promise<boolean> {
-    return this.repo.delete(id);
+    const deleted = await this.repo.delete(id);
+    if (deleted) this.publishChange("deleted");
+    return deleted;
   }
 
   // -------------------------------------------------------------------------
@@ -47,7 +60,9 @@ export class DnsService {
   // -------------------------------------------------------------------------
 
   async addRecord(id: string, record: DnsRecord): Promise<DnsDomain | null> {
-    return this.repo.addRecord(id, record);
+    const result = await this.repo.addRecord(id, record);
+    if (result) this.publishChange();
+    return result;
   }
 
   async updateRecord(
@@ -55,11 +70,15 @@ export class DnsService {
     index: number,
     fields: Partial<DnsRecord>,
   ): Promise<DnsDomain | null> {
-    return this.repo.updateRecord(id, index, fields);
+    const result = await this.repo.updateRecord(id, index, fields);
+    if (result) this.publishChange();
+    return result;
   }
 
   async deleteRecord(id: string, index: number): Promise<DnsDomain | null> {
-    return this.repo.deleteRecord(id, index);
+    const result = await this.repo.deleteRecord(id, index);
+    if (result) this.publishChange();
+    return result;
   }
 
   // -------------------------------------------------------------------------
@@ -84,6 +103,7 @@ export class DnsService {
       else updated++;
     }
 
+    publish("dns.synced");
     return { synced: results.length, created, updated };
   }
 

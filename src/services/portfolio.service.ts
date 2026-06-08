@@ -42,7 +42,10 @@ export class PortfolioService extends CachedService<
     message: string,
   ): Promise<PortfolioStatusUpdate | null> {
     const update = await this.portfolioRepo.addStatusUpdate(id, message);
-    if (update) await this.cacheRefreshFromDisk(id);
+    if (update) {
+      await this.cacheRefreshFromDisk(id);
+      this.publishChange();
+    }
     return update;
   }
 
@@ -56,13 +59,19 @@ export class PortfolioService extends CachedService<
       updateId,
       message,
     );
-    if (update) await this.cacheRefreshFromDisk(id);
+    if (update) {
+      await this.cacheRefreshFromDisk(id);
+      this.publishChange();
+    }
     return update;
   }
 
   async deleteStatusUpdate(id: string, updateId: string): Promise<boolean> {
     const deleted = await this.portfolioRepo.deleteStatusUpdate(id, updateId);
-    if (deleted) await this.cacheRefreshFromDisk(id);
+    if (deleted) {
+      await this.cacheRefreshFromDisk(id);
+      this.publishChange();
+    }
     return deleted;
   }
 

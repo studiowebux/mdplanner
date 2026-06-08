@@ -1,6 +1,8 @@
 // Base service — standard CRUD pass-through to a repository.
 // Subclasses implement applyFilters for domain-specific list filtering.
 
+import { publish } from "../singletons/event-bus.ts";
+
 /** Minimal repository interface expected by BaseService. */
 export interface ReadWriteRepository<T, C, U> {
   findAll(): Promise<T[]>;
@@ -32,6 +34,24 @@ export abstract class BaseService<
 > {
   constructor(protected repo: ReadWriteRepository<T, C, U>) {}
 
+  /**
+   * SSE event prefix for this domain (e.g. "task", "business-model"). Set once
+   * at startup from the authoritative `DomainConfig.ssePrefix` (see
+   * `createDomainRoutes`). When set, every mutation broadcasts
+   * `<ssePrefix>.updated` / `.deleted` so connected browsers live-refresh —
+   * regardless of whether the mutation arrived via REST or MCP. The publish
+   * lives here (the single business-logic layer), not in the interfaces.
+   */
+  private ssePrefix?: string;
+
+  setSsePrefix(prefix: string): void {
+    this.ssePrefix = prefix;
+  }
+
+  protected publishChange(event: "updated" | "deleted" = "updated"): void {
+    if (this.ssePrefix) publish(`${this.ssePrefix}.${event}`);
+  }
+
   async list(options?: Options): Promise<T[]> {
     let items = await this.repo.findAll();
     if (options) {
@@ -52,15 +72,21 @@ export abstract class BaseService<
   }
 
   async create(data: C): Promise<T> {
-    return this.repo.create(data);
+    const created = await this.repo.create(data);
+    this.publishChange();
+    return created;
   }
 
   async update(id: string, data: U): Promise<T | null> {
-    return this.repo.update(id, data);
+    const updated = await this.repo.update(id, data);
+    if (updated) this.publishChange();
+    return updated;
   }
 
   async delete(id: string): Promise<boolean> {
-    return this.repo.delete(id);
+    const deleted = await this.repo.delete(id);
+    if (deleted) this.publishChange("deleted");
+    return deleted;
   }
 
   /**
@@ -75,7 +101,9 @@ export abstract class BaseService<
         `${this.constructor.name}: archive() not supported by repository`,
       );
     }
-    return this.repo.archive(id, by);
+    const archived = await this.repo.archive(id, by);
+    if (archived) this.publishChange();
+    return archived;
   }
 
   /** Restore an archived item (clear `archived`/`archivedAt`/`archivedBy`). */
@@ -85,7 +113,9 @@ export abstract class BaseService<
         `${this.constructor.name}: restore() not supported by repository`,
       );
     }
-    return this.repo.restore(id);
+    const restored = await this.repo.restore(id);
+    if (restored) this.publishChange();
+    return restored;
   }
 
   /** Permanently remove the item from disk (no recovery). */
@@ -95,7 +125,9 @@ export abstract class BaseService<
         `${this.constructor.name}: hardDelete() not supported by repository`,
       );
     }
-    return this.repo.hardDelete(id);
+    const removed = await this.repo.hardDelete(id);
+    if (removed) this.publishChange("deleted");
+    return removed;
   }
 
   /**
@@ -133,6 +165,7 @@ export abstract class BaseService<
         );
       }
     }
+    if (count > 0) this.publishChange();
     return { count, errors };
   }
 }
