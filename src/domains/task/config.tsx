@@ -19,6 +19,7 @@ import { TaskTimelineView } from "../../views/components/task-timeline.tsx";
 import {
   buildSectionOptions,
   DEFAULT_TASKS_PER_SECTION,
+  getMoveSectionOrder,
   TASK_PRIORITY_OPTIONS,
   TASK_STATE_KEYS,
   TASK_TABLE_COLUMNS,
@@ -256,6 +257,10 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       const peopleOptions = people
         .map((p) => ({ value: p.id, label: p.name }))
         .sort((a, b) => a.label.localeCompare(b.label));
+      // Move-target sections come from the COMPLETE live task set, not the
+      // filtered/paginated `items`, so custom sections (Cancelled, Scope Creep)
+      // stay reachable regardless of the active filter or pagination slice.
+      const allTasks = await getTaskService().list();
       return (
         <TaskListView
           tasks={items}
@@ -265,6 +270,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
           archived={state.archived === "true"}
           pageSize={pageSize}
           state={state}
+          moveSections={getMoveSectionOrder(allTasks)}
         />
       );
     }

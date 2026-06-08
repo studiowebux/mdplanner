@@ -83,6 +83,34 @@ Deno.test("move dropdowns render custom sections", async (t) => {
         );
       },
     );
+
+    await t.step(
+      "custom section filtered OUT of the view still appears as a move target",
+      async () => {
+        // 'Cancelled' lives only on a task excluded by the active search filter.
+        // Before the fix the dropdown was sourced from the filtered slice, so a
+        // custom section with no visible row dropped out entirely.
+        await service.create({ title: "Scrapped idea", section: "Cancelled" });
+        await service.create({ title: "Keep me", section: "Todo" });
+        const res = await viewRouter.request(
+          new Request("http://localhost/?view=list&q=Keep", { method: "GET" }),
+        );
+        assertEquals(res.status, 200);
+        const html = await res.text();
+        // The Cancelled task is filtered out of the rendered rows...
+        assertEquals(
+          html.includes("Scrapped idea"),
+          false,
+          "the Cancelled task should be filtered out of the visible rows",
+        );
+        // ...but its section is still offered as a move target (sourced from the
+        // complete live set, not the filtered/paginated slice).
+        assert(
+          html.includes(">Cancelled</option>"),
+          "move dropdown must include 'Cancelled' even when no visible row sits in it",
+        );
+      },
+    );
   } finally {
     await Deno.remove(dir, { recursive: true });
   }

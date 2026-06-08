@@ -127,7 +127,12 @@ tasksRouter.get("/more-section", async (c) => {
 
   const state = c.get("filterState" as never) as DomainFilterState;
   const { helpers } = resolveDomainHelpers(taskConfig);
-  const { filtered } = await loadFilteredItems(c, taskConfig, helpers, state);
+  const { all, filtered } = await loadFilteredItems(
+    c,
+    taskConfig,
+    helpers,
+    state,
+  );
 
   const sectionTasks = filtered.filter((t) => t.section === section);
   const sorted = view === "board"
@@ -164,7 +169,9 @@ tasksRouter.get("/more-section", async (c) => {
   const peopleOptions = people
     .map((p) => ({ value: p.id, label: p.name }))
     .sort((a, b) => a.label.localeCompare(b.label));
-  const moveSections = getMoveSectionOrder(filtered);
+  // Move targets come from the complete pre-filter set so custom sections
+  // outside the current filter/pagination slice stay reachable.
+  const moveSections = getMoveSectionOrder(all);
   return c.html(
     toHtml(
       <>

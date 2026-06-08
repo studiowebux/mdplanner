@@ -9,7 +9,6 @@ import { groupBy } from "../../utils/group.ts";
 import { formatDate } from "../../utils/time.ts";
 import { EmptyState } from "../../components/ui/empty-state.tsx";
 import {
-  getMoveSectionOrder,
   sortTasksInSection,
   TASK_PRIORITY_LABELS,
   TASK_SORTABLE_COLS,
@@ -337,10 +336,26 @@ type ListProps = TaskViewProps & {
   archived?: boolean;
   pageSize?: number;
   state?: DomainFilterState;
+  /**
+   * Move-target sections (configured order + every custom section across the
+   * whole project). Computed by the caller from the COMPLETE task set — never
+   * from the filtered/paginated `tasks` slice, or custom sections outside the
+   * current view (e.g. Cancelled, Scope Creep) drop out of the dropdowns.
+   */
+  moveSections: string[];
 };
 
 export const TaskListView: FC<ListProps> = (
-  { tasks, sort, order, peopleOptions, archived, pageSize, state },
+  {
+    tasks,
+    sort,
+    order,
+    peopleOptions,
+    archived,
+    pageSize,
+    state,
+    moveSections,
+  },
 ) => {
   if (tasks.length === 0) {
     return <EmptyState message="No tasks match the current filters." />;
@@ -348,9 +363,6 @@ export const TaskListView: FC<ListProps> = (
 
   const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);
   const sectionNames = Object.keys(grouped);
-  // Move-target sections include any custom section, so the per-row and bulk
-  // "move" dropdowns can target sections beyond the configured defaults.
-  const moveSections = getMoveSectionOrder(tasks);
 
   return (
     <div class="task-list" data-column-table="tasks" data-sort={sort ?? ""}>

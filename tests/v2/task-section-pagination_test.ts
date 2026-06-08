@@ -38,6 +38,7 @@ Deno.test("TaskListView — caps rows per section and emits load-more", () => {
       tasks: makeTasks("Todo", 30),
       pageSize: 25,
       state: listState,
+      moveSections: [],
       // deno-lint-ignore no-explicit-any
     }) as any,
   );
@@ -59,6 +60,7 @@ Deno.test("TaskListView — no load-more when the section fits", () => {
       tasks: makeTasks("Todo", 10),
       pageSize: 25,
       state: listState,
+      moveSections: [],
       // deno-lint-ignore no-explicit-any
     }) as any,
   );
@@ -89,7 +91,10 @@ Deno.test("TaskBoardView — caps cards per column and emits load-more", () => {
 Deno.test("TaskListView — pageSize unset renders every row (no regression)", () => {
   const html = renderToString(
     // deno-lint-ignore no-explicit-any
-    TaskListView({ tasks: makeTasks("Todo", 40), state: listState }) as any,
+    TaskListView(
+      { tasks: makeTasks("Todo", 40), state: listState, moveSections: [] },
+      // deno-lint-ignore no-explicit-any
+    ) as any,
   );
   assertEquals(countMatches(html, "task-list__row-title"), 40);
   assertEquals(countMatches(html, "task-load-more"), 0);
@@ -104,6 +109,7 @@ Deno.test("SectionLoadMore — label caps at pageSize, not total remaining", () 
       tasks: makeTasks("Todo", 388),
       pageSize: 25,
       state: listState,
+      moveSections: [],
       // deno-lint-ignore no-explicit-any
     }) as any,
   );
@@ -119,6 +125,7 @@ Deno.test("SectionLoadMore — final partial page shows the true remainder", () 
       tasks: makeTasks("Todo", 27),
       pageSize: 25,
       state: listState,
+      moveSections: [],
       // deno-lint-ignore no-explicit-any
     }) as any,
   );
