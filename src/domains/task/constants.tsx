@@ -170,6 +170,23 @@ export function buildSectionOptions(
   return ordered;
 }
 
+/**
+ * Valid move-target sections: the full configured order (even empty sections)
+ * plus any custom section present on `tasks` that is not already configured
+ * (appended, sorted). Unlike buildSectionOptions (which drops empty configured
+ * sections), this keeps every default as a move target — used by the per-row,
+ * bulk, and detail-page "move" dropdowns so custom sections are not lost.
+ */
+export function getMoveSectionOrder(tasks: Task[]): string[] {
+  const configured = [...getSectionOrder()];
+  const known = new Set(configured);
+  const custom = new Set<string>();
+  for (const t of tasks) {
+    if (!known.has(t.section)) custom.add(t.section);
+  }
+  return [...configured, ...[...custom].sort()];
+}
+
 export function taskToRow(t: Task): Record<string, unknown> {
   return {
     id: t.id,

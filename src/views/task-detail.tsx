@@ -8,7 +8,7 @@ import type { Person } from "../types/person.types.ts";
 import type { Milestone } from "../types/milestone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
-import { getSectionOrder } from "../constants/mod.ts";
+import { getMoveSectionOrder } from "../domains/task/constants.tsx";
 import {
   getMilestoneService,
   getPeopleService,
@@ -44,6 +44,7 @@ export type TaskDetailProps = {
   blockedByTasks: Task[];
   mentionOpts: MentionOpts;
   people: Person[];
+  moveSections: string[];
 };
 
 type Props = ViewProps & TaskDetailProps;
@@ -58,17 +59,19 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
   blockedByTasks: Task[];
   mentionOpts: MentionOpts;
   people: Person[];
+  moveSections: string[];
 }> {
   const taskSvc = getTaskService();
   const peopleSvc = getPeopleService();
   const milestoneSvc = getMilestoneService();
 
-  const [assigneePerson, milestonEntity, blockedByTasks, allPeople] =
+  const [assigneePerson, milestonEntity, blockedByTasks, allPeople, allTasks] =
     await Promise.all([
       task.assignee ? peopleSvc.getById(task.assignee) : null,
       task.milestone ? milestoneSvc.getByName(task.milestone) : null,
       resolveLinkedItems(task.blocked_by, (id) => taskSvc.getById(id)),
       peopleSvc.list(),
+      taskSvc.list(),
     ]);
 
   const personMap = new Map<string, string>(
@@ -85,6 +88,7 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
     blockedByTasks,
     mentionOpts,
     people: allPeople,
+    moveSections: getMoveSectionOrder(allTasks),
   };
 }
 
@@ -367,10 +371,11 @@ export const TaskDetailView: FC<Props> = (
     blockedByTasks,
     mentionOpts,
     people,
+    moveSections,
     ...rest
   },
 ) => {
-  const sections = getSectionOrder();
+  const sections = moveSections;
   const assigneeDisplayName = assigneePerson?.name ?? "";
 
   return (

@@ -9,6 +9,7 @@ import { groupBy } from "../../utils/group.ts";
 import { formatDate } from "../../utils/time.ts";
 import { EmptyState } from "../../components/ui/empty-state.tsx";
 import {
+  getMoveSectionOrder,
   sortTasksInSection,
   TASK_PRIORITY_LABELS,
   TASK_SORTABLE_COLS,
@@ -25,11 +26,12 @@ export const TaskRow: FC<
   {
     task: Task;
     peopleOptions?: PeopleOption[];
+    moveSections: string[];
     index: number;
     archived?: boolean;
   }
 > = (
-  { task, peopleOptions, index, archived },
+  { task, peopleOptions, moveSections, index, archived },
 ) => (
   <div
     // Stable id so idiomorph keys this row by identity during the SSE morph of
@@ -175,7 +177,7 @@ export const TaskRow: FC<
               name="section"
               aria-label="Move section"
             >
-              {(getSectionOrder() as readonly string[]).map((s) => (
+              {moveSections.map((s) => (
                 <option key={s} value={s} selected={s === task.section}>
                   {s}
                 </option>
@@ -346,6 +348,9 @@ export const TaskListView: FC<ListProps> = (
 
   const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);
   const sectionNames = Object.keys(grouped);
+  // Move-target sections include any custom section, so the per-row and bulk
+  // "move" dropdowns can target sections beyond the configured defaults.
+  const moveSections = getMoveSectionOrder(tasks);
 
   return (
     <div class="task-list" data-column-table="tasks" data-sort={sort ?? ""}>
@@ -397,6 +402,7 @@ export const TaskListView: FC<ListProps> = (
                   key={t.id}
                   task={t}
                   peopleOptions={peopleOptions}
+                  moveSections={moveSections}
                   index={i}
                   archived={archived}
                 />
@@ -429,9 +435,7 @@ export const TaskListView: FC<ListProps> = (
           aria-label="Move selected to section"
         >
           <option value="">Move to…</option>
-          {(getSectionOrder() as readonly string[]).map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
+          {moveSections.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <button
           type="button"
@@ -442,6 +446,16 @@ export const TaskListView: FC<ListProps> = (
           hx-swap="none"
         >
           Move
+        </button>
+        <button
+          type="button"
+          class="btn btn--secondary btn--sm"
+          id="task-bulk-complete"
+          hx-post="/tasks/batch-complete"
+          hx-include=".task-list__select:checked"
+          hx-swap="none"
+        >
+          Mark complete
         </button>
         <button
           type="button"

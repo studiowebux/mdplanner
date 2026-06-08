@@ -9,6 +9,7 @@ import { loadFilteredItems } from "../../factories/domain-routes-collection.ts";
 import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
 import {
   DEFAULT_TASKS_PER_SECTION,
+  getMoveSectionOrder,
   sortTasks,
   sortTasksInSection,
 } from "../../domains/task/constants.tsx";
@@ -162,6 +163,7 @@ tasksRouter.get("/more-section", async (c) => {
   const peopleOptions = people
     .map((p) => ({ value: p.id, label: p.name }))
     .sort((a, b) => a.label.localeCompare(b.label));
+  const moveSections = getMoveSectionOrder(filtered);
   return c.html(
     toHtml(
       <>
@@ -170,6 +172,7 @@ tasksRouter.get("/more-section", async (c) => {
             key={t.id}
             task={t}
             peopleOptions={peopleOptions}
+            moveSections={moveSections}
             index={offset + i}
             archived={state.archived === "true"}
           />
@@ -480,6 +483,36 @@ tasksRouter.post("/batch-move", async (c) => {
       const task = await svc.getById(id);
       if (!task || task.archived === true) continue;
       updates.push({ id, updates: { section } });
+    }
+    if (updates.length > 0) {
+      await svc.batchUpdate(updates);
+      publish("task.updated");
+    }
+  }
+
+  c.header("HX-Refresh", "true");
+  return c.body(null, 204);
+});
+
+// POST /batch-complete — htmx bulk "mark complete & move to Done" for the
+// task-list bulk bar. Reads checked `taskId` fields, sets completed:true and
+// moves each live task to Done in one pass (moveToSection is just
+// update({section})), then refreshes the list. Distinct from /batch-move,
+// which must NOT set completed. Idempotent for already-done/already-completed
+// tasks; archived tasks are skipped.
+tasksRouter.post("/batch-complete", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const ids = parseTaskIds(body["taskId"]);
+
+  if (ids.length > 0) {
+    const svc = getTaskService();
+    const updates: Array<
+      { id: string; updates: { completed: boolean; section: string } }
+    > = [];
+    for (const id of ids) {
+      const task = await svc.getById(id);
+      if (!task || task.archived === true) continue;
+      updates.push({ id, updates: { completed: true, section: "Done" } });
     }
     if (updates.length > 0) {
       await svc.batchUpdate(updates);
