@@ -3,6 +3,7 @@
 
 import type { FC } from "hono/jsx";
 import type { CompletionEntry, Habit } from "../../../types/habit.types.ts";
+import { FormTextarea } from "../../components/form-textarea.tsx";
 
 const MONTH_NAMES = [
   "January",
@@ -109,14 +110,13 @@ export const HabitHeatmap: FC<{ habits: Habit[] }> = ({ habits }) => {
           hx-swap="outerHTML"
         >
           <p class="habit-note-form__title">Add a note (optional)</p>
-          <textarea
+          <FormTextarea
             id="habit-note-input"
             name="note"
-            class="form-input habit-note-form__textarea"
+            class="habit-note-form__textarea"
             placeholder="What did you do?"
             rows={3}
-          >
-          </textarea>
+          />
           <div class="habit-note-form__actions">
             <button type="submit" class="btn btn--primary btn--sm">Save</button>
             <button

@@ -10,6 +10,7 @@ import {
   StatusUpdateEditRow,
   StatusUpdateForm,
 } from "../../src/views/portfolio-detail.tsx";
+import { HabitHeatmap } from "../../src/views/habits/components/habit-heatmap.tsx";
 
 Deno.test("FormTextarea — carries the form__textarea base class, not form__input", () => {
   // deno-lint-ignore no-explicit-any
@@ -68,4 +69,13 @@ Deno.test("StatusUpdateEditRow — edit textarea uses form__textarea with value"
   assertStringIncludes(html, "form__textarea");
   assertEquals(html.includes("form__input"), false);
   assertStringIncludes(html, "shipped");
+});
+
+Deno.test("HabitHeatmap — note box uses form__textarea, not the bogus form-input class", () => {
+  // deno-lint-ignore no-explicit-any
+  const html = renderToString(HabitHeatmap({ habits: [] }) as any);
+  assertStringIncludes(html, "form__textarea");
+  assertStringIncludes(html, "habit-note-form__textarea");
+  // The bogus single-dash `form-input` token must be gone.
+  assertEquals(html.includes('class="form-input'), false);
 });
