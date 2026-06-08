@@ -150,6 +150,20 @@ export class MilestoneService {
     return enrichMilestone(raw, tasks);
   }
 
+  /**
+   * Resolve a milestone by id, including virtual milestones — names referenced
+   * by tasks with no backing file, which `list()` surfaces with a slugified id
+   * (see enrichMilestones). `getById` can't find these (no file), so the detail
+   * page 404'd ("stuck" milestones). Falls back to the enriched list only when
+   * the direct lookup misses, so the common path is unaffected.
+   */
+  async getByIdOrVirtual(id: string): Promise<Milestone | null> {
+    const direct = await this.getById(id);
+    if (direct) return direct;
+    const all = await this.list();
+    return all.find((m) => m.id === id) ?? null;
+  }
+
   async getByName(name: string): Promise<Milestone | null> {
     const [raw, tasks] = await Promise.all([
       this.milestoneRepo.findByName(name),

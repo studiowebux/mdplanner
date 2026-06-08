@@ -16,7 +16,7 @@ export const milestonesRouter = createDomainRoutes(milestoneConfig);
 /** Render the detail page; `?editing=true` enables in-place description editing. */
 async function renderDetail(c: AppContext, id: string) {
   const svc = getMilestoneService();
-  const milestone = await svc.getById(id);
+  const milestone = await svc.getByIdOrVirtual(id);
   if (!milestone) return c.notFound();
   const tasks = await svc.getTasksForMilestone(milestone.name);
   // task.assignee stores a person id — map id→name so the task list shows the
