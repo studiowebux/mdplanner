@@ -123,7 +123,7 @@ const MembersTable: FC<{
                       personById[m.personId] ?? m.personId
                     }? Their allocations will also be removed.`}
                     hx-swap="none"
-                    hx-on--after-request="if(event.detail.successful) window.location.reload()"
+                    data-reload-on-success
                   >
                     Remove
                   </button>
@@ -275,7 +275,7 @@ const AllocationsConfig: FC<{
                     hx-delete={`/capacity-plans/${a.planId}/allocations/${a.id}`}
                     hx-confirm="Remove this allocation?"
                     hx-swap="none"
-                    hx-on--after-request="if(event.detail.successful) window.location.reload()"
+                    data-reload-on-success
                   >
                     Remove
                   </button>

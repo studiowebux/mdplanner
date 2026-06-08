@@ -17,7 +17,7 @@ export const CachingTab: FC = () => (
         type="button"
         hx-post="/settings/cache/rebuild"
         hx-swap="none"
-        hx-on--after-request="htmx.trigger('#cache-stats', 'load')"
+        data-trigger-on-success="#cache-stats"
       >
         Rebuild Cache
       </button>
@@ -26,7 +26,7 @@ export const CachingTab: FC = () => (
         type="button"
         hx-post="/settings/cache/rebuild-fts"
         hx-swap="none"
-        hx-on--after-request="htmx.trigger('#cache-stats', 'load')"
+        data-trigger-on-success="#cache-stats"
       >
         Rebuild FTS
       </button>

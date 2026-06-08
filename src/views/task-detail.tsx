@@ -146,7 +146,7 @@ const CommentsSection: FC<{
         class="task-detail__add-comment"
         hx-post={`/tasks/${taskId}/comments`}
         hx-swap="none"
-        hx-on--after-request="if(event.detail.successful){ this.reset(); }"
+        data-reset-on-success
       >
         <label class="sr-only" for={`comment-body-${taskId}`}>
           Add a comment
@@ -180,7 +180,7 @@ export const LogTimeForm: FC<{
         class="form"
         hx-post={`/tasks/${taskId}/time-entries`}
         hx-swap="none"
-        hx-on--after-request="if(event.detail.successful){ window.location.reload(); }"
+        data-reload-on-success
       >
         <div class="form__body">
           <div class="form__field">
@@ -309,7 +309,7 @@ export const TimeEntriesSection: FC<{
                     hx-delete={`/tasks/${taskId}/time-entries/${e.id}`}
                     hx-confirm="Delete this time entry?"
                     hx-swap="none"
-                    hx-on--after-request="if(event.detail.successful) window.location.reload()"
+                    data-reload-on-success
                   >
                     Delete
                   </button>

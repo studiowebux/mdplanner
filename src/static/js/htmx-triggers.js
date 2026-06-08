@@ -85,6 +85,50 @@
     open.setAttribute("aria-hidden", "true");
   });
 
+  // CSP-safe replacements for hx-on handlers. htmx compiles `hx-on:*` bodies
+  // with new Function(), which our nonce-only CSP (no 'unsafe-eval') refuses —
+  // every hx-on threw EvalError and silently did nothing. Behaviors are now
+  // declared with data-* hooks and run from these delegated listeners.
+  document.body.addEventListener("htmx:afterRequest", function (e) {
+    if (!e.detail || !e.detail.successful) return;
+    var el = e.detail.elt;
+    if (!el || !el.getAttribute) return;
+    if (
+      el.hasAttribute("data-reset-on-success") && typeof el.reset === "function"
+    ) {
+      el.reset();
+    }
+    if (el.hasAttribute("data-reload-on-success")) {
+      window.location.reload();
+      return;
+    }
+    var redirect = el.getAttribute("data-redirect-on-success");
+    if (redirect) {
+      window.location.href = redirect;
+      return;
+    }
+    var triggerSel = el.getAttribute("data-trigger-on-success");
+    if (triggerSel && window.htmx) {
+      var target = document.querySelector(triggerSel);
+      if (target) {
+        window.htmx.trigger(
+          target,
+          el.getAttribute("data-trigger-on-success-event") || "load",
+        );
+      }
+    }
+  });
+
+  // Click hook: remove the nearest ancestor matching the selector. Replaces the
+  // form-builder array-row remove button's old hx-on--click handler.
+  document.body.addEventListener("click", function (e) {
+    if (!e.target || !e.target.closest) return;
+    var btn = e.target.closest("[data-remove-closest]");
+    if (!btn) return;
+    var row = btn.closest(btn.getAttribute("data-remove-closest"));
+    if (row) row.remove();
+  });
+
   // Intercept htmx:confirm and show the custom modal instead of browser confirm().
   // Per-element overrides: data-confirm-title and data-confirm-label.
   // Defaults stay delete-oriented so existing delete buttons are unaffected.

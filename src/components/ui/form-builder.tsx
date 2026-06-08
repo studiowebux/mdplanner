@@ -247,7 +247,7 @@ const ArrayTableRow: FC<
       type="button"
       class="array-table__remove"
       aria-label="Remove row"
-      hx-on--click="this.closest('.array-table__row').remove()"
+      data-remove-closest=".array-table__row"
     >
       &times;
     </button>

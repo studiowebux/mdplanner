@@ -158,7 +158,7 @@ const ActionsTableComponent: FC<
       hx-post={`/meetings/${meeting.id}/actions`}
       hx-target="#meeting-actions-table"
       hx-swap="outerHTML"
-      hx-on--htmx:after-request="this.reset()"
+      data-reset-on-success
     >
       <input
         class="form__input meeting-detail__add-action-input"
@@ -365,7 +365,7 @@ const RelatedMeetingsSectionComponent: FC<
         hx-post={`/meetings/${meeting.id}/links`}
         hx-target="#meeting-related-section"
         hx-swap="outerHTML"
-        hx-on--htmx:after-request="this.reset()"
+        data-reset-on-success
       >
         <AutocompleteWidget
           id={`meeting-link-${meeting.id}`}

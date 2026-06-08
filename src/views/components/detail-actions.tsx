@@ -44,8 +44,7 @@ export function DetailActions(
       "hx-swap": "none",
     };
     if (onDeleteRedirect) {
-      destroyAttrs["hx-on--after-request"] =
-        `if(event.detail.successful) window.location.href='${onDeleteRedirect}'`;
+      destroyAttrs["data-redirect-on-success"] = onDeleteRedirect;
     }
     return (
       <div class="detail-actions">
@@ -77,8 +76,7 @@ export function DetailActions(
     "hx-swap": "none",
   };
   if (onDeleteRedirect) {
-    deleteAttrs["hx-on--after-request"] =
-      `if(event.detail.successful) window.location.href='${onDeleteRedirect}'`;
+    deleteAttrs["data-redirect-on-success"] = onDeleteRedirect;
   }
 
   return (
