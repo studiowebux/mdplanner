@@ -414,6 +414,7 @@ export const TaskListView: FC<ListProps> = (
                   view="list"
                   offset={shown.length}
                   remaining={remaining}
+                  pageSize={limit}
                 />
               )}
             </div>

@@ -47,7 +47,8 @@ export const SectionLoadMore: FC<{
   view: "list" | "board";
   offset: number;
   remaining: number;
-}> = ({ state, section, view, offset, remaining }) => (
+  pageSize: number;
+}> = ({ state, section, view, offset, remaining, pageSize }) => (
   <button
     type="button"
     class={`task-load-more task-load-more--${view}`}
@@ -56,6 +57,6 @@ export const SectionLoadMore: FC<{
     hx-swap="outerHTML"
     hx-params="none"
   >
-    Load {remaining} more
+    Load {Math.min(remaining, pageSize)} more
   </button>
 );

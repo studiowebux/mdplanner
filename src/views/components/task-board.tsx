@@ -159,6 +159,7 @@ const BoardColumn: FC<
             view="board"
             offset={shown.length}
             remaining={remaining}
+            pageSize={limit}
           />
         )}
       </div>

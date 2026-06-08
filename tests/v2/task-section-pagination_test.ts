@@ -78,7 +78,9 @@ Deno.test("TaskBoardView — caps cards per column and emits load-more", () => {
   );
   assertEquals(countMatches(html, "task-board__card-title"), 5);
   assertStringIncludes(html, "task-load-more--board");
-  assertStringIncludes(html, "Load 7 more");
+  // Label is the next chunk size (pageSize), not the 7 total remaining.
+  assertStringIncludes(html, "Load 5 more");
+  assertEquals(html.includes("Load 7 more"), false);
   assertStringIncludes(html, "section=In+Progress");
   assertStringIncludes(html, "view=board");
   assertStringIncludes(html, "offset=5");
@@ -91,6 +93,36 @@ Deno.test("TaskListView — pageSize unset renders every row (no regression)", (
   );
   assertEquals(countMatches(html, "task-list__row-title"), 40);
   assertEquals(countMatches(html, "task-load-more"), 0);
+});
+
+Deno.test("SectionLoadMore — label caps at pageSize, not total remaining", () => {
+  // 388 tasks, page size 25 → first page shows 25, 363 remain, but the button
+  // must advertise the NEXT chunk (25), not the 363 total.
+  const html = renderToString(
+    // deno-lint-ignore no-explicit-any
+    TaskListView({
+      tasks: makeTasks("Todo", 388),
+      pageSize: 25,
+      state: listState,
+      // deno-lint-ignore no-explicit-any
+    }) as any,
+  );
+  assertStringIncludes(html, "Load 25 more");
+  assertEquals(html.includes("Load 363 more"), false);
+});
+
+Deno.test("SectionLoadMore — final partial page shows the true remainder", () => {
+  // 27 tasks, page size 25 → 2 remain on the last page; min(2, 25) = 2.
+  const html = renderToString(
+    // deno-lint-ignore no-explicit-any
+    TaskListView({
+      tasks: makeTasks("Todo", 27),
+      pageSize: 25,
+      state: listState,
+      // deno-lint-ignore no-explicit-any
+    }) as any,
+  );
+  assertStringIncludes(html, "Load 2 more");
 });
 
 Deno.test("buildSectionMoreUrl — carries filter state, overrides section/view", () => {

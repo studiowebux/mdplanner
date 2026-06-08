@@ -152,6 +152,7 @@ tasksRouter.get("/more-section", async (c) => {
               view="board"
               offset={nextOffset}
               remaining={remaining}
+              pageSize={pageSize}
             />
           )}
         </>,
@@ -184,6 +185,7 @@ tasksRouter.get("/more-section", async (c) => {
             view="list"
             offset={nextOffset}
             remaining={remaining}
+            pageSize={pageSize}
           />
         )}
       </>,
