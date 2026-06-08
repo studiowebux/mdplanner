@@ -25,6 +25,9 @@
  *   7. Docs        — public-API exports preceded by a doc comment (scoped to
  *                    CONFIG.docApiDirs); file headers.
  *   8. Lint/Format — (--deep only) deno lint --json + deno fmt --check counts.
+ *   9. Dead Code   — (--dead only) exported symbols with no cross-file
+ *                    reference (unused exports / un-migrated leftovers), via
+ *                    in-process TypeScript findReferences.
  *
  * The overall grade is a weighted blend of the available dimensions.
  *
@@ -44,6 +47,7 @@
  *
  * Flags:
  *   --deep            also run deno lint + fmt --check (subprocess). Needs --allow-run.
+ *   --dead            cross-file unused-export detection (TS findReferences). Needs --allow-env.
  *   --json <path>     write the full machine-readable report (needs --allow-write).
  *   --min-score <n>   exit non-zero if the overall score is below n (default 0).
  *   root              directory to analyze (default ./src). A sibling tests/
@@ -53,6 +57,9 @@
 import { dirname, join } from "@std/path";
 import { collectComplexity, collectStructuralClones } from "./analyze/ast.ts";
 import { collectCssRules, type CssRule } from "./analyze/css.ts";
+// Type-only: erased at compile, so the fast default run loads no typescript via
+// this path. The runtime module is dynamically imported only under --dead.
+import type { DeadExport } from "./analyze/deadcode.ts";
 
 // ---------------------------------------------------------------------------
 // Tunables — thresholds that define "good". Adjust per project, not per run.
@@ -89,6 +96,7 @@ const CONFIG = {
     testing: 1.5,
     docs: 1,
     lintFormat: 2,
+    deadCode: 1.5,
   } as Record<string, number>,
 };
 
@@ -704,6 +712,38 @@ async function analyzeLintFormat(root: string): Promise<Dimension | null> {
 }
 
 // ---------------------------------------------------------------------------
+// Dimension 9 — Dead Code (--dead, in-process TS findReferences)
+// ---------------------------------------------------------------------------
+// Builds the Dimension from the raw dead-export list produced by the (lazily
+// imported) deadcode collector. CANDIDATES, not certainties: dynamic
+// registration can mask real use — flagged in the summary, never auto-deleted.
+function analyzeDeadCodeDimension(dead: DeadExport[]): Dimension {
+  const trueDead = dead.filter((d) => !d.testOnly);
+  const testOnly = dead.filter((d) => d.testOnly);
+  const score = clamp(100 - trueDead.length * 3 - testOnly.length);
+  return {
+    name: "Dead Code",
+    score,
+    grade: grade(score),
+    summary: `${trueDead.length} unused export(s) + ${testOnly.length} ` +
+      `test-only export(s). CANDIDATES — dynamic registration (views, MCP ` +
+      `tools, routes) can mask real use; confirm by reading before deleting.`,
+    findings: [
+      ...trueDead.slice(0, 8).map((d) =>
+        `dead: ${d.name} @ ${d.rel}:${d.line}`
+      ),
+      ...testOnly.slice(0, 4).map((d) =>
+        `test-only: ${d.name} @ ${d.rel}:${d.line}`
+      ),
+    ],
+    recommendations: trueDead.length === 0 && testOnly.length === 0 ? [] : [
+      "Remove genuinely-unused exports (confirm no dynamic/string-keyed use); " +
+      "drop `export` on test-only symbols or delete if the test is obsolete.",
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Report rendering
 // ---------------------------------------------------------------------------
 const BAR_WIDTH = 24;
@@ -740,6 +780,8 @@ function overallScore(dims: Dimension[]): number {
       ? "debt"
       : d.name === "Lint / Format"
       ? "lintFormat"
+      : d.name === "Dead Code"
+      ? "deadCode"
       : d.name.toLowerCase();
     const w = CONFIG.weights[key] ?? 1;
     weighted += d.score * w;
@@ -754,6 +796,7 @@ function overallScore(dims: Dimension[]): number {
 async function main(): Promise<void> {
   const args = Deno.args;
   const deep = args.includes("--deep");
+  const deadFlag = args.includes("--dead");
   const jsonIdx = args.indexOf("--json");
   const jsonPath = jsonIdx !== -1 ? args[jsonIdx + 1] : null;
   const minIdx = args.indexOf("--min-score");
@@ -814,6 +857,18 @@ async function main(): Promise<void> {
         "\n  (lint/format skipped — `deno` unavailable or --allow-run missing)",
       );
     }
+  }
+  if (deadFlag) {
+    // Lazy import: the cross-file findReferences pass (and its typescript load)
+    // only happens under --dead, keeping the fast default run dependency-free.
+    const { analyzeDeadCode } = await import("./analyze/deadcode.ts");
+    const tsFiles = files.map((f) => ({
+      path: f.path,
+      rel: f.rel,
+      text: f.text,
+      isTest: f.isTest,
+    }));
+    dims.push(analyzeDeadCodeDimension(analyzeDeadCode(tsFiles)));
   }
 
   for (const d of dims) renderDimension(d);
