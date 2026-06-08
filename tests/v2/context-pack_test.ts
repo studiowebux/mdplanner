@@ -189,11 +189,10 @@ Deno.test("assembleContextPack — resume: in-progress task surfaces checkpoint 
       project: PROJECT,
       files: ["src/a.ts"],
     });
-    // Checkpoint comment drives the resume nextStep. (The comment also carries
-    // files_changed metadata, but extractRelevantFiles' comment-metadata source
-    // is not asserted here: the frontmatter serializer mangles nested comment
-    // metadata to "[object Object]" on the round-trip — see
-    // `[bug] MD Planner — comment metadata lost in frontmatter serializer`.)
+    // Checkpoint comment drives the resume nextStep and carries files_changed
+    // metadata, which extractRelevantFiles merges into relevantFiles. (Fixed in
+    // dba34i — the frontmatter serializer previously mangled nested comment
+    // metadata to "[object Object]" on the disk round-trip, dropping it.)
     await tasks.addComment(
       wip.id,
       "Checkpoint: extracted helper\nremaining: wire callers",
@@ -205,8 +204,9 @@ Deno.test("assembleContextPack — resume: in-progress task surfaces checkpoint 
 
     assertEquals(pack.inProgress.length, 1);
     assertEquals(pack.inProgress[0].id, wip.id);
-    // relevantFiles surfaces the explicit `files` set.
-    assertEquals(pack.inProgress[0].relevantFiles, ["src/a.ts"]);
+    // relevantFiles merges the explicit `files` set with the comment's
+    // metadata.files_changed (deduped, in encounter order).
+    assertEquals(pack.inProgress[0].relevantFiles, ["src/a.ts", "src/b.ts"]);
 
     assertEquals(pack.suggestedAction.type, "resume");
     assertEquals(pack.suggestedAction.taskId, wip.id);

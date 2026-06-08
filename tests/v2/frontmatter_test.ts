@@ -50,6 +50,41 @@ Deno.test("frontmatter - round-trips arrays of objects", () => {
   assertEquals(roundTrip(fm), fm);
 });
 
+Deno.test("frontmatter - round-trips array of objects with nested object/array fields", () => {
+  // Regression (dba34i): nested object/array values inside an array-of-objects
+  // item serialized to the literal "[object Object]" — a task comment's
+  // `metadata.files_changed` was silently dropped on the disk round-trip.
+  const fm = {
+    comments: [
+      {
+        id: "c1",
+        body: "did work",
+        author: "Claude",
+        metadata: { files_changed: ["src/a.ts", "src/b.ts"] },
+      },
+      {
+        id: "c2",
+        body: "more work",
+        author: "Tommy",
+        metadata: { files_changed: ["src/c.ts"], tags: ["wip"] },
+      },
+    ],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips array item whose first field is complex", () => {
+  // Exercises the YAML block-sequence dash splice + the symmetric first-key
+  // parse path when the leading field is itself an object / inline array.
+  const fm = {
+    items: [
+      { meta: { k: "v", nums: [1, 2] }, id: "x1" },
+      { tags: ["a", "b"], id: "x2" },
+    ],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
 Deno.test("frontmatter - round-trips depth-1 object (flat Record)", () => {
   const fm = {
     accounts: { github: "octocat", asana: "rt" },

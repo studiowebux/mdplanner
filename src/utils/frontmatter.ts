@@ -174,8 +174,40 @@ function parseBlockArray(
     const obj: Record<string, unknown> = {};
     const firstKey = afterDash.slice(0, colonIdx).trim();
     const firstVal = afterDash.slice(colonIdx + 1).trim();
-    if (firstVal !== "") obj[firstKey] = parseScalar(firstVal);
+    // The first field sits on the dash line; its key starts two columns past
+    // the dash, so its own nested block (if any) is indented deeper than that.
+    const dashKeyIndent = currentIndent + 2;
     i++;
+    if (firstVal.startsWith("[") && firstVal.endsWith("]")) {
+      const inner = firstVal.slice(1, -1);
+      obj[firstKey] = inner
+        ? inner.split(",").map((s) => parseScalar(s.trim()))
+        : [];
+    } else if (firstVal !== "") {
+      obj[firstKey] = parseScalar(firstVal);
+    } else {
+      // Empty inline value: the first field may carry a nested map/array on
+      // deeper-indented lines (mirror the continuation empty-value path below).
+      const childStart = nextNonEmpty(lines, i);
+      if (childStart !== -1) {
+        const childIndent = leadingSpaces(lines[childStart]);
+        if (childIndent > dashKeyIndent) {
+          if (lines[childStart].trim().startsWith("-")) {
+            const { value, next } = parseBlockArray(
+              lines,
+              childStart,
+              childIndent,
+            );
+            obj[firstKey] = value;
+            i = next;
+          } else {
+            const { value, next } = parseMap(lines, childStart, childIndent);
+            obj[firstKey] = value;
+            i = next;
+          }
+        }
+      }
+    }
 
     // Continuation lines for this object: indented strictly deeper than the dash.
     while (i < lines.length) {
@@ -338,9 +370,19 @@ function appendValue(
           .filter(([_, rv]) => rv !== undefined && rv !== null);
         if (entries.length === 0) continue;
         const [fk, fv] = entries[0];
-        lines.push(`${itemPad}- ${fk}: ${serializeScalar(fv)}`);
+        // Emit every field through the shared recursion so nested object/array
+        // values (e.g. comment `metadata.files_changed`) serialize properly
+        // instead of stringifying to "[object Object]". The first field's line
+        // gets the YAML block-sequence dash spliced into its leading pad — the
+        // two leading pad spaces become "- " (identical width), so scalar-only
+        // items render byte-identical to the previous output.
+        const dashIdx = lines.length;
+        appendValue(lines, fk, fv, indent + 2);
+        lines[dashIdx] = `${itemPad}- ${
+          lines[dashIdx].slice((indent + 2) * 2)
+        }`;
         for (const [rk, rv] of entries.slice(1)) {
-          lines.push(`${itemPad}  ${rk}: ${serializeScalar(rv)}`);
+          appendValue(lines, rk, rv, indent + 2);
         }
       }
       return;
