@@ -14,8 +14,9 @@
  *                    @ts-ignore / deno-lint-ignore density per KLOC.
  *   3. Debt        — TODO/FIXME/HACK/XXX markers, console.* bypassing the log
  *                    singleton, empty `catch {}` swallows.
- *   4. Complexity  — cyclomatic (decision-point) count per function. Token
- *                    heuristic (if/for/while/case/catch/&&/||/?:), not AST.
+ *   4. Complexity  — cyclomatic (decision-point) count per function via a real
+ *                    TypeScript AST walk (counts each real function, including
+ *                    those nested inside classic-script IIFEs).
  *   5. Duplication — % of meaningful lines inside a recurring N-line clone,
  *                    via line-window hashing. Catches copy-paste, misses
  *                    renamed/reordered clones.
@@ -26,10 +27,10 @@
  *
  * The overall grade is a weighted blend of the available dimensions.
  *
- * LIMITATION (be honest): complexity, duplication, and docs are token/line
- * heuristics, NOT a type-aware AST walk. Cyclomatic is a decision-token count;
- * duplication is line-window hashing (catches copy-paste, misses renamed or
- * reordered clones). They approximate hotspots, they do not certify them.
+ * LIMITATION (be honest): duplication and docs are line/regex heuristics, NOT a
+ * type-aware AST walk. Duplication is line-window hashing (catches copy-paste,
+ * misses renamed or reordered clones). They approximate hotspots, they do not
+ * certify them. Complexity is a real per-function AST decision count.
  * Generated/minified files are excluded (vendor/, *.min.*). Lint/Format are
  * only computed with --deep (subprocess).
  *
@@ -48,6 +49,7 @@
  */
 
 import { dirname, join } from "@std/path";
+import { collectComplexity } from "./analyze/ast.ts";
 
 // ---------------------------------------------------------------------------
 // Tunables — thresholds that define "good". Adjust per project, not per run.
@@ -336,51 +338,20 @@ function analyzeDebt(files: FileInfo[]): Dimension {
 }
 
 // ---------------------------------------------------------------------------
-// Dimension 4 — Complexity (cyclomatic / decision-point count)
+// Dimension 4 — Complexity (cyclomatic / decision-point count, per-function AST)
 // ---------------------------------------------------------------------------
-// McCabe cyclomatic complexity ≈ 1 + number of decision points in a function.
-// We count if/for/while/case/catch + && + || + ternary ( ? ) per brace-tracked
-// function body. Token-based, not AST: `?.`/`?:` are excluded by requiring
-// whitespace around the ternary `?` (deno fmt guarantees it). Approximate but a
-// real signal, unlike raw indentation (which JSX inflates).
-const DECISION_RE = /\b(if|for|while|case|catch)\b|&&|\|\||\s\?\s/g;
-const FN_SIG_RE = /\b(function\b|=>\s*\{|\)\s*\{|\)\s*:\s*[\w<>,.\[\] ]+\{)/;
-
+// McCabe cyclomatic complexity = 1 + decision points in a function body
+// (if/for/while/case/catch + && + || + ?? + ternary). Sourced from a real
+// TypeScript AST walk (scripts/analyze/ast.ts), NOT line/brace heuristics: each
+// real function is scored on its own, so a function inside a classic-script
+// IIFE is no longer counted as part of one giant file-wide "function".
 function analyzeComplexity(files: FileInfo[]): Dimension {
   const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
-  const complex: Array<{ rel: string; cc: number; loc: number; line: number }> =
-    [];
+  const complex = src
+    .flatMap((f) => collectComplexity(f.rel, f.text))
+    .filter((c) => c.cc > CONFIG.maxCyclomatic)
+    .sort((a, b) => b.cc - a.cc);
 
-  for (const f of src) {
-    const lines = f.text.split("\n");
-    for (let i = 0; i < lines.length; i++) {
-      if (!FN_SIG_RE.test(lines[i]) || !lines[i].includes("{")) continue;
-      let depth = 0;
-      let started = false;
-      let bodyLoc = 0;
-      let cc = 1;
-      for (let j = i; j < lines.length; j++) {
-        const line = lines[j];
-        for (const ch of line) {
-          if (ch === "{") {
-            depth++;
-            started = true;
-          } else if (ch === "}") depth--;
-        }
-        if (started) {
-          bodyLoc++;
-          const m = line.match(DECISION_RE);
-          if (m) cc += m.length;
-        }
-        if (started && depth <= 0) break;
-      }
-      if (cc > CONFIG.maxCyclomatic) {
-        complex.push({ rel: f.rel, cc, loc: bodyLoc, line: i + 1 });
-      }
-    }
-  }
-
-  complex.sort((a, b) => b.cc - a.cc);
   // Penalize each over-threshold function, weighted by how far over it is.
   const penalty = complex.reduce(
     (n, c) => n + 2 + (c.cc - CONFIG.maxCyclomatic) * 0.6,
@@ -393,12 +364,13 @@ function analyzeComplexity(files: FileInfo[]): Dimension {
     grade: grade(score),
     summary:
       `${complex.length} function(s) over cyclomatic ${CONFIG.maxCyclomatic} ` +
-      `(decision-point count; heuristic, not AST).` +
+      `(per-function AST decision count).` +
       (complex.length
-        ? ` Worst: ${complex[0].cc} at ${complex[0].rel}:${complex[0].line}.`
+        ? ` Worst: ${complex[0].cc} at ${complex[0].rel}:${complex[0].line} ` +
+          `(${complex[0].name}).`
         : ""),
     findings: complex.slice(0, 8).map((c) =>
-      `cyclomatic ${c.cc} (~${c.loc} LOC): ${c.rel}:${c.line}`
+      `cyclomatic ${c.cc} (~${c.loc} LOC): ${c.name} @ ${c.rel}:${c.line}`
     ),
     recommendations: complex.length === 0 ? [] : [
       "Split high-cyclomatic functions: extract branch groups into helpers, " +
