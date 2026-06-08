@@ -21,6 +21,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
+import { FormTextarea } from "./components/form-textarea.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -91,7 +92,7 @@ export const StatusUpdateEditRow: FC<{
     hx-swap="outerHTML"
   >
     <span class="portfolio-detail__update-date">{formatDate(u.date)}</span>
-    <textarea class="form__input" name="message" rows={2}>{u.message}</textarea>
+    <FormTextarea name="message" rows={2} value={u.message} />
     <span class="portfolio-detail__update-actions">
       <button class="btn btn--primary btn--sm" type="submit">Save</button>
       <button
@@ -104,6 +105,26 @@ export const StatusUpdateEditRow: FC<{
         Cancel
       </button>
     </span>
+  </form>
+);
+
+/** Quick-add status update form — prepends new rows into #status-updates-list. */
+export const StatusUpdateForm: FC<{ itemId: string }> = ({ itemId }) => (
+  <form
+    class="portfolio-detail__update-form"
+    hx-post={`/portfolio/${itemId}/status-updates`}
+    hx-target="#status-updates-list"
+    hx-swap="afterbegin"
+  >
+    <FormTextarea
+      name="message"
+      placeholder="Add a status update..."
+      rows={2}
+      required
+    />
+    <button class="btn btn--primary btn--sm" type="submit">
+      Add Update
+    </button>
   </form>
 );
 
@@ -349,23 +370,7 @@ export const PortfolioDetailView: FC<Props> = (
         <section class="portfolio-detail__status-updates">
           <h2 class="section-heading">Status Updates</h2>
 
-          <form
-            class="portfolio-detail__update-form"
-            hx-post={`/portfolio/${item.id}/status-updates`}
-            hx-target="#status-updates-list"
-            hx-swap="afterbegin"
-          >
-            <textarea
-              class="form__input"
-              name="message"
-              placeholder="Add a status update..."
-              rows={2}
-              required
-            />
-            <button class="btn btn--primary btn--sm" type="submit">
-              Add Update
-            </button>
-          </form>
+          <StatusUpdateForm itemId={item.id} />
 
           <div id="status-updates-list">
             {(item.statusUpdates ?? []).map((u) => (
