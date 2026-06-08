@@ -246,11 +246,26 @@ export function createDomainPage<T extends Entity>(
           sse-connect="/sse"
           hx-indicator="#global-loading"
           hx-get={`/${cfg.name}/view`}
-          hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted, global-filter:changed from:body`}
+          hx-trigger="global-filter:changed from:body"
           hx-target={`#${cfg.name}-view`}
           hx-swap="morph:outerHTML"
           hx-include={`#${cfg.name}-toolbar`}
         >
+          {
+            /*
+            SSE background refreshes ride a dedicated hidden element so they do
+            NOT flash the shared #global-loading bar (it strobed on every
+            mutation). It inherits hx-get/target/swap/include from <main>;
+            hx-indicator="this" pins the request indicator to this hidden node,
+            i.e. no visible bar. User-initiated swaps (filter/sort/search/
+            pagination, global-filter) still use <main>'s #global-loading.
+          */
+          }
+          <span
+            hidden
+            hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted`}
+            hx-indicator="this"
+          />
           <header class="domain-page__header">
             <h1 class="domain-page__title">
               {cfg.plural ?? `${cfg.singular}s`}

@@ -71,6 +71,43 @@ Deno.test("global htmx loading indicator wiring", async (t) => {
         );
       },
     );
+
+    await t.step(
+      "SSE background-refresh element does NOT bind the global loading bar",
+      async () => {
+        const { DomainPage } = createDomainPage(taskConfig);
+        const app = new Hono();
+        app.get(
+          "/__page",
+          async (c) =>
+            c.html(
+              await DomainPage({
+                items: [],
+                state: { view: "table" },
+              }) as unknown as string,
+            ),
+        );
+        const res = await app.request("/__page");
+        const html = await res.text();
+        // The element carrying the sse:* refresh trigger must opt out of the
+        // shared bar (hx-indicator="this" → indicator on this hidden node),
+        // otherwise every mutation strobes #global-loading.
+        const sseTag = html.match(/<[^>]*hx-trigger="sse:[^>]*>/)?.[0] ?? "";
+        assert(
+          sseTag.length > 0,
+          "expected an element with an sse:* hx-trigger",
+        );
+        assert(
+          sseTag.includes('hx-indicator="this"'),
+          'SSE refresh element must set hx-indicator="this" (no global bar)',
+        );
+        assertEquals(
+          sseTag.includes("#global-loading"),
+          false,
+          "SSE refresh element must not bind #global-loading",
+        );
+      },
+    );
   } finally {
     await Deno.remove(dir, { recursive: true });
   }
