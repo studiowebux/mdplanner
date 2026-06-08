@@ -21,6 +21,7 @@ import {
 import { getProjectService } from "./singletons/services.ts";
 import { setFormatConfig } from "./utils/format.ts";
 import { setTimeLocale } from "./utils/time.ts";
+import { runShutdown } from "./utils/shutdown.ts";
 import type { AppVariables } from "./types/app.ts";
 import { errorHandler, notFoundHandler } from "./middleware/error-handlers.tsx";
 
@@ -130,23 +131,25 @@ const server = Deno.serve({ port }, app.fetch);
 // released and the CacheDatabase `unload` handler closes the connection. The
 // DB layer no longer registers signal listeners (those suppressed the default
 // terminate and left the process lingering → AddrInUse on the next boot).
+// Brief pause after the shutdown notice so the event flushes to sockets.
+const SHUTDOWN_FLUSH_MS = 150;
+// Max time to wait for the graceful drain before forcing exit. Long-lived
+// `/sse` + MCP keep-alive connections would otherwise hang it forever.
+const SHUTDOWN_DRAIN_MS = 1000;
 let shuttingDown = false;
-const shutdown = async (signal: string) => {
-  if (shuttingDown) return;
+const shutdown = (signal: string): Promise<void> => {
+  if (shuttingDown) return Promise.resolve();
   shuttingDown = true;
   log.info(`Received ${signal} — shutting down`);
-  try {
-    // Tell connected clients we're going down so the UI can show a notice
-    // before its SSE stream ends; brief pause lets the event flush to sockets.
-    publish("server.shutdown");
-    await new Promise((r) => setTimeout(r, 150));
-    // End open SSE streams first so the graceful drain below returns promptly.
-    closeAll();
-    await server.shutdown();
-  } catch (err) {
-    log.warn("[shutdown] server.shutdown() failed:", err);
-  }
-  Deno.exit(0);
+  return runShutdown({
+    notify: () => publish("server.shutdown"),
+    flushMs: SHUTDOWN_FLUSH_MS,
+    closeStreams: closeAll,
+    drain: () => server.shutdown(),
+    drainMs: SHUTDOWN_DRAIN_MS,
+    exit: Deno.exit,
+    log: (msg) => log.warn(msg),
+  });
 };
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
   try {
