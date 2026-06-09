@@ -58,6 +58,304 @@ const NotesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
 );
 
 // ---------------------------------------------------------------------------
+// Sections — each owns its visibility check, renders null when empty.
+// ---------------------------------------------------------------------------
+
+const OverviewRow: FC<{
+  plan: MarketingPlan;
+  personById: Record<string, string>;
+}> = ({ plan, personById }) => {
+  const budget = plan.budgetTotal != null
+    ? `${plan.budgetCurrency ?? ""} ${plan.budgetTotal.toLocaleString()}`
+      .trim()
+    : "";
+  const hasOverview = budget || plan.project || plan.responsible ||
+    plan.description;
+  const hasTimeline = plan.startDate || plan.endDate;
+  if (!hasOverview && !hasTimeline) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {budget && <InfoItem label="Budget">{budget}</InfoItem>}
+      {plan.project && (
+        <InfoItem label="Project">
+          <a href={`/portfolio/${toKebab(plan.project)}`}>
+            {plan.project}
+          </a>
+        </InfoItem>
+      )}
+      {plan.responsible && (
+        <InfoItem label="Responsible">
+          <a href={`/people/${plan.responsible}`}>
+            {personById[plan.responsible] ?? plan.responsible}
+          </a>
+        </InfoItem>
+      )}
+      {plan.startDate && (
+        <InfoItem label="Start">{formatDate(plan.startDate)}</InfoItem>
+      )}
+      {plan.endDate && (
+        <InfoItem label="End">{formatDate(plan.endDate)}</InfoItem>
+      )}
+    </div>
+  );
+};
+
+const TeamSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if ((plan.team?.length ?? 0) === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Team ({(plan.team ?? []).length})
+      </h2>
+      <span class="mktplan-detail__team">
+        {(plan.team ?? []).map((id) => (
+          <a key={id} href={`/people/${id}`} class="badge">
+            {id}
+          </a>
+        ))}
+      </span>
+    </section>
+  );
+};
+
+const TargetAudiencesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if ((plan.targetAudiences?.length ?? 0) === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Target Audiences ({(plan.targetAudiences ?? []).length})
+      </h2>
+      <table class="data-table data-table--compact data-table--uppercase">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(plan.targetAudiences ?? []).map((a, idx) => (
+            <tr key={idx}>
+              <td>{a.name}</td>
+              <td>{a.description ?? ""}</td>
+              <td>{a.size ?? ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
+const ChannelsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if ((plan.channels?.length ?? 0) === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Channels ({(plan.channels ?? []).length})
+      </h2>
+      <table class="data-table data-table--compact data-table--uppercase">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Budget</th>
+            <th scope="col">Status</th>
+            <th scope="col">Goals</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(plan.channels ?? []).map((ch, idx) => (
+            <tr key={idx}>
+              <td>{ch.name}</td>
+              <td>
+                {ch.budget != null ? ch.budget.toLocaleString() : ""}
+              </td>
+              <td>
+                {ch.status
+                  ? (
+                    <span
+                      class={badgeClass(
+                        MKTPLAN_ITEM_STATUS_VARIANTS,
+                        ch.status,
+                      )}
+                    >
+                      {ch.status}
+                    </span>
+                  )
+                  : ""}
+              </td>
+              <td>{ch.goals ?? ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
+const CampaignsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if ((plan.campaigns?.length ?? 0) === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Campaigns ({(plan.campaigns ?? []).length})
+      </h2>
+      <table class="data-table data-table--compact data-table--uppercase">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Channel</th>
+            <th scope="col">Budget</th>
+            <th scope="col">Start</th>
+            <th scope="col">End</th>
+            <th scope="col">Status</th>
+            <th scope="col">Goals</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(plan.campaigns ?? []).map((c, idx) => (
+            <tr key={idx}>
+              <td>{c.name}</td>
+              <td>{c.channel ?? ""}</td>
+              <td>
+                {c.budget != null ? c.budget.toLocaleString() : ""}
+              </td>
+              <td>{c.startDate ? formatDate(c.startDate) : ""}</td>
+              <td>{c.endDate ? formatDate(c.endDate) : ""}</td>
+              <td>
+                {c.status
+                  ? (
+                    <span
+                      class={badgeClass(
+                        MKTPLAN_ITEM_STATUS_VARIANTS,
+                        c.status,
+                      )}
+                    >
+                      {c.status}
+                    </span>
+                  )
+                  : ""}
+              </td>
+              <td>{c.goals ?? ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
+const LinkedGoalsSection: FC<{ goals: Goal[] }> = ({ goals }) => {
+  if (goals.length === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Linked Goals ({goals.length})
+      </h2>
+      <div class="mktplan-detail__kpis">
+        {goals.map((goal) => {
+          const pct = goal.kpiTarget && goal.kpiTarget > 0
+            ? Math.min(
+              Math.round(
+                ((goal.kpiValue ?? 0) / goal.kpiTarget) * 100,
+              ),
+              100,
+            )
+            : goal.progress ?? 0;
+          return (
+            <div key={goal.id} class="mktplan-kpi">
+              <div class="mktplan-kpi__header">
+                <a href={`/goals/${goal.id}`} class="mktplan-kpi__metric">
+                  {goal.title}
+                </a>
+                <span
+                  class={badgeClass(GOAL_STATUS_VARIANTS, goal.status)}
+                >
+                  {goal.status}
+                </span>
+              </div>
+              {goal.kpi && <span class="mktplan-kpi__label">{goal.kpi}</span>}
+              {goal.kpiTarget != null && (
+                <>
+                  <div class="mktplan-kpi__values">
+                    {(goal.kpiValue ?? 0).toLocaleString()} /{" "}
+                    {goal.kpiTarget.toLocaleString()}
+                  </div>
+                  <div class="mktplan-kpi__bar">
+                    <div class="mktplan-kpi__fill" data-pct={pct} />
+                  </div>
+                  <span class="mktplan-kpi__pct">{pct}%</span>
+                </>
+              )}
+              {goal.kpiTarget == null && goal.progress != null && (
+                <>
+                  <div class="mktplan-kpi__bar">
+                    <div
+                      class="mktplan-kpi__fill"
+                      data-pct={goal.progress}
+                    />
+                  </div>
+                  <span class="mktplan-kpi__pct">{goal.progress}%</span>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+const HypothesisSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if ((plan.hypothesis?.length ?? 0) === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Hypothesis ({(plan.hypothesis ?? []).length})
+      </h2>
+      <ul class="mktplan-detail__hypothesis-list">
+        {(plan.hypothesis ?? []).map((h, idx) => (
+          <li key={idx} class="mktplan-detail__hypothesis-item">
+            <span class="mktplan-detail__hypothesis-text">{h.text}</span>
+            {h.verdict && (
+              <span
+                class={badgeClass(MKTPLAN_VERDICT_VARIANTS, h.verdict)}
+              >
+                {h.verdict}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+};
+
+const LearningsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if ((plan.learnings?.length ?? 0) === 0) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">
+        Learnings ({(plan.learnings ?? []).length})
+      </h2>
+      <ul class="mktplan-detail__hypothesis-list">
+        {(plan.learnings ?? []).map((l, idx) => <li key={idx}>{l.text}</li>)}
+      </ul>
+    </section>
+  );
+};
+
+const ReadDescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
+  if (!plan.description) return null;
+  return (
+    <section class="detail-section mktplan-detail__section">
+      <h2 class="section-heading">Description</h2>
+      <p class="mktplan-detail__description">{plan.description}</p>
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
@@ -71,22 +369,6 @@ export const MarketingPlanDetailView: FC<
 > = (
   { item: plan, goals = [], personById = {}, editing = false, ...viewProps },
 ) => {
-  const budget = plan.budgetTotal != null
-    ? `${plan.budgetCurrency ?? ""} ${plan.budgetTotal.toLocaleString()}`
-      .trim()
-    : "";
-
-  const hasOverview = budget || plan.project || plan.responsible ||
-    plan.description;
-  const hasTimeline = plan.startDate || plan.endDate;
-  const hasTeam = (plan.team?.length ?? 0) > 0;
-  const hasHypothesis = (plan.hypothesis?.length ?? 0) > 0;
-  const hasLearnings = (plan.learnings?.length ?? 0) > 0;
-  const hasAudiences = (plan.targetAudiences?.length ?? 0) > 0;
-  const hasChannels = (plan.channels?.length ?? 0) > 0;
-  const hasCampaigns = (plan.campaigns?.length ?? 0) > 0;
-  const hasGoals = goals.length > 0;
-
   return (
     <MainLayout
       title={plan.name}
@@ -139,276 +421,33 @@ export const MarketingPlanDetailView: FC<
         <ArchivedBanner entity={plan} />
 
         {/* -- Overview -------------------------------------------------- */}
-        {(hasOverview || hasTimeline) && (
-          <div class="detail-section detail-info-row">
-            {budget && <InfoItem label="Budget">{budget}</InfoItem>}
-            {plan.project && (
-              <InfoItem label="Project">
-                <a href={`/portfolio/${toKebab(plan.project)}`}>
-                  {plan.project}
-                </a>
-              </InfoItem>
-            )}
-            {plan.responsible && (
-              <InfoItem label="Responsible">
-                <a href={`/people/${plan.responsible}`}>
-                  {personById[plan.responsible] ?? plan.responsible}
-                </a>
-              </InfoItem>
-            )}
-            {plan.startDate && (
-              <InfoItem label="Start">{formatDate(plan.startDate)}</InfoItem>
-            )}
-            {plan.endDate && (
-              <InfoItem label="End">{formatDate(plan.endDate)}</InfoItem>
-            )}
-          </div>
-        )}
+        <OverviewRow plan={plan} personById={personById} />
 
         {/* -- Team ------------------------------------------------------ */}
-        {hasTeam && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Team ({(plan.team ?? []).length})
-            </h2>
-            <span class="mktplan-detail__team">
-              {(plan.team ?? []).map((id) => (
-                <a key={id} href={`/people/${id}`} class="badge">
-                  {id}
-                </a>
-              ))}
-            </span>
-          </section>
-        )}
+        <TeamSection plan={plan} />
 
         {/* -- Description ----------------------------------------------- */}
         {editing
           ? <DescriptionSection plan={plan} />
-          : plan.description && (
-            <section class="detail-section mktplan-detail__section">
-              <h2 class="section-heading">Description</h2>
-              <p class="mktplan-detail__description">{plan.description}</p>
-            </section>
-          )}
+          : <ReadDescriptionSection plan={plan} />}
 
         {/* -- Target Audiences ------------------------------------------ */}
-        {hasAudiences && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Target Audiences ({(plan.targetAudiences ?? []).length})
-            </h2>
-            <table class="data-table data-table--compact data-table--uppercase">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Description</th>
-                  <th scope="col">Size</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(plan.targetAudiences ?? []).map((a, idx) => (
-                  <tr key={idx}>
-                    <td>{a.name}</td>
-                    <td>{a.description ?? ""}</td>
-                    <td>{a.size ?? ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+        <TargetAudiencesSection plan={plan} />
 
         {/* -- Channels -------------------------------------------------- */}
-        {hasChannels && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Channels ({(plan.channels ?? []).length})
-            </h2>
-            <table class="data-table data-table--compact data-table--uppercase">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Budget</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Goals</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(plan.channels ?? []).map((ch, idx) => (
-                  <tr key={idx}>
-                    <td>{ch.name}</td>
-                    <td>
-                      {ch.budget != null ? ch.budget.toLocaleString() : ""}
-                    </td>
-                    <td>
-                      {ch.status
-                        ? (
-                          <span
-                            class={badgeClass(
-                              MKTPLAN_ITEM_STATUS_VARIANTS,
-                              ch.status,
-                            )}
-                          >
-                            {ch.status}
-                          </span>
-                        )
-                        : ""}
-                    </td>
-                    <td>{ch.goals ?? ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+        <ChannelsSection plan={plan} />
 
         {/* -- Campaigns ------------------------------------------------- */}
-        {hasCampaigns && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Campaigns ({(plan.campaigns ?? []).length})
-            </h2>
-            <table class="data-table data-table--compact data-table--uppercase">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Channel</th>
-                  <th scope="col">Budget</th>
-                  <th scope="col">Start</th>
-                  <th scope="col">End</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Goals</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(plan.campaigns ?? []).map((c, idx) => (
-                  <tr key={idx}>
-                    <td>{c.name}</td>
-                    <td>{c.channel ?? ""}</td>
-                    <td>
-                      {c.budget != null ? c.budget.toLocaleString() : ""}
-                    </td>
-                    <td>{c.startDate ? formatDate(c.startDate) : ""}</td>
-                    <td>{c.endDate ? formatDate(c.endDate) : ""}</td>
-                    <td>
-                      {c.status
-                        ? (
-                          <span
-                            class={badgeClass(
-                              MKTPLAN_ITEM_STATUS_VARIANTS,
-                              c.status,
-                            )}
-                          >
-                            {c.status}
-                          </span>
-                        )
-                        : ""}
-                    </td>
-                    <td>{c.goals ?? ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+        <CampaignsSection plan={plan} />
 
         {/* -- Linked Goals ---------------------------------------------- */}
-        {hasGoals && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Linked Goals ({goals.length})
-            </h2>
-            <div class="mktplan-detail__kpis">
-              {goals.map((goal) => {
-                const pct = goal.kpiTarget && goal.kpiTarget > 0
-                  ? Math.min(
-                    Math.round(
-                      ((goal.kpiValue ?? 0) / goal.kpiTarget) * 100,
-                    ),
-                    100,
-                  )
-                  : goal.progress ?? 0;
-                return (
-                  <div key={goal.id} class="mktplan-kpi">
-                    <div class="mktplan-kpi__header">
-                      <a href={`/goals/${goal.id}`} class="mktplan-kpi__metric">
-                        {goal.title}
-                      </a>
-                      <span
-                        class={badgeClass(GOAL_STATUS_VARIANTS, goal.status)}
-                      >
-                        {goal.status}
-                      </span>
-                    </div>
-                    {goal.kpi && (
-                      <span class="mktplan-kpi__label">{goal.kpi}</span>
-                    )}
-                    {goal.kpiTarget != null && (
-                      <>
-                        <div class="mktplan-kpi__values">
-                          {(goal.kpiValue ?? 0).toLocaleString()} /{" "}
-                          {goal.kpiTarget.toLocaleString()}
-                        </div>
-                        <div class="mktplan-kpi__bar">
-                          <div class="mktplan-kpi__fill" data-pct={pct} />
-                        </div>
-                        <span class="mktplan-kpi__pct">{pct}%</span>
-                      </>
-                    )}
-                    {goal.kpiTarget == null && goal.progress != null && (
-                      <>
-                        <div class="mktplan-kpi__bar">
-                          <div
-                            class="mktplan-kpi__fill"
-                            data-pct={goal.progress}
-                          />
-                        </div>
-                        <span class="mktplan-kpi__pct">{goal.progress}%</span>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+        <LinkedGoalsSection goals={goals} />
 
         {/* -- Hypothesis ------------------------------------------------ */}
-        {hasHypothesis && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Hypothesis ({(plan.hypothesis ?? []).length})
-            </h2>
-            <ul class="mktplan-detail__hypothesis-list">
-              {(plan.hypothesis ?? []).map((h, idx) => (
-                <li key={idx} class="mktplan-detail__hypothesis-item">
-                  <span class="mktplan-detail__hypothesis-text">{h.text}</span>
-                  {h.verdict && (
-                    <span
-                      class={badgeClass(MKTPLAN_VERDICT_VARIANTS, h.verdict)}
-                    >
-                      {h.verdict}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        <HypothesisSection plan={plan} />
 
         {/* -- Learnings ------------------------------------------------- */}
-        {hasLearnings && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">
-              Learnings ({(plan.learnings ?? []).length})
-            </h2>
-            <ul class="mktplan-detail__hypothesis-list">
-              {(plan.learnings ?? []).map((l, idx) => (
-                <li key={idx}>{l.text}</li>
-              ))}
-            </ul>
-          </section>
-        )}
+        <LearningsSection plan={plan} />
 
         {/* -- Notes ----------------------------------------------------- */}
         {editing
