@@ -133,113 +133,120 @@ export const TaskRow: FC<
       </div>
     </div>
     <div class="task-list__row-actions">
-      {archived
-        ? (
-          <>
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-post={`/tasks/${task.id}/restore`}
-              hx-swap="none"
-            >
-              Restore
-            </button>
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              data-copy
-              data-copy-value={`/tasks/${task.id}`}
-              aria-label="Copy link to task"
-            >
-              Link
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-post={`/tasks/${task.id}/destroy`}
-              hx-confirm={`Permanently delete "${task.title}"? This cannot be undone — the file will be removed from disk.`}
-              data-confirm-title="Delete permanently"
-              data-confirm-label="Delete permanently"
-              hx-swap="none"
-            >
-              Delete permanently
-            </button>
-          </>
-        )
-        : (
-          <>
-            <select
-              id={`move-${task.id}`}
-              class="form__select form__select--sm"
-              hx-post={`/tasks/${task.id}/move`}
-              hx-swap="none"
-              hx-trigger="change"
-              hx-include="this"
-              // Override the inherited hx-params="sid,reorderSection" from the
-              // SortableJS reorder container — otherwise `section` is filtered
-              // out of the POST body and /move returns 400 (Missing section).
-              hx-params="section"
-              name="section"
-              aria-label="Move section"
-            >
-              {moveSections.map((s) => (
-                <option key={s} value={s} selected={s === task.section}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            {task.completed
-              ? (
+      <details class="task-list__actions">
+        <summary class="task-list__actions-trigger" aria-label="Row actions">
+          ⋮
+        </summary>
+        <div class="task-list__actions-list">
+          {archived
+            ? (
+              <>
                 <button
                   class="btn btn--secondary btn--sm"
                   type="button"
-                  hx-post={`/tasks/${task.id}/reopen`}
+                  hx-post={`/tasks/${task.id}/restore`}
                   hx-swap="none"
                 >
-                  Reopen
+                  Restore
                 </button>
-              )
-              : (
                 <button
-                  class="btn btn--primary btn--sm"
+                  class="btn btn--secondary btn--sm"
                   type="button"
-                  hx-post={`/tasks/${task.id}/complete`}
+                  data-copy
+                  data-copy-value={`/tasks/${task.id}`}
+                  aria-label="Copy link to task"
+                >
+                  Link
+                </button>
+                <button
+                  class="btn btn--danger btn--sm"
+                  type="button"
+                  hx-post={`/tasks/${task.id}/destroy`}
+                  hx-confirm={`Permanently delete "${task.title}"? This cannot be undone — the file will be removed from disk.`}
+                  data-confirm-title="Delete permanently"
+                  data-confirm-label="Delete permanently"
                   hx-swap="none"
                 >
-                  Mark complete
+                  Delete permanently
                 </button>
-              )}
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/tasks/${task.id}/edit`}
-              hx-target="#tasks-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              data-copy
-              data-copy-value={`/tasks/${task.id}`}
-              aria-label="Copy link to task"
-            >
-              Link
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/tasks/${task.id}`}
-              hx-confirm={`Archive "${task.title}"? Archived items can be restored from the archived view.`}
-              data-confirm-title="Archive"
-              data-confirm-label="Archive"
-              hx-swap="none"
-            >
-              Archive
-            </button>
-          </>
-        )}
+              </>
+            )
+            : (
+              <>
+                <select
+                  id={`move-${task.id}`}
+                  class="form__select form__select--sm"
+                  hx-post={`/tasks/${task.id}/move`}
+                  hx-swap="none"
+                  hx-trigger="change"
+                  hx-include="this"
+                  // Override the inherited hx-params="sid,reorderSection" from the
+                  // SortableJS reorder container — otherwise `section` is filtered
+                  // out of the POST body and /move returns 400 (Missing section).
+                  hx-params="section"
+                  name="section"
+                  aria-label="Move section"
+                >
+                  {moveSections.map((s) => (
+                    <option key={s} value={s} selected={s === task.section}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                {task.completed
+                  ? (
+                    <button
+                      class="btn btn--secondary btn--sm"
+                      type="button"
+                      hx-post={`/tasks/${task.id}/reopen`}
+                      hx-swap="none"
+                    >
+                      Reopen
+                    </button>
+                  )
+                  : (
+                    <button
+                      class="btn btn--primary btn--sm"
+                      type="button"
+                      hx-post={`/tasks/${task.id}/complete`}
+                      hx-swap="none"
+                    >
+                      Mark complete
+                    </button>
+                  )}
+                <button
+                  class="btn btn--secondary btn--sm"
+                  type="button"
+                  hx-get={`/tasks/${task.id}/edit`}
+                  hx-target="#tasks-form-container"
+                  hx-swap="innerHTML"
+                >
+                  Edit
+                </button>
+                <button
+                  class="btn btn--secondary btn--sm"
+                  type="button"
+                  data-copy
+                  data-copy-value={`/tasks/${task.id}`}
+                  aria-label="Copy link to task"
+                >
+                  Link
+                </button>
+                <button
+                  class="btn btn--danger btn--sm"
+                  type="button"
+                  hx-delete={`/tasks/${task.id}`}
+                  hx-confirm={`Archive "${task.title}"? Archived items can be restored from the archived view.`}
+                  data-confirm-title="Archive"
+                  data-confirm-label="Archive"
+                  hx-swap="none"
+                >
+                  Archive
+                </button>
+              </>
+            )}
+        </div>
+      </details>
     </div>
   </div>
 );
