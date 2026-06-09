@@ -13,6 +13,7 @@ import {
 import { HabitHeatmap } from "../../src/views/habits/components/habit-heatmap.tsx";
 import { CommentsSection } from "../../src/views/task-detail.tsx";
 import { NewBoardForm } from "../../src/views/sticky-notes/routes.tsx";
+import { MindmapEditForm } from "../../src/views/mindmap-detail.tsx";
 
 Deno.test("FormTextarea — carries the form__textarea base class, not form__input", () => {
   // deno-lint-ignore no-explicit-any
@@ -100,6 +101,18 @@ Deno.test("NewBoardForm — description box uses form__textarea, drops the redun
   assertEquals(html.includes("form__input form__textarea"), false);
   // Create-board wiring survives.
   assertStringIncludes(html, 'hx-post="/sticky-notes/boards"');
+});
+
+Deno.test("MindmapEditForm — body box uses form__textarea + modifier, keeps spellcheck + save target", () => {
+  const html = renderToString(
+    // deno-lint-ignore no-explicit-any
+    MindmapEditForm({ id: "mm1", bodyText: "- root" }) as any,
+  );
+  assertStringIncludes(html, "form__textarea mindmap-edit-form__textarea");
+  assertEquals(html.includes("form__input"), false);
+  assertStringIncludes(html, 'spellcheck="false"');
+  assertStringIncludes(html, ">- root</textarea>");
+  assertStringIncludes(html, 'hx-post="/mindmaps/mm1/body"');
 });
 
 Deno.test("HabitHeatmap — note box uses form__textarea, not the bogus form-input class", () => {

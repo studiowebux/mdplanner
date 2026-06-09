@@ -12,6 +12,7 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
+import { FormTextarea } from "./components/form-textarea.tsx";
 import { countAllNodes } from "../domains/mindmap/constants.tsx";
 import { serializeBulletTree } from "../repositories/mindmap.repository.ts";
 
@@ -26,6 +27,34 @@ const NotesSection: FC<{ item: Mindmap }> = ({ item }) => (
       rootId="mindmap-detail-root"
     />
   </section>
+);
+
+// Raw-bullet edit form (edit mode). Saves the whole body back to the mindmap.
+export const MindmapEditForm: FC<{ id: string; bodyText: string }> = ({
+  id,
+  bodyText,
+}) => (
+  <form
+    class="mindmap-edit-form"
+    hx-post={`/mindmaps/${id}/body`}
+    hx-target="#mindmap-detail-root"
+    hx-select="#mindmap-detail-root"
+    hx-swap="outerHTML"
+  >
+    <FormTextarea
+      class="mindmap-edit-form__textarea"
+      name="body"
+      rows={20}
+      value={bodyText}
+      attrs={{ spellcheck: "false" }}
+    />
+    <div class="mindmap-edit-form__actions">
+      <button type="submit" class="btn btn--primary">Save</button>
+      <a class="btn btn--secondary" href={`/mindmaps/${id}`}>
+        Cancel
+      </a>
+    </div>
+  </form>
 );
 
 export const MindmapDetailView: FC<
@@ -92,67 +121,39 @@ export const MindmapDetailView: FC<
 
         <ArchivedBanner entity={item} />
 
-        {editing
-          ? (
-            <form
-              class="mindmap-edit-form"
-              hx-post={`/mindmaps/${item.id}/body`}
-              hx-target="#mindmap-detail-root"
-              hx-select="#mindmap-detail-root"
-              hx-swap="outerHTML"
-            >
-              <textarea
-                class="form__textarea mindmap-edit-form__textarea"
-                name="body"
-                rows={20}
-                spellcheck={false}
+        {editing ? <MindmapEditForm id={item.id} bodyText={bodyText} /> : (
+          <>
+            <div class="mindmap-detail__toolbar">
+              <button
+                id="mindmap-zoom-out"
+                type="button"
+                class="btn btn--secondary btn--sm"
               >
-                {bodyText}
-              </textarea>
-              <div class="mindmap-edit-form__actions">
-                <button type="submit" class="btn btn--primary">Save</button>
-                <a
-                  class="btn btn--secondary"
-                  href={`/mindmaps/${item.id}`}
-                >
-                  Cancel
-                </a>
-              </div>
-            </form>
-          )
-          : (
-            <>
-              <div class="mindmap-detail__toolbar">
-                <button
-                  id="mindmap-zoom-out"
-                  type="button"
-                  class="btn btn--secondary btn--sm"
-                >
-                  Zoom out
-                </button>
-                <button
-                  id="mindmap-fit"
-                  type="button"
-                  class="btn btn--secondary btn--sm"
-                >
-                  Fit
-                </button>
-                <button
-                  id="mindmap-zoom-in"
-                  type="button"
-                  class="btn btn--secondary btn--sm"
-                >
-                  Zoom in
-                </button>
-              </div>
+                Zoom out
+              </button>
+              <button
+                id="mindmap-fit"
+                type="button"
+                class="btn btn--secondary btn--sm"
+              >
+                Fit
+              </button>
+              <button
+                id="mindmap-zoom-in"
+                type="button"
+                class="btn btn--secondary btn--sm"
+              >
+                Zoom in
+              </button>
+            </div>
 
-              <div
-                id="mindmap-container"
-                class="mindmap-detail__canvas"
-                data-mindmap-id={item.id}
-              />
-            </>
-          )}
+            <div
+              id="mindmap-container"
+              class="mindmap-detail__canvas"
+              data-mindmap-id={item.id}
+            />
+          </>
+        )}
 
         {editing
           ? <NotesSection item={item} />
