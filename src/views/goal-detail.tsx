@@ -154,6 +154,243 @@ const SmartCriteriaSection: FC<{ goal: Goal }> = ({ goal }) => {
 };
 
 // ---------------------------------------------------------------------------
+// Person link — owner / contributor resolution (id → name → raw)
+// ---------------------------------------------------------------------------
+
+const PersonLink: FC<{
+  ref: string;
+  personById: Record<string, string>;
+  personByName: Record<string, string>;
+  class?: string;
+}> = ({ ref, personById, personByName, class: cls }) => {
+  if (personById[ref]) {
+    return <a href={`/people/${ref}`} class={cls}>{personById[ref]}</a>;
+  }
+  if (personByName[ref]) {
+    return <a href={`/people/${personByName[ref]}`} class={cls}>{ref}</a>;
+  }
+  return cls ? <span class={cls}>{ref}</span> : <>{ref}</>;
+};
+
+// ---------------------------------------------------------------------------
+// Detail header — title row, status/type badges, deadline, actions
+// ---------------------------------------------------------------------------
+
+const GoalDetailHeader: FC<{ goal: Goal; editing: boolean }> = (
+  { goal, editing },
+) => {
+  const isCompleted = goal.status === "success" || goal.status === "failed";
+  const deadline = isCompleted ? "" : dueIn(goal.endDate);
+  const isOverdue = deadline.includes("overdue");
+  const tookDays = isCompleted && goal.startDate
+    ? Math.max(
+      0,
+      Math.round(
+        (parseDate(goal.updatedAt).getTime() -
+          parseDate(goal.startDate).getTime()) / 86400000,
+      ),
+    )
+    : null;
+
+  return (
+    <header class="detail-section detail-header goal-detail__header">
+      <div class="detail-title-row goal-detail__title-row">
+        <h1 class="detail-title goal-detail__title">{goal.title}</h1>
+        <span class={badgeClass(GOAL_STATUS_VARIANTS, goal.status)}>
+          {goal.status}
+        </span>
+        <span class={badgeClass(GOAL_TYPE_VARIANTS, goal.type)}>
+          {goal.type}
+        </span>
+        {deadline && (
+          <span
+            class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
+          >
+            {deadline}
+          </span>
+        )}
+        {tookDays !== null && (
+          <span class="goal-deadline">
+            took {tookDays} day{tookDays !== 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
+      <DetailActions
+        entity="goals"
+        id={goal.id}
+        title={goal.title}
+        formContainerId="goals-form-container"
+        archived={goal.archived === true}
+      >
+        <EditModeToggle href={`/goals/${goal.id}`} editing={editing} />
+      </DetailActions>
+    </header>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Info rows — each owns its visibility check, renders null when empty
+// ---------------------------------------------------------------------------
+
+const GoalOverviewRow: FC<{
+  goal: Goal;
+  parentGoal?: Goal | null;
+  personById: Record<string, string>;
+  personByName: Record<string, string>;
+  portfolioIdByName?: string;
+  projectSlug: string;
+}> = (
+  {
+    goal,
+    parentGoal,
+    personById,
+    personByName,
+    portfolioIdByName,
+    projectSlug,
+  },
+) => {
+  const hasOverview = goal.owner || goal.priority || goal.project || parentGoal;
+  if (!hasOverview) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {goal.priority && (
+        <InfoItem label="Priority">
+          <span class={`badge priority--${goal.priority}`}>
+            {PRIORITY_LABELS[String(goal.priority)] ??
+              `P${goal.priority}`}
+          </span>
+        </InfoItem>
+      )}
+      {goal.owner && (
+        <InfoItem label="Owner">
+          <PersonLink
+            ref={goal.owner}
+            personById={personById}
+            personByName={personByName}
+          />
+        </InfoItem>
+      )}
+      {goal.project && (
+        <InfoItem label="Project">
+          <a href={`/portfolio/${portfolioIdByName ?? projectSlug}`}>
+            {goal.project}
+          </a>
+        </InfoItem>
+      )}
+      {parentGoal && (
+        <InfoItem label="Parent Goal">
+          <a href={`/goals/${parentGoal.id}`}>{parentGoal.title}</a>
+        </InfoItem>
+      )}
+    </div>
+  );
+};
+
+const GoalMeasurementRow: FC<{ goal: Goal }> = ({ goal }) => {
+  const hasKpi = goal.kpi || goal.kpiMetric ||
+    goal.kpiValue !== undefined || goal.kpiTarget !== undefined ||
+    goal.progress !== undefined;
+  if (!hasKpi) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {goal.kpi && <InfoItem label="KPI">{goal.kpi}</InfoItem>}
+      {goal.kpiMetric && <InfoItem label="Metric">{goal.kpiMetric}</InfoItem>}
+      {goal.kpiValue != null && goal.kpiTarget != null
+        ? (
+          <InfoItem label="KPI Progress">
+            <KpiGauge value={goal.kpiValue} target={goal.kpiTarget} />
+          </InfoItem>
+        )
+        : (
+          <>
+            {goal.kpiTarget != null && (
+              <InfoItem label="Target">{goal.kpiTarget}</InfoItem>
+            )}
+            {goal.kpiValue != null && (
+              <InfoItem label="Value">{goal.kpiValue}</InfoItem>
+            )}
+          </>
+        )}
+      {goal.progress != null && (
+        <InfoItem label="Progress">
+          <div class="goal-progress-cell">
+            <progress
+              class="progress-bar"
+              value={goal.progress}
+              max={100}
+            />
+            <span>{goal.progress}%</span>
+          </div>
+        </InfoItem>
+      )}
+    </div>
+  );
+};
+
+const GoalTimelineRow: FC<{ goal: Goal }> = ({ goal }) => {
+  if (!goal.startDate && !goal.endDate) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {goal.startDate && (
+        <InfoItem label="Start">{formatDate(goal.startDate)}</InfoItem>
+      )}
+      {goal.endDate && (
+        <InfoItem label="End">{formatDate(goal.endDate)}</InfoItem>
+      )}
+    </div>
+  );
+};
+
+const GoalRelationshipsRow: FC<{
+  goal: Goal;
+  linkedMilestones: MilestoneBase[];
+  personById: Record<string, string>;
+  personByName: Record<string, string>;
+}> = ({ goal, linkedMilestones, personById, personByName }) => {
+  const hasRelationships = (goal.contributors?.length ?? 0) > 0 ||
+    linkedMilestones.length > 0 || (goal.tags?.length ?? 0) > 0;
+  if (!hasRelationships) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {(goal.contributors?.length ?? 0) > 0 && (
+        <InfoItem label="Contributors">
+          <span class="goal-detail__links">
+            {(goal.contributors ?? []).map((c) => (
+              <PersonLink
+                ref={c}
+                personById={personById}
+                personByName={personByName}
+                class="badge"
+              />
+            ))}
+          </span>
+        </InfoItem>
+      )}
+      {linkedMilestones.length > 0 && (
+        <InfoItem label="Milestones">
+          <span class="goal-detail__links">
+            {linkedMilestones.map((m) => (
+              <a href={`/milestones/${m.id}`} class="badge">
+                {m.name}
+              </a>
+            ))}
+          </span>
+        </InfoItem>
+      )}
+      {(goal.tags?.length ?? 0) > 0 && (
+        <InfoItem label="Tags">
+          <span class="goal-detail__links">
+            {(goal.tags ?? []).map((t) => (
+              <span key={t} class="badge">{t}</span>
+            ))}
+          </span>
+        </InfoItem>
+      )}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
@@ -228,28 +465,7 @@ export const GoalDetailView: FC<
 ) => {
   const portfolioByName = portfolioItems.find((p) => p.name === goal.project);
   const portfolioIdByName = portfolioByName?.id;
-  const isCompleted = goal.status === "success" || goal.status === "failed";
-  const deadline = isCompleted ? "" : dueIn(goal.endDate);
-  const isOverdue = deadline.includes("overdue");
-  const tookDays = isCompleted && goal.startDate
-    ? Math.max(
-      0,
-      Math.round(
-        (parseDate(goal.updatedAt).getTime() -
-          parseDate(goal.startDate).getTime()) / 86400000,
-      ),
-    )
-    : null;
-
   const projectSlug = goal.project ? toKebab(goal.project) : "";
-
-  const hasOverview = goal.owner || goal.priority || goal.project || parentGoal;
-  const hasKpi = goal.kpi || goal.kpiMetric ||
-    goal.kpiValue !== undefined || goal.kpiTarget !== undefined ||
-    goal.progress !== undefined;
-  const hasTimeline = goal.startDate || goal.endDate;
-  const hasRelationships = (goal.contributors?.length ?? 0) > 0 ||
-    linkedMilestones.length > 0 || (goal.tags?.length ?? 0) > 0;
 
   return (
     <MainLayout
@@ -278,182 +494,33 @@ export const GoalDetailView: FC<
         <BackButton href="/goals" label="Back to Goals" />
 
         {/* ── Header ─────────────────────────────────────────────── */}
-        <header class="detail-section detail-header goal-detail__header">
-          <div class="detail-title-row goal-detail__title-row">
-            <h1 class="detail-title goal-detail__title">{goal.title}</h1>
-            <span class={badgeClass(GOAL_STATUS_VARIANTS, goal.status)}>
-              {goal.status}
-            </span>
-            <span class={badgeClass(GOAL_TYPE_VARIANTS, goal.type)}>
-              {goal.type}
-            </span>
-            {deadline && (
-              <span
-                class={`goal-deadline${
-                  isOverdue ? " goal-deadline--overdue" : ""
-                }`}
-              >
-                {deadline}
-              </span>
-            )}
-            {tookDays !== null && (
-              <span class="goal-deadline">
-                took {tookDays} day{tookDays !== 1 ? "s" : ""}
-              </span>
-            )}
-          </div>
-          <DetailActions
-            entity="goals"
-            id={goal.id}
-            title={goal.title}
-            formContainerId="goals-form-container"
-            archived={goal.archived === true}
-          >
-            <EditModeToggle href={`/goals/${goal.id}`} editing={editing} />
-          </DetailActions>
-        </header>
+        <GoalDetailHeader goal={goal} editing={editing} />
 
         <ArchivedBanner entity={goal} />
 
         {/* ── Overview row ───────────────────────────────────────── */}
-        {hasOverview && (
-          <div class="detail-section detail-info-row">
-            {goal.priority && (
-              <InfoItem label="Priority">
-                <span class={`badge priority--${goal.priority}`}>
-                  {PRIORITY_LABELS[String(goal.priority)] ??
-                    `P${goal.priority}`}
-                </span>
-              </InfoItem>
-            )}
-            {goal.owner && (
-              <InfoItem label="Owner">
-                {personById[goal.owner]
-                  ? (
-                    <a href={`/people/${goal.owner}`}>
-                      {personById[goal.owner]}
-                    </a>
-                  )
-                  : personByName[goal.owner]
-                  ? (
-                    <a href={`/people/${personByName[goal.owner]}`}>
-                      {goal.owner}
-                    </a>
-                  )
-                  : goal.owner}
-              </InfoItem>
-            )}
-            {goal.project && (
-              <InfoItem label="Project">
-                <a href={`/portfolio/${portfolioIdByName ?? projectSlug}`}>
-                  {goal.project}
-                </a>
-              </InfoItem>
-            )}
-            {parentGoal && (
-              <InfoItem label="Parent Goal">
-                <a href={`/goals/${parentGoal.id}`}>{parentGoal.title}</a>
-              </InfoItem>
-            )}
-          </div>
-        )}
+        <GoalOverviewRow
+          goal={goal}
+          parentGoal={parentGoal}
+          personById={personById}
+          personByName={personByName}
+          portfolioIdByName={portfolioIdByName}
+          projectSlug={projectSlug}
+        />
 
         {/* ── Measurement row ────────────────────────────────────── */}
-        {hasKpi && (
-          <div class="detail-section detail-info-row">
-            {goal.kpi && <InfoItem label="KPI">{goal.kpi}</InfoItem>}
-            {goal.kpiMetric && (
-              <InfoItem label="Metric">{goal.kpiMetric}</InfoItem>
-            )}
-            {goal.kpiValue != null && goal.kpiTarget != null
-              ? (
-                <InfoItem label="KPI Progress">
-                  <KpiGauge value={goal.kpiValue} target={goal.kpiTarget} />
-                </InfoItem>
-              )
-              : (
-                <>
-                  {goal.kpiTarget != null && (
-                    <InfoItem label="Target">{goal.kpiTarget}</InfoItem>
-                  )}
-                  {goal.kpiValue != null && (
-                    <InfoItem label="Value">{goal.kpiValue}</InfoItem>
-                  )}
-                </>
-              )}
-            {goal.progress != null && (
-              <InfoItem label="Progress">
-                <div class="goal-progress-cell">
-                  <progress
-                    class="progress-bar"
-                    value={goal.progress}
-                    max={100}
-                  />
-                  <span>{goal.progress}%</span>
-                </div>
-              </InfoItem>
-            )}
-          </div>
-        )}
+        <GoalMeasurementRow goal={goal} />
 
         {/* ── Timeline row ───────────────────────────────────────── */}
-        {hasTimeline && (
-          <div class="detail-section detail-info-row">
-            {goal.startDate && (
-              <InfoItem label="Start">{formatDate(goal.startDate)}</InfoItem>
-            )}
-            {goal.endDate && (
-              <InfoItem label="End">{formatDate(goal.endDate)}</InfoItem>
-            )}
-          </div>
-        )}
+        <GoalTimelineRow goal={goal} />
 
         {/* ── Relationships row ──────────────────────────────────── */}
-        {hasRelationships && (
-          <div class="detail-section detail-info-row">
-            {(goal.contributors?.length ?? 0) > 0 && (
-              <InfoItem label="Contributors">
-                <span class="goal-detail__links">
-                  {(goal.contributors ?? []).map((c) => (
-                    personById[c]
-                      ? (
-                        <a href={`/people/${c}`} class="badge">
-                          {personById[c]}
-                        </a>
-                      )
-                      : personByName[c]
-                      ? (
-                        <a href={`/people/${personByName[c]}`} class="badge">
-                          {c}
-                        </a>
-                      )
-                      : <span class="badge">{c}</span>
-                  ))}
-                </span>
-              </InfoItem>
-            )}
-            {linkedMilestones.length > 0 && (
-              <InfoItem label="Milestones">
-                <span class="goal-detail__links">
-                  {linkedMilestones.map((m) => (
-                    <a href={`/milestones/${m.id}`} class="badge">
-                      {m.name}
-                    </a>
-                  ))}
-                </span>
-              </InfoItem>
-            )}
-            {(goal.tags?.length ?? 0) > 0 && (
-              <InfoItem label="Tags">
-                <span class="goal-detail__links">
-                  {(goal.tags ?? []).map((t) => (
-                    <span key={t} class="badge">{t}</span>
-                  ))}
-                </span>
-              </InfoItem>
-            )}
-          </div>
-        )}
+        <GoalRelationshipsRow
+          goal={goal}
+          linkedMilestones={linkedMilestones}
+          personById={personById}
+          personByName={personByName}
+        />
 
         {/* ── Description ────────────────────────────────────────── */}
         {editing
