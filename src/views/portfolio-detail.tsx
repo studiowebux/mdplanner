@@ -21,7 +21,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
-import { FormTextarea } from "./components/form-textarea.tsx";
+import { FormTextarea } from "../components/ui/form-textarea.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 

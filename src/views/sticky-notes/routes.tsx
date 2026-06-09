@@ -19,7 +19,7 @@ import { Sidenav } from "../../components/ui/sidenav.tsx";
 import { stickyNoteConfig } from "../../domains/sticky-note/config.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { publish } from "../../singletons/event-bus.ts";
-import { FormTextarea } from "../components/form-textarea.tsx";
+import { FormTextarea } from "../../components/ui/form-textarea.tsx";
 
 export const stickyNotesRouter = new Hono<{ Variables: AppVariables }>();
 

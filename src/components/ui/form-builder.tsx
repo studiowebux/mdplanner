@@ -3,6 +3,7 @@ import type { FC } from "hono/jsx";
 import { parseJson } from "../../database/sqlite/mod.ts";
 import { AutocompleteWidget } from "./autocomplete-widget.tsx";
 import { Sidenav } from "./sidenav.tsx";
+import { FormTextarea } from "./form-textarea.tsx";
 
 type Option = { value: string; label: string };
 
@@ -196,14 +197,12 @@ const ArrayTableRowField: FC<
         </select>
       )}
       {field.type === "textarea" && (
-        <textarea
+        <FormTextarea
           name={name}
-          class="form__textarea"
           rows={field.rows ?? 2}
           placeholder={field.placeholder}
-        >
-          {value ?? ""}
-        </textarea>
+          value={value ?? ""}
+        />
       )}
       {field.type === "autocomplete" && (
         <AutocompleteWidget
@@ -380,16 +379,14 @@ const Field: FC<
         </select>
       )}
       {def.type === "textarea" && (
-        <textarea
+        <FormTextarea
           id={id}
           name={def.name}
-          class="form__textarea"
           rows={def.rows ?? 4}
           required={def.required}
           maxlength={def.maxLength}
-        >
-          {value ?? ""}
-        </textarea>
+          value={value ?? ""}
+        />
       )}
       {def.type === "boolean" && (
         <label class="form__checkbox-label">

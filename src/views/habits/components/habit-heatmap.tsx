@@ -3,7 +3,7 @@
 
 import type { FC } from "hono/jsx";
 import type { CompletionEntry, Habit } from "../../../types/habit.types.ts";
-import { FormTextarea } from "../../components/form-textarea.tsx";
+import { FormTextarea } from "../../../components/ui/form-textarea.tsx";
 
 const MONTH_NAMES = [
   "January",

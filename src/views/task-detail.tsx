@@ -17,7 +17,7 @@ import {
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
-import { FormTextarea } from "./components/form-textarea.tsx";
+import { FormTextarea } from "../components/ui/form-textarea.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { type MentionOpts } from "../utils/mentions.ts";

@@ -5,7 +5,7 @@
 import { assertStringIncludes } from "@std/assert";
 import { assertEquals } from "@std/assert";
 import { renderToString } from "hono/jsx/dom/server";
-import { FormTextarea } from "../../src/views/components/form-textarea.tsx";
+import { FormTextarea } from "../../src/components/ui/form-textarea.tsx";
 import {
   StatusUpdateEditRow,
   StatusUpdateForm,

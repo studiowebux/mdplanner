@@ -12,7 +12,7 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
-import { FormTextarea } from "./components/form-textarea.tsx";
+import { FormTextarea } from "../components/ui/form-textarea.tsx";
 import { countAllNodes } from "../domains/mindmap/constants.tsx";
 import { serializeBulletTree } from "../repositories/mindmap.repository.ts";
 
