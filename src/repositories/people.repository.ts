@@ -22,6 +22,27 @@ import { PEOPLE_BODY_KEYS, PEOPLE_TABLE } from "../domains/people/constants.ts";
 import type { QueryResult } from "../database/sqlite/mod.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
+/**
+ * Frontmatter keys copied verbatim into a Person as `String(value)` when
+ * present. Kept as a typed list so `parse` collapses to one loop instead of a
+ * per-field conditional chain. fm keys are already camelCase (mapKeysFromFm).
+ */
+const STRING_FM_FIELDS = [
+  "title",
+  "role",
+  "reportsTo",
+  "email",
+  "phone",
+  "startDate",
+  "systemPrompt",
+  "lastSeen",
+  "currentTaskId",
+  "createdAt",
+  "updatedAt",
+  "createdBy",
+  "updatedBy",
+] as const satisfies readonly (keyof Person)[];
+
 /** Persists Person entities as markdown with a SQLite cache mirror. */
 export class PeopleRepository extends CachedMarkdownRepository<
   Person,
@@ -116,18 +137,31 @@ export class PeopleRepository extends CachedMarkdownRepository<
       id: String(fm.id),
       name,
     };
-    if (fm.title != null) person.title = String(fm.title);
-    if (fm.role != null) person.role = String(fm.role);
-    const depts = this.toStringArray(fm.departments);
-    if (depts) person.departments = depts;
     // Note: fm keys are already camelCase (mapKeysFromFm applied by base repo).
-    if (fm.reportsTo != null) person.reportsTo = String(fm.reportsTo);
-    if (fm.email != null) person.email = String(fm.email);
-    if (fm.phone != null) person.phone = String(fm.phone);
-    if (fm.startDate != null) person.startDate = String(fm.startDate);
+    this.applyScalarFm(person, fm);
+    this.applyArrayFm(person, fm);
+    this.applyEnumFm(person, fm);
+    this.applyStructuredFm(person, fm);
+    if (notes) person.notes = notes;
+
+    return person;
+  }
+
+  /** Verbatim string fields + the lone numeric field. */
+  private applyScalarFm(person: Person, fm: Record<string, unknown>): void {
+    for (const key of STRING_FM_FIELDS) {
+      const v = fm[key];
+      if (v != null) person[key] = String(v);
+    }
     if (typeof fm.hoursPerDay === "number") {
       person.hoursPerDay = fm.hoursPerDay;
     }
+  }
+
+  /** List-valued fields, normalized via toStringArray. */
+  private applyArrayFm(person: Person, fm: Record<string, unknown>): void {
+    const depts = this.toStringArray(fm.departments);
+    if (depts) person.departments = depts;
     const wd = this.toStringArray(fm.workingDays);
     if (wd) {
       person.workingDays = wd.filter(
@@ -135,23 +169,17 @@ export class PeopleRepository extends CachedMarkdownRepository<
           (WEEKDAYS as readonly string[]).includes(d),
       );
     }
-    if (notes) person.notes = notes;
+    const skills = this.toStringArray(fm.skills);
+    if (skills) person.skills = skills;
+  }
+
+  /** Enum-constrained fields — assigned only on a valid literal. */
+  private applyEnumFm(person: Person, fm: Record<string, unknown>): void {
     if (
       fm.agentType === "human" || fm.agentType === "ai" ||
       fm.agentType === "hybrid"
     ) {
       person.agentType = fm.agentType;
-    }
-    const skills = this.toStringArray(fm.skills);
-    if (skills) person.skills = skills;
-    if (Array.isArray(fm.models)) {
-      const parsed = AgentModelSchema.array().safeParse(fm.models);
-      if (parsed.success && parsed.data.length > 0) {
-        person.models = parsed.data;
-      }
-    }
-    if (fm.systemPrompt != null) {
-      person.systemPrompt = String(fm.systemPrompt);
     }
     if (
       fm.status === "idle" || fm.status === "working" ||
@@ -159,9 +187,15 @@ export class PeopleRepository extends CachedMarkdownRepository<
     ) {
       person.status = fm.status;
     }
-    if (fm.lastSeen != null) person.lastSeen = String(fm.lastSeen);
-    if (fm.currentTaskId != null) {
-      person.currentTaskId = String(fm.currentTaskId);
+  }
+
+  /** Schema-validated / object-shaped fields: models, accounts, preferences. */
+  private applyStructuredFm(person: Person, fm: Record<string, unknown>): void {
+    if (Array.isArray(fm.models)) {
+      const parsed = AgentModelSchema.array().safeParse(fm.models);
+      if (parsed.success && parsed.data.length > 0) {
+        person.models = parsed.data;
+      }
     }
     if (
       fm.accounts != null && typeof fm.accounts === "object" &&
@@ -184,12 +218,6 @@ export class PeopleRepository extends CachedMarkdownRepository<
         person.preferences = parsed.data;
       }
     }
-    if (fm.createdAt != null) person.createdAt = String(fm.createdAt);
-    if (fm.updatedAt != null) person.updatedAt = String(fm.updatedAt);
-    if (fm.createdBy != null) person.createdBy = String(fm.createdBy);
-    if (fm.updatedBy != null) person.updatedBy = String(fm.updatedBy);
-
-    return person;
   }
 
   protected serialize(item: Person): string {
