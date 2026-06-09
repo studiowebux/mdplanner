@@ -304,11 +304,14 @@ function analyzeDebt(files: FileInfo[]): Dimension {
   const isBrowser = (rel: string) => /static[\/\\]js[\/\\]/.test(rel);
   const server = src.filter((f) => !isBrowser(f.rel));
   const markers = countMatches(src, /\b(TODO|FIXME|HACK|XXX|WIP)\b/);
-  // console.* that bypasses the log singleton (logger.ts itself is exempt).
+  // console.* that bypasses the log singleton. Logger transport sinks are
+  // exempt — they ARE the output transport: singletons/logger.ts and the
+  // self-contained WebDAV logger (api/v1/webdav/log.ts, which keeps JSON
+  // request-log mode the text-only app singleton can't express).
   const consoles = countMatches(
     server,
     /\bconsole\.(log|error|warn|info|debug)\b/,
-  ).filter((h) => !/logger\.ts$/.test(h.rel));
+  ).filter((h) => !/(^|[\/\\])(logger|log)\.ts$/.test(h.rel));
   const emptyCatch = countMatches(server, /catch\s*(\([^)]*\))?\s*\{\s*\}/);
   const total = markers.length + consoles.length + emptyCatch.length;
   const score = clamp(
