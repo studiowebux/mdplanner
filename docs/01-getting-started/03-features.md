@@ -24,6 +24,11 @@ stay visible — click to expand) and hides any stray completed tasks in other
 sections, rather than emptying the list. Visible columns can be shown or hidden
 from the **Columns** control above the list.
 
+Each task row in the list and grid views has a **Mark complete** button (it
+becomes **Reopen** once the task is done) so you can complete a task without
+opening its detail page — completing moves it to Done, reopening returns it to
+Todo.
+
 ## Planning
 
 | Feature            | Description                                                    |

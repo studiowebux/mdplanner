@@ -55,6 +55,24 @@ Deno.test("TaskRow — project meta renders empty (no badge) when unset", () => 
   );
 });
 
+Deno.test("TaskRow — open task shows Mark complete hitting /complete", () => {
+  const html = render(
+    TaskRow({ task: task(), moveSections: [], index: 0 }),
+  );
+  assertStringIncludes(html, "Mark complete");
+  assertStringIncludes(html, 'hx-post="/tasks/task_1/complete"');
+  assertEquals(html.includes("/tasks/task_1/reopen"), false);
+});
+
+Deno.test("TaskRow — completed task shows Reopen hitting /reopen", () => {
+  const html = render(
+    TaskRow({ task: task({ completed: true }), moveSections: [], index: 0 }),
+  );
+  assertStringIncludes(html, "Reopen");
+  assertStringIncludes(html, 'hx-post="/tasks/task_1/reopen"');
+  assertEquals(html.includes("/tasks/task_1/complete"), false);
+});
+
 Deno.test("TaskListView — collapsedSections renders the section as a closed <details> with count", () => {
   const html = render(
     TaskListView({

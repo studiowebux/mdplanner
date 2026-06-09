@@ -6,7 +6,6 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
-import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
@@ -24,7 +23,59 @@ export const TASK_SECTION_VARIANTS: Record<string, BadgeVariant> = {
   "done": "success",
 };
 
-const actionBtns = createActionBtns("tasks", "tasks-form-container");
+// Task-local action renderer — adds a Complete/Reopen toggle the shared
+// createActionBtns factory (used by ~40 domains) must not carry. Mirrors the
+// note domain's local renderer pattern. Complete/Reopen hit the existing
+// /complete + /reopen endpoints (hx-swap="none"); the SSE morph of #tasks-view
+// on task.updated refreshes the row.
+const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
+  <div class="card__actions">
+    <a class="btn btn--secondary btn--sm" href={`/tasks/${row.id}`}>
+      View
+    </a>
+    <button
+      class="btn btn--secondary btn--sm"
+      type="button"
+      hx-get={`/tasks/${row.id}/edit`}
+      hx-target="#tasks-form-container"
+      hx-swap="innerHTML"
+    >
+      Edit
+    </button>
+    {row.completed
+      ? (
+        <button
+          class="btn btn--secondary btn--sm"
+          type="button"
+          hx-post={`/tasks/${row.id}/reopen`}
+          hx-swap="none"
+        >
+          Reopen
+        </button>
+      )
+      : (
+        <button
+          class="btn btn--primary btn--sm"
+          type="button"
+          hx-post={`/tasks/${row.id}/complete`}
+          hx-swap="none"
+        >
+          Mark complete
+        </button>
+      )}
+    <button
+      class="btn btn--danger btn--sm"
+      type="button"
+      hx-delete={`/tasks/${row.id}`}
+      hx-confirm={`Archive "${row.title}"? Archived items can be restored from the archived view.`}
+      data-confirm-title="Archive"
+      data-confirm-label="Archive"
+      hx-swap="none"
+    >
+      Archive
+    </button>
+  </div>
+);
 
 export const TASK_TABLE_COLUMNS: ColumnDef[] = [
   {

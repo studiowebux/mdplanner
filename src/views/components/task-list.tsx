@@ -188,6 +188,27 @@ export const TaskRow: FC<
                 </option>
               ))}
             </select>
+            {task.completed
+              ? (
+                <button
+                  class="btn btn--secondary btn--sm"
+                  type="button"
+                  hx-post={`/tasks/${task.id}/reopen`}
+                  hx-swap="none"
+                >
+                  Reopen
+                </button>
+              )
+              : (
+                <button
+                  class="btn btn--primary btn--sm"
+                  type="button"
+                  hx-post={`/tasks/${task.id}/complete`}
+                  hx-swap="none"
+                >
+                  Mark complete
+                </button>
+              )}
             <button
               class="btn btn--secondary btn--sm"
               type="button"
