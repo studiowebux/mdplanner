@@ -7,8 +7,8 @@ import type { Goal } from "../types/goal.types.ts";
 import type { Habit } from "../types/habit.types.ts";
 import type { JournalEntry } from "../types/journal.types.ts";
 import type { Meeting } from "../types/meeting.types.ts";
-import { PRIORITY_LABELS } from "../constants/mod.ts";
 import { computeStreak, isDoneToday } from "../domains/habit/constants.tsx";
+import { MyTasksChunk } from "./components/my-tasks-list.tsx";
 
 type TimeEntryRow = {
   taskId: string;
@@ -26,9 +26,8 @@ type MeDashboardProps = ViewProps & {
   todayJournal: JournalEntry | null;
   timeRows: TimeEntryRow[];
   meetings: Meeting[];
+  pageSize: number;
 };
-
-const ACTIVE_SECTIONS = ["Todo", "In Progress", "Pending Review"];
 
 export const MeDashboard: FC<MeDashboardProps> = ({
   person,
@@ -38,6 +37,7 @@ export const MeDashboard: FC<MeDashboardProps> = ({
   todayJournal,
   timeRows,
   meetings,
+  pageSize,
   ...viewProps
 }) => {
   return (
@@ -63,25 +63,11 @@ export const MeDashboard: FC<MeDashboardProps> = ({
                 <section class="me-dashboard__card detail-section">
                   <h2 class="me-dashboard__card-title">My Tasks</h2>
                   <ul class="me-dashboard__list">
-                    {tasks.map((t) => (
-                      <li key={t.id} class="me-dashboard__item">
-                        <a
-                          href={`/tasks/${t.id}`}
-                          class="me-dashboard__item-link"
-                        >
-                          {t.title}
-                        </a>
-                        <div class="me-dashboard__item-meta">
-                          <span class="badge">{t.section}</span>
-                          {t.priority && (
-                            <span class={`badge priority--${t.priority}`}>
-                              {PRIORITY_LABELS[String(t.priority)] ??
-                                `P${t.priority}`}
-                            </span>
-                          )}
-                        </div>
-                      </li>
-                    ))}
+                    <MyTasksChunk
+                      tasks={tasks}
+                      offset={0}
+                      pageSize={pageSize}
+                    />
                   </ul>
                 </section>
               )}

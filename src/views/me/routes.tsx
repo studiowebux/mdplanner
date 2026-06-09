@@ -4,12 +4,20 @@ import {
   getHabitService,
   getJournalService,
   getMeetingService,
+  getProjectService,
   getTaskService,
 } from "../../singletons/services.ts";
 import { viewProps } from "../../middleware/view-props.ts";
 import type { AppVariables } from "../../types/app.ts";
 import { MeDashboard } from "../me.tsx";
 import { resolveUserScope } from "../../utils/actor.ts";
+import { DEFAULT_TASKS_PER_SECTION } from "../../domains/task/constants.tsx";
+import { toHtml } from "../../utils/html.ts";
+import {
+  MY_ACTIVE_SECTIONS,
+  MyTasksChunk,
+  sortMyTasks,
+} from "../components/my-tasks-list.tsx";
 
 export const meRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -27,6 +35,7 @@ meRouter.get("/", async (c) => {
         todayJournal={null}
         timeRows={[]}
         meetings={[]}
+        pageSize={DEFAULT_TASKS_PER_SECTION}
       />,
     );
   }
@@ -53,8 +62,13 @@ meRouter.get("/", async (c) => {
       getMeetingService().list(),
     ]);
 
-  const tasks = allTasks.filter((t) =>
-    (["Todo", "In Progress", "Pending Review"] as string[]).includes(t.section)
+  const config = await getProjectService().getConfig();
+  const pageSize = config.tasksPerSection ?? DEFAULT_TASKS_PER_SECTION;
+
+  const tasks = sortMyTasks(
+    allTasks.filter((t) =>
+      (MY_ACTIVE_SECTIONS as string[]).includes(t.section)
+    ),
   );
 
   const goals = allGoals.filter(
@@ -98,6 +112,30 @@ meRouter.get("/", async (c) => {
       todayJournal={todayJournal}
       timeRows={timeRows}
       meetings={meetings}
+      pageSize={pageSize}
     />,
+  );
+});
+
+// GET /tasks/more — pagination fragment for the My Tasks card. Rebuilds the same
+// person-scoped, sorted task list as `/` and returns the next page (offset → +
+// pageSize) of items plus a fresh load-more control while more remain.
+meRouter.get("/tasks/more", async (c) => {
+  const person = c.get("activePerson") ?? null;
+  if (!person) return c.body(null, 204);
+
+  const offset = Math.max(0, parseInt(c.req.query("offset") ?? "0", 10) || 0);
+  const allTasks = await getTaskService().list({ assignee: person.id });
+  const tasks = sortMyTasks(
+    allTasks.filter((t) =>
+      (MY_ACTIVE_SECTIONS as string[]).includes(t.section)
+    ),
+  );
+
+  const config = await getProjectService().getConfig();
+  const pageSize = config.tasksPerSection ?? DEFAULT_TASKS_PER_SECTION;
+
+  return c.html(
+    toHtml(<MyTasksChunk tasks={tasks} offset={offset} pageSize={pageSize} />),
   );
 });
