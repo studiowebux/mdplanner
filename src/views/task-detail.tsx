@@ -17,6 +17,7 @@ import {
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { FormTextarea } from "./components/form-textarea.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { type MentionOpts } from "../utils/mentions.ts";
@@ -100,7 +101,7 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
 // ./components/task-detail-sections.tsx; activity sections below)
 // ---------------------------------------------------------------------------
 
-const CommentsSection: FC<{
+export const CommentsSection: FC<{
   taskId: string;
   comments: Task["comments"];
   mentionOpts: MentionOpts;
@@ -154,14 +155,14 @@ const CommentsSection: FC<{
         <label class="sr-only" for={`comment-body-${taskId}`}>
           Add a comment
         </label>
-        <textarea
+        <FormTextarea
           id={`comment-body-${taskId}`}
-          class="form__input task-detail__comment-input"
+          class="task-detail__comment-input"
           name="body"
           rows={3}
           placeholder="Add a comment… type @ to mention someone"
-          data-mentions
           required
+          attrs={{ "data-mentions": "" }}
         />
         <button type="submit" class="btn btn--primary btn--sm">
           Comment

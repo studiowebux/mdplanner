@@ -11,6 +11,7 @@ import {
   StatusUpdateForm,
 } from "../../src/views/portfolio-detail.tsx";
 import { HabitHeatmap } from "../../src/views/habits/components/habit-heatmap.tsx";
+import { CommentsSection } from "../../src/views/task-detail.tsx";
 
 Deno.test("FormTextarea — carries the form__textarea base class, not form__input", () => {
   // deno-lint-ignore no-explicit-any
@@ -69,6 +70,24 @@ Deno.test("StatusUpdateEditRow — edit textarea uses form__textarea with value"
   assertStringIncludes(html, "form__textarea");
   assertEquals(html.includes("form__input"), false);
   assertStringIncludes(html, "shipped");
+});
+
+Deno.test("CommentsSection — comment box uses form__textarea, keeps data-mentions + reset-on-success", () => {
+  const html = renderToString(
+    CommentsSection({
+      taskId: "task_1",
+      comments: [],
+      mentionOpts: {},
+      people: [],
+      // deno-lint-ignore no-explicit-any
+    }) as any,
+  );
+  assertStringIncludes(html, "form__textarea");
+  assertStringIncludes(html, "task-detail__comment-input");
+  assertEquals(html.includes("form__input"), false);
+  assertStringIncludes(html, "data-mentions");
+  assertStringIncludes(html, "data-reset-on-success");
+  assertStringIncludes(html, 'id="comment-body-task_1"');
 });
 
 Deno.test("HabitHeatmap — note box uses form__textarea, not the bogus form-input class", () => {
