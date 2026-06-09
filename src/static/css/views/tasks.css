@@ -1327,6 +1327,20 @@ a.task-board__card-avatar:hover {
   }
 }
 
+/* Mid widths (half-screen): above the mobile stack but too narrow for all five
+   meta columns plus a usable title. Drop the three lowest-value columns
+   (effort, due, project) so the title keeps real width. Header + data cells
+   share [data-col], so each column hides as a whole and stays aligned. The
+   manual column-toggle (.is-hidden) still composes on top of this.
+   1100px is a sanctioned deviation — see shell.css CANONICAL BREAKPOINTS. */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .task-list__row [data-col="effort"],
+  .task-list__row [data-col="due"],
+  .task-list__row [data-col="project"] {
+    display: none;
+  }
+}
+
 /* ── Board drag-and-drop — SortableJS ghost/chosen states (sortable-init.js) ── */
 
 .task-board__card {
