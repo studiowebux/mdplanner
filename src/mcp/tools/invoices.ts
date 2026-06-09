@@ -8,92 +8,46 @@ import {
   ListInvoiceOptionsSchema,
   UpdateInvoiceSchema,
 } from "../../types/invoice.types.ts";
-import { err, ok } from "../utils.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
 export function registerInvoiceTools(server: McpServer): void {
-  const service = getInvoiceService();
-
-  server.registerTool(
-    "list_invoices",
-    {
-      description:
-        "List all invoices. Optionally filter by status, customerId, or search query.",
-      inputSchema: ListInvoiceOptionsSchema.shape,
-    },
-    async ({ status, customerId, q }) => {
-      const invoices = await service.list({ status, customerId, q });
-      return ok(invoices);
-    },
-  );
-
-  server.registerTool(
-    "get_invoice",
-    {
-      description: "Get a single invoice by its ID.",
-      inputSchema: { id: InvoiceSchema.shape.id.describe("Invoice ID") },
-    },
-    async ({ id }) => {
-      const invoice = await service.getById(id);
-      if (!invoice) return err(`Invoice '${id}' not found`);
-      return ok(invoice);
-    },
-  );
-
-  server.registerTool(
-    "get_invoice_by_name",
-    {
-      description:
-        "Get an invoice by its title (case-insensitive). Prefer this over list when the title is known.",
-      inputSchema: {
-        name: InvoiceSchema.shape.title.describe("Invoice title"),
+  registerCrudTools(server, {
+    service: getInvoiceService(),
+    notFoundLabel: "Invoice",
+    idParam: InvoiceSchema.shape.id.describe("Invoice ID"),
+    nameParam: InvoiceSchema.shape.title.describe("Invoice title"),
+    listSchema: ListInvoiceOptionsSchema,
+    createSchema: CreateInvoiceSchema,
+    updateSchema: UpdateInvoiceSchema,
+    mutationReturn: "id-success",
+    tools: {
+      list: {
+        name: "list_invoices",
+        description:
+          "List all invoices. Optionally filter by status, customerId, or search query.",
+      },
+      get: {
+        name: "get_invoice",
+        description: "Get a single invoice by its ID.",
+      },
+      getByName: {
+        name: "get_invoice_by_name",
+        description:
+          "Get an invoice by its title (case-insensitive). Prefer this over list when the title is known.",
+      },
+      create: {
+        name: "create_invoice",
+        description:
+          "Create a new invoice. Number auto-generated if not specified. Status defaults to 'draft'.",
+      },
+      update: {
+        name: "update_invoice",
+        description: "Update an existing invoice's fields.",
+      },
+      delete: {
+        name: "delete_invoice",
+        description: "Delete an invoice by its ID.",
       },
     },
-    async ({ name }) => {
-      const invoice = await service.getByName(name);
-      if (!invoice) return err(`Invoice '${name}' not found`);
-      return ok(invoice);
-    },
-  );
-
-  server.registerTool(
-    "create_invoice",
-    {
-      description:
-        "Create a new invoice. Number auto-generated if not specified. Status defaults to 'draft'.",
-      inputSchema: CreateInvoiceSchema.shape,
-    },
-    async (data) => {
-      const invoice = await service.create(data);
-      return ok({ id: invoice.id });
-    },
-  );
-
-  server.registerTool(
-    "update_invoice",
-    {
-      description: "Update an existing invoice's fields.",
-      inputSchema: {
-        id: InvoiceSchema.shape.id.describe("Invoice ID"),
-        ...UpdateInvoiceSchema.shape,
-      },
-    },
-    async ({ id, ...fields }) => {
-      const invoice = await service.update(id, fields);
-      if (!invoice) return err(`Invoice '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_invoice",
-    {
-      description: "Delete an invoice by its ID.",
-      inputSchema: { id: InvoiceSchema.shape.id.describe("Invoice ID") },
-    },
-    async ({ id }) => {
-      const success = await service.delete(id);
-      if (!success) return err(`Invoice '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }

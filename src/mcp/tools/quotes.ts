@@ -8,92 +8,46 @@ import {
   QuoteSchema,
   UpdateQuoteSchema,
 } from "../../types/quote.types.ts";
-import { err, ok } from "../utils.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
 export function registerQuoteTools(server: McpServer): void {
-  const service = getQuoteService();
-
-  server.registerTool(
-    "list_quotes",
-    {
-      description:
-        "List all quotes. Optionally filter by status, customerId, or search query.",
-      inputSchema: ListQuoteOptionsSchema.shape,
-    },
-    async ({ status, customerId, q }) => {
-      const quotes = await service.list({ status, customerId, q });
-      return ok(quotes);
-    },
-  );
-
-  server.registerTool(
-    "get_quote",
-    {
-      description: "Get a single quote by its ID.",
-      inputSchema: { id: QuoteSchema.shape.id.describe("Quote ID") },
-    },
-    async ({ id }) => {
-      const quote = await service.getById(id);
-      if (!quote) return err(`Quote '${id}' not found`);
-      return ok(quote);
-    },
-  );
-
-  server.registerTool(
-    "get_quote_by_name",
-    {
-      description:
-        "Get a quote by its title (case-insensitive). Prefer this over list when the title is known.",
-      inputSchema: {
-        name: QuoteSchema.shape.title.describe("Quote title"),
+  registerCrudTools(server, {
+    service: getQuoteService(),
+    notFoundLabel: "Quote",
+    idParam: QuoteSchema.shape.id.describe("Quote ID"),
+    nameParam: QuoteSchema.shape.title.describe("Quote title"),
+    listSchema: ListQuoteOptionsSchema,
+    createSchema: CreateQuoteSchema,
+    updateSchema: UpdateQuoteSchema,
+    mutationReturn: "id-success",
+    tools: {
+      list: {
+        name: "list_quotes",
+        description:
+          "List all quotes. Optionally filter by status, customerId, or search query.",
+      },
+      get: {
+        name: "get_quote",
+        description: "Get a single quote by its ID.",
+      },
+      getByName: {
+        name: "get_quote_by_name",
+        description:
+          "Get a quote by its title (case-insensitive). Prefer this over list when the title is known.",
+      },
+      create: {
+        name: "create_quote",
+        description:
+          "Create a new quote. Number auto-generated if not specified. Status defaults to 'draft'.",
+      },
+      update: {
+        name: "update_quote",
+        description: "Update an existing quote's fields.",
+      },
+      delete: {
+        name: "delete_quote",
+        description: "Delete a quote by its ID.",
       },
     },
-    async ({ name }) => {
-      const quote = await service.getByName(name);
-      if (!quote) return err(`Quote '${name}' not found`);
-      return ok(quote);
-    },
-  );
-
-  server.registerTool(
-    "create_quote",
-    {
-      description:
-        "Create a new quote. Number auto-generated if not specified. Status defaults to 'draft'.",
-      inputSchema: CreateQuoteSchema.shape,
-    },
-    async (data) => {
-      const quote = await service.create(data);
-      return ok({ id: quote.id });
-    },
-  );
-
-  server.registerTool(
-    "update_quote",
-    {
-      description: "Update an existing quote's fields.",
-      inputSchema: {
-        id: QuoteSchema.shape.id.describe("Quote ID"),
-        ...UpdateQuoteSchema.shape,
-      },
-    },
-    async ({ id, ...fields }) => {
-      const quote = await service.update(id, fields);
-      if (!quote) return err(`Quote '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_quote",
-    {
-      description: "Delete a quote by its ID.",
-      inputSchema: { id: QuoteSchema.shape.id.describe("Quote ID") },
-    },
-    async ({ id }) => {
-      const success = await service.delete(id);
-      if (!success) return err(`Quote '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
