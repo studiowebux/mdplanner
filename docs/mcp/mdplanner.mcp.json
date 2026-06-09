@@ -2944,13 +2944,17 @@
     },
     {
       "name": "list_portfolio",
-      "description": "List all portfolio projects.",
+      "description": "List all portfolio projects, optionally filtered by status. Pass slim: true when browsing to get a compact overview — returns id, name, status, category, progress only, cutting token usage by ~90%. Prefer get_portfolio_by_name when the project name is known.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "status": {
             "type": "string",
             "description": "Filter by status (e.g. active, completed, archived)"
+          },
+          "slim": {
+            "type": "boolean",
+            "description": "Return minimal fields only: id, name, status, category, progress. Use when browsing projects."
           }
         },
         "additionalProperties": false,

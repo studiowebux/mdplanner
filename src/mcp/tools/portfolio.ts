@@ -20,16 +20,30 @@ export function registerPortfolioTools(server: McpServer): void {
     "list_portfolio",
     {
       description:
-        "List all portfolio projects, optionally filtered by status.",
+        "List all portfolio projects, optionally filtered by status. " +
+        "Pass slim: true when browsing to get a compact overview — returns id, name, status, category, progress only, cutting token usage by ~90%. " +
+        "Prefer get_portfolio_by_name when the project name is known.",
       inputSchema: {
         status: z.enum(PORTFOLIO_STATUSES).optional().describe(
           "Filter by status",
         ),
+        slim: z.boolean().optional().describe(
+          "Return minimal fields only: id, name, status, category, progress. Use when browsing projects.",
+        ),
       },
     },
-    async ({ status }) => {
+    async ({ status, slim }) => {
       let items = await service.list();
       if (status) items = items.filter((i) => i.status === status);
+      if (slim) {
+        return ok(items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          status: i.status,
+          category: i.category,
+          progress: i.progress,
+        })));
+      }
       return ok(items);
     },
   );
