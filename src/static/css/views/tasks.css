@@ -346,8 +346,13 @@
   cursor: default;
 }
 
+/* Two-track grid: title fills all free space, meta block hugs the right.
+   Same template on the column header and every data row, so columns align
+   without nested flex-grow guesswork. minmax(0,1fr) lets the title grow into
+   empty width and ellipsis-truncate only when the row is genuinely full. */
 .task-list__row-main {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-md);
   flex: 1;
@@ -358,10 +363,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  /* Floor the title column so it never shrinks to 0 and vanishes at mid widths.
-     The title itself keeps min-width:0 below for ellipsis within this floor. */
-  min-width: var(--task-title-min-w);
-  flex: 1;
+  /* Grid cell is minmax(0,1fr); min-width:0 lets the title inside shrink. */
+  min-width: 0;
 }
 
 .task-list__row-title {
@@ -371,10 +374,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* Grow to fill row-left so the title consumes the free space (no dead gap
-     before the metas); min-width:0 lets it shrink → ellipsis when space is
-     tight. row-main has no justify-content, so this grow right-aligns the
-     meta block instead of space-between dumping slack into a gap. */
+  /* Fill the 1fr title cell; min-width:0 enables ellipsis. */
   flex: 1;
   min-width: 0;
 }
@@ -392,9 +392,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  /* Shrinkable so fixed-width metas yield space to the title before it
-     collapses; metas ellipsis via their own min-width:0. */
-  flex-shrink: 1;
+  /* The `auto` grid track — sized to the fixed meta columns, right-aligned
+     by the title's 1fr cell. */
   min-width: 0;
 }
 
@@ -1264,7 +1263,10 @@ a.task-board__card-avatar:hover {
   }
 
   .task-list__row-main {
+    /* Override the desktop two-track grid so the title + metas stack. */
+    display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--space-xs);
   }
 
