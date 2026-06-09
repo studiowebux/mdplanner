@@ -349,7 +349,6 @@
 .task-list__row-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-md);
   flex: 1;
   min-width: 0;
@@ -372,8 +371,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* Flex item defaults to min-width:auto and won't shrink below its content,
-     so a long title overflowed the row. Allow it to shrink → ellipsis. */
+  /* Grow to fill row-left so the title consumes the free space (no dead gap
+     before the metas); min-width:0 lets it shrink → ellipsis when space is
+     tight. row-main has no justify-content, so this grow right-aligns the
+     meta block instead of space-between dumping slack into a gap. */
+  flex: 1;
   min-width: 0;
 }
 
