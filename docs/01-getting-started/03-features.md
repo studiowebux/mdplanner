@@ -19,10 +19,11 @@ The number of tasks each section/column shows before a "Load more" control
 appears is configurable in **Settings → Project → Tasks per section** (default
 25).
 
-The **Hide completed** toggle collapses the Done section (its header and count
-stay visible — click to expand) and hides any stray completed tasks in other
-sections, rather than emptying the list. Visible columns can be shown or hidden
-from the **Columns** control above the list.
+Every section in the list view is collapsible — click a section header to
+collapse or expand its rows (the header and task count stay visible). The
+**Hide completed** toggle collapses the Done section by default and hides any
+stray completed tasks in other sections, rather than emptying the list. Visible
+columns can be shown or hidden from the **Columns** control above the list.
 
 Each task row in the list and grid views has a **Mark complete** button (it
 becomes **Reopen** once the task is done) so you can complete a task without

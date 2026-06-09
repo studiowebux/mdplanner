@@ -247,15 +247,31 @@
   line-height: var(--line-height-tight);
 }
 
-/* Collapsed section (e.g. Done when hideCompleted is on) — native <details>
-   keeps the header + count visible and toggles the body. */
-.task-list__section--collapsed {
-  display: flex;
-  flex-direction: column;
-}
-
+/* Collapsible section — the header is a <summary> inside a <details>. Hide the
+   native disclosure marker (we render our own chevron) and toggle the body. */
 .task-list__section-summary {
   cursor: pointer;
+  list-style: none;
+}
+
+.task-list__section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.task-list__section-chevron {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0.3em 0 0.3em 0.4em;
+  border-color: transparent transparent transparent var(--color-text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.task-list__section[open]
+  > .task-list__section-summary
+  .task-list__section-chevron {
+  transform: rotate(90deg);
 }
 
 /* Task rows */

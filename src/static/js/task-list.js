@@ -263,3 +263,41 @@
     history.replaceState(null, "", href);
   });
 })();
+
+// ---------------------------------------------------------------------------
+// Collapsible sections — the section header is a <summary>, so each section is
+// a native <details>. Two concerns handled here:
+//   1. The per-section select-all checkbox sits inside the <summary>; a raw
+//      click would also toggle the <details>. We cancel the default (which
+//      stops BOTH the native check and the toggle), flip the checkbox
+//      ourselves, and re-fire `change` so the bulk-select handler still runs.
+//   2. The #tasks-view SSE morph (hx-swap="morph:outerHTML") reconciles the
+//      `open` attribute, which would reopen a section the user collapsed. The
+//      idiomorph beforeAttributeUpdated hook skips `open` on any element
+//      carrying `data-preserve-open`, leaving the live collapse state intact.
+// ---------------------------------------------------------------------------
+
+(function () {
+  // -- 1. Checkbox click must not toggle its enclosing <details> -------------
+  document.addEventListener("click", function (e) {
+    var box = e.target.closest(".task-list__select-all-section");
+    if (!box || !box.closest("summary")) return;
+    e.preventDefault();
+    box.checked = !box.checked;
+    box.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  // -- 2. Preserve user-toggled collapse state across SSE morphs ------------
+  var I = globalThis.Idiomorph;
+  if (!I || !I.defaults || !I.defaults.callbacks) return;
+  var prev = I.defaults.callbacks.beforeAttributeUpdated;
+  I.defaults.callbacks.beforeAttributeUpdated = function (attr, node, type) {
+    if (
+      attr === "open" && node && node.nodeType === 1 &&
+      node.hasAttribute("data-preserve-open")
+    ) {
+      return false; // keep the current open/closed state, ignore the new HTML
+    }
+    if (typeof prev === "function") return prev(attr, node, type);
+  };
+})();

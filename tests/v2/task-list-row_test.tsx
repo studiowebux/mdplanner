@@ -73,34 +73,47 @@ Deno.test("TaskRow — completed task shows Reopen hitting /reopen", () => {
   assertEquals(html.includes("/tasks/task_1/complete"), false);
 });
 
-Deno.test("TaskListView — collapsedSections renders the section as a closed <details> with count", () => {
+Deno.test("TaskListView — every section is a collapse-preserving <details>", () => {
+  const html = render(
+    TaskListView({
+      tasks: [task({ id: "t1", section: "Todo" })],
+      moveSections: ["Todo"],
+    }),
+  );
+  // Section is a <details> carrying data-preserve-open (the idiomorph hook
+  // marker) with a <summary> header — the toggle is native.
+  assertStringIncludes(html, "<details");
+  assertStringIncludes(html, "data-preserve-open");
+  assertStringIncludes(html, "task-list__section-summary");
+  assertStringIncludes(html, "task-list__section-chevron");
+});
+
+Deno.test("TaskListView — collapsedSections omits open on that section, others stay open", () => {
   const html = render(
     TaskListView({
       tasks: [
         task({ id: "d1", section: "Done", completed: true }),
-        task({ id: "d2", section: "Done", completed: true }),
         task({ id: "t1", section: "Todo" }),
       ],
       moveSections: ["Todo", "Done"],
       collapsedSections: ["Done"],
     }),
   );
-  // Done is a collapsed <details> with NO open attr (asserting the exact
-  // opening tag proves both class and the closed state) carrying its count.
-  // Closing `">` right after the class proves there is no `open` attr.
-  assertStringIncludes(html, "<details ");
-  assertStringIncludes(html, 'task-list__section--collapsed">');
+  // Exactly one section is open (Todo); the collapsed Done section omits `open`.
+  assertEquals(html.match(/<details[^>]* open/g)?.length, 1);
+  // Count stays visible on every section header even when collapsed.
   assertStringIncludes(html, "task-list__section-count");
-  // Todo stays a normal (non-details) section
-  assertStringIncludes(html, 'class="task-list__section">');
 });
 
 Deno.test("TaskListView — no collapsedSections keeps every section open", () => {
   const html = render(
     TaskListView({
-      tasks: [task({ id: "d1", section: "Done", completed: true })],
-      moveSections: ["Done"],
+      tasks: [
+        task({ id: "d1", section: "Done", completed: true }),
+        task({ id: "t1", section: "Todo" }),
+      ],
+      moveSections: ["Todo", "Done"],
     }),
   );
-  assertEquals(html.includes("task-list__section--collapsed"), false);
+  assertEquals(html.match(/<details[^>]* open/g)?.length, 2);
 });

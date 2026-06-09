@@ -245,16 +245,19 @@ export const TaskRow: FC<
 );
 
 // ---------------------------------------------------------------------------
-// Section header
+// Section header — a <summary> so every section is a collapsible <details>.
+// The select-all checkbox lives inside it; task-list.js stops its click from
+// toggling the <details> so checking it never collapses the section.
 // ---------------------------------------------------------------------------
 
-const SectionHeader: FC<{ name: string; count: number }> = (
+const SectionSummary: FC<{ name: string; count: number }> = (
   { name, count },
 ) => (
-  <div
-    class="task-list__section-header"
+  <summary
+    class="task-list__section-header task-list__section-summary"
     id={`section-${name.toLowerCase().replace(/\s+/g, "-")}`}
   >
+    <span class="task-list__section-chevron" aria-hidden="true" />
     <input
       type="checkbox"
       class="task-list__select-all-section"
@@ -263,7 +266,7 @@ const SectionHeader: FC<{ name: string; count: number }> = (
     />
     <h2 class="section-heading">{name}</h2>
     <span class="task-list__section-count">{count}</span>
-  </div>
+  </summary>
 );
 
 // ---------------------------------------------------------------------------
@@ -469,32 +472,22 @@ export const TaskListView: FC<ListProps> = (
         </div>
         <ColumnHeader sort={sort} order={order} />
       </div>
-      {sectionNames.map((name) =>
-        collapsed.has(name)
-          ? (
-            <details
-              key={name}
-              class="task-list__section task-list__section--collapsed"
-            >
-              <summary
-                class="task-list__section-header task-list__section-summary"
-                id={`section-${name.toLowerCase().replace(/\s+/g, "-")}`}
-              >
-                <h2 class="section-heading">{name}</h2>
-                <span class="task-list__section-count">
-                  {grouped[name].length}
-                </span>
-              </summary>
-              {SectionRows(name)}
-            </details>
-          )
-          : (
-            <div key={name} class="task-list__section">
-              <SectionHeader name={name} count={grouped[name].length} />
-              {SectionRows(name)}
-            </div>
-          )
-      )}
+      {sectionNames.map((name) => (
+        // Every section is a collapsible <details>. `data-preserve-open` tells
+        // the idiomorph beforeAttributeUpdated hook (task-list.js) to leave the
+        // open/closed state alone during an SSE morph, so a live task.updated
+        // refresh never reopens a section the user collapsed. Server-driven
+        // collapse (hideCompleted → collapsedSections) just omits `open`.
+        <details
+          key={name}
+          class="task-list__section"
+          data-preserve-open
+          open={!collapsed.has(name)}
+        >
+          <SectionSummary name={name} count={grouped[name].length} />
+          {SectionRows(name)}
+        </details>
+      ))}
       <div
         id="task-bulk-bar"
         class="task-list__bulk-bar is-hidden"
