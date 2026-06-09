@@ -6,6 +6,7 @@
 // GET /sticky-notes/:boardId     — canvas for that board
 
 import { Hono } from "hono";
+import type { FC } from "hono/jsx";
 import type { AppVariables } from "../../types/app.ts";
 import {
   getStickyBoardService,
@@ -18,6 +19,7 @@ import { Sidenav } from "../../components/ui/sidenav.tsx";
 import { stickyNoteConfig } from "../../domains/sticky-note/config.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { publish } from "../../singletons/event-bus.ts";
+import { FormTextarea } from "../components/form-textarea.tsx";
 
 export const stickyNotesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -121,42 +123,42 @@ stickyNotesRouter.get("/boards/list", async (c) => {
   return c.html(grid);
 });
 
+// New Board sidenav form fragment.
+export const NewBoardForm: FC = () => (
+  <form hx-post="/sticky-notes/boards" hx-swap="none" class="form">
+    <div class="form__field">
+      <label class="form__label" for="sboard-title">Title</label>
+      <input
+        id="sboard-title"
+        name="title"
+        type="text"
+        class="form__input"
+        required
+        placeholder="e.g. Work, Personal"
+      />
+    </div>
+    <div class="form__field">
+      <label class="form__label" for="sboard-description">
+        Description
+      </label>
+      <FormTextarea
+        id="sboard-description"
+        name="description"
+        placeholder="Optional description"
+      />
+    </div>
+    <div class="form__actions">
+      <button type="submit" class="btn btn--primary">Create Board</button>
+      <button type="button" class="btn" data-sidenav-close>Cancel</button>
+    </div>
+  </form>
+);
+
 // GET /sticky-notes/forms/new-board — sidenav form fragment
 stickyNotesRouter.get("/forms/new-board", (c) => {
   return c.html(
     <Sidenav id="sticky-notes-board-form" title="New Board" open>
-      <form
-        hx-post="/sticky-notes/boards"
-        hx-swap="none"
-        class="form"
-      >
-        <div class="form__field">
-          <label class="form__label" for="sboard-title">Title</label>
-          <input
-            id="sboard-title"
-            name="title"
-            type="text"
-            class="form__input"
-            required
-            placeholder="e.g. Work, Personal"
-          />
-        </div>
-        <div class="form__field">
-          <label class="form__label" for="sboard-description">
-            Description
-          </label>
-          <textarea
-            id="sboard-description"
-            name="description"
-            class="form__input form__textarea"
-            placeholder="Optional description"
-          />
-        </div>
-        <div class="form__actions">
-          <button type="submit" class="btn btn--primary">Create Board</button>
-          <button type="button" class="btn" data-sidenav-close>Cancel</button>
-        </div>
-      </form>
+      <NewBoardForm />
     </Sidenav>,
   );
 });

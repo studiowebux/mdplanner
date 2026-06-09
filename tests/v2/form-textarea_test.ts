@@ -12,6 +12,7 @@ import {
 } from "../../src/views/portfolio-detail.tsx";
 import { HabitHeatmap } from "../../src/views/habits/components/habit-heatmap.tsx";
 import { CommentsSection } from "../../src/views/task-detail.tsx";
+import { NewBoardForm } from "../../src/views/sticky-notes/routes.tsx";
 
 Deno.test("FormTextarea — carries the form__textarea base class, not form__input", () => {
   // deno-lint-ignore no-explicit-any
@@ -88,6 +89,17 @@ Deno.test("CommentsSection — comment box uses form__textarea, keeps data-menti
   assertStringIncludes(html, "data-mentions");
   assertStringIncludes(html, "data-reset-on-success");
   assertStringIncludes(html, 'id="comment-body-task_1"');
+});
+
+Deno.test("NewBoardForm — description box uses form__textarea, drops the redundant form__input combo", () => {
+  // deno-lint-ignore no-explicit-any
+  const html = renderToString(NewBoardForm({}) as any);
+  assertStringIncludes(html, "form__textarea");
+  assertStringIncludes(html, 'id="sboard-description"');
+  // The textarea must no longer carry the fixed-height form__input combo.
+  assertEquals(html.includes("form__input form__textarea"), false);
+  // Create-board wiring survives.
+  assertStringIncludes(html, 'hx-post="/sticky-notes/boards"');
 });
 
 Deno.test("HabitHeatmap — note box uses form__textarea, not the bogus form-input class", () => {
