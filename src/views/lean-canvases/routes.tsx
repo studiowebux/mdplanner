@@ -12,7 +12,6 @@ export const leanCanvasesRouter = createDomainRoutes(leanCanvasConfig);
 
 registerSectionEditRoutes(leanCanvasesRouter, {
   path: "/lean-canvases",
-  ssePrefix: "lean-canvas",
   sections: LEAN_CANVAS_SECTIONS.map((s) => s.key),
   getService: getLeanCanvasService,
   DetailView: LeanCanvasDetailView,

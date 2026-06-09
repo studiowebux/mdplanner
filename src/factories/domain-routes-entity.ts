@@ -3,7 +3,6 @@
 // domain route factory.
 
 import type { Hono } from "hono";
-import { publish } from "../singletons/event-bus.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
 import { toHtml } from "../utils/html.ts";
 import { viewProps } from "../middleware/view-props.ts";
@@ -49,7 +48,6 @@ export function registerEntityRoutes<T extends Entity, C, U>(
         (data as Record<string, unknown>).updatedBy = actor.name;
       }
       await cfg.getService().create(data);
-      publish(`${cfg.ssePrefix}.created`);
       return new Response(null, {
         status: 204,
         headers: {
@@ -111,7 +109,6 @@ export function registerEntityRoutes<T extends Entity, C, U>(
           },
         });
       }
-      publish(`${cfg.ssePrefix}.updated`);
       return new Response(null, {
         status: 204,
         headers: {
@@ -130,9 +127,9 @@ export function registerEntityRoutes<T extends Entity, C, U>(
   });
 
   // Delete (soft-delete by default — see DomainConfig.supportsArchive).
-  // Base/Cached repo route `delete` through `archive` when the repo opts in;
-  // emit `.updated` so a detail page open on the archived item re-renders
-  // with the archived banner, plus `.deleted` for list-view listeners.
+  // Base/Cached repo route `delete` through `archive` when the repo opts in.
+  // The service publishes the SSE event (`.deleted` on delete, `.updated` on
+  // archive) — list-view + detail listeners refresh off the service publish.
   router.delete("/:id", async (c) => {
     const id = c.req.param("id");
     const actor = c.get("actor");
@@ -150,8 +147,6 @@ export function registerEntityRoutes<T extends Entity, C, U>(
         },
       });
     }
-    publish(`${cfg.ssePrefix}.deleted`);
-    if (archiveEnabled) publish(`${cfg.ssePrefix}.updated`);
     return new Response(null, {
       status: 204,
       headers: {
@@ -167,8 +162,8 @@ export function registerEntityRoutes<T extends Entity, C, U>(
 
   // Restore + Destroy (only when archive is enabled).
   if (archiveEnabled) {
-    // Restore: clear the archived flag. Emits `.restored` (archived-view
-    // listeners can drop the row) + `.updated` (detail-page re-render).
+    // Restore: clear the archived flag. The service publishes `.updated`,
+    // which re-fetches the (archived) list and re-renders the detail page.
     router.post("/:id/restore", async (c) => {
       const id = c.req.param("id");
       const ok = await cfg.getService().restore?.(id);
@@ -180,8 +175,6 @@ export function registerEntityRoutes<T extends Entity, C, U>(
           },
         });
       }
-      publish(`${cfg.ssePrefix}.restored`);
-      publish(`${cfg.ssePrefix}.updated`);
       return new Response(null, {
         status: 204,
         headers: {
@@ -202,7 +195,6 @@ export function registerEntityRoutes<T extends Entity, C, U>(
           },
         });
       }
-      publish(`${cfg.ssePrefix}.deleted`);
       return new Response(null, {
         status: 204,
         headers: {

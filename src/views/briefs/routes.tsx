@@ -14,7 +14,6 @@ export const briefsRouter = createDomainRoutes(briefConfig);
 
 registerSectionEditRoutes(briefsRouter, {
   path: "/briefs",
-  ssePrefix: "brief",
   sections: BRIEF_SECTIONS.map((s) => s.key),
   getService: getBriefService,
   DetailView: BriefDetailView,

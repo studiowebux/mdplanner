@@ -36,7 +36,6 @@ businessModelRouter.put("/:id/notes", async (c: AppContext) => {
 
 registerSectionEditRoutes(businessModelRouter, {
   path: "/business-models",
-  ssePrefix: "business-model",
   sections: BUSINESS_MODEL_SECTION_KEYS,
   getService: getBusinessModelService,
   DetailView: BusinessModelDetailView,

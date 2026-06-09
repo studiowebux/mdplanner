@@ -16,7 +16,6 @@ export const retrospectivesRouter = createDomainRoutes(retrospectiveConfig);
 
 registerSectionEditRoutes(retrospectivesRouter, {
   path: "/retrospectives",
-  ssePrefix: "retrospective",
   sections: RETROSPECTIVE_SECTIONS.map((s) => s.key),
   getService: getRetrospectiveService,
   DetailView: RetrospectiveDetailView,

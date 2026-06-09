@@ -12,15 +12,12 @@ import type { Hono } from "hono";
 import type { FC } from "hono/jsx";
 import type { AppContext, AppVariables, ViewProps } from "../types/app.ts";
 import type { DomainService, Entity } from "./domain.types.ts";
-import { publish } from "../singletons/event-bus.ts";
 import { viewProps } from "../middleware/view-props.ts";
 
-/** Config for a detail page's section-level inline-edit routes (per-section PUT); publishes "<ssePrefix>.updated" after each mutation. */
+/** Config for a detail page's section-level inline-edit routes (per-section PUT). The service publishes "<ssePrefix>.updated" after each mutation. */
 export interface SectionEditConfig<T extends Entity, C, U> {
   /** Mount path of the domain, e.g. "/swot" — passed to viewProps. */
   path: string;
-  /** SSE event prefix — publishes "<prefix>.updated" after every mutation. */
-  ssePrefix: string;
   /** Valid section keys — also the entity fields holding the string[] arrays. */
   sections: readonly string[];
   getService: () => DomainService<T, C, U>;
@@ -85,7 +82,6 @@ export function registerSectionEditRoutes<T extends Entity, C, U>(
     items: string[],
   ): Promise<void> {
     await cfg.getService().update(id, { [section]: items } as unknown as U);
-    publish(`${cfg.ssePrefix}.updated`);
   }
 
   // Detail page — view or edit mode via ?editing=true.

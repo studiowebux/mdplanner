@@ -41,7 +41,6 @@ swotRouter.put("/:id/notes", async (c) => {
 
 registerSectionEditRoutes(swotRouter, {
   path: "/swot",
-  ssePrefix: "swot",
   sections: SWOT_QUADRANTS.map((n) => n.toLowerCase()),
   getService: getSwotService,
   DetailView: SwotDetailView,
