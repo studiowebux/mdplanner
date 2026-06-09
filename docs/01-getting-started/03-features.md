@@ -11,13 +11,18 @@ with what you need, enable the rest when you grow into it.
 
 | Feature      | Description                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------- |
-| **List**     | Filterable task list with sections, assignees, milestones, sorting, and per-section "Load more" paging |
+| **List**     | Filterable task list with sections, assignees, milestones, projects, sorting, and per-section "Load more" paging |
 | **Board**    | Kanban board organized by section columns, with per-column "Load more" paging                |
 | **Timeline** | Gantt chart for task schedules and dependencies                                              |
 
 The number of tasks each section/column shows before a "Load more" control
 appears is configurable in **Settings → Project → Tasks per section** (default
 25).
+
+The **Hide completed** toggle collapses the Done section (its header and count
+stay visible — click to expand) and hides any stray completed tasks in other
+sections, rather than emptying the list. Visible columns can be shown or hidden
+from the **Columns** control above the list.
 
 ## Planning
 
