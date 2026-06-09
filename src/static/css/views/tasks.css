@@ -14,6 +14,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: right;
+  /* Allow metas to shrink below their fixed width (ellipsis) so the row-right
+     block yields space to the title instead of collapsing it. Header + data
+     cells share these classes, so they shrink in lockstep and stay aligned. */
+  min-width: 0;
 }
 
 .task-list__meta--assignee {
@@ -355,7 +359,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  min-width: 0;
+  /* Floor the title column so it never shrinks to 0 and vanishes at mid widths.
+     The title itself keeps min-width:0 below for ellipsis within this floor. */
+  min-width: var(--task-title-min-w);
   flex: 1;
 }
 
@@ -384,7 +390,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  flex-shrink: 0;
+  /* Shrinkable so fixed-width metas yield space to the title before it
+     collapses; metas ellipsis via their own min-width:0. */
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .task-list__row-actions {
