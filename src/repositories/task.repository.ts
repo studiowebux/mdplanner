@@ -390,6 +390,37 @@ export class TaskRepository {
   ): Promise<
     { file: string | null; task: Task | null; sectionDir: string | null }
   > {
+    // Fast path: the cache knows the task's section, so resolve the file
+    // directly (files are named `${id}.md`) instead of scanning every section
+    // dir. Falls through to the full scan on any miss — keeps correctness if
+    // the cache is stale. Turns the O(N) resolve into O(1) for every update.
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<QueryResult>(
+          `SELECT * FROM "${TASK_TABLE}" WHERE id = ?`,
+          [id],
+        );
+        if (row) {
+          const cached = rowToTask(row);
+          if (cached.section) {
+            const dir = sectionToDir(cached.section);
+            const filePath = join(this.boardDir, dir, `${id}.md`);
+            try {
+              const content = await Deno.readTextFile(filePath);
+              const task = this.parse(content, cached.section);
+              if (task?.id === id) {
+                return { file: filePath, task, sectionDir: dir };
+              }
+            } catch (err) {
+              if (!(err instanceof Deno.errors.NotFound)) throw err;
+            }
+          }
+        }
+      } catch (err) {
+        log.warn("[cache] findFileById fast-path failed, scanning:", err);
+      }
+    }
+
     const sections = await this.discoverSections();
     for (const { dir, section } of sections) {
       const sectionPath = join(this.boardDir, dir);
