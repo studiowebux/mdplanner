@@ -20,6 +20,7 @@ export function registerCustomerTools(server: McpServer): void {
     createSchema: CreateCustomerSchema,
     updateSchema: UpdateCustomerSchema,
     mutationReturn: "id-success",
+    slimFields: ["name", "company", "email"],
     tools: {
       list: {
         name: "list_customers",

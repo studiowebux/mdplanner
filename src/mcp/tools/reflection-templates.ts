@@ -24,6 +24,7 @@ export function registerReflectionTemplateTools(server: McpServer): void {
     createSchema: CreateReflectionTemplateSchema,
     updateSchema: UpdateReflectionTemplateSchema,
     mutationReturn: "entity",
+    slimFields: ["name", "period"],
     tools: {
       list: {
         name: "list_reflection_templates",

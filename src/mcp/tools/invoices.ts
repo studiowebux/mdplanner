@@ -20,6 +20,7 @@ export function registerInvoiceTools(server: McpServer): void {
     createSchema: CreateInvoiceSchema,
     updateSchema: UpdateInvoiceSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "status", "currency", "dueDate", "customerId"],
     tools: {
       list: {
         name: "list_invoices",

@@ -20,6 +20,7 @@ export function registerBrainstormTools(server: McpServer): void {
     createSchema: CreateBrainstormSchema,
     updateSchema: UpdateBrainstormSchema,
     mutationReturn: "entity",
+    slimFields: ["title", "templateId"],
     tools: {
       list: {
         name: "list_brainstorms",

@@ -11,8 +11,10 @@
 import { assert, assertEquals, assertExists } from "@std/assert";
 import { registerGoalTools } from "../../src/mcp/tools/goals.ts";
 import { registerBriefTools } from "../../src/mcp/tools/briefs.ts";
+import { registerCustomerTools } from "../../src/mcp/tools/customers.ts";
 import {
   getBriefService,
+  getCustomerService,
   getGoalService,
   initServices,
 } from "../../src/singletons/services.ts";
@@ -37,11 +39,13 @@ Deno.test("MCP slim — factory list tool projects slimFields, full mode unchang
   initServices(dir, { cache: false });
   const goals = getGoalService();
   const briefs = getBriefService();
+  const customers = getCustomerService();
 
   // deno-lint-ignore no-explicit-any
   const server = new FakeMcpServer() as any;
   registerGoalTools(server);
   registerBriefTools(server);
+  registerCustomerTools(server);
   const tools: Map<string, Handler> = server.tools;
 
   try {
@@ -108,6 +112,35 @@ Deno.test("MCP slim — factory list tool projects slimFields, full mode unchang
       assert(!("summary" in rows[0]));
       assert(!("mission" in rows[0]));
     });
+
+    // First-wave factory domain — guards the slimFields chosen for it actually
+    // exist on the entity (a non-existent field would silently project away).
+    await customers.create({
+      name: "Acme",
+      company: "Acme Corp",
+      email: "ops@acme.test",
+      notes: "Heavy notes dropped in slim mode.",
+    });
+
+    const listCustomers = tools.get("list_customers");
+    assertExists(listCustomers);
+
+    await t.step(
+      "customers slim projects id + name + company + email",
+      async () => {
+        const rows = okData<Array<Record<string, unknown>>>(
+          await listCustomers!({ slim: true }),
+        );
+        assertEquals(rows.length, 1);
+        assertEquals(Object.keys(rows[0]).sort(), [
+          "company",
+          "email",
+          "id",
+          "name",
+        ]);
+        assert(!("notes" in rows[0]));
+      },
+    );
   } finally {
     await Deno.remove(dir, { recursive: true });
   }

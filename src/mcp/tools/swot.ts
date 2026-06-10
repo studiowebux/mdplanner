@@ -20,6 +20,7 @@ export function registerSwotTools(server: McpServer): void {
     createSchema: CreateSwotSchema,
     updateSchema: UpdateSwotSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "project", "date"],
     tools: {
       list: {
         name: "list_swot",

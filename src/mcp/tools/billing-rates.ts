@@ -20,6 +20,7 @@ export function registerBillingRateTools(server: McpServer): void {
     createSchema: CreateBillingRateSchema,
     updateSchema: UpdateBillingRateSchema,
     mutationReturn: "id-success",
+    slimFields: ["name", "rate", "currency", "unit"],
     tools: {
       list: {
         name: "list_billing_rates",

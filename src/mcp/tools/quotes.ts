@@ -20,6 +20,7 @@ export function registerQuoteTools(server: McpServer): void {
     createSchema: CreateQuoteSchema,
     updateSchema: UpdateQuoteSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "status", "currency", "customerId"],
     tools: {
       list: {
         name: "list_quotes",

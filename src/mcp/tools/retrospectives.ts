@@ -20,6 +20,7 @@ export function registerRetrospectiveTools(server: McpServer): void {
     createSchema: CreateRetrospectiveSchema,
     updateSchema: UpdateRetrospectiveSchema,
     mutationReturn: "entity",
+    slimFields: ["title", "status", "date"],
     tools: {
       list: {
         name: "list_retrospectives",

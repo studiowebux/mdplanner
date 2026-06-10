@@ -24,6 +24,7 @@ export function registerOnboardingTemplateTools(server: McpServer): void {
     createSchema: CreateOnboardingTemplateSchema,
     updateSchema: UpdateOnboardingTemplateSchema,
     mutationReturn: "entity",
+    slimFields: ["name", "role"],
     tools: {
       list: {
         name: "list_onboarding_templates",

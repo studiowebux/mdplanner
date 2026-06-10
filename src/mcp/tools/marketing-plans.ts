@@ -20,6 +20,7 @@ export function registerMarketingPlanTools(server: McpServer): void {
     createSchema: CreateMarketingPlanSchema,
     updateSchema: UpdateMarketingPlanSchema,
     mutationReturn: "id-success",
+    slimFields: ["name", "status", "project", "startDate", "endDate"],
     tools: {
       list: {
         name: "list_marketing_plans",
