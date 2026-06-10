@@ -4,7 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getProjectValueBoardService } from "../../singletons/services.ts";
 import { type ProjectValueBoardSectionKey } from "../../types/project-value-board.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 const stringArray = z.array(z.string());
 
@@ -22,11 +22,14 @@ export function registerProjectValueBoardTools(server: McpServer): void {
         project: z.string().optional().describe(
           "Filter by linked project name",
         ),
+        slim: slimParam,
       },
     },
-    async ({ q, project }) => {
+    async ({ q, project, slim }) => {
       const items = await service.list({ q, project });
-      return ok(items);
+      return slim
+        ? ok(projectSlim(items, ["title", "project", "date"]))
+        : ok(items);
     },
   );
 

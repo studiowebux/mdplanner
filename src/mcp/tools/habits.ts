@@ -9,7 +9,7 @@ import {
   ListHabitOptionsSchema,
   UpdateHabitSchema,
 } from "../../types/habit.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 import { defaultScope, scopeForUserId } from "../../utils/actor.ts";
 
 export function registerHabitTools(server: McpServer): void {
@@ -19,11 +19,15 @@ export function registerHabitTools(server: McpServer): void {
     "list_habits",
     {
       description: "List all habits. Optionally filter by project.",
-      inputSchema: ListHabitOptionsSchema.shape,
+      inputSchema: { ...ListHabitOptionsSchema.shape, slim: slimParam },
     },
-    async (options) => {
+    async ({ slim, ...options }) => {
       const items = await service.list(options);
-      return ok(items);
+      return slim
+        ? ok(
+          projectSlim(items, ["title", "frequency", "targetPerPeriod", "unit"]),
+        )
+        : ok(items);
     },
   );
 

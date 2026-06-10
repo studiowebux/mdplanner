@@ -9,7 +9,7 @@ import {
   ListFinanceOptionsSchema,
   UpdateFinanceSchema,
 } from "../../types/finance.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerFinanceTools(server: McpServer): void {
   const service = getFinanceService();
@@ -19,11 +19,15 @@ export function registerFinanceTools(server: McpServer): void {
     {
       description:
         "List all finance entries. Optionally filter by type, project, or date range.",
-      inputSchema: ListFinanceOptionsSchema.shape,
+      inputSchema: { ...ListFinanceOptionsSchema.shape, slim: slimParam },
     },
-    async (options) => {
+    async ({ slim, ...options }) => {
       const items = await service.list(options);
-      return ok(items);
+      return slim
+        ? ok(
+          projectSlim(items, ["title", "type", "amount", "currency", "date"]),
+        )
+        : ok(items);
     },
   );
 

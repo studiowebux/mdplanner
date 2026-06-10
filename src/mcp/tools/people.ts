@@ -14,7 +14,7 @@ import {
   PersonWorkloadSchema,
   UpdatePersonSchema,
 } from "../../types/person.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerPeopleTools(server: McpServer): void {
   const service = getPeopleService();
@@ -24,13 +24,15 @@ export function registerPeopleTools(server: McpServer): void {
     "list_people",
     {
       description: "List all people in the project's people registry.",
-      inputSchema: ListPeopleOptionsSchema.shape,
+      inputSchema: { ...ListPeopleOptionsSchema.shape, slim: slimParam },
     },
-    async ({ department }) => {
+    async ({ department, slim }) => {
       const people = await service.list(
         department ? { department } : undefined,
       );
-      return ok(people);
+      return slim
+        ? ok(projectSlim(people, ["name", "title", "role", "status"]))
+        : ok(people);
     },
   );
 

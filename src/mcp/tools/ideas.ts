@@ -8,7 +8,7 @@ import {
   ListIdeaOptionsSchema,
   UpdateIdeaSchema,
 } from "../../types/idea.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerIdeaTools(server: McpServer): void {
   const service = getIdeaService();
@@ -18,11 +18,21 @@ export function registerIdeaTools(server: McpServer): void {
     {
       description:
         "List all ideas. Optionally filter by status, category, priority, or search query.",
-      inputSchema: ListIdeaOptionsSchema.shape,
+      inputSchema: { ...ListIdeaOptionsSchema.shape, slim: slimParam },
     },
-    async ({ status, category, priority, q }) => {
+    async ({ status, category, priority, q, slim }) => {
       const ideas = await service.list({ status, category, priority, q });
-      return ok(ideas);
+      return slim
+        ? ok(
+          projectSlim(ideas, [
+            "title",
+            "status",
+            "category",
+            "priority",
+            "project",
+          ]),
+        )
+        : ok(ideas);
     },
   );
 

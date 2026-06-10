@@ -6,7 +6,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "@hono/zod-openapi";
-import { err, ok } from "./utils.ts";
+import { err, ok, projectSlim, slimParam } from "./utils.ts";
 
 /** Service surface the factory drives — the BaseService CRUD subset. */
 export interface CrudService<T, Opts, C, U> {
@@ -85,12 +85,7 @@ export function registerCrudTools<
     {
       description: tools.list.description,
       inputSchema: slimFields
-        ? {
-          ...config.listSchema.shape,
-          slim: z.boolean().optional().describe(
-            "Return a compact projection (id + key fields) instead of full records. Use when browsing.",
-          ),
-        }
+        ? { ...config.listSchema.shape, slim: slimParam }
         : config.listSchema.shape,
     },
     async (args) => {
@@ -98,15 +93,9 @@ export function registerCrudTools<
         slim?: boolean;
       };
       const items = await service.list(listArgs as z.infer<ListSchema>);
-      if (slim && slimFields) {
-        return ok(items.map((item) => {
-          const row = item as Record<string, unknown>;
-          const out: Record<string, unknown> = { id: row.id };
-          for (const f of slimFields) out[f] = row[f];
-          return out;
-        }));
-      }
-      return ok(items);
+      return slim && slimFields
+        ? ok(projectSlim(items, slimFields))
+        : ok(items);
     },
   );
 

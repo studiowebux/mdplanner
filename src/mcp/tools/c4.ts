@@ -12,7 +12,7 @@ import {
   ListC4OptionsSchema,
   UpdateC4ComponentSchema,
 } from "../../types/c4.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerC4Tools(server: McpServer): void {
   const service = getC4Service();
@@ -22,11 +22,13 @@ export function registerC4Tools(server: McpServer): void {
     {
       description:
         "List C4 architecture components. Filter by diagram, level, parent, or full-text query.",
-      inputSchema: ListC4OptionsSchema.shape,
+      inputSchema: { ...ListC4OptionsSchema.shape, slim: slimParam },
     },
-    async ({ diagram, level, parent, q }) => {
+    async ({ diagram, level, parent, q, slim }) => {
       const items = await service.list({ diagram, level, parent, q });
-      return ok(items);
+      return slim
+        ? ok(projectSlim(items, ["name", "level", "type", "diagram", "parent"]))
+        : ok(items);
     },
   );
 

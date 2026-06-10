@@ -9,17 +9,24 @@ import {
   TeamMemberRefSchema,
   UpdateCapacityPlanSchema,
 } from "../../types/capacity-plan.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerCapacityPlanTools(server: McpServer): void {
   const service = getCapacityPlanService();
 
   server.registerTool(
     "list_capacity_plans",
-    { description: "List all capacity plans.", inputSchema: {} },
-    async () => {
+    {
+      description: "List all capacity plans.",
+      inputSchema: { slim: slimParam },
+    },
+    async ({ slim }) => {
       const items = await service.list();
-      return ok(items);
+      return slim
+        ? ok(
+          projectSlim(items, ["title", "startDate", "endDate", "budgetHours"]),
+        )
+        : ok(items);
     },
   );
 

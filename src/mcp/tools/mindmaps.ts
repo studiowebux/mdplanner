@@ -8,7 +8,7 @@ import {
   MindmapSchema,
   UpdateMindmapSchema,
 } from "../../types/mindmap.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerMindmapTools(server: McpServer): void {
   const service = getMindmapService();
@@ -16,10 +16,10 @@ export function registerMindmapTools(server: McpServer): void {
   server.registerTool("list_mindmaps", {
     description:
       "List all mindmaps. Optionally filter by project (name) or search query (matches title and node text).",
-    inputSchema: ListMindmapOptionsSchema.shape,
-  }, async ({ project, q }) => {
+    inputSchema: { ...ListMindmapOptionsSchema.shape, slim: slimParam },
+  }, async ({ project, q, slim }) => {
     const items = await service.list({ project, q });
-    return ok(items);
+    return slim ? ok(projectSlim(items, ["title", "project"])) : ok(items);
   });
 
   server.registerTool("get_mindmap", {

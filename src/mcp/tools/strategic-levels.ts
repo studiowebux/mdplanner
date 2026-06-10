@@ -7,7 +7,7 @@ import {
   LEVEL_ORDER,
   StrategicLevelsBuildersSchema,
 } from "../../types/strategic-levels.types.ts";
-import { err, ok } from "../utils.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
 export function registerStrategicLevelsTools(server: McpServer): void {
   const service = getStrategicLevelsService();
@@ -19,11 +19,12 @@ export function registerStrategicLevelsTools(server: McpServer): void {
       inputSchema: {
         q: z.string().optional().describe("Search query (matches title)"),
         date: z.string().optional().describe("Filter by date (YYYY-MM-DD)"),
+        slim: slimParam,
       },
     },
-    async ({ q, date }) => {
+    async ({ q, date, slim }) => {
       const items = await service.list({ q, date });
-      return ok(items);
+      return slim ? ok(projectSlim(items, ["title", "date"])) : ok(items);
     },
   );
 
