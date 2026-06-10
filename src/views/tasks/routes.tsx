@@ -217,8 +217,10 @@ tasksRouter.post("/:id/complete", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   const svc = getTaskService();
-  await svc.update(id, { completed: true });
-  await svc.moveTask(id, "Done");
+  // Single write: completed + section move in one update (the repo handles the
+  // file relocation and completedAt stamp). Two separate updates each ran an
+  // O(N) section-dir scan via findFileById — slow with 400+ tasks.
+  await svc.update(id, { completed: true, section: "Done" });
   publish("task.updated");
   c.header("HX-Trigger", hxTrigger("success", "Task marked complete"));
   return renderDetailPage(c, id);
@@ -233,8 +235,9 @@ tasksRouter.post("/:id/reopen", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   const svc = getTaskService();
-  await svc.update(id, { completed: false });
-  await svc.moveTask(id, "Todo");
+  // Single write: clear completed + move to Todo in one update (symmetric to
+  // /complete — avoids the double O(N) findFileById scan).
+  await svc.update(id, { completed: false, section: "Todo" });
   publish("task.updated");
   c.header("HX-Trigger", hxTrigger("success", "Task reopened"));
   return renderDetailPage(c, id);
