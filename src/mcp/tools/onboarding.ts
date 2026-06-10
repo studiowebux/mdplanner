@@ -20,11 +20,12 @@ export function registerOnboardingTools(server: McpServer): void {
     createSchema: CreateOnboardingSchema,
     updateSchema: UpdateOnboardingSchema,
     mutationReturn: "id-success",
+    slimFields: ["employeeName", "role", "startDate"],
     tools: {
       list: {
         name: "list_onboarding",
         description:
-          "List all onboarding flows. Optionally filter by project or status.",
+          "List all onboarding flows. Optionally filter by project or status. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_onboarding",

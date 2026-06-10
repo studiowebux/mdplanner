@@ -20,33 +20,25 @@ export function registerDealTools(server: McpServer): void {
     createSchema: CreateDealSchema,
     updateSchema: UpdateDealSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "stage", "value", "company"],
     tools: {
       list: {
         name: "list_deals",
         description:
-          "List all deals. Optionally filter by stage, company, or project.",
+          "List all deals. Optionally filter by stage, company, or project. Pass slim: true to browse with a compact projection.",
       },
-      get: {
-        name: "get_deal",
-        description: "Get a single deal by its ID.",
-      },
+      get: { name: "get_deal", description: "Get a single deal by its ID." },
       getByName: {
         name: "get_deal_by_name",
         description:
           "Get a deal by its title (case-insensitive). Prefer this over list_deals when the title is known.",
       },
-      create: {
-        name: "create_deal",
-        description: "Create a new deal.",
-      },
+      create: { name: "create_deal", description: "Create a new deal." },
       update: {
         name: "update_deal",
         description: "Update an existing deal's fields.",
       },
-      delete: {
-        name: "delete_deal",
-        description: "Delete a deal by its ID.",
-      },
+      delete: { name: "delete_deal", description: "Delete a deal by its ID." },
     },
   });
 }

@@ -20,11 +20,12 @@ export function registerLeanCanvasTools(server: McpServer): void {
     createSchema: CreateLeanCanvasSchema,
     updateSchema: UpdateLeanCanvasSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "project", "date"],
     tools: {
       list: {
         name: "list_lean_canvases",
         description:
-          "List all Lean Canvases. Optionally filter by project or search query.",
+          "List all Lean Canvases. Optionally filter by project or search query. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_lean_canvas",

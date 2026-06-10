@@ -20,33 +20,25 @@ export function registerRiskTools(server: McpServer): void {
     createSchema: CreateRiskSchema,
     updateSchema: UpdateRiskSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "category", "status", "impact", "likelihood"],
     tools: {
       list: {
         name: "list_risks",
         description:
-          "List all risks. Optionally filter by category, status, or project.",
+          "List all risks. Optionally filter by category, status, or project. Pass slim: true to browse with a compact projection.",
       },
-      get: {
-        name: "get_risk",
-        description: "Get a single risk by its ID.",
-      },
+      get: { name: "get_risk", description: "Get a single risk by its ID." },
       getByName: {
         name: "get_risk_by_name",
         description:
           "Get a risk by its title (case-insensitive). Prefer this over list_risks when the title is known.",
       },
-      create: {
-        name: "create_risk",
-        description: "Create a new risk entry.",
-      },
+      create: { name: "create_risk", description: "Create a new risk entry." },
       update: {
         name: "update_risk",
         description: "Update an existing risk's fields.",
       },
-      delete: {
-        name: "delete_risk",
-        description: "Delete a risk by its ID.",
-      },
+      delete: { name: "delete_risk", description: "Delete a risk by its ID." },
     },
   });
 }

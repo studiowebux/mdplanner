@@ -20,11 +20,12 @@ export function registerJournalTools(server: McpServer): void {
     createSchema: CreateJournalEntrySchema,
     updateSchema: UpdateJournalEntrySchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "date", "mood"],
     tools: {
       list: {
         name: "list_journal_entries",
         description:
-          "List all journal entries. Optionally filter by project, mood, or date range.",
+          "List all journal entries. Optionally filter by project, mood, or date range. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_journal_entry",

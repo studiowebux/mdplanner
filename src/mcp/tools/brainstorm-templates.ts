@@ -24,10 +24,12 @@ export function registerBrainstormTemplateTools(server: McpServer): void {
     createSchema: CreateBrainstormTemplateSchema,
     updateSchema: UpdateBrainstormTemplateSchema,
     mutationReturn: "id-success",
+    slimFields: ["name"],
     tools: {
       list: {
         name: "list_brainstorm_templates",
-        description: "List all brainstorm templates.",
+        description:
+          "List all brainstorm templates. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_brainstorm_template",

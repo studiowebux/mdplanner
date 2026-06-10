@@ -20,11 +20,12 @@ export function registerMoscowTools(server: McpServer): void {
     createSchema: CreateMoscowSchema,
     updateSchema: UpdateMoscowSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "project", "date"],
     tools: {
       list: {
         name: "list_moscow",
         description:
-          "List all MoSCoW prioritization boards. Optionally filter by project.",
+          "List all MoSCoW prioritization boards. Optionally filter by project. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_moscow",

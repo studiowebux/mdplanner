@@ -20,11 +20,12 @@ export function registerInvestorTools(server: McpServer): void {
     createSchema: CreateInvestorSchema,
     updateSchema: UpdateInvestorSchema,
     mutationReturn: "id-success",
+    slimFields: ["name", "type", "stage", "status"],
     tools: {
       list: {
         name: "list_investors",
         description:
-          "List all investors. Optionally filter by type, stage, or status.",
+          "List all investors. Optionally filter by type, stage, or status. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_investor",

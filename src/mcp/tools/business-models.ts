@@ -20,10 +20,12 @@ export function registerBusinessModelTools(server: McpServer): void {
     createSchema: CreateBusinessModelSchema,
     updateSchema: UpdateBusinessModelSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "project", "date"],
     tools: {
       list: {
         name: "list_business_models",
-        description: "List all business models. Optionally filter by project.",
+        description:
+          "List all business models. Optionally filter by project. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_business_model",

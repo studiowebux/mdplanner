@@ -74,9 +74,11 @@ const GOLDEN: Record<string, CapturedTool[]> = {
   "briefs": [
     {
       "name": "list_briefs",
-      "description": "List all briefs. Optionally filter by search query.",
+      "description":
+        "List all briefs. Optionally filter by search query. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "q",
+        "slim",
       ],
       "notFound": null,
     },
@@ -150,10 +152,12 @@ const GOLDEN: Record<string, CapturedTool[]> = {
   "business-models": [
     {
       "name": "list_business_models",
-      "description": "List all business models. Optionally filter by project.",
+      "description":
+        "List all business models. Optionally filter by project. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "project",
         "q",
+        "slim",
       ],
       "notFound": null,
     },
@@ -228,10 +232,11 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_companies",
       "description":
-        "List companies. Optionally filter by q (matches name/industry/website/address/notes), type (prospect/customer/partner/vendor/other), or industry.",
+        "List companies. Optionally filter by q (matches name/industry/website/address/notes), type (prospect/customer/partner/vendor/other), or industry. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "industry",
         "q",
+        "slim",
         "type",
       ],
       "notFound": null,
@@ -302,11 +307,12 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_deals",
       "description":
-        "List all deals. Optionally filter by stage, company, or project.",
+        "List all deals. Optionally filter by stage, company, or project. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "assignee",
         "company",
         "q",
+        "slim",
         "stage",
       ],
       "notFound": null,
@@ -376,10 +382,11 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_fishbones",
       "description":
-        "List all fishbone diagrams. Optionally filter by project.",
+        "List all fishbone diagrams. Optionally filter by project. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "project",
         "q",
+        "slim",
       ],
       "notFound": null,
     },
@@ -436,9 +443,10 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_goals",
       "description":
-        "List all goals in the project. Optionally filter by status, type, or project.",
+        "List all goals in the project. Optionally filter by status, type, or project. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "project",
+        "slim",
         "status",
         "type",
       ],
@@ -533,9 +541,10 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_investors",
       "description":
-        "List all investors. Optionally filter by type, stage, or status.",
+        "List all investors. Optionally filter by type, stage, or status. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "q",
+        "slim",
         "stage",
         "status",
         "tag",
@@ -608,11 +617,12 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_journal_entries",
       "description":
-        "List all journal entries. Optionally filter by project, mood, or date range.",
+        "List all journal entries. Optionally filter by project, mood, or date range. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "from",
         "mood",
         "q",
+        "slim",
         "tag",
         "to",
       ],
@@ -673,10 +683,11 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_lean_canvases",
       "description":
-        "List all Lean Canvases. Optionally filter by project or search query.",
+        "List all Lean Canvases. Optionally filter by project or search query. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "project",
         "q",
+        "slim",
       ],
       "notFound": null,
     },
@@ -756,10 +767,11 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_moscow",
       "description":
-        "List all MoSCoW prioritization boards. Optionally filter by project.",
+        "List all MoSCoW prioritization boards. Optionally filter by project. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "project",
         "q",
+        "slim",
       ],
       "notFound": null,
     },
@@ -824,10 +836,11 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_onboarding",
       "description":
-        "List all onboarding flows. Optionally filter by project or status.",
+        "List all onboarding flows. Optionally filter by project or status. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "q",
         "role",
+        "slim",
         "status",
       ],
       "notFound": null,
@@ -889,11 +902,12 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_reflections",
       "description":
-        "List all reflections. Optionally filter by period, tag, date range, or search query.",
+        "List all reflections. Optionally filter by period, tag, date range, or search query. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "from",
         "period",
         "q",
+        "slim",
         "tag",
         "to",
       ],
@@ -956,11 +970,12 @@ const GOLDEN: Record<string, CapturedTool[]> = {
     {
       "name": "list_risks",
       "description":
-        "List all risks. Optionally filter by category, status, or project.",
+        "List all risks. Optionally filter by category, status, or project. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "category",
         "project",
         "q",
+        "slim",
         "status",
       ],
       "notFound": null,
@@ -1029,10 +1044,12 @@ const GOLDEN: Record<string, CapturedTool[]> = {
   "brainstorm-templates": [
     {
       "name": "list_brainstorm_templates",
-      "description": "List all brainstorm templates.",
+      "description":
+        "List all brainstorm templates. Pass slim: true to browse with a compact projection.",
       "inputKeys": [
         "category",
         "q",
+        "slim",
       ],
       "notFound": null,
     },

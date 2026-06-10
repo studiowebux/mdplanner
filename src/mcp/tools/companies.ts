@@ -20,11 +20,12 @@ export function registerCompanyTools(server: McpServer): void {
     createSchema: CreateCompanySchema,
     updateSchema: UpdateCompanySchema,
     mutationReturn: "id-success",
+    slimFields: ["name", "type", "industry"],
     tools: {
       list: {
         name: "list_companies",
         description:
-          "List companies. Optionally filter by q (matches name/industry/website/address/notes), type (prospect/customer/partner/vendor/other), or industry.",
+          "List companies. Optionally filter by q (matches name/industry/website/address/notes), type (prospect/customer/partner/vendor/other), or industry. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_company",

@@ -51,6 +51,13 @@ export interface CrudToolConfig<
    * - "entity": create & update → the full entity
    */
   mutationReturn: "id-success" | "entity";
+  /**
+   * Optional compact projection for the list tool. When set, the list tool
+   * gains a `slim: boolean` param; `slim: true` returns `{ id, ...fields }` per
+   * row instead of full records (cuts token usage when browsing). `id` is always
+   * included — list only the additional fields here. Omit for light payloads.
+   */
+  slimFields?: Array<keyof T & string>;
   tools: {
     list: ToolMeta;
     get: ToolMeta;
@@ -72,13 +79,35 @@ export function registerCrudTools<
 ): void {
   const { service, notFoundLabel, tools } = config;
 
+  const slimFields = config.slimFields;
   server.registerTool(
     tools.list.name,
     {
       description: tools.list.description,
-      inputSchema: config.listSchema.shape,
+      inputSchema: slimFields
+        ? {
+          ...config.listSchema.shape,
+          slim: z.boolean().optional().describe(
+            "Return a compact projection (id + key fields) instead of full records. Use when browsing.",
+          ),
+        }
+        : config.listSchema.shape,
     },
-    async (args) => ok(await service.list(args)),
+    async (args) => {
+      const { slim, ...listArgs } = args as Record<string, unknown> & {
+        slim?: boolean;
+      };
+      const items = await service.list(listArgs as z.infer<ListSchema>);
+      if (slim && slimFields) {
+        return ok(items.map((item) => {
+          const row = item as Record<string, unknown>;
+          const out: Record<string, unknown> = { id: row.id };
+          for (const f of slimFields) out[f] = row[f];
+          return out;
+        }));
+      }
+      return ok(items);
+    },
   );
 
   server.registerTool(

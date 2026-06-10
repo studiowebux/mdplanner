@@ -20,11 +20,12 @@ export function registerReflectionTools(server: McpServer): void {
     createSchema: CreateReflectionSchema,
     updateSchema: UpdateReflectionSchema,
     mutationReturn: "entity",
+    slimFields: ["title", "period", "date"],
     tools: {
       list: {
         name: "list_reflections",
         description:
-          "List all reflections. Optionally filter by period, tag, date range, or search query.",
+          "List all reflections. Optionally filter by period, tag, date range, or search query. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_reflection",

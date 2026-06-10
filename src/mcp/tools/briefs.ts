@@ -20,32 +20,25 @@ export function registerBriefTools(server: McpServer): void {
     createSchema: CreateBriefSchema,
     updateSchema: UpdateBriefSchema,
     mutationReturn: "entity",
+    slimFields: ["title", "date"],
     tools: {
       list: {
         name: "list_briefs",
-        description: "List all briefs. Optionally filter by search query.",
+        description:
+          "List all briefs. Optionally filter by search query. Pass slim: true to browse with a compact projection.",
       },
-      get: {
-        name: "get_brief",
-        description: "Get a single brief by its ID.",
-      },
+      get: { name: "get_brief", description: "Get a single brief by its ID." },
       getByName: {
         name: "get_brief_by_name",
         description:
           "Get a brief by its title (case-insensitive). Prefer this over list_briefs when the title is known.",
       },
-      create: {
-        name: "create_brief",
-        description: "Create a new brief.",
-      },
+      create: { name: "create_brief", description: "Create a new brief." },
       update: {
         name: "update_brief",
         description: "Update an existing brief.",
       },
-      delete: {
-        name: "delete_brief",
-        description: "Delete a brief by ID.",
-      },
+      delete: { name: "delete_brief", description: "Delete a brief by ID." },
     },
   });
 }

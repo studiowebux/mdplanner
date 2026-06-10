@@ -20,16 +20,14 @@ export function registerGoalTools(server: McpServer): void {
     createSchema: CreateGoalSchema,
     updateSchema: UpdateGoalSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "status", "type", "progress", "project"],
     tools: {
       list: {
         name: "list_goals",
         description:
-          "List all goals in the project. Optionally filter by status, type, or project.",
+          "List all goals in the project. Optionally filter by status, type, or project. Pass slim: true to browse with a compact projection.",
       },
-      get: {
-        name: "get_goal",
-        description: "Get a single goal by its ID.",
-      },
+      get: { name: "get_goal", description: "Get a single goal by its ID." },
       getByName: {
         name: "get_goal_by_name",
         description:
@@ -43,10 +41,7 @@ export function registerGoalTools(server: McpServer): void {
         name: "update_goal",
         description: "Update an existing goal's fields.",
       },
-      delete: {
-        name: "delete_goal",
-        description: "Delete a goal by its ID.",
-      },
+      delete: { name: "delete_goal", description: "Delete a goal by its ID." },
     },
   });
 }

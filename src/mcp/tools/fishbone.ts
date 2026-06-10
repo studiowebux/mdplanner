@@ -20,11 +20,12 @@ export function registerFishboneTools(server: McpServer): void {
     createSchema: CreateFishboneSchema,
     updateSchema: UpdateFishboneSchema,
     mutationReturn: "id-success",
+    slimFields: ["title", "project"],
     tools: {
       list: {
         name: "list_fishbones",
         description:
-          "List all fishbone diagrams. Optionally filter by project.",
+          "List all fishbone diagrams. Optionally filter by project. Pass slim: true to browse with a compact projection.",
       },
       get: {
         name: "get_fishbone",
