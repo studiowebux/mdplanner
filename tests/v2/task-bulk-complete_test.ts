@@ -3,7 +3,7 @@
  *
  * Locks the task-list bulk bar Mark-complete action:
  * - POST /tasks/batch-complete sets completed:true AND moves every checked
- *   taskId to Done (skipping archived), returning 204 + HX-Refresh.
+ *   taskId to Done (skipping archived), returning 204 (refresh via SSE morph).
  * - The action is distinct from /batch-move: it sets completed, not just the
  *   section. Idempotent for already-done/already-completed tasks.
  * - The list view button is htmx-wired to /tasks/batch-complete.
@@ -32,7 +32,7 @@ Deno.test("bulk complete — htmx /tasks/batch-complete", async (t) => {
 
   try {
     await t.step(
-      "batch-complete sets completed + moves to Done (204 HX-Refresh)",
+      "batch-complete sets completed + moves to Done (204, no HX-Refresh)",
       async () => {
         const a = await service.create({ title: "Done A", section: "Todo" });
         const b = await service.create({
@@ -47,7 +47,7 @@ Deno.test("bulk complete — htmx /tasks/batch-complete", async (t) => {
           ]),
         );
         assertEquals(res.status, 204);
-        assertEquals(res.headers.get("HX-Refresh"), "true");
+        assertEquals(res.headers.get("HX-Refresh"), null);
         await res.body?.cancel();
 
         const ra = (await service.getById(a.id))!;

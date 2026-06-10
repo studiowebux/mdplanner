@@ -476,7 +476,8 @@ tasksRouter.post("/batch-delete", async (c) => {
   }
 
   if (archived > 0) publish("task.deleted");
-  c.header("HX-Refresh", "true");
+  // No HX-Refresh full reload: the debounced SseListRefresh morphs #tasks-view
+  // and the afterSettle handler clears the bulk selection.
   return c.body(null, 204);
 });
 
@@ -502,7 +503,8 @@ tasksRouter.post("/batch-move", async (c) => {
     }
   }
 
-  c.header("HX-Refresh", "true");
+  // No HX-Refresh full reload: the debounced SseListRefresh morphs #tasks-view
+  // and the afterSettle handler clears the bulk selection.
   return c.body(null, 204);
 });
 
@@ -532,7 +534,8 @@ tasksRouter.post("/batch-complete", async (c) => {
     }
   }
 
-  c.header("HX-Refresh", "true");
+  // No HX-Refresh full reload: the debounced SseListRefresh morphs #tasks-view
+  // and the afterSettle handler clears the bulk selection.
   return c.body(null, 204);
 });
 
@@ -565,7 +568,8 @@ tasksRouter.post("/batch-tag", async (c) => {
     }
   }
 
-  c.header("HX-Refresh", "true");
+  // No HX-Refresh full reload: the debounced SseListRefresh morphs #tasks-view
+  // and the afterSettle handler clears the bulk selection.
   return c.body(null, 204);
 });
 

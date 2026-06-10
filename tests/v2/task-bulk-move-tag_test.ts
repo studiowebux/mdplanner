@@ -4,9 +4,9 @@
  * Locks the task-list bulk bar Move/Tag actions after the fetch→htmx
  * conversion:
  * - POST /tasks/batch-move sets the section on every checked taskId (skipping
- *   archived) and returns 204 + HX-Refresh.
+ *   archived) and returns 204 (no HX-Refresh — list refreshes via SSE morph).
  * - POST /tasks/batch-tag adds/removes a tag per checked task, computing the
- *   next tag set server-side, and returns 204 + HX-Refresh.
+ *   next tag set server-side, and returns 204 (no HX-Refresh).
  * - The list view buttons are htmx-wired; the section <select>/tag <input>
  *   carry name attributes so hx-include serializes them.
  *
@@ -34,7 +34,7 @@ Deno.test("bulk move/tag — htmx /tasks/batch-move + /tasks/batch-tag", async (
 
   try {
     await t.step(
-      "batch-move sets section on checked tasks (204 HX-Refresh)",
+      "batch-move sets section on checked tasks (204, no HX-Refresh)",
       async () => {
         const a = await service.create({ title: "Move A", section: "Todo" });
         const b = await service.create({ title: "Move B", section: "Todo" });
@@ -47,7 +47,7 @@ Deno.test("bulk move/tag — htmx /tasks/batch-move + /tasks/batch-tag", async (
           ]),
         );
         assertEquals(res.status, 204);
-        assertEquals(res.headers.get("HX-Refresh"), "true");
+        assertEquals(res.headers.get("HX-Refresh"), null);
         await res.body?.cancel();
 
         assertEquals((await service.getById(a.id))!.section, "In Progress");
@@ -89,7 +89,7 @@ Deno.test("bulk move/tag — htmx /tasks/batch-move + /tasks/batch-tag", async (
           ]),
         );
         assertEquals(addRes.status, 204);
-        assertEquals(addRes.headers.get("HX-Refresh"), "true");
+        assertEquals(addRes.headers.get("HX-Refresh"), null);
         await addRes.body?.cancel();
         const afterAdd = (await service.getById(t1.id))!.tags ?? [];
         assert(afterAdd.includes("urgent") && afterAdd.includes("keep"));

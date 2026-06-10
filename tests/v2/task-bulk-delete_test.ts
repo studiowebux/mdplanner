@@ -3,7 +3,7 @@
  *
  * Locks the task-list bulk bar delete:
  * - POST /tasks/batch-delete archives every checked taskId (soft-delete),
- *   skips missing/already-archived, returns 204 + HX-Refresh so htmx reloads.
+ *   skips missing/already-archived, returns 204 (list refreshes via SSE morph).
  * - The list view delete button is htmx-wired (hx-post + hx-include) and row
  *   checkboxes carry name="taskId" value=<id> for hx-include serialization.
  *
@@ -34,7 +34,7 @@ Deno.test("bulk-delete — POST /tasks/batch-delete archives checked tasks", asy
 
   try {
     await t.step(
-      "archives every checked taskId + returns 204 HX-Refresh",
+      "archives every checked taskId + returns 204 (no HX-Refresh)",
       async () => {
         const a = await service.create({ title: "Bulk A", section: "Todo" });
         const b = await service.create({ title: "Bulk B", section: "Todo" });
@@ -44,7 +44,7 @@ Deno.test("bulk-delete — POST /tasks/batch-delete archives checked tasks", asy
           batchDeleteRequest([a.id, b.id]),
         );
         assertEquals(res.status, 204);
-        assertEquals(res.headers.get("HX-Refresh"), "true");
+        assertEquals(res.headers.get("HX-Refresh"), null);
         await res.body?.cancel();
 
         assertEquals((await service.getById(a.id))!.archived, true);

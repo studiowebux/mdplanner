@@ -158,10 +158,17 @@
     }
   });
 
-  // Clear selection state when view re-renders (bar hides automatically via updateBar)
+  // Clear selection state when view re-renders (bar hides automatically via
+  // updateBar). Bulk actions now refresh via the SSE morph (no HX-Refresh full
+  // reload), so this is the sole reset path — explicitly uncheck any boxes the
+  // morph may have left checked rather than relying on idiomorph reconciliation.
   document.addEventListener("htmx:afterSettle", function (e) {
     if (e.detail && e.detail.target && e.detail.target.id === "tasks-view") {
       selected.clear();
+      var checked = document.querySelectorAll(".task-list__select:checked");
+      for (var i = 0; i < checked.length; i++) {
+        checked[i].checked = false;
+      }
       updateBar();
     }
   });
