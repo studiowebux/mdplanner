@@ -579,6 +579,38 @@ Deno.test("PeopleService - updatePreferences deep-merges object sub-keys and rep
   }
 });
 
+Deno.test("PeopleService - updatePreferences serializes concurrent disjoint-key writes (no lost update)", async () => {
+  const { service, dir } = await setupService();
+  try {
+    const p = await service.create({ name: "Concurrent User" });
+
+    // Fire N concurrent patches, each adding a DISJOINT sub-key under
+    // filterDefaults. Without per-person serialization the read-merge-write
+    // races and all but one key is lost (each call reads the same empty base).
+    const N = 25;
+    await Promise.all(
+      Array.from({ length: N }, (_, i) =>
+        service.updatePreferences(p.id, {
+          filterDefaults: { [`domain${i}`]: { section: `S${i}` } },
+        })),
+    );
+
+    const reread = await service.getById(p.id);
+    assertExists(reread);
+    const filterDefaults = reread!.preferences?.filterDefaults ?? {};
+    assertEquals(
+      Object.keys(filterDefaults).length,
+      N,
+      "every concurrent patch must survive — none lost-updated",
+    );
+    for (let i = 0; i < N; i++) {
+      assertEquals(filterDefaults[`domain${i}`], { section: `S${i}` });
+    }
+  } finally {
+    await cleanup(dir);
+  }
+});
+
 Deno.test("PeopleService - updatePreferences returns null for missing person", async () => {
   const { service, dir } = await setupService();
   try {

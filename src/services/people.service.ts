@@ -14,6 +14,7 @@ import type {
   UpdatePerson,
 } from "../types/person.types.ts";
 import { ciEquals } from "../utils/string.ts";
+import { SafeWriter } from "../utils/safe-io.ts";
 import { insertPersonRow } from "../domains/people/cache.ts";
 import { PEOPLE_TABLE } from "../domains/people/constants.ts";
 import { CachedService } from "./cached.service.ts";
@@ -30,6 +31,9 @@ export class PeopleService extends CachedService<
   PeopleListOptions
 > {
   protected readonly tableName = PEOPLE_TABLE;
+
+  /** Serializes read-merge-write of preferences per person (prevents lost updates). */
+  private prefsWriter = new SafeWriter();
 
   constructor(private peopleRepo: PeopleRepository) {
     super(peopleRepo);
@@ -198,44 +202,48 @@ export class PeopleService extends CachedService<
     id: string,
     patch: PersonPreferences,
   ): Promise<Person | null> {
-    const person = await this.peopleRepo.findById(id);
-    if (!person) return null;
+    // Serialize per-person so concurrent disjoint-key patches don't lost-update:
+    // the read-merge-write must run atomically against the same starting state.
+    return await this.prefsWriter.write(id, async () => {
+      const person = await this.peopleRepo.findById(id);
+      if (!person) return null;
 
-    const existing = person.preferences ?? {};
-    const merged: PersonPreferences = { ...existing };
+      const existing = person.preferences ?? {};
+      const merged: PersonPreferences = { ...existing };
 
-    if (patch == null) return person;
+      if (patch == null) return person;
 
-    for (
-      const key of Object.keys(patch) as Array<
-        keyof NonNullable<PersonPreferences>
-      >
-    ) {
-      const patchVal = patch[key];
-      const existingVal = existing[key];
-      if (patchVal === undefined) continue;
-
-      if (
-        Array.isArray(patchVal) ||
-        typeof patchVal !== "object" ||
-        patchVal === null ||
-        Array.isArray(existingVal) ||
-        typeof existingVal !== "object" ||
-        existingVal === null
+      for (
+        const key of Object.keys(patch) as Array<
+          keyof NonNullable<PersonPreferences>
+        >
       ) {
-        // Arrays and non-objects: replace wholesale
-        (merged as Record<string, unknown>)[key] = patchVal;
-      } else {
-        // Objects: merge one level deep
-        (merged as Record<string, unknown>)[key] = {
-          ...(existingVal as Record<string, unknown>),
-          ...(patchVal as Record<string, unknown>),
-        };
-      }
-    }
+        const patchVal = patch[key];
+        const existingVal = existing[key];
+        if (patchVal === undefined) continue;
 
-    const updated = await this.peopleRepo.update(id, { preferences: merged });
-    if (updated) this.cacheUpsert(updated);
-    return updated;
+        if (
+          Array.isArray(patchVal) ||
+          typeof patchVal !== "object" ||
+          patchVal === null ||
+          Array.isArray(existingVal) ||
+          typeof existingVal !== "object" ||
+          existingVal === null
+        ) {
+          // Arrays and non-objects: replace wholesale
+          (merged as Record<string, unknown>)[key] = patchVal;
+        } else {
+          // Objects: merge one level deep
+          (merged as Record<string, unknown>)[key] = {
+            ...(existingVal as Record<string, unknown>),
+            ...(patchVal as Record<string, unknown>),
+          };
+        }
+      }
+
+      const updated = await this.peopleRepo.update(id, { preferences: merged });
+      if (updated) this.cacheUpsert(updated);
+      return updated;
+    });
   }
 }
