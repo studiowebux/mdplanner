@@ -1,4 +1,4 @@
-// MCP tools for deal operations — thin wrappers over DealService.
+// MCP tools for deal operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getDealService } from "../../singletons/services.ts";
@@ -8,89 +8,45 @@ import {
   ListDealOptionsSchema,
   UpdateDealSchema,
 } from "../../types/deal.types.ts";
-import { err, ok } from "../utils.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
 export function registerDealTools(server: McpServer): void {
-  const service = getDealService();
-
-  server.registerTool(
-    "list_deals",
-    {
-      description:
-        "List all deals. Optionally filter by stage, company, or project.",
-      inputSchema: ListDealOptionsSchema.shape,
-    },
-    async (options) => {
-      const items = await service.list(options);
-      return ok(items);
-    },
-  );
-
-  server.registerTool(
-    "get_deal",
-    {
-      description: "Get a single deal by its ID.",
-      inputSchema: { id: DealSchema.shape.id.describe("Deal ID") },
-    },
-    async ({ id }) => {
-      const item = await service.getById(id);
-      if (!item) return err(`Deal '${id}' not found`);
-      return ok(item);
-    },
-  );
-
-  server.registerTool(
-    "get_deal_by_name",
-    {
-      description:
-        "Get a deal by its title (case-insensitive). Prefer this over list_deals when the title is known.",
-      inputSchema: { name: DealSchema.shape.title.describe("Deal title") },
-    },
-    async ({ name }) => {
-      const item = await service.getByName(name);
-      if (!item) return err(`Deal '${name}' not found`);
-      return ok(item);
-    },
-  );
-
-  server.registerTool(
-    "create_deal",
-    {
-      description: "Create a new deal.",
-      inputSchema: CreateDealSchema.shape,
-    },
-    async (data) => {
-      const item = await service.create(data);
-      return ok({ id: item.id });
-    },
-  );
-
-  server.registerTool(
-    "update_deal",
-    {
-      description: "Update an existing deal's fields.",
-      inputSchema: {
-        id: DealSchema.shape.id.describe("Deal ID"),
-        ...UpdateDealSchema.shape,
+  registerCrudTools(server, {
+    service: getDealService(),
+    notFoundLabel: "Deal",
+    idParam: DealSchema.shape.id.describe("Deal ID"),
+    nameParam: DealSchema.shape.title.describe("Deal title"),
+    listSchema: ListDealOptionsSchema,
+    createSchema: CreateDealSchema,
+    updateSchema: UpdateDealSchema,
+    mutationReturn: "id-success",
+    tools: {
+      list: {
+        name: "list_deals",
+        description:
+          "List all deals. Optionally filter by stage, company, or project.",
+      },
+      get: {
+        name: "get_deal",
+        description: "Get a single deal by its ID.",
+      },
+      getByName: {
+        name: "get_deal_by_name",
+        description:
+          "Get a deal by its title (case-insensitive). Prefer this over list_deals when the title is known.",
+      },
+      create: {
+        name: "create_deal",
+        description: "Create a new deal.",
+      },
+      update: {
+        name: "update_deal",
+        description: "Update an existing deal's fields.",
+      },
+      delete: {
+        name: "delete_deal",
+        description: "Delete a deal by its ID.",
       },
     },
-    async ({ id, ...fields }) => {
-      const item = await service.update(id, fields);
-      if (!item) return err(`Deal '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_deal",
-    {
-      description: "Delete a deal by its ID.",
-      inputSchema: { id: DealSchema.shape.id.describe("Deal ID") },
-    },
-    async ({ id }) => {
-      const success = await service.delete(id);
-      if (!success) return err(`Deal '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
