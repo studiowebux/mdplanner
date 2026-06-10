@@ -1353,6 +1353,14 @@ a.task-board__card-avatar:hover {
    Header + data cells share [data-col], so each column hides as a whole and
    stays aligned. 1100px is a sanctioned deviation — see shell.css CANONICAL
    BREAKPOINTS. */
+/* Manual column selector is moot ≤1100px: the responsive bands force-hide
+   meta columns, so toggling them does nothing. Hide the control. */
+@media (max-width: 1100px) {
+  .column-toggle {
+    display: none;
+  }
+}
+
 @media (min-width: 769px) and (max-width: 1100px) {
   .task-list__row [data-col="assignee"],
   .task-list__row [data-col="milestone"],
