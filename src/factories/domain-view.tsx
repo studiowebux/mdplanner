@@ -6,6 +6,7 @@
 
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import { SseListRefresh } from "../views/components/sse-refresh.tsx";
 import { DataTable } from "../components/ui/data-table.tsx";
 import type { ColumnDef } from "../components/ui/data-table.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
@@ -255,17 +256,14 @@ export function createDomainPage<T extends Entity>(
             /*
             SSE background refreshes ride a dedicated hidden element so they do
             NOT flash the shared #global-loading bar (it strobed on every
-            mutation). It inherits hx-get/target/swap/include from <main>;
-            hx-indicator="this" pins the request indicator to this hidden node,
-            i.e. no visible bar. User-initiated swaps (filter/sort/search/
-            pagination, global-filter) still use <main>'s #global-loading.
+            mutation). It carries its OWN hx-get/target/swap/include (htmx 2.x
+            does not inherit the request verb from <main> — only modifier attrs
+            inherit), and hx-indicator="this" pins the request indicator to this
+            hidden node, i.e. no visible bar. User-initiated swaps (filter/sort/
+            search/pagination, global-filter) still use <main>'s #global-loading.
           */
           }
-          <span
-            hidden
-            hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted`}
-            hx-indicator="this"
-          />
+          <SseListRefresh name={cfg.name} ssePrefix={cfg.ssePrefix} />
           <header class="domain-page__header">
             <h1 class="domain-page__title">
               {cfg.plural ?? `${cfg.singular}s`}

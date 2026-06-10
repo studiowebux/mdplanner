@@ -33,3 +33,34 @@ export function SseRefresh(
     />
   );
 }
+
+type SseListRefreshProps = {
+  /** Domain config name — drives the view URL, target id, and toolbar include. */
+  name: string;
+  /** SSE event prefix (e.g. "task") — listens on .created/.updated/.deleted. */
+  ssePrefix: string;
+};
+
+/**
+ * Background SSE refresh for a domain list view. Lives inside <main> (which owns
+ * the sse-connect) but carries its OWN hx-get: htmx 2.x resolves the request
+ * verb via hasAttribute on the element directly, so hx-get is NOT inherited from
+ * <main> — only modifier attrs (target/swap/include) inherit. A span without its
+ * own verb fires the trigger but issues no request, so the list never refreshes.
+ *
+ * `hidden` + `hx-indicator="this"` pin the request indicator to this node so the
+ * background morph never flashes the shared #global-loading bar.
+ */
+export function SseListRefresh({ name, ssePrefix }: SseListRefreshProps) {
+  return (
+    <span
+      hidden
+      hx-get={`/${name}/view`}
+      hx-trigger={`sse:${ssePrefix}.created, sse:${ssePrefix}.updated, sse:${ssePrefix}.deleted`}
+      hx-target={`#${name}-view`}
+      hx-swap="morph:outerHTML"
+      hx-include={`#${name}-toolbar`}
+      hx-indicator="this"
+    />
+  );
+}
