@@ -32,3 +32,15 @@ Deno.test("SseListRefresh — listens on created/updated/deleted for the prefix"
   assertStringIncludes(html, "sse:goal.deleted");
   assertStringIncludes(html, 'hx-get="/goals/view"');
 });
+
+Deno.test("SseListRefresh — debounces SSE triggers to coalesce mutation bursts", () => {
+  const html = renderToString(
+    // deno-lint-ignore no-explicit-any
+    SseListRefresh({ name: "tasks", ssePrefix: "task" }) as any,
+  );
+  // delay:200ms on each trigger collapses a bulk-mutation storm into one
+  // trailing refetch instead of one full /view morph per event.
+  assertStringIncludes(html, "sse:task.created delay:200ms");
+  assertStringIncludes(html, "sse:task.updated delay:200ms");
+  assertStringIncludes(html, "sse:task.deleted delay:200ms");
+});

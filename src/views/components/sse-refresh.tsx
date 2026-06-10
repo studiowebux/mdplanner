@@ -50,13 +50,18 @@ type SseListRefreshProps = {
  *
  * `hidden` + `hx-indicator="this"` pin the request indicator to this node so the
  * background morph never flashes the shared #global-loading bar.
+ *
+ * `delay:200ms` debounces the SSE triggers: a burst of mutations (e.g. a bulk
+ * move/tag/complete that publishes many `<prefix>.updated` events, or several
+ * clients mutating at once) collapses into ONE trailing refetch+morph instead
+ * of one full /view refetch per event — kills the morph storm at 400+ rows.
  */
 export function SseListRefresh({ name, ssePrefix }: SseListRefreshProps) {
   return (
     <span
       hidden
       hx-get={`/${name}/view`}
-      hx-trigger={`sse:${ssePrefix}.created, sse:${ssePrefix}.updated, sse:${ssePrefix}.deleted`}
+      hx-trigger={`sse:${ssePrefix}.created delay:200ms, sse:${ssePrefix}.updated delay:200ms, sse:${ssePrefix}.deleted delay:200ms`}
       hx-target={`#${name}-view`}
       hx-swap="morph:outerHTML"
       hx-include={`#${name}-toolbar`}
