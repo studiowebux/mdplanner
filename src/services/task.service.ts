@@ -92,8 +92,20 @@ export class TaskService {
   // Standalone service (no BaseService) — publish the SSE refresh directly so
   // mutations via REST *or* MCP live-update browsers. Same contract as
   // BaseService.publishChange; prefix = "task".
-  private publishChange(event: "updated" | "deleted" = "updated"): void {
-    publish(`task.${event}`);
+  //
+  // Event taxonomy drives how the list view live-updates (see TaskSseRefresh +
+  // task-sse-row.js):
+  //   - "updated" carries the changed task `id` → the client swaps only that
+  //     row (`#task-row-<id>`). Use ONLY for same-section field edits where the
+  //     row stays put (assignee, comments, time entries, attachments, …).
+  //   - "created" / "moved" / "deleted" carry no id → the client refetches the
+  //     whole #tasks-view (membership/section/order changes that a single-row
+  //     swap cannot relocate correctly).
+  private publishChange(
+    event: "updated" | "created" | "moved" | "deleted" = "updated",
+    id?: string,
+  ): void {
+    publish(`task.${event}`, id !== undefined ? { id } : undefined);
   }
 
   // -------------------------------------------------------------------------
@@ -180,7 +192,7 @@ export class TaskService {
   async create(data: CreateTask): Promise<Task> {
     const created = await this.taskRepo.create(data);
     this.cacheUpsert(created);
-    this.publishChange();
+    this.publishChange("created");
     return created;
   }
 
@@ -216,7 +228,13 @@ export class TaskService {
     const updated = await this.taskRepo.update(id, data);
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      // A section/completion change relocates the row across sections and
+      // shifts section counts → full-view refetch ("moved"). A pure field edit
+      // keeps the row in place → targeted single-row swap ("updated" + id).
+      const membershipChange = data.section !== undefined ||
+        data.completed !== undefined;
+      if (membershipChange) this.publishChange("moved");
+      else this.publishChange("updated", id);
     }
     return updated;
   }
@@ -236,7 +254,8 @@ export class TaskService {
     const ok = await this.taskRepo.archive(id, by);
     if (ok) {
       this.cacheRemove(id);
-      this.publishChange();
+      // Leaves the active view → full refetch.
+      this.publishChange("moved");
     }
     return ok;
   }
@@ -247,7 +266,8 @@ export class TaskService {
     if (ok) {
       const restored = await this.taskRepo.findById(id);
       if (restored) this.cacheUpsert(restored);
-      this.publishChange();
+      // Re-enters the active view → full refetch.
+      this.publishChange("moved");
     }
     return ok;
   }
@@ -287,7 +307,8 @@ export class TaskService {
     });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      // Section → In Progress → full refetch.
+      this.publishChange("moved");
     }
     return updated;
   }
@@ -296,7 +317,7 @@ export class TaskService {
     const updated = await this.taskRepo.moveToSection(id, newSection);
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      this.publishChange("moved");
     }
     return updated;
   }
@@ -323,7 +344,8 @@ export class TaskService {
       }
     }
 
-    if (swept.length > 0) this.publishChange();
+    // Bulk claim-clear across many tasks → full refetch.
+    if (swept.length > 0) this.publishChange("moved");
     return swept;
   }
 
@@ -408,7 +430,7 @@ export class TaskService {
     const updated = await this.taskRepo.update(id, { comments });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      this.publishChange("updated", id);
     }
     return comment;
   }
@@ -429,7 +451,7 @@ export class TaskService {
     const updated = await this.taskRepo.update(id, { time_entries });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      this.publishChange("updated", id);
     }
     return entry;
   }
@@ -445,7 +467,7 @@ export class TaskService {
     const updated = await this.taskRepo.update(id, { time_entries });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      this.publishChange("updated", id);
     }
     return true;
   }
@@ -462,7 +484,7 @@ export class TaskService {
     const updated = await this.taskRepo.update(id, { attachments });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      this.publishChange("updated", id);
     }
     return updated;
   }
@@ -493,7 +515,8 @@ export class TaskService {
     });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      // Section → Pending Review → full refetch.
+      this.publishChange("moved");
     }
     return updated;
   }
@@ -526,7 +549,8 @@ export class TaskService {
     });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      // Section → Done → full refetch.
+      this.publishChange("moved");
     }
     return updated;
   }
@@ -560,7 +584,8 @@ export class TaskService {
     });
     if (updated) {
       this.cacheUpsert(updated);
-      this.publishChange();
+      // Section → In Progress → full refetch.
+      this.publishChange("moved");
     }
     return updated;
   }

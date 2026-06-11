@@ -263,7 +263,9 @@ export function createDomainPage<T extends Entity>(
             search/pagination, global-filter) still use <main>'s #global-loading.
           */
           }
-          <SseListRefresh name={cfg.name} ssePrefix={cfg.ssePrefix} />
+          {cfg.SseRefresh
+            ? <cfg.SseRefresh state={state} />
+            : <SseListRefresh name={cfg.name} ssePrefix={cfg.ssePrefix} />}
           <header class="domain-page__header">
             <h1 class="domain-page__title">
               {cfg.plural ?? `${cfg.singular}s`}

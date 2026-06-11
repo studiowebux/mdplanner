@@ -201,6 +201,51 @@ tasksRouter.get("/more-section", async (c) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /row/:id — single task row for targeted SSE live-update.
+// Registered BEFORE GET /:id so the literal path is not captured as an id.
+// A same-section field edit publishes `task.updated` with the id; the client
+// (task-sse-row.js) fetches this fragment and morph-swaps just `#task-row-<id>`
+// instead of refetching the whole #tasks-view. Renders the IDENTICAL <TaskRow>
+// the list renders (peopleOptions, moveSections, archived, section index).
+// Returns 204 (no swap) when the task is gone or archived — an archive/delete
+// publishes `task.moved`/`task.deleted`, which the full-view refetch handles.
+// ---------------------------------------------------------------------------
+
+tasksRouter.get("/row/:id", async (c) => {
+  const id = c.req.param("id");
+  const task = await getTaskService().getById(id);
+  if (!task || task.archived === true) return c.body(null, 204);
+
+  const state = c.get("filterState" as never) as DomainFilterState;
+  const all = await getTaskService().list();
+  // Recompute the row's position within its section (same sort as the list) so
+  // the `data-order` seed matches what a full render would produce.
+  const sectionTasks = all.filter((t) => t.section === task.section);
+  const sorted = sortTasksInSection(sectionTasks, state.sort, state.order);
+  const index = Math.max(0, sorted.findIndex((t) => t.id === id));
+
+  const people = await getPeopleService().list();
+  const peopleOptions = people
+    .map((p) => ({ value: p.id, label: p.name }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  // Move targets come from the complete pre-filter set so custom sections
+  // outside the current filter/pagination slice stay reachable.
+  const moveSections = getMoveSectionOrder(all);
+
+  return c.html(
+    toHtml(
+      <TaskRow
+        task={task}
+        peopleOptions={peopleOptions}
+        moveSections={moveSections}
+        index={index}
+        archived={state.archived === "true"}
+      />,
+    ),
+  );
+});
+
+// ---------------------------------------------------------------------------
 // GET /:id — detail page
 // ---------------------------------------------------------------------------
 
@@ -221,7 +266,8 @@ tasksRouter.post("/:id/complete", async (c) => {
   // file relocation and completedAt stamp). Two separate updates each ran an
   // O(N) section-dir scan via findFileById — slow with 400+ tasks.
   await svc.update(id, { completed: true, section: "Done" });
-  publish("task.updated");
+  // No route-level publish: the service emits `task.moved` (section change) →
+  // the list does one debounced full-view refetch.
   c.header("HX-Trigger", hxTrigger("success", "Task marked complete"));
   return renderDetailPage(c, id);
 });
@@ -238,7 +284,7 @@ tasksRouter.post("/:id/reopen", async (c) => {
   // Single write: clear completed + move to Todo in one update (symmetric to
   // /complete — avoids the double O(N) findFileById scan).
   await svc.update(id, { completed: false, section: "Todo" });
-  publish("task.updated");
+  // Service emits `task.moved` (section change) → full-view refetch.
   c.header("HX-Trigger", hxTrigger("success", "Task reopened"));
   return renderDetailPage(c, id);
 });
@@ -256,7 +302,7 @@ tasksRouter.post("/:id/move", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   await getTaskService().moveTask(id, section);
-  publish("task.updated");
+  // Service emits `task.moved` (section change) → full-view refetch.
   c.header("HX-Trigger", hxTrigger("success", `Moved to ${section}`));
   return renderDetailPage(c, id);
 });
@@ -273,7 +319,7 @@ tasksRouter.post("/:id/assign", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   await getTaskService().update(id, { assignee });
-  publish("task.updated");
+  // Service emits `task.updated` with the id → targeted single-row swap.
   // assignee is a person ID — resolve to the name for the toast (falls back to
   // the raw value for legacy free-text data).
   const assigneeName = assignee
@@ -302,7 +348,7 @@ tasksRouter.post("/:id/comments", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   await getTaskService().addComment(id, text);
-  publish("task.updated");
+  // Service emits `task.updated` with the id → targeted single-row swap.
   c.header("HX-Trigger", hxTrigger("success", "Comment added"));
   return renderDetailPage(c, id);
 });
@@ -456,7 +502,11 @@ tasksRouter.post("/reorder", async (c) => {
 
   // Clear sort state so a page refresh respects the new drag order.
   await deleteUiStateKeys(c, "tasks", ["sort", "order"]);
-  publish("task.updated");
+  // Force a full-view refetch: a same-section reorder only changes `order`, so
+  // the service emits per-row `task.updated` — but a targeted single-row swap
+  // re-renders rows in place WITHOUT relocating them, so other clients would
+  // not see the new order. `task.moved` makes the list re-fetch and re-sort.
+  publish("task.moved");
   return c.body(null, 204);
 });
 

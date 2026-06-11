@@ -182,7 +182,10 @@ export function registerTaskWorkflowRoutes(tasksRouter: TasksRouter): void {
       // Clear any column sort from UI state so F5 respects drag order.
       await deleteUiStateKeys(c, "tasks", ["sort", "order"]);
 
-      publish("task.updated");
+      // Force a full-view refetch: a same-section reorder only changes `order`,
+      // so per-row `task.updated` swaps re-render rows in place WITHOUT
+      // relocating them — other clients would not see the new order.
+      publish("task.moved");
       return c.json(updated, 200);
     },
   );

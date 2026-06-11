@@ -16,6 +16,56 @@ import {
 import { SectionLoadMore } from "./task-pagination.tsx";
 
 // ---------------------------------------------------------------------------
+// SSE live-refresh wiring (replaces the generic <SseListRefresh> for tasks)
+// ---------------------------------------------------------------------------
+
+/**
+ * Task-list SSE live-refresh. Lets the list update a single row instead of
+ * refetching the whole view on every mutation.
+ *
+ *  - `task.updated` carries the changed task id (a SAME-section field edit). In
+ *    list view it is NOT wired to a full refetch here: a hidden subscriber span
+ *    makes the htmx SSE extension dispatch `htmx:sseMessage`, which
+ *    `task-sse-row.js` handles by morph-swapping only `#task-row-<id>` via
+ *    GET /tasks/row/:id.
+ *  - `task.created` / `task.moved` / `task.deleted` change section membership,
+ *    counts, or order — a single-row swap cannot relocate those — so they drive
+ *    a debounced full `#tasks-view` refetch (same contract as SseListRefresh).
+ *
+ * Board/timeline views have no `#task-row-<id>` nodes, so there `task.updated`
+ * ALSO drives the full refetch (the targeted swap would no-op).
+ *
+ * `delay:200ms` debounces bursts (bulk ops / multiple clients) into one trailing
+ * refetch. `hidden` + `hx-indicator="this"` keep the background refetch off the
+ * shared #global-loading bar.
+ */
+export function TaskSseRefresh({ view }: { view?: string }) {
+  const listMode = !view || view === "list";
+  const fullRefetch = listMode
+    ? "sse:task.created delay:200ms, sse:task.moved delay:200ms, sse:task.deleted delay:200ms"
+    : "sse:task.created delay:200ms, sse:task.updated delay:200ms, sse:task.moved delay:200ms, sse:task.deleted delay:200ms";
+  return (
+    <>
+      <span
+        hidden
+        hx-get="/tasks/view"
+        hx-trigger={fullRefetch}
+        hx-target="#tasks-view"
+        hx-swap="morph:outerHTML"
+        hx-include="#tasks-toolbar"
+        hx-indicator="this"
+      />
+      {
+        /* List-view only: a verb-less subscriber so the htmx SSE extension wires
+          a `task.updated` listener and fires `htmx:sseMessage` for the row swap;
+          no hx-get → no request of its own. */
+      }
+      {listMode && <span hidden hx-trigger="sse:task.updated" />}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Task row
 // ---------------------------------------------------------------------------
 

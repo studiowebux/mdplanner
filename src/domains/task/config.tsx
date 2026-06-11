@@ -13,7 +13,10 @@ import {
 import { createSearchPredicate } from "../../utils/string.ts";
 import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
-import { TaskListView } from "../../views/components/task-list.tsx";
+import {
+  TaskListView,
+  TaskSseRefresh,
+} from "../../views/components/task-list.tsx";
 import { TaskBoardView } from "../../views/components/task-board.tsx";
 import { TaskTimelineView } from "../../views/components/task-timeline.tsx";
 import {
@@ -107,9 +110,13 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   styles: ["/css/views/tasks.css"],
   scripts: [
     "/js/task-list.js",
+    "/js/task-sse-row.js",
     "/js/task-timeline.js",
     "/js/task-timeline-export.js",
   ],
+  // Targeted SSE: swap a single row on `task.updated`; full-view refetch only
+  // on membership/section/order changes. See TaskSseRefresh + task-sse-row.js.
+  SseRefresh: ({ state }) => <TaskSseRefresh view={state.view} />,
   emptyMessage: "No tasks yet. Create one to get started.",
 
   stateKeys: TASK_STATE_KEYS,

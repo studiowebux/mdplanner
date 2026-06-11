@@ -71,6 +71,15 @@ export type DomainConfig<T extends Entity, C, U> = {
   plural?: string;
   path: string;
   ssePrefix: string;
+  /**
+   * Custom SSE live-refresh element rendered inside `<main>` (outside the
+   * swappable view container) in place of the generic `<SseListRefresh>`. Lets
+   * a domain narrow live updates beyond the default whole-view refetch (e.g.
+   * tasks swap a single row on `task.updated`). Receives the current filter
+   * state so it can branch on `state.view`. When omitted the factory renders
+   * the default `<SseListRefresh>`.
+   */
+  SseRefresh?: FC<{ state: DomainFilterState }>;
 
   // Presentation
   styles: string[];

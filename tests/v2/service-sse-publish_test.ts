@@ -24,7 +24,7 @@ async function openBus(): Promise<ReadableStreamDefaultReader<string>> {
   return reader;
 }
 
-Deno.test("service SSE publish — standalone TaskService.create emits task.updated", async () => {
+Deno.test("service SSE publish — standalone TaskService.create emits task.created", async () => {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-sse-task-" });
   initServices(dir, { cache: false });
   const reader = await openBus();
@@ -32,7 +32,9 @@ Deno.test("service SSE publish — standalone TaskService.create emits task.upda
     await getTaskService().create({ title: "Live", section: "Todo" });
     const { value } = await reader.read();
     assert(value, "expected an SSE message after create");
-    assertStringIncludes(value, "event: task.updated");
+    // A new row adds to a section (membership change) → `task.created` drives a
+    // full-view refetch, distinct from the `task.updated` single-row swap path.
+    assertStringIncludes(value, "event: task.created");
   } finally {
     reader.releaseLock();
     await Deno.remove(dir, { recursive: true });
