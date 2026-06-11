@@ -300,7 +300,7 @@ export function createDomainPage<T extends Entity>(
                 hx-get={`/${cfg.name}/view`}
                 hx-trigger="input changed delay:300ms, search"
                 hx-target={`#${cfg.name}-view`}
-                hx-swap="outerHTML"
+                hx-swap="morph:outerHTML"
                 hx-include={`#${cfg.name}-toolbar`}
               />
               {state.sort && (
@@ -310,7 +310,7 @@ export function createDomainPage<T extends Entity>(
                   hx-get={`/${cfg.name}/view?sort=&order=`}
                   hx-include={`#${cfg.name}-toolbar`}
                   hx-target={`#${cfg.name}-view`}
-                  hx-swap="outerHTML"
+                  hx-swap="morph:outerHTML"
                   aria-label="Clear sort"
                   title="Clear sort"
                 >
@@ -327,7 +327,7 @@ export function createDomainPage<T extends Entity>(
                   hx-get={`/${cfg.name}/view`}
                   hx-trigger="change"
                   hx-target={`#${cfg.name}-view`}
-                  hx-swap="outerHTML"
+                  hx-swap="morph:outerHTML"
                   hx-include={`#${cfg.name}-toolbar`}
                 >
                   {cfg.pageSizeOptions.map((n) => (
@@ -385,7 +385,7 @@ export function createDomainPage<T extends Entity>(
                         hx-get={`/${cfg.name}/view`}
                         hx-trigger="change"
                         hx-target={`#${cfg.name}-view`}
-                        hx-swap="outerHTML"
+                        hx-swap="morph:outerHTML"
                         hx-include={`#${cfg.name}-toolbar`}
                       >
                         <option value="">{f.label}</option>
@@ -424,7 +424,7 @@ export function createDomainPage<T extends Entity>(
                         hx-get={`/${cfg.name}/view`}
                         hx-trigger="change"
                         hx-target={`#${cfg.name}-view`}
-                        hx-swap="outerHTML"
+                        hx-swap="morph:outerHTML"
                         hx-include={`#${cfg.name}-toolbar`}
                       />
                       <span class="domain-toolbar__toggle-label">
@@ -443,7 +443,7 @@ export function createDomainPage<T extends Entity>(
                         hx-get={`/${cfg.name}/view`}
                         hx-trigger="change"
                         hx-target={`#${cfg.name}-view`}
-                        hx-swap="outerHTML"
+                        hx-swap="morph:outerHTML"
                         hx-include={`#${cfg.name}-toolbar`}
                       />
                       <span class="domain-toolbar__toggle-label">
@@ -461,7 +461,7 @@ export function createDomainPage<T extends Entity>(
                         hx-get={`/${cfg.name}/view`}
                         hx-trigger="change"
                         hx-target={`#${cfg.name}-view`}
-                        hx-swap="outerHTML"
+                        hx-swap="morph:outerHTML"
                         hx-include={`#${cfg.name}-toolbar`}
                       />
                       <span class="domain-toolbar__toggle-label">

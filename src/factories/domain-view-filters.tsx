@@ -92,7 +92,7 @@ export function DateRangeFilter(
           hx-get={`/${domain}/view`}
           hx-trigger="change"
           hx-target={`#${domain}-view`}
-          hx-swap="outerHTML"
+          hx-swap="morph:outerHTML"
           hx-include={`#${domain}-toolbar`}
         />
       </label>
@@ -106,7 +106,7 @@ export function DateRangeFilter(
           hx-get={`/${domain}/view`}
           hx-trigger="change"
           hx-target={`#${domain}-view`}
-          hx-swap="outerHTML"
+          hx-swap="morph:outerHTML"
           hx-include={`#${domain}-toolbar`}
         />
       </label>
