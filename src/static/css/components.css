@@ -2523,6 +2523,9 @@ div.load-more-sentinel {
 
 .global-loading.htmx-request {
   opacity: 1;
+  /* Only the fade-IN is delayed (the base rule has no delay), so a bar shown
+     for a genuinely slow request still hides immediately when it completes. */
+  transition-delay: var(--loading-bar-delay);
 }
 
 .global-loading::after {

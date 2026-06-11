@@ -67,6 +67,9 @@
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;
   --transition-slow: 0.3s ease;
+  /* Defer the #global-loading bar's fade-in: sub-150ms swaps drop .htmx-request
+     before this elapses, so fast filter/search/sort requests never paint it. */
+  --loading-bar-delay: 150ms;
 
   /* Opacity */
   --opacity-hidden: 0;
