@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
 import { backupRouter } from "./v1/backup/routes.ts";
+import { cerveauApiRouter } from "./v1/cerveau/routes.ts";
 import { brainstormsRouter } from "./v1/brainstorms/routes.ts";
 import { brainstormTemplatesRouter } from "./v1/brainstorm-templates/routes.ts";
 import { briefsRouter } from "./v1/briefs/routes.ts";
@@ -101,6 +102,7 @@ v1.route("/sticky-notes", stickyNotesRouter);
 v1.route("/capacity-plans", capacityPlansRouter);
 v1.route("/analytics", analyticsRouter);
 v1.route("/backup", backupRouter);
+v1.route("/cerveau", cerveauApiRouter);
 
 v1.doc("/doc", {
   openapi: "3.1.0",
