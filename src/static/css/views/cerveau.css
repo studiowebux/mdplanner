@@ -1,0 +1,304 @@
+/* Cerveau viewer — read-only brains/registry/files explorer. Uses shared design
+   tokens only (colours from theme blocks, layout dims from base :root). */
+
+.cerveau {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.cerveau--unconfigured {
+  display: block;
+}
+
+/* -- Sidebar -- */
+
+.cerveau-sidebar {
+  flex: 0 0 var(--cerveau-sidebar-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-lg);
+}
+
+.cerveau-version {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.cerveau-sidebar-section {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  padding: var(--space-sm) var(--space-sm) var(--space-xs);
+}
+
+.cerveau-sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cerveau-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cerveau-sidebar-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.cerveau-sidebar-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cerveau-sidebar-count {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+}
+
+/* -- Detail panel -- */
+
+.cerveau-detail {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cerveau-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cerveau-panel-title {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.cerveau-props {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.cerveau-prop {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+.cerveau-prop-label {
+  flex: 0 0 6rem;
+  color: var(--color-text-secondary);
+}
+
+.cerveau-prop-value {
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.cerveau-card-header {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-top: var(--space-sm);
+}
+
+.cerveau-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--space-sm);
+}
+
+.cerveau-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.cerveau-card-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.cerveau-pkg-versions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.cerveau-pkg-version {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: baseline;
+  font-size: var(--font-size-sm);
+}
+
+.cerveau-pkg-ver {
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text-secondary);
+}
+
+.cerveau-pkg-desc {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.cerveau-pkg-files {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.cerveau-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.cerveau-tag {
+  font-size: var(--font-size-sm);
+  padding: 0 var(--space-xs);
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+}
+
+.cerveau-tag-none {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.cerveau-memory {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  margin: 0;
+}
+
+/* -- File browser -- */
+
+.cerveau-breadcrumb {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.cerveau-filelist {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cerveau-filerow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cerveau-filerow:hover {
+  background: var(--color-bg-hover);
+}
+
+.cerveau-filerow--dir .cerveau-file-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.cerveau-file-icon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.cerveau-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cerveau-file-size {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.cerveau-file-viewer {
+  margin-top: var(--space-sm);
+}
+
+.cerveau-file-content-head {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) 0;
+}
+
+.cerveau-file-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  margin: 0;
+  max-height: 32rem;
+  overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .cerveau {
+    flex-direction: column;
+  }
+
+  .cerveau-sidebar {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
