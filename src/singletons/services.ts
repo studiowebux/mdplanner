@@ -15,6 +15,7 @@ import { IdeaService } from "../services/idea.service.ts";
 import { MarketingPlanService } from "../services/marketing-plan.service.ts";
 import { SwotService } from "../services/swot.service.ts";
 import { GitHubService } from "../services/github.service.ts";
+import { CerveauService } from "../services/cerveau.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import { TaskService } from "../services/task.service.ts";
 import { BaseService } from "../services/base.service.ts";
@@ -366,6 +367,7 @@ export function initServices(
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
+  _set(_svc, "cerveau", new CerveauService(projectService));
 
   if (useCache) {
     cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
@@ -697,6 +699,10 @@ export function getDnsService(): DnsService {
 
 export function getGitHubService(): GitHubService {
   return _get<GitHubService>(_svc, "github");
+}
+
+export function getCerveauService(): CerveauService {
+  return _get<CerveauService>(_svc, "cerveau");
 }
 
 export function getInvestorService(): InvestorService {

@@ -169,6 +169,13 @@ export const ProjectConfigSchema = z.object({
       "userId). When unset, the first person record by name is used.",
     example: "person_1771824811363_phhxpx",
   }),
+  cerveauDir: z.string().optional().openapi({
+    description:
+      "Absolute path to a Cerveau root (containing _configs_/, _packages_/, " +
+      "version.txt). When set, the read-only Cerveau viewer is mounted and its " +
+      "nav entry shown. Unset = feature hidden.",
+    example: "/Users/me/Development/cerveau",
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -232,6 +239,7 @@ export const FrontmatterProjectSchema = z.object({
   billing_default_footer: z.string().optional(),
   api_keys: z.array(z.unknown()).optional(),
   default_user_id: z.string().optional(),
+  cerveau_dir: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
     const githubToken = fm.github_token
@@ -306,6 +314,7 @@ export const FrontmatterProjectSchema = z.object({
         )
         : undefined,
       defaultUserId: fm.default_user_id,
+      cerveauDir: fm.cerveau_dir,
     };
   },
 );

@@ -51,6 +51,7 @@ export class ProjectService {
     if (data.tasksPerSection !== undefined) {
       current.tasksPerSection = data.tasksPerSection;
     }
+    if (data.cerveauDir !== undefined) current.cerveauDir = data.cerveauDir;
     await this.repo.write(current);
     return current;
   }

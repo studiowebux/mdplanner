@@ -103,6 +103,9 @@ export class ProjectRepository {
     if (config.defaultUserId !== undefined) {
       fm.default_user_id = config.defaultUserId || undefined;
     }
+    if (config.cerveauDir !== undefined) {
+      fm.cerveau_dir = config.cerveauDir || undefined;
+    }
     fm.last_updated = new Date().toISOString();
 
     let body = `# ${config.name}`;
