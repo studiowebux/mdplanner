@@ -8,7 +8,6 @@ import { contactConfig } from "../../domains/contact/config.tsx";
 import { getContactService } from "../../singletons/services.ts";
 import { ContactDetailView } from "../contact-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const contactsRouter = createDomainRoutes(contactConfig);
 
@@ -35,6 +34,5 @@ contactsRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getContactService().update(id, { notes });
-  publish("contact.updated");
   return renderDetail(c, id);
 });

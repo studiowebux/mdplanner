@@ -12,7 +12,6 @@ import {
   getProjectService,
 } from "../../singletons/services.ts";
 import { buildTeamPersonById } from "../../domains/portfolio/owners.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import {
   PortfolioDetailView,
   StatusUpdateEditRow,
@@ -399,7 +398,6 @@ portfolioRouter.put("/:id/description", async (c) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getPortfolioService().update(id, { description });
-  publish("portfolio.updated");
   return renderDetail(c, id);
 });
 
@@ -410,7 +408,6 @@ portfolioRouter.post("/:id/restore", async (c) => {
   const id = c.req.param("id");
   const ok = await getPortfolioService().restore(id);
   if (!ok) return c.notFound();
-  publish("portfolio.updated");
   c.header("HX-Trigger", hxTrigger("success", "Portfolio item restored"));
   c.header("HX-Redirect", `/portfolio/${id}`);
   return new Response(null, { status: 204 });
@@ -422,7 +419,6 @@ portfolioRouter.post("/:id/destroy", async (c) => {
   const id = c.req.param("id");
   const ok = await getPortfolioService().hardDelete(id);
   if (!ok) return c.notFound();
-  publish("portfolio.deleted");
   c.header(
     "HX-Trigger",
     hxTrigger("success", "Portfolio item permanently deleted"),
@@ -447,7 +443,6 @@ portfolioRouter.post("/:id/status-updates", async (c) => {
   if (!message) return new Response(null, { status: 400 });
   const update = await getPortfolioService().addStatusUpdate(id, message);
   if (!update) return c.notFound();
-  publish("portfolio.updated");
   return c.html(<StatusUpdateRow u={update} itemId={id} />, 200, {
     "HX-Trigger": hxTrigger("success", "Status update added"),
   });
@@ -474,7 +469,6 @@ portfolioRouter.post("/:id/status-updates/:updateId", async (c) => {
     message,
   );
   if (!update) return c.notFound();
-  publish("portfolio.updated");
   return c.html(<StatusUpdateRow u={update} itemId={id} />, 200, {
     "HX-Trigger": hxTrigger("success", "Status update saved"),
   });
@@ -513,7 +507,6 @@ portfolioRouter.delete("/:id/status-updates/:updateId", async (c) => {
     );
   }
   await getPortfolioService().deleteStatusUpdate(id, updateId);
-  publish("portfolio.updated");
   return new Response(null, {
     status: 200,
     headers: {

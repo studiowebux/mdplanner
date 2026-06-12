@@ -425,7 +425,6 @@ tasksRouter.post("/:id/github/link-issue", async (c) => {
   if (githubRepo) updates.githubRepo = githubRepo;
   if (Object.keys(updates).length > 0) {
     await getTaskService().update(id, updates);
-    publish("task.updated");
   }
   return renderGitHubFragment(c, id);
 });
@@ -442,7 +441,6 @@ tasksRouter.post("/:id/github/link-pr", async (c) => {
   if (githubRepo) updates.githubRepo = githubRepo;
   if (Object.keys(updates).length > 0) {
     await getTaskService().update(id, updates);
-    publish("task.updated");
   }
   return renderGitHubFragment(c, id);
 });
@@ -452,7 +450,6 @@ tasksRouter.post("/:id/github/unlink-issue", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   await getTaskService().update(id, { githubIssue: undefined });
-  publish("task.updated");
   return renderGitHubFragment(c, id);
 });
 
@@ -461,7 +458,6 @@ tasksRouter.post("/:id/github/unlink-pr", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   await getTaskService().update(id, { githubPR: undefined });
-  publish("task.updated");
   return renderGitHubFragment(c, id);
 });
 
@@ -518,16 +514,14 @@ tasksRouter.post("/batch-delete", async (c) => {
   const body = await c.req.parseBody({ all: true });
   const ids = parseTaskIds(body["taskId"]);
 
-  let archived = 0;
   for (const id of ids) {
     const task = await getTaskService().getById(id);
     if (!task || task.archived === true) continue;
-    if (await getTaskService().delete(id)) archived++;
+    await getTaskService().delete(id);
   }
 
-  if (archived > 0) publish("task.deleted");
-  // No HX-Refresh full reload: the debounced SseListRefresh morphs #tasks-view
-  // and the afterSettle handler clears the bulk selection.
+  // Each delete publishes `task.deleted` (service) → debounced full-view
+  // refetch; the afterSettle handler clears the bulk selection.
   return c.body(null, 204);
 });
 
@@ -549,7 +543,6 @@ tasksRouter.post("/batch-move", async (c) => {
     }
     if (updates.length > 0) {
       await svc.batchUpdate(updates);
-      publish("task.updated");
     }
   }
 
@@ -580,7 +573,6 @@ tasksRouter.post("/batch-complete", async (c) => {
     }
     if (updates.length > 0) {
       await svc.batchUpdate(updates);
-      publish("task.updated");
     }
   }
 
@@ -614,7 +606,6 @@ tasksRouter.post("/batch-tag", async (c) => {
     }
     if (updates.length > 0) {
       await svc.batchUpdate(updates);
-      publish("task.updated");
     }
   }
 
@@ -644,7 +635,6 @@ tasksRouter.post("/:id/time-entries", async (c) => {
     description: String(body.description ?? "").trim() || undefined,
   });
   if (!entry) return c.notFound();
-  publish("task.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/tasks/${id}` },
@@ -658,7 +648,6 @@ tasksRouter.delete("/:id/time-entries/:entryId", async (c) => {
   const guard = await requireLiveTask(c, id);
   if ("response" in guard) return guard.response;
   await getTaskService().deleteTimeEntry(id, entryId);
-  publish("task.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/tasks/${id}` },
@@ -721,7 +710,6 @@ tasksRouter.post("/:id/upload", async (c) => {
   await Deno.writeFile(`${uploadsDir}/${safeName}`, bytes);
   const relPath = `uploads/${id}/${safeName}`;
   await getTaskService().addAttachments(id, [relPath]);
-  publish("task.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/tasks/${id}` },
@@ -746,7 +734,6 @@ tasksRouter.delete("/:id/upload/:filename", async (c) => {
     const remaining = (task.attachments ?? []).filter((a) => a !== relPath);
     await getTaskService().update(id, { attachments: remaining });
   }
-  publish("task.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/tasks/${id}` },

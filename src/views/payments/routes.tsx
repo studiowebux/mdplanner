@@ -6,7 +6,6 @@ import { paymentConfig } from "../../domains/payment/config.tsx";
 import { getPaymentService } from "../../singletons/services.ts";
 import { PaymentDetailView } from "../payment-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const paymentsRouter = createDomainRoutes(paymentConfig);
 
@@ -32,6 +31,5 @@ paymentsRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getPaymentService().update(id, { notes });
-  publish("payment.updated");
   return renderDetail(c, id);
 });

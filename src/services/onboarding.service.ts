@@ -85,7 +85,7 @@ export class OnboardingService extends BaseService<
         }
         : s
     );
-    return this.repo.update(id, { steps });
+    return this.update(id, { steps });
   }
 
   /**
@@ -101,6 +101,6 @@ export class OnboardingService extends BaseService<
     if (!item) return null;
     if (!item.steps.some((s) => s.id === stepId)) return null;
     const steps = item.steps.map((s) => s.id === stepId ? { ...s, title } : s);
-    return this.repo.update(id, { steps });
+    return this.update(id, { steps });
   }
 }

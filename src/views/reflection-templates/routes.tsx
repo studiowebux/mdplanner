@@ -6,7 +6,6 @@ import { reflectionTemplateConfig } from "../../domains/reflection-template/conf
 import { getReflectionTemplateService } from "../../singletons/services.ts";
 import { ReflectionTemplateDetailView } from "../reflection-template-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const reflectionTemplatesRouter = createDomainRoutes(
   reflectionTemplateConfig,
@@ -37,6 +36,5 @@ reflectionTemplatesRouter.put("/:id/description", async (c) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getReflectionTemplateService().update(id, { description });
-  publish("rtemplate.updated");
   return renderDetail(c, id);
 });

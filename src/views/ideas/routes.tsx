@@ -9,7 +9,6 @@ import { getIdeaService, getPeopleService } from "../../singletons/services.ts";
 import { IdeaDetailView } from "../idea-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { resolvePersonByName } from "../../utils/person-name-match.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const ideasRouter = createDomainRoutes(ideaConfig);
 
@@ -71,6 +70,5 @@ ideasRouter.put("/:id/description", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getIdeaService().update(id, { description });
-  publish("idea.updated");
   return renderDetail(c, id);
 });

@@ -8,7 +8,6 @@ import { dealConfig } from "../../domains/deal/config.tsx";
 import { getDealService } from "../../singletons/services.ts";
 import { DealDetailView } from "../deal-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { DEAL_STAGES } from "../../types/deal.types.ts";
 
@@ -41,7 +40,6 @@ dealsRouter.post("/:id/stage", async (c) => {
     stage: stage as typeof DEAL_STAGES[number],
   });
   if (!deal) return c.notFound();
-  publish("deal.updated");
   return new Response(null, {
     status: 204,
     headers: {
@@ -65,6 +63,5 @@ dealsRouter.put("/:id/description", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getDealService().update(id, { description });
-  publish("deal.updated");
   return renderDetail(c, id);
 });

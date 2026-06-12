@@ -10,7 +10,6 @@ import { getBusinessModelService } from "../../singletons/services.ts";
 import { BusinessModelDetailView } from "../business-model-detail.tsx";
 import { BUSINESS_MODEL_SECTION_KEYS } from "../../types/business-model.types.ts";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const businessModelRouter = createDomainRoutes(businessModelConfig);
 
@@ -21,7 +20,6 @@ businessModelRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getBusinessModelService().update(id, { notes });
-  publish("business-model.updated");
   const item = await getBusinessModelService().getById(id);
   if (!item) return c.notFound();
   const editing = c.req.query("editing") === "true";

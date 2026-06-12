@@ -4,7 +4,6 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { eisenhowerConfig } from "../../domains/eisenhower/config.tsx";
 import { getEisenhowerService } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { EisenhowerDetailView } from "../eisenhower-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import {
@@ -42,7 +41,6 @@ eisenhowerRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getEisenhowerService().update(id, { notes });
-  publish("eisenhower.updated");
   return renderDetail(c, id);
 });
 
@@ -61,7 +59,6 @@ eisenhowerRouter.post("/:id/:quadrant", async (c) => {
 
   const items = [...item[quadrant as EisenhowerQuadrantKey], text];
   await getEisenhowerService().update(id, { [quadrant]: items });
-  publish("eisenhower.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item added" } }),
@@ -86,7 +83,6 @@ eisenhowerRouter.put("/:id/:quadrant/:index", async (c) => {
   if (index >= 0 && index < items.length && text) {
     items[index] = text;
     await getEisenhowerService().update(id, { [quadrant]: items });
-    publish("eisenhower.updated");
   }
   c.header(
     "HX-Trigger",
@@ -111,7 +107,6 @@ eisenhowerRouter.delete("/:id/:quadrant/:index", async (c) => {
   if (index >= 0 && index < items.length) {
     items.splice(index, 1);
     await getEisenhowerService().update(id, { [quadrant]: items });
-    publish("eisenhower.updated");
   }
   c.header(
     "HX-Trigger",

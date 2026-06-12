@@ -8,7 +8,6 @@ import { companyConfig } from "../../domains/company/config.tsx";
 import { getCompanyService } from "../../singletons/services.ts";
 import { CompanyDetailView } from "../company-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const companiesRouter = createDomainRoutes(companyConfig);
 
@@ -35,6 +34,5 @@ companiesRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getCompanyService().update(id, { notes });
-  publish("company.updated");
   return renderDetail(c, id);
 });

@@ -6,7 +6,6 @@ import { investorConfig } from "../../domains/investor/config.tsx";
 import { getInvestorService } from "../../singletons/services.ts";
 import { InvestorDetailView } from "../investor-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const investorRouter = createDomainRoutes(investorConfig);
 
@@ -35,6 +34,5 @@ investorRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getInvestorService().update(id, { notes });
-  publish("investor.updated");
   return renderDetail(c, id);
 });

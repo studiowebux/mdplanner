@@ -100,7 +100,7 @@ export class HabitService extends BaseService<
         ...habit.completedDates,
         { date, userId: scope.userId },
       ].sort((a, b) => a.date.localeCompare(b.date));
-      await this.habitRepo.update(id, {
+      await this.update(id, {
         completedDates: habit.completedDates,
       });
     }
@@ -117,7 +117,7 @@ export class HabitService extends BaseService<
     habit.completedDates = habit.completedDates.filter((e) =>
       !(e.date === date && this.ownedBy(e, scope))
     );
-    await this.habitRepo.update(id, { completedDates: habit.completedDates });
+    await this.update(id, { completedDates: habit.completedDates });
     return this.getForUser(id, scope);
   }
 
@@ -143,7 +143,7 @@ export class HabitService extends BaseService<
         a.date.localeCompare(b.date)
       );
     }
-    await this.habitRepo.update(id, { completedDates: habit.completedDates });
+    await this.update(id, { completedDates: habit.completedDates });
     return this.getForUser(id, scope);
   }
 
@@ -167,7 +167,7 @@ export class HabitService extends BaseService<
         a.date.localeCompare(b.date)
       );
     }
-    await this.habitRepo.update(id, { completedDates: habit.completedDates });
+    await this.update(id, { completedDates: habit.completedDates });
     return this.getForUser(id, scope);
   }
 
@@ -181,7 +181,7 @@ export class HabitService extends BaseService<
     habit.completedDates = habit.completedDates.filter((e) =>
       !(e.date === date && this.ownedBy(e, scope))
     );
-    await this.habitRepo.update(id, { completedDates: habit.completedDates });
+    await this.update(id, { completedDates: habit.completedDates });
     return this.getForUser(id, scope);
   }
 }

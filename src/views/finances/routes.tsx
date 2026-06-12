@@ -8,7 +8,6 @@ import { financeConfig } from "../../domains/finance/config.tsx";
 import { getFinanceService } from "../../singletons/services.ts";
 import { FinanceDetailView } from "../finance-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const financesRouter = createDomainRoutes(financeConfig);
 
@@ -35,6 +34,5 @@ financesRouter.put("/:id/description", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getFinanceService().update(id, { description });
-  publish("finance.updated");
   return renderDetail(c, id);
 });

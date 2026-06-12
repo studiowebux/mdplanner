@@ -6,7 +6,6 @@ import { onboardingTemplateConfig } from "../../domains/onboarding-template/conf
 import { getOnboardingTemplateService } from "../../singletons/services.ts";
 import { OnboardingTemplateDetailView } from "../onboarding-template-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const onboardingTemplatesRouter = createDomainRoutes(
   onboardingTemplateConfig,
@@ -37,6 +36,5 @@ onboardingTemplatesRouter.put("/:id/description", async (c) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getOnboardingTemplateService().update(id, { description });
-  publish("onboarding-template.updated");
   return renderDetail(c, id);
 });

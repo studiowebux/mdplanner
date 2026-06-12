@@ -10,7 +10,6 @@ import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { markdownToHtml } from "../../utils/markdown.ts";
 import { escapeHtml } from "../../utils/html.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const notesRouter = createDomainRoutes(noteConfig);
 
@@ -27,7 +26,6 @@ notesRouter.put("/:id", async (c) => {
   >();
   const note = await getNoteService().update(id, body as never);
   if (!note) return c.notFound();
-  publish("note.updated");
   return new Response(null, { status: 204 });
 });
 
@@ -77,7 +75,6 @@ notesRouter.post("/:id/restore", async (c) => {
   const id = c.req.param("id");
   const ok = await getNoteService().restore(id);
   if (!ok) return c.notFound();
-  publish("note.updated");
   c.header("HX-Trigger", hxTrigger("success", "Note restored"));
   c.header("HX-Redirect", `/notes/${id}`);
   return new Response(null, { status: 204 });
@@ -88,7 +85,6 @@ notesRouter.post("/:id/destroy", async (c) => {
   const id = c.req.param("id");
   const ok = await getNoteService().hardDelete(id);
   if (!ok) return c.notFound();
-  publish("note.deleted");
   c.header("HX-Trigger", hxTrigger("success", "Note permanently deleted"));
   c.header("HX-Redirect", `/notes`);
   return new Response(null, { status: 204 });

@@ -12,7 +12,6 @@ import { HabitStats } from "./components/habit-stats.tsx";
 import { HabitCompletionLog } from "./components/habit-completion-log.tsx";
 import { HabitCard } from "../components/habit-card.tsx";
 import type { Habit } from "../../types/habit.types.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { resolveUserScope } from "../../utils/actor.ts";
 
 export const habitRouter = createDomainRoutes(habitConfig);
@@ -71,7 +70,6 @@ habitRouter.put("/:id/description", async (c) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getHabitService().update(id, { description });
-  publish("habit.updated");
   return renderDetail(c, id);
 });
 
@@ -81,7 +79,6 @@ habitRouter.delete("/:id/completion/:date", async (c) => {
   const scope = await resolveUserScope(c);
   const habit = await getHabitService().deleteCompletion(id, date, scope);
   if (!habit) return c.notFound();
-  publish("habit.updated");
   return c.html(habitFragment(habit), 200);
 });
 
@@ -95,6 +92,5 @@ habitRouter.post("/:id/toggle-date/:date", async (c) => {
   const scope = await resolveUserScope(c);
   const habit = await getHabitService().toggleDate(id, date, scope, note);
   if (!habit) return c.notFound();
-  publish("habit.updated");
   return c.html(habitFragment(habit), 200);
 });

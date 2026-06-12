@@ -9,7 +9,6 @@ import { getSwotService } from "../../singletons/services.ts";
 import { SwotDetailView } from "../swot-detail.tsx";
 import { SWOT_QUADRANTS } from "../../domains/swot/constants.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const swotRouter = createDomainRoutes(swotConfig);
 
@@ -35,7 +34,6 @@ swotRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getSwotService().update(id, { notes });
-  publish("swot.updated");
   return renderDetail(c, id);
 });
 

@@ -8,7 +8,6 @@ import { brainstormTemplateConfig } from "../../domains/brainstorm-template/conf
 import { getBrainstormTemplateService } from "../../singletons/services.ts";
 import { BrainstormTemplateDetailView } from "../brainstorm-template-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const brainstormTemplatesRouter = createDomainRoutes(
   brainstormTemplateConfig,
@@ -39,6 +38,5 @@ brainstormTemplatesRouter.put("/:id/description", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getBrainstormTemplateService().update(id, { description });
-  publish("btemplate.updated");
   return renderDetail(c, id);
 });

@@ -12,7 +12,6 @@ import {
 } from "../../singletons/services.ts";
 import { BrainstormDetailView } from "../brainstorm-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const brainstormsRouter = createDomainRoutes(brainstormConfig);
 
@@ -84,6 +83,5 @@ brainstormsRouter.put("/:id/qa/:index", async (c: AppContext) => {
   }
 
   await getBrainstormService().update(id, { questions });
-  publish("brainstorm.updated");
   return renderDetail(c, id);
 });

@@ -14,7 +14,6 @@ import {
 } from "../../singletons/services.ts";
 import { GoalDetailView } from "../goal-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const goalsRouter = createDomainRoutes(goalConfig);
 
@@ -84,7 +83,6 @@ goalsRouter.put("/:id/description", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getGoalService().update(id, { description });
-  publish("goal.updated");
   return renderDetail(c, id);
 });
 
@@ -93,6 +91,5 @@ goalsRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getGoalService().update(id, { notes });
-  publish("goal.updated");
   return renderDetail(c, id);
 });

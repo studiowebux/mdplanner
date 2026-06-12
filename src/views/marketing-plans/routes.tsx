@@ -13,7 +13,6 @@ import {
 } from "../../singletons/services.ts";
 import { MarketingPlanDetailView } from "../marketing-plan-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import type { Goal } from "../../types/goal.types.ts";
 
 export const marketingPlansRouter = createDomainRoutes(marketingPlanConfig);
@@ -63,7 +62,6 @@ marketingPlansRouter.put("/:id/description", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getMarketingPlanService().update(id, { description });
-  publish("marketing-plan.updated");
   return renderDetail(c, id);
 });
 
@@ -73,6 +71,5 @@ marketingPlansRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getMarketingPlanService().update(id, { notes });
-  publish("marketing-plan.updated");
   return renderDetail(c, id);
 });

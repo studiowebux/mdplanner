@@ -8,7 +8,6 @@ import { RiskDetailView } from "../risk-detail.tsx";
 import { RiskPreview } from "../components/risk-preview.tsx";
 import { Sidenav } from "../../components/ui/sidenav.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const riskRouter = createDomainRoutes(riskConfig);
 
@@ -45,7 +44,6 @@ riskRouter.put("/:id/description", async (c) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getRiskService().update(id, { description });
-  publish("risk.updated");
   return renderDetail(c, id);
 });
 
@@ -55,6 +53,5 @@ riskRouter.put("/:id/mitigation", async (c) => {
   const body = await c.req.parseBody();
   const mitigation = String(body.mitigation ?? "").trim() || undefined;
   await getRiskService().update(id, { mitigation });
-  publish("risk.updated");
   return renderDetail(c, id);
 });

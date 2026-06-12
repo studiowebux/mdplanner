@@ -38,7 +38,6 @@ dnsRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getDnsService().update(id, { notes });
-  publish("dns.updated");
   return renderDetail(c, id);
 });
 
@@ -114,7 +113,6 @@ dnsRouter.post("/:id/records", async (c) => {
     proxied: body.proxied === "true",
   });
   if (!domain) return c.notFound();
-  publish("dns.updated");
   return c.html(<DnsRecordsTable domain={domain} />, 200, {
     "HX-Trigger": hxTrigger("success", "Record added"),
   });
@@ -133,7 +131,6 @@ dnsRouter.post("/:id/records/:index", async (c) => {
   if (body.proxied !== undefined) fields.proxied = body.proxied === "true";
   const domain = await getDnsService().updateRecord(id, index, fields);
   if (!domain) return c.notFound();
-  publish("dns.updated");
   return c.html(<DnsRecordsTable domain={domain} />, 200, {
     "HX-Trigger": hxTrigger("success", "Record updated"),
   });
@@ -145,7 +142,6 @@ dnsRouter.delete("/:id/records/:index", async (c) => {
   const index = Number(c.req.param("index"));
   const domain = await getDnsService().deleteRecord(id, index);
   if (!domain) return c.notFound();
-  publish("dns.updated");
   return c.html(<DnsRecordsTable domain={domain} />, 200, {
     "HX-Trigger": hxTrigger("success", "Record deleted"),
   });

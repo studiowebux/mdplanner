@@ -4,7 +4,6 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { fishboneConfig } from "../../domains/fishbone/config.tsx";
 import { getFishboneService } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { FishboneDetailView } from "../fishbone-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import type { FishboneCause } from "../../types/fishbone.types.ts";
@@ -58,7 +57,6 @@ fishboneRouter.post("/:id/category", async (c) => {
   const causes = cloneCauses(item.causes);
   causes.push({ section: text, items: [] });
   await getFishboneService().update(id, { causes });
-  publish("fishbone.updated");
   toast(c, "Category added");
   return renderDetail(c, id);
 });
@@ -79,7 +77,6 @@ fishboneRouter.put("/:id/category/:cidx", async (c) => {
   if (cidx >= 0 && cidx < causes.length && text) {
     causes[cidx].section = text;
     await getFishboneService().update(id, { causes });
-    publish("fishbone.updated");
   }
   toast(c, "Category renamed");
   return renderDetail(c, id);
@@ -98,7 +95,6 @@ fishboneRouter.delete("/:id/category/:cidx", async (c) => {
   if (cidx >= 0 && cidx < causes.length) {
     causes.splice(cidx, 1);
     await getFishboneService().update(id, { causes });
-    publish("fishbone.updated");
   }
   toast(c, "Category removed");
   return renderDetail(c, id);
@@ -121,7 +117,6 @@ fishboneRouter.post("/:id/category/:cidx/item", async (c) => {
   if (cidx >= 0 && cidx < causes.length) {
     causes[cidx].items.push(text);
     await getFishboneService().update(id, { causes });
-    publish("fishbone.updated");
   }
   toast(c, "Cause added");
   return renderDetail(c, id);
@@ -147,7 +142,6 @@ fishboneRouter.put("/:id/category/:cidx/item/:iidx", async (c) => {
   ) {
     causes[cidx].items[iidx] = text;
     await getFishboneService().update(id, { causes });
-    publish("fishbone.updated");
   }
   toast(c, "Cause updated");
   return renderDetail(c, id);
@@ -170,7 +164,6 @@ fishboneRouter.delete("/:id/category/:cidx/item/:iidx", async (c) => {
   ) {
     causes[cidx].items.splice(iidx, 1);
     await getFishboneService().update(id, { causes });
-    publish("fishbone.updated");
   }
   toast(c, "Cause removed");
   return renderDetail(c, id);

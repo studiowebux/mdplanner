@@ -45,7 +45,7 @@ export class MeetingService extends BaseService<
       due: data.due,
       status: "open",
     };
-    return this.repo.update(id, {
+    return this.update(id, {
       actions: [...meeting.actions, action],
     });
   }
@@ -65,7 +65,7 @@ export class MeetingService extends BaseService<
         }
         : a
     );
-    return this.repo.update(id, { actions });
+    return this.update(id, { actions });
   }
 
   async deleteAction(
@@ -75,7 +75,7 @@ export class MeetingService extends BaseService<
     const meeting = await this.repo.findById(id);
     if (!meeting) return null;
     const actions = meeting.actions.filter((a) => a.id !== actionId);
-    return this.repo.update(id, { actions });
+    return this.update(id, { actions });
   }
 
   // -------------------------------------------------------------------------
@@ -122,8 +122,8 @@ export class MeetingService extends BaseService<
     const aRelated = [...new Set([...(a.relatedMeetings ?? []), idB])];
     const bRelated = [...new Set([...(b.relatedMeetings ?? []), idA])];
     const [updatedA, updatedB] = await Promise.all([
-      this.repo.update(idA, { relatedMeetings: aRelated }),
-      this.repo.update(idB, { relatedMeetings: bRelated }),
+      this.update(idA, { relatedMeetings: aRelated }),
+      this.update(idB, { relatedMeetings: bRelated }),
     ]);
     if (!updatedA || !updatedB) return null;
     return { a: updatedA, b: updatedB };
@@ -141,8 +141,8 @@ export class MeetingService extends BaseService<
     const aRelated = (a.relatedMeetings ?? []).filter((id) => id !== idB);
     const bRelated = (b.relatedMeetings ?? []).filter((id) => id !== idA);
     const [updatedA, updatedB] = await Promise.all([
-      this.repo.update(idA, { relatedMeetings: aRelated }),
-      this.repo.update(idB, { relatedMeetings: bRelated }),
+      this.update(idA, { relatedMeetings: aRelated }),
+      this.update(idB, { relatedMeetings: bRelated }),
     ]);
     if (!updatedA || !updatedB) return null;
     return { a: updatedA, b: updatedB };

@@ -12,7 +12,6 @@ import {
 } from "../../singletons/services.ts";
 import { OnboardingDetailView } from "../onboarding-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { ArrayTableRow } from "../../components/ui/form-builder.tsx";
 import { getArrayTableSection } from "../../components/ui/array-table-registry.ts";
 
@@ -78,7 +77,6 @@ onboardingRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getOnboardingService().update(id, { notes });
-  publish("onboarding.updated");
   return renderDetail(c, id);
 });
 
@@ -88,7 +86,6 @@ onboardingRouter.post("/:id/steps/:stepId/toggle", async (c: AppContext) => {
   const stepId = c.req.param("stepId")!;
   const updated = await getOnboardingService().toggleStep(id, stepId);
   if (!updated) return c.notFound();
-  publish("onboarding.updated");
   return renderDetail(c, id);
 });
 
@@ -105,6 +102,5 @@ onboardingRouter.post("/:id/steps/:stepId/title", async (c: AppContext) => {
     title,
   );
   if (!updated) return c.notFound();
-  publish("onboarding.updated");
   return renderDetail(c, id);
 });

@@ -11,7 +11,6 @@ import {
 import { InvoiceDetailView } from "../invoice-detail.tsx";
 import { InvoicePrintView } from "../invoice-print.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const invoicesRouter = createDomainRoutes(invoiceConfig);
@@ -63,7 +62,6 @@ invoicesRouter.post("/:id/send", async (c) => {
     }
   }
   await service.update(id, updates);
-  publish("invoice.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/invoices/${id}` },
@@ -78,7 +76,6 @@ invoicesRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getInvoiceService().update(id, { notes });
-  publish("invoice.updated");
   return renderDetail(c, id);
 });
 
@@ -88,7 +85,6 @@ invoicesRouter.put("/:id/footer", async (c) => {
   const body = await c.req.parseBody();
   const footer = String(body.footer ?? "").trim() || undefined;
   await getInvoiceService().update(id, { footer });
-  publish("invoice.updated");
   return renderDetail(c, id);
 });
 

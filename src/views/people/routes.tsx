@@ -15,7 +15,6 @@ import type { SearchResult } from "../../types/search.types.ts";
 import { PersonDetailView } from "../person-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { resolvePersonByName } from "../../utils/person-name-match.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const peopleRouter = createDomainRoutes(peopleConfig);
@@ -165,7 +164,6 @@ peopleRouter.post("/:id/reports-to", async (c) => {
   const reportsTo = String(body.reportsTo ?? "");
   const person = await getPeopleService().update(id, { reportsTo });
   if (!person) return c.notFound();
-  publish("person.updated");
   c.header(
     "HX-Trigger",
     hxTrigger(

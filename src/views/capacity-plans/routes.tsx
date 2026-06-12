@@ -9,7 +9,6 @@ import {
   getPortfolioService,
   getTaskService,
 } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import type { Task } from "../../types/task.types.ts";
 import { CapacityPlanDetailView } from "../capacity-plan-detail.tsx";
 import { AllocationForm, MemberForm } from "../capacity-plan-detail.tsx";
@@ -256,7 +255,6 @@ capacityPlansViewRouter.delete("/:id/members/:memberId", async (c) => {
   const id = c.req.param("id");
   const memberId = c.req.param("memberId");
   await getCapacityPlanService().removeMember(id, memberId);
-  publish("capacity-plan.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/capacity-plans/${id}` },
@@ -276,7 +274,6 @@ capacityPlansViewRouter.post("/:id/members", async (c) => {
     workingDays: workingDays.length > 0 ? workingDays : undefined,
   });
   if (!plan) return c.notFound();
-  publish("capacity-plan.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Trigger": hxTrigger("success", "Member added") },
@@ -371,7 +368,6 @@ capacityPlansViewRouter.delete("/:id/allocations/:allocId", async (c) => {
   const id = c.req.param("id");
   const allocId = c.req.param("allocId");
   await getCapacityPlanService().removeAllocation(id, allocId);
-  publish("capacity-plan.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/capacity-plans/${id}` },
@@ -401,7 +397,6 @@ capacityPlansViewRouter.post("/:id/allocations", async (c) => {
     notes: body.notes ? String(body.notes) : undefined,
   });
   if (!plan) return c.notFound();
-  publish("capacity-plan.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Trigger": hxTrigger("success", "Allocation added") },
@@ -432,7 +427,6 @@ capacityPlansViewRouter.post("/:id/allocations/:allocId", async (c) => {
     notes: body.notes ? String(body.notes) : undefined,
   });
   if (!plan) return c.notFound();
-  publish("capacity-plan.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Trigger": hxTrigger("success", "Allocation updated") },

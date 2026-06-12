@@ -9,7 +9,6 @@ import {
 } from "../../singletons/services.ts";
 import { MilestoneDetailView } from "../milestone-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const milestonesRouter = createDomainRoutes(milestoneConfig);
 
@@ -44,6 +43,5 @@ milestonesRouter.put("/:id/description", async (c) => {
   const body = await c.req.parseBody();
   const description = String(body.description ?? "").trim() || undefined;
   await getMilestoneService().update(id, { description });
-  publish("milestone.updated");
   return renderDetail(c, id);
 });

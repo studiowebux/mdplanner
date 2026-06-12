@@ -4,7 +4,6 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { strategicLevelsConfig } from "../../domains/strategic-levels/config.tsx";
 import { getStrategicLevelsService } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { StrategicLevelsDetailView } from "../strategic-levels-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import type { StrategicLevelType } from "../../types/strategic-levels.types.ts";
@@ -64,7 +63,6 @@ strategicLevelsRouter.post("/:id/levels/:levelType", async (c) => {
     },
   ];
   await getStrategicLevelsService().update(id, { levels: updated });
-  publish("strategic-levels.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item added" } }),
@@ -91,7 +89,6 @@ strategicLevelsRouter.put("/:id/levels/:levelId", async (c) => {
     return { ...l, title: title || l.title };
   });
   await getStrategicLevelsService().update(id, { levels });
-  publish("strategic-levels.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item updated" } }),
@@ -112,7 +109,6 @@ strategicLevelsRouter.delete("/:id/levels/:levelId", async (c) => {
 
   const levels = builder.levels.filter((l) => l.id !== levelId);
   await getStrategicLevelsService().update(id, { levels });
-  publish("strategic-levels.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({

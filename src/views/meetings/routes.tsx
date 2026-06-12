@@ -18,7 +18,6 @@ import {
   renderRelatedSection,
 } from "../meeting-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { toHtml } from "../../utils/html.ts";
 import type { AppContext, AppVariables } from "../../types/app.ts";
@@ -66,7 +65,6 @@ domainRouter.put("/:id/agenda", async (c) => {
   const body = await c.req.parseBody();
   const agenda = String(body.agenda ?? "").trim() || undefined;
   await getMeetingService().update(id, { agenda });
-  publish("meeting.updated");
   return renderDetail(c, id);
 });
 
@@ -76,7 +74,6 @@ domainRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getMeetingService().update(id, { notes });
-  publish("meeting.updated");
   return renderDetail(c, id);
 });
 
@@ -97,7 +94,6 @@ domainRouter.post("/:id/actions", async (c) => {
     due: String(body.due ?? "").trim() || undefined,
   });
   if (!meeting) return c.notFound();
-  publish("meeting.updated");
   const personById = await buildActionPersonById(meeting.actions);
   return new Response(renderActionsTable(meeting, personById), {
     status: 200,
@@ -118,7 +114,6 @@ domainRouter.post("/:id/links", async (c) => {
   }
   const result = await getMeetingService().linkMeetings(id, linkedId);
   if (!result) return c.notFound();
-  publish("meeting.updated");
   const relatedItems = await resolveLinkedItems(
     result.a.relatedMeetings,
     (rid) => getMeetingService().getById(rid),
@@ -135,7 +130,6 @@ domainRouter.put("/:id/actions/:actionId/toggle", async (c) => {
   const actionId = c.req.param("actionId");
   const meeting = await getMeetingService().toggleAction(id, actionId);
   if (!meeting) return c.notFound();
-  publish("meeting.updated");
   const personById = await buildActionPersonById(meeting.actions);
   return new Response(renderActionsTable(meeting, personById), {
     status: 200,
@@ -149,7 +143,6 @@ domainRouter.delete("/:id/actions/:actionId", async (c) => {
   const actionId = c.req.param("actionId");
   const meeting = await getMeetingService().deleteAction(id, actionId);
   if (!meeting) return c.notFound();
-  publish("meeting.updated");
   const personById = await buildActionPersonById(meeting.actions);
   return new Response(renderActionsTable(meeting, personById), {
     status: 200,
@@ -163,7 +156,6 @@ domainRouter.delete("/:id/links/:linkedId", async (c) => {
   const linkedId = c.req.param("linkedId");
   const result = await getMeetingService().unlinkMeetings(id, linkedId);
   if (!result) return c.notFound();
-  publish("meeting.updated");
   const relatedItems = await resolveLinkedItems(
     result.a.relatedMeetings,
     (rid) => getMeetingService().getById(rid),

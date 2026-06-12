@@ -4,7 +4,6 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { moscowConfig } from "../../domains/moscow/config.tsx";
 import { getMoscowService } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { MoscowDetailView } from "../moscow-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import {
@@ -43,7 +42,6 @@ moscowRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getMoscowService().update(id, { notes });
-  publish("moscow.updated");
   return renderDetail(c, id);
 });
 
@@ -62,7 +60,6 @@ moscowRouter.post("/:id/:quadrant", async (c) => {
 
   const items = [...moscow[quadrant as MoscowQuadrantKey], text];
   await getMoscowService().update(id, { [quadrant]: items });
-  publish("moscow.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item added" } }),
@@ -87,7 +84,6 @@ moscowRouter.put("/:id/:quadrant/:index", async (c) => {
   if (index >= 0 && index < items.length && text) {
     items[index] = text;
     await getMoscowService().update(id, { [quadrant]: items });
-    publish("moscow.updated");
   }
   c.header(
     "HX-Trigger",
@@ -110,7 +106,6 @@ moscowRouter.delete("/:id/:quadrant/:index", async (c) => {
   if (index >= 0 && index < items.length) {
     items.splice(index, 1);
     await getMoscowService().update(id, { [quadrant]: items });
-    publish("moscow.updated");
   }
   c.header(
     "HX-Trigger",

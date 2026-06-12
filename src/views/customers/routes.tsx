@@ -12,7 +12,6 @@ import {
 } from "../../singletons/services.ts";
 import { CustomerDetailView } from "../customer-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const customersRouter = createDomainRoutes(customerConfig);
 
@@ -53,6 +52,5 @@ customersRouter.put("/:id/notes", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getCustomerService().update(id, { notes });
-  publish("customer.updated");
   return renderDetail(c, id);
 });

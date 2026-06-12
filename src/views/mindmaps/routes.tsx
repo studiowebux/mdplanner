@@ -7,7 +7,6 @@ import { getMindmapService } from "../../singletons/services.ts";
 import { viewProps } from "../../middleware/view-props.ts";
 import { MindmapDetailView } from "../mindmap-detail.tsx";
 import { parseBulletTree } from "../../repositories/mindmap.repository.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const mindmapRouter = createDomainRoutes(mindmapConfig);
 
@@ -34,7 +33,6 @@ mindmapRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getMindmapService().update(id, { notes });
-  publish("mindmap.updated");
   return renderDetail(c, id);
 });
 
@@ -68,7 +66,6 @@ mindmapRouter.post("/:id/body", async (c) => {
 
   const updated = await getMindmapService().update(id, { nodes });
   if (!updated) return c.notFound();
-  publish("mindmap.updated");
 
   c.header(
     "HX-Trigger",

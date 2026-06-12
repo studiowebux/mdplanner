@@ -11,7 +11,6 @@ import {
 } from "../../singletons/services.ts";
 import { ReflectionDetailView } from "../reflection-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const reflectionRouter = createDomainRoutes(reflectionConfig);
 
@@ -44,6 +43,5 @@ reflectionRouter.put("/:id/content", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const content = String(body.content ?? "").trim() || undefined;
   await getReflectionService().update(id, { content });
-  publish("reflection.updated");
   return renderDetail(c, id);
 });

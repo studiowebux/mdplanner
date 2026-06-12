@@ -8,7 +8,6 @@ import { journalConfig } from "../../domains/journal/config.tsx";
 import { getJournalService } from "../../singletons/services.ts";
 import { JournalDetailView } from "../journal-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 
 export const journalRouter = createDomainRoutes(journalConfig);
 
@@ -37,6 +36,5 @@ journalRouter.put("/:id/content", async (c: AppContext) => {
   const body = await c.req.parseBody();
   const content = String(body.content ?? "").trim() || undefined;
   await getJournalService().update(id, { content });
-  publish("journal.updated");
   return renderDetail(c, id);
 });

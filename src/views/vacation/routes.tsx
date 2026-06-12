@@ -1,7 +1,6 @@
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { vacationConfig } from "../../domains/vacation/config.tsx";
 import { getVacationService } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const vacationRouter = createDomainRoutes(vacationConfig);
@@ -33,7 +32,6 @@ vacationRouter.post("/:id/approve", async (c) => {
     });
   }
   await getVacationService().update(id, { status: "approved" });
-  publish("vacation.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": "/vacation" },
@@ -67,7 +65,6 @@ vacationRouter.post("/:id/reject", async (c) => {
     });
   }
   await getVacationService().update(id, { status: "rejected" });
-  publish("vacation.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": "/vacation" },

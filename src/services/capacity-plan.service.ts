@@ -37,7 +37,7 @@ export class CapacityPlanService extends BaseService<
     if (!plan) return null;
 
     const newMember: TeamMemberRef = { ...member, id: generateId("member") };
-    return this.repo.update(planId, {
+    return this.update(planId, {
       teamMembers: [...plan.teamMembers, newMember],
     });
   }
@@ -55,7 +55,7 @@ export class CapacityPlanService extends BaseService<
 
     const teamMembers = [...plan.teamMembers];
     teamMembers[idx] = { ...teamMembers[idx], ...updates, id: memberId };
-    return this.repo.update(planId, { teamMembers });
+    return this.update(planId, { teamMembers });
   }
 
   async removeMember(
@@ -66,7 +66,7 @@ export class CapacityPlanService extends BaseService<
     if (!plan) return null;
 
     const member = plan.teamMembers.find((m) => m.id === memberId);
-    return this.repo.update(planId, {
+    return this.update(planId, {
       teamMembers: plan.teamMembers.filter((m) => m.id !== memberId),
       // Remove allocations belonging to this person.
       allocations: member
@@ -90,7 +90,7 @@ export class CapacityPlanService extends BaseService<
       ...allocation,
       id: generateId("alloc"),
     };
-    return this.repo.update(planId, {
+    return this.update(planId, {
       allocations: [...plan.allocations, newAllocation],
     });
   }
@@ -108,7 +108,7 @@ export class CapacityPlanService extends BaseService<
 
     const allocations = [...plan.allocations];
     allocations[idx] = { ...allocations[idx], ...updates, id: allocId };
-    return this.repo.update(planId, { allocations });
+    return this.update(planId, { allocations });
   }
 
   async removeAllocation(
@@ -118,7 +118,7 @@ export class CapacityPlanService extends BaseService<
     const plan = await this.repo.findById(planId);
     if (!plan) return null;
 
-    return this.repo.update(planId, {
+    return this.update(planId, {
       allocations: plan.allocations.filter((a) => a.id !== allocId),
     });
   }

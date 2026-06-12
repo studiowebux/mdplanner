@@ -11,7 +11,6 @@ import {
 import { QuoteDetailView } from "../quote-detail.tsx";
 import { QuotePrintView } from "../quote-print.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import {
   EDITABLE_LINE_ITEM_FIELDS,
@@ -89,7 +88,6 @@ quotesRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getQuoteService().update(id, { notes });
-  publish("quote.updated");
   return renderDetail(c, id);
 });
 
@@ -99,7 +97,6 @@ quotesRouter.put("/:id/footer", async (c) => {
   const body = await c.req.parseBody();
   const footer = String(body.footer ?? "").trim() || undefined;
   await getQuoteService().update(id, { footer });
-  publish("quote.updated");
   return renderDetail(c, id);
 });
 
@@ -122,7 +119,6 @@ quotesRouter.post("/:id/submit-approval", async (c) => {
     status: "pending_approval",
     submittedForApprovalAt: new Date().toISOString(),
   });
-  publish("quote.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
@@ -152,7 +148,6 @@ quotesRouter.post("/:id/approve", async (c) => {
     approvedAt: new Date().toISOString(),
     approvalNotes: null,
   });
-  publish("quote.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
@@ -179,7 +174,6 @@ quotesRouter.post("/:id/reject-approval", async (c) => {
     approvalNotes: null,
     submittedForApprovalAt: null,
   });
-  publish("quote.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
@@ -203,7 +197,6 @@ quotesRouter.post("/:id/send", async (c) => {
     ? (actor?.name ?? "system")
     : "system";
   await getQuoteService().sendQuote(quote, sentBy);
-  publish("quote.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
@@ -226,7 +219,6 @@ quotesRouter.post("/:id/accept", async (c) => {
     status: "accepted",
     acceptedAt: new Date().toISOString(),
   });
-  publish("quote.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
@@ -246,7 +238,6 @@ quotesRouter.post("/:id/reject", async (c) => {
     });
   }
   await getQuoteService().update(id, { status: "rejected" });
-  publish("quote.updated");
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },

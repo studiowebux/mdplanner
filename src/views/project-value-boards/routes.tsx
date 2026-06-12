@@ -4,7 +4,6 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { projectValueBoardConfig } from "../../domains/project-value-board/config.tsx";
 import { getProjectValueBoardService } from "../../singletons/services.ts";
-import { publish } from "../../singletons/event-bus.ts";
 import { ProjectValueBoardDetailView } from "../project-value-board-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import {
@@ -44,7 +43,6 @@ projectValueBoardRouter.put("/:id/notes", async (c) => {
   const body = await c.req.parseBody();
   const notes = String(body.notes ?? "").trim() || undefined;
   await getProjectValueBoardService().update(id, { notes });
-  publish("project-value-board.updated");
   return renderDetail(c, id);
 });
 
@@ -63,7 +61,6 @@ projectValueBoardRouter.post("/:id/:section", async (c) => {
 
   const items = [...item[section as ProjectValueBoardSectionKey], text];
   await getProjectValueBoardService().update(id, { [section]: items });
-  publish("project-value-board.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item added" } }),
@@ -88,7 +85,6 @@ projectValueBoardRouter.put("/:id/:section/:index", async (c) => {
   if (index >= 0 && index < items.length && text) {
     items[index] = text;
     await getProjectValueBoardService().update(id, { [section]: items });
-    publish("project-value-board.updated");
   }
   c.header(
     "HX-Trigger",
@@ -111,7 +107,6 @@ projectValueBoardRouter.delete("/:id/:section/:index", async (c) => {
   if (index >= 0 && index < items.length) {
     items.splice(index, 1);
     await getProjectValueBoardService().update(id, { [section]: items });
-    publish("project-value-board.updated");
   }
   c.header(
     "HX-Trigger",
