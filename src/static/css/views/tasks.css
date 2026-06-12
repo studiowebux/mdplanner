@@ -128,6 +128,61 @@
   min-width: 0;
 }
 
+/* Bulk "Edit fields" popover — a native <details> opening a panel of one
+   labelled control + Apply per editable field, anchored above the bulk bar. */
+.task-list__bulk-fields {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.task-list__bulk-fields > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.task-list__bulk-fields > summary::-webkit-details-marker {
+  display: none;
+}
+
+.task-list__bulk-fields-panel {
+  display: none;
+}
+
+.task-list__bulk-fields[open] .task-list__bulk-fields-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: absolute;
+  bottom: calc(100% + var(--space-xs));
+  right: 0;
+  min-width: var(--task-actions-w);
+  padding: var(--space-sm);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+}
+
+.task-list__bulk-field {
+  display: grid;
+  grid-template-columns: var(--bulk-field-label-w) 1fr auto;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.task-list__bulk-field-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.task-list__bulk-field .form__select,
+.task-list__bulk-field .form__input {
+  width: 100%;
+  min-width: 0;
+}
+
 /* Drag-and-drop — SortableJS ghost/chosen states (see sortable-init.js) */
 
 .task-list__row.is-sortable-ghost {

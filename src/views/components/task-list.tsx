@@ -1,7 +1,7 @@
 // Task list view — section-grouped task rows with sticky headers.
 // Uses shared groupBy + getSectionOrder() for ordering.
 
-import type { FC } from "hono/jsx";
+import type { Child, FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
 import type { DomainFilterState } from "../../factories/domain.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
@@ -11,6 +11,7 @@ import { EmptyState } from "../../components/ui/empty-state.tsx";
 import {
   sortTasksInSection,
   TASK_PRIORITY_LABELS,
+  TASK_PRIORITY_OPTIONS,
   TASK_SORTABLE_COLS,
 } from "../../domains/task/constants.tsx";
 import { SectionLoadMore } from "./task-pagination.tsx";
@@ -413,6 +414,31 @@ const SectionJumpBar: FC<{ sections: string[] }> = ({ sections }) => (
 );
 
 // ---------------------------------------------------------------------------
+// Bulk "Edit fields" popover row — a labelled control + Apply button. The
+// button posts to its batch endpoint, including the checked row checkboxes and
+// this row's control. Empty value = server-side no-op. Mirrors the bulk Move
+// select + button pairing; no JS (native <details> popover, htmx-only).
+// ---------------------------------------------------------------------------
+
+const BulkFieldRow: FC<
+  { label: string; endpoint: string; controlId: string; children: Child }
+> = ({ label, endpoint, controlId, children }) => (
+  <div class="task-list__bulk-field">
+    <label class="task-list__bulk-field-label" for={controlId}>{label}</label>
+    {children}
+    <button
+      type="button"
+      class="btn btn--secondary btn--sm"
+      hx-post={endpoint}
+      hx-include={`.task-list__select:checked, #${controlId}`}
+      hx-swap="none"
+    >
+      Apply
+    </button>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -420,6 +446,8 @@ type ListProps = TaskViewProps & {
   sort?: string;
   order?: string;
   peopleOptions?: { value: string; label: string }[];
+  milestoneOptions?: { value: string; label: string }[];
+  projectOptions?: { value: string; label: string }[];
   archived?: boolean;
   pageSize?: number;
   state?: DomainFilterState;
@@ -444,6 +472,8 @@ export const TaskListView: FC<ListProps> = (
     sort,
     order,
     peopleOptions,
+    milestoneOptions,
+    projectOptions,
     archived,
     pageSize,
     state,
@@ -626,6 +656,133 @@ export const TaskListView: FC<ListProps> = (
             Remove tag
           </button>
         </div>
+        <details class="task-list__bulk-fields">
+          <summary class="btn btn--secondary btn--sm">Edit fields ▾</summary>
+          <div class="task-list__bulk-fields-panel">
+            <BulkFieldRow
+              label="Priority"
+              endpoint="/tasks/batch-priority"
+              controlId="task-bulk-priority"
+            >
+              <select
+                class="form__select form__select--sm"
+                id="task-bulk-priority"
+                name="priority"
+                aria-label="Set priority on selected"
+              >
+                <option value="">—</option>
+                {TASK_PRIORITY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Milestone"
+              endpoint="/tasks/batch-milestone"
+              controlId="task-bulk-milestone"
+            >
+              <select
+                class="form__select form__select--sm"
+                id="task-bulk-milestone"
+                name="milestone"
+                aria-label="Set milestone on selected"
+              >
+                <option value="">—</option>
+                {(milestoneOptions ?? []).map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Assignee"
+              endpoint="/tasks/batch-assignee"
+              controlId="task-bulk-assignee"
+            >
+              <select
+                class="form__select form__select--sm"
+                id="task-bulk-assignee"
+                name="assignee"
+                aria-label="Set assignee on selected"
+              >
+                <option value="">—</option>
+                {(peopleOptions ?? []).map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Project"
+              endpoint="/tasks/batch-project"
+              controlId="task-bulk-project"
+            >
+              <select
+                class="form__select form__select--sm"
+                id="task-bulk-project"
+                name="project"
+                aria-label="Set project on selected"
+              >
+                <option value="">—</option>
+                {(projectOptions ?? []).map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Due date"
+              endpoint="/tasks/batch-due-date"
+              controlId="task-bulk-due-date"
+            >
+              <input
+                type="date"
+                class="form__input form__input--sm"
+                id="task-bulk-due-date"
+                name="due_date"
+                aria-label="Set due date on selected"
+              />
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Planned start"
+              endpoint="/tasks/batch-planned-start"
+              controlId="task-bulk-planned-start"
+            >
+              <input
+                type="date"
+                class="form__input form__input--sm"
+                id="task-bulk-planned-start"
+                name="planned_start"
+                aria-label="Set planned start on selected"
+              />
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Planned end"
+              endpoint="/tasks/batch-planned-end"
+              controlId="task-bulk-planned-end"
+            >
+              <input
+                type="date"
+                class="form__input form__input--sm"
+                id="task-bulk-planned-end"
+                name="planned_end"
+                aria-label="Set planned end on selected"
+              />
+            </BulkFieldRow>
+            <BulkFieldRow
+              label="Effort (h)"
+              endpoint="/tasks/batch-effort"
+              controlId="task-bulk-effort"
+            >
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                class="form__input form__input--sm"
+                id="task-bulk-effort"
+                name="effort"
+                aria-label="Set effort on selected"
+              />
+            </BulkFieldRow>
+          </div>
+        </details>
         <button
           type="button"
           class="btn btn--ghost btn--sm"

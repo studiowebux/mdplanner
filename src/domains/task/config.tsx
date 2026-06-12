@@ -265,20 +265,34 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     const config = await getProjectService().getConfig();
     const pageSize = config.tasksPerSection ?? DEFAULT_TASKS_PER_SECTION;
     if (view === "list") {
-      const people = await getPeopleService().list();
+      // Bulk-bar field options: people/milestones/projects for the "Edit
+      // fields" popover selects (milestone/project use the name as the value,
+      // assignee uses the person id — matching the task schema).
+      const [people, milestones, projectNames, allTasks] = await Promise.all([
+        getPeopleService().list(),
+        getMilestoneService().list(),
+        extractProjectNames(),
+        // Move-target sections come from the COMPLETE live task set, not the
+        // filtered/paginated `items`, so custom sections (Cancelled, Scope
+        // Creep) stay reachable regardless of the active filter/pagination.
+        getTaskService().list(),
+      ]);
       const peopleOptions = people
         .map((p) => ({ value: p.id, label: p.name }))
         .sort((a, b) => a.label.localeCompare(b.label));
-      // Move-target sections come from the COMPLETE live task set, not the
-      // filtered/paginated `items`, so custom sections (Cancelled, Scope Creep)
-      // stay reachable regardless of the active filter or pagination slice.
-      const allTasks = await getTaskService().list();
+      const milestoneOptions = [...new Set(milestones.map((m) => m.name))]
+        .sort()
+        .map((name) => ({ value: name, label: name }));
+      const projectOptions = projectNames
+        .map((name) => ({ value: name, label: name }));
       return (
         <TaskListView
           tasks={items}
           sort={state.sort}
           order={state.order}
           peopleOptions={peopleOptions}
+          milestoneOptions={milestoneOptions}
+          projectOptions={projectOptions}
           archived={state.archived === "true"}
           pageSize={pageSize}
           state={state}

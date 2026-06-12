@@ -42,7 +42,7 @@ import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { toHtml } from "../../utils/html.ts";
 import { deleteUiStateKeys } from "../../utils/ui-state.ts";
-import type { Task } from "../../types/task.types.ts";
+import type { Task, UpdateTask } from "../../types/task.types.ts";
 
 export const tasksRouter = createDomainRoutes(taskConfig);
 
@@ -613,6 +613,94 @@ tasksRouter.post("/batch-tag", async (c) => {
   // and the afterSettle handler clears the bulk selection.
   return c.body(null, 204);
 });
+
+// Bulk field-edit routes for the task-list bulk bar "Edit fields" popover.
+// Each reads checked `taskId` fields + a single field value, applies it to every
+// live (non-archived) selected task via one batchUpdate, and returns 204. An
+// empty value is a no-op (the field is never clobbered). The service publishes
+// per mutation (single SSE source), so no route-level publish() — the debounced
+// SseListRefresh morphs #tasks-view and afterSettle clears the selection. Mirror
+// of /batch-move (one field instead of `section`).
+type BulkBody = Record<string, string | File | (string | File)[]>;
+
+async function batchSetField(
+  c: AppContext,
+  buildPatch: (body: BulkBody) => Partial<UpdateTask> | undefined,
+) {
+  const body = await c.req.parseBody({ all: true });
+  const ids = parseTaskIds(body["taskId"]);
+  const patch = buildPatch(body);
+
+  if (ids.length > 0 && patch) {
+    const svc = getTaskService();
+    const updates: Array<{ id: string; updates: Partial<UpdateTask> }> = [];
+    for (const id of ids) {
+      const task = await svc.getById(id);
+      if (!task || task.archived === true) continue;
+      updates.push({ id, updates: patch });
+    }
+    if (updates.length > 0) {
+      await svc.batchUpdate(updates);
+    }
+  }
+
+  return c.body(null, 204);
+}
+
+const trimmed = (body: BulkBody, key: string) => {
+  const v = String(body[key] ?? "").trim();
+  return v.length > 0 ? v : undefined;
+};
+
+tasksRouter.post("/batch-priority", (c) =>
+  batchSetField(c, (b) => {
+    const n = Number(trimmed(b, "priority"));
+    return n >= 1 && n <= 5 ? { priority: n } : undefined;
+  }));
+
+tasksRouter.post("/batch-milestone", (c) =>
+  batchSetField(c, (b) => {
+    const v = trimmed(b, "milestone");
+    return v ? { milestone: v } : undefined;
+  }));
+
+tasksRouter.post("/batch-assignee", (c) =>
+  batchSetField(c, (b) => {
+    const v = trimmed(b, "assignee");
+    return v ? { assignee: v } : undefined;
+  }));
+
+tasksRouter.post("/batch-project", (c) =>
+  batchSetField(c, (b) => {
+    const v = trimmed(b, "project");
+    return v ? { project: v } : undefined;
+  }));
+
+tasksRouter.post("/batch-due-date", (c) =>
+  batchSetField(c, (b) => {
+    const v = trimmed(b, "due_date");
+    return v ? { due_date: v } : undefined;
+  }));
+
+tasksRouter.post("/batch-planned-start", (c) =>
+  batchSetField(c, (b) => {
+    const v = trimmed(b, "planned_start");
+    return v ? { planned_start: v } : undefined;
+  }));
+
+tasksRouter.post("/batch-planned-end", (c) =>
+  batchSetField(c, (b) => {
+    const v = trimmed(b, "planned_end");
+    return v ? { planned_end: v } : undefined;
+  }));
+
+tasksRouter.post("/batch-effort", (c) =>
+  batchSetField(c, (b) => {
+    const raw = trimmed(b, "effort");
+    if (raw === undefined) return undefined;
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 0 ? { effort: n } : undefined;
+  }));
 
 // POST /:id/time-entries — create time entry, reload detail page
 tasksRouter.post("/:id/time-entries", async (c) => {

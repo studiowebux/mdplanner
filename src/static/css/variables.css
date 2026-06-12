@@ -410,6 +410,7 @@
 
   /* Bulk bar */
   --bulk-tag-input-width: 7rem;
+  --bulk-field-label-w: 5.5rem;
 
   /* Pomodoro */
   --pomodoro-paused-opacity: 0.6;
