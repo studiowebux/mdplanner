@@ -115,6 +115,9 @@ settingsViewRouter.post("/project", async (c) => {
     cloudflareToken: body.cloudflareToken !== undefined
       ? String(body.cloudflareToken)
       : undefined,
+    cerveauDir: body.cerveauDir !== undefined
+      ? String(body.cerveauDir).trim()
+      : undefined,
   });
   return new Response(null, {
     status: 204,

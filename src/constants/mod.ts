@@ -154,6 +154,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   upload: "Uploads",
   dashboard: "Dashboard",
   me: "My Work",
+  cerveau: "Cerveau",
 };
 
 /**
@@ -210,7 +211,7 @@ export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
   Portfolio: ["portfolio", "dashboard"],
   Infrastructure: ["dns_domain", "github"],
   AI: ["ai_chat"],
-  Tools: ["analytics", "upload"],
+  Tools: ["analytics", "upload", "cerveau"],
 };
 
 // -- Nav link types and builders ------------------------------------------
@@ -371,6 +372,7 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   upload: "/uploads",
   dashboard: "/portfolio/dashboard",
   me: "/me",
+  cerveau: "/cerveau",
 };
 
 // ---------------------------------------------------------------------------

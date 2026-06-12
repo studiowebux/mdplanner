@@ -107,6 +107,25 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label class="settings-field__label" for="cfg-cerveau-dir">
+          Cerveau directory
+        </label>
+        <input
+          type="text"
+          id="cfg-cerveau-dir"
+          name="cerveauDir"
+          value={config.cerveauDir ?? ""}
+          placeholder="/path/to/cerveau"
+          class="settings-field__input"
+        />
+        <span class="settings-field__hint">
+          Absolute path to a Cerveau root (contains _configs_/, _packages_,
+          version.txt). When set, enable the “Cerveau” feature to show the
+          read-only viewer in the sidebar.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label class="settings-field__label" for="cfg-tasks-per-section">
           Tasks per section (list / board)
         </label>
