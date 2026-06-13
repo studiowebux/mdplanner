@@ -9,6 +9,8 @@ import type {
   UpdateQuote,
 } from "../types/quote.types.ts";
 import {
+  fmNum,
+  fmStr,
   mapArrayFromFm,
   resolveEntityId,
   stampAuditFields,
@@ -18,6 +20,20 @@ import { atomicWrite } from "../utils/safe-io.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { QUOTE_TABLE, rowToQuote } from "../domains/quote/cache.ts";
 import { QUOTE_BODY_KEYS } from "../domains/quote/constants.ts";
+
+/** Parse the frontmatter payment-schedule array into typed items, or undefined. */
+function parsePaymentSchedule(
+  raw: unknown,
+): PaymentScheduleItem[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const items = mapArrayFromFm(raw as unknown[]).map((ps) => ({
+    description: String(ps.description ?? ""),
+    percent: ps.percent != null ? Number(ps.percent) : undefined,
+    amount: ps.amount != null ? Number(ps.amount) : undefined,
+    dueDate: ps.dueDate != null ? String(ps.dueDate) : undefined,
+  }));
+  return items.length ? items : undefined;
+}
 
 /** Persists Quote entities as markdown with a SQLite cache mirror; revision history is appended to the body (getRevisions/appendRevision). */
 export class QuoteRepository extends CachedMarkdownRepository<
@@ -68,44 +84,32 @@ export class QuoteRepository extends CachedMarkdownRepository<
 
     const { title, notes } = parseBillingBody(fm.title, body);
     const lineItems = parseLineItems(fm.lineItems);
-
-    const rawSchedule = Array.isArray(fm.paymentSchedule)
-      ? mapArrayFromFm(fm.paymentSchedule as unknown[])
-      : undefined;
-    const paymentSchedule: PaymentScheduleItem[] | undefined = rawSchedule
-      ?.map((ps) => ({
-        description: String(ps.description ?? ""),
-        percent: ps.percent != null ? Number(ps.percent) : undefined,
-        amount: ps.amount != null ? Number(ps.amount) : undefined,
-        dueDate: ps.dueDate != null ? String(ps.dueDate) : undefined,
-      }));
+    const paymentSchedule = parsePaymentSchedule(fm.paymentSchedule);
 
     return {
       id,
-      number: String(fm.number ?? ""),
-      customerId: String(fm.customerId ?? ""),
+      number: fmStr(fm, "number") ?? "",
+      customerId: fmStr(fm, "customerId") ?? "",
       title,
       status: (fm.status as Quote["status"]) ?? "draft",
-      currency: fm.currency != null ? String(fm.currency) : undefined,
-      expiresAt: fm.expiresAt != null ? String(fm.expiresAt) : undefined,
+      currency: fmStr(fm, "currency"),
+      expiresAt: fmStr(fm, "expiresAt"),
       lineItems,
-      paymentSchedule: paymentSchedule?.length ? paymentSchedule : undefined,
-      subtotal: Number(fm.subtotal ?? 0),
-      tax: fm.tax != null ? Number(fm.tax) : undefined,
-      taxRate: fm.taxRate != null ? Number(fm.taxRate) : undefined,
-      total: Number(fm.total ?? 0),
+      paymentSchedule,
+      subtotal: fmNum(fm, "subtotal") ?? 0,
+      tax: fmNum(fm, "tax"),
+      taxRate: fmNum(fm, "taxRate"),
+      total: fmNum(fm, "total") ?? 0,
       notes,
-      footer: fm.footer != null ? String(fm.footer) : undefined,
-      revision: fm.revision != null ? Number(fm.revision) : undefined,
-      convertedToInvoice: fm.convertedToInvoice != null
-        ? String(fm.convertedToInvoice)
-        : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      sentAt: fm.sentAt != null ? String(fm.sentAt) : undefined,
-      acceptedAt: fm.acceptedAt != null ? String(fm.acceptedAt) : undefined,
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      footer: fmStr(fm, "footer"),
+      revision: fmNum(fm, "revision"),
+      convertedToInvoice: fmStr(fm, "convertedToInvoice"),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      sentAt: fmStr(fm, "sentAt"),
+      acceptedAt: fmStr(fm, "acceptedAt"),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

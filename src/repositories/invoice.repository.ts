@@ -11,6 +11,8 @@ import { INVOICE_TABLE, rowToInvoice } from "../domains/invoice/cache.ts";
 import { INVOICE_BODY_KEYS } from "../domains/invoice/constants.ts";
 
 import {
+  fmNum,
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -66,30 +68,28 @@ export class InvoiceRepository extends CachedMarkdownRepository<
 
     return {
       id,
-      number: String(fm.number ?? ""),
-      customerId: String(fm.customerId ?? ""),
-      quoteId: fm.quoteId != null ? String(fm.quoteId) : undefined,
+      number: fmStr(fm, "number") ?? "",
+      customerId: fmStr(fm, "customerId") ?? "",
+      quoteId: fmStr(fm, "quoteId"),
       title,
       status: (fm.status as Invoice["status"]) ?? "draft",
-      currency: fm.currency != null ? String(fm.currency) : undefined,
-      dueDate: fm.dueDate != null ? String(fm.dueDate) : undefined,
-      paymentTerms: fm.paymentTerms != null
-        ? String(fm.paymentTerms)
-        : undefined,
+      currency: fmStr(fm, "currency"),
+      dueDate: fmStr(fm, "dueDate"),
+      paymentTerms: fmStr(fm, "paymentTerms"),
       lineItems,
-      subtotal: Number(fm.subtotal ?? 0),
-      tax: fm.tax != null ? Number(fm.tax) : undefined,
-      taxRate: fm.taxRate != null ? Number(fm.taxRate) : undefined,
-      total: Number(fm.total ?? 0),
-      paidAmount: Number(fm.paidAmount ?? 0),
+      subtotal: fmNum(fm, "subtotal") ?? 0,
+      tax: fmNum(fm, "tax"),
+      taxRate: fmNum(fm, "taxRate"),
+      total: fmNum(fm, "total") ?? 0,
+      paidAmount: fmNum(fm, "paidAmount") ?? 0,
       notes,
-      footer: fm.footer != null ? String(fm.footer) : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      sentAt: fm.sentAt != null ? String(fm.sentAt) : undefined,
-      paidAt: fm.paidAt != null ? String(fm.paidAt) : undefined,
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      footer: fmStr(fm, "footer"),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      sentAt: fmStr(fm, "sentAt"),
+      paidAt: fmStr(fm, "paidAt"),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

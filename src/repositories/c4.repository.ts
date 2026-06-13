@@ -13,9 +13,39 @@ import { C4_TABLE, rowToC4 } from "../domains/c4/cache.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
 import {
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+
+/** Extract the component name (first `# heading`) and trailing description body. */
+function parseC4Body(body: string): { name: string; description?: string } {
+  let name = "";
+  const descLines: string[] = [];
+  let pastHeading = false;
+  for (const line of body.split("\n")) {
+    if (!pastHeading && line.startsWith("# ")) {
+      name = line.slice(2).trim();
+      pastHeading = true;
+      continue;
+    }
+    if (pastHeading) descLines.push(line);
+  }
+  return { name, description: descLines.join("\n").trim() || undefined };
+}
+
+/** Map the frontmatter connections array into typed C4Connection edges. */
+function parseC4Connections(raw: unknown): C4Connection[] {
+  const rawConns = (raw ?? []) as Array<Record<string, unknown>>;
+  return rawConns.map((c) => ({
+    id: c.id ? String(c.id) : generateId("c4conn"),
+    target: String(c.target ?? ""),
+    label: String(c.label ?? ""),
+    technology: c.technology != null ? String(c.technology) : undefined,
+  }));
+}
+
 /** Persists C4 components as markdown with a SQLite cache mirror; adds level queries (findByLevel), position patching, and connection edges (add/remove/getConnectionsFor). */
 export class C4Repository extends CachedMarkdownRepository<
   C4Component,
@@ -67,51 +97,27 @@ export class C4Repository extends CachedMarkdownRepository<
     if (!fm.id && !filename) return null;
     const id = resolveEntityId(filename, fm);
 
-    const lines = body.split("\n");
-    let name = "";
-    const descLines: string[] = [];
-    let pastHeading = false;
-
-    for (const line of lines) {
-      if (!pastHeading && line.startsWith("# ")) {
-        name = line.slice(2).trim();
-        pastHeading = true;
-        continue;
-      }
-      if (pastHeading) descLines.push(line);
-    }
-
-    const description = descLines.join("\n").trim() || undefined;
+    const { name, description } = parseC4Body(body);
 
     const rawPos = fm.position as { x?: number; y?: number } | undefined;
     const position = { x: rawPos?.x ?? 0, y: rawPos?.y ?? 0 };
-
-    const rawConns = (fm.connections ?? []) as Array<Record<string, unknown>>;
-    const connections: C4Connection[] = rawConns.map((c) => ({
-      id: c.id ? String(c.id) : generateId("c4conn"),
-      target: String(c.target ?? ""),
-      label: String(c.label ?? ""),
-      technology: c.technology != null ? String(c.technology) : undefined,
-    }));
 
     return {
       id,
       name: name || "Untitled Component",
       level: (fm.level as C4Component["level"]) ?? "context",
-      type: fm.type ? String(fm.type) : "",
+      type: fmStr(fm, "type") ?? "",
       description,
-      technology: fm.technology != null ? String(fm.technology) : undefined,
+      technology: fmStr(fm, "technology"),
       position,
-      diagram: fm.diagram != null ? String(fm.diagram) : "default",
-      parent: fm.parent != null ? String(fm.parent) : undefined,
-      children: Array.isArray(fm.children)
-        ? (fm.children as string[]).map(String)
-        : [],
-      connections,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      diagram: fmStr(fm, "diagram") ?? "default",
+      parent: fmStr(fm, "parent"),
+      children: fmStrArr(fm, "children") ?? [],
+      connections: parseC4Connections(fm.connections),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

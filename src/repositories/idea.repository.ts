@@ -11,6 +11,8 @@ import { IDEA_TABLE, rowToIdea } from "../domains/idea/cache.ts";
 import { IDEA_BODY_KEYS } from "../domains/idea/constants.ts";
 
 import {
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -144,32 +146,24 @@ export class IdeaRepository extends CachedMarkdownRepository<
       id,
       title,
       status: (fm.status as Idea["status"]) ?? "new",
-      category: fm.category != null ? String(fm.category) : undefined,
-      priority: fm.priority != null
-        ? String(fm.priority) as Idea["priority"]
-        : undefined,
-      project: fm.project != null ? String(fm.project) : undefined,
-      submittedBy: fm.submittedBy != null ? String(fm.submittedBy) : undefined,
-      startDate: fm.startDate != null ? String(fm.startDate) : undefined,
-      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
-      resources: fm.resources != null ? String(fm.resources) : undefined,
-      subtasks: Array.isArray(fm.subtasks)
-        ? (fm.subtasks as unknown[]).map(String)
-        : undefined,
+      category: fmStr(fm, "category"),
+      priority: fmStr(fm, "priority") as Idea["priority"] | undefined,
+      project: fmStr(fm, "project"),
+      submittedBy: fmStr(fm, "submittedBy"),
+      startDate: fmStr(fm, "startDate"),
+      endDate: fmStr(fm, "endDate"),
+      resources: fmStr(fm, "resources"),
+      subtasks: fmStrArr(fm, "subtasks"),
       description: description || undefined,
-      links: Array.isArray(fm.links)
-        ? (fm.links as unknown[]).map(String)
-        : undefined,
-      implementedAt: fm.implementedAt != null
-        ? String(fm.implementedAt)
-        : undefined,
-      cancelledAt: fm.cancelledAt != null ? String(fm.cancelledAt) : undefined,
+      links: fmStrArr(fm, "links"),
+      implementedAt: fmStr(fm, "implementedAt"),
+      cancelledAt: fmStr(fm, "cancelledAt"),
       // archived / archivedAt / archivedBy are injected by the base
       // `parseWithArchive` wrapper — no per-domain handling required.
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

@@ -11,6 +11,7 @@ import { CUSTOMER_TABLE, rowToCustomer } from "../domains/customer/cache.ts";
 import { CUSTOMER_BODY_KEYS } from "../domains/customer/constants.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -76,26 +77,26 @@ export class CustomerRepository extends CachedMarkdownRepository<
     if (fm.billingAddress && typeof fm.billingAddress === "object") {
       const a = fm.billingAddress as Record<string, unknown>;
       billingAddress = {
-        street: a.street != null ? String(a.street) : undefined,
-        city: a.city != null ? String(a.city) : undefined,
-        state: a.state != null ? String(a.state) : undefined,
-        postalCode: a.postalCode != null ? String(a.postalCode) : undefined,
-        country: a.country != null ? String(a.country) : undefined,
+        street: fmStr(a, "street"),
+        city: fmStr(a, "city"),
+        state: fmStr(a, "state"),
+        postalCode: fmStr(a, "postalCode"),
+        country: fmStr(a, "country"),
       };
     }
 
     return {
       id,
       name,
-      email: fm.email != null ? String(fm.email) : undefined,
-      phone: fm.phone != null ? String(fm.phone) : undefined,
-      company: fm.company != null ? String(fm.company) : undefined,
+      email: fmStr(fm, "email"),
+      phone: fmStr(fm, "phone"),
+      company: fmStr(fm, "company"),
       billingAddress,
       notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 
