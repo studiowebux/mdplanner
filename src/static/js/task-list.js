@@ -289,9 +289,18 @@
   document.addEventListener("click", function (e) {
     var box = e.target.closest(".task-list__select-all-section");
     if (!box || !box.closest("summary")) return;
+    // preventDefault stops the <details> from toggling, but it ALSO cancels the
+    // checkbox's own toggle — the browser reverts `checked` to its prior value
+    // after this handler returns (canceled-activation steps). Pre-click
+    // activation has already flipped `checked` to the user-intended value, so
+    // capture it now and re-apply it on the next microtask (after the revert),
+    // then fire the change the bulk-select handler listens for.
     e.preventDefault();
-    box.checked = !box.checked;
-    box.dispatchEvent(new Event("change", { bubbles: true }));
+    var intended = box.checked;
+    queueMicrotask(function () {
+      box.checked = intended;
+      box.dispatchEvent(new Event("change", { bubbles: true }));
+    });
   });
 
   // -- 2. Preserve user-toggled collapse state across SSE morphs ------------
