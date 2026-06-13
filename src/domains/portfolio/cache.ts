@@ -22,6 +22,29 @@ import type {
 } from "../../types/portfolio.types.ts";
 import { PORTFOLIO_SCHEMA, PORTFOLIO_TABLE } from "./constants.ts";
 
+// Nullable [column, PortfolioItem key] mappings, copied verbatim by type.
+const PORTFOLIO_STR_COLS: readonly (readonly [string, keyof PortfolioItem])[] =
+  [
+    ["description", "description"],
+    ["client", "client"],
+    ["start_date", "startDate"],
+    ["end_date", "endDate"],
+    ["logo", "logo"],
+    ["license", "license"],
+    ["github_repo", "githubRepo"],
+    ["billing_customer_id", "billingCustomerId"],
+    ["created_at", "createdAt"],
+    ["updated_at", "updatedAt"],
+    ["created_by", "createdBy"],
+    ["updated_by", "updatedBy"],
+  ];
+const PORTFOLIO_NUM_COLS: readonly (readonly [string, keyof PortfolioItem])[] =
+  [
+    ["revenue", "revenue"],
+    ["expenses", "expenses"],
+    ["progress", "progress"],
+  ];
+
 /** Deserialize a SQLite row to a PortfolioItem. */
 export function rowToPortfolioItem(
   row: Record<string, string | number | null>,
@@ -32,13 +55,35 @@ export function rowToPortfolioItem(
     category: row.category as string,
     status: row.status as PortfolioStatus,
   };
-  if (row.description != null) item.description = row.description as string;
-  if (row.client != null) item.client = row.client as string;
-  if (row.revenue != null) item.revenue = row.revenue as number;
-  if (row.expenses != null) item.expenses = row.expenses as number;
-  if (row.progress != null) item.progress = row.progress as number;
-  if (row.start_date != null) item.startDate = row.start_date as string;
-  if (row.end_date != null) item.endDate = row.end_date as string;
+  applyPortfolioScalars(item, row);
+  applyPortfolioJson(item, row);
+  const archive = archiveFieldsFromRow(row);
+  if (archive.archived !== undefined) item.archived = archive.archived;
+  if (archive.archivedAt !== undefined) item.archivedAt = archive.archivedAt;
+  if (archive.archivedBy !== undefined) item.archivedBy = archive.archivedBy;
+  return item;
+}
+
+/** Copy the nullable scalar columns (string/number/bool) onto the item. */
+function applyPortfolioScalars(
+  item: PortfolioItem,
+  row: Record<string, string | number | null>,
+): void {
+  const t = item as Record<string, unknown>;
+  for (const [col, key] of PORTFOLIO_STR_COLS) {
+    if (row[col] != null) t[key] = row[col] as string;
+  }
+  for (const [col, key] of PORTFOLIO_NUM_COLS) {
+    if (row[col] != null) t[key] = row[col] as number;
+  }
+  if (row.brain_managed != null) item.brainManaged = row.brain_managed === 1;
+}
+
+/** Parse and assign the JSON-encoded columns onto the item. */
+function applyPortfolioJson(
+  item: PortfolioItem,
+  row: Record<string, string | number | null>,
+): void {
   const teamRaw = parseJson<unknown[]>(row.team);
   if (teamRaw) {
     item.team = teamRaw.map((m): TeamMember =>
@@ -47,13 +92,6 @@ export function rowToPortfolioItem(
   }
   const techStack = parseJson<string[]>(row.tech_stack);
   if (techStack) item.techStack = techStack;
-  if (row.logo != null) item.logo = row.logo as string;
-  if (row.license != null) item.license = row.license as string;
-  if (row.github_repo != null) item.githubRepo = row.github_repo as string;
-  if (row.billing_customer_id != null) {
-    item.billingCustomerId = row.billing_customer_id as string;
-  }
-  if (row.brain_managed != null) item.brainManaged = row.brain_managed === 1;
   const linkedGoals = parseJson<string[]>(row.linked_goals);
   if (linkedGoals) item.linkedGoals = linkedGoals;
   const kpis = parseJson<PortfolioItem["kpis"]>(row.kpis);
@@ -64,15 +102,6 @@ export function rowToPortfolioItem(
     row.status_updates,
   );
   if (statusUpdates) item.statusUpdates = statusUpdates;
-  const archive = archiveFieldsFromRow(row);
-  if (archive.archived !== undefined) item.archived = archive.archived;
-  if (archive.archivedAt !== undefined) item.archivedAt = archive.archivedAt;
-  if (archive.archivedBy !== undefined) item.archivedBy = archive.archivedBy;
-  if (row.created_at != null) item.createdAt = row.created_at as string;
-  if (row.updated_at != null) item.updatedAt = row.updated_at as string;
-  if (row.created_by != null) item.createdBy = row.created_by as string;
-  if (row.updated_by != null) item.updatedBy = row.updated_by as string;
-  return item;
 }
 
 /** Insert or replace a PortfolioItem in the cache table. */

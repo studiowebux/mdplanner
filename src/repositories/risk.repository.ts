@@ -7,9 +7,45 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { RISK_TABLE, rowToRisk } from "../domains/risk/cache.ts";
 
 import {
+  fmNum,
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+
+/** Split a risk body into its title, description and ## Mitigation section. */
+function parseRiskBody(body: string): {
+  bodyTitle: string;
+  description?: string;
+  mitigation?: string;
+} {
+  const descLines: string[] = [];
+  const mitigationLines: string[] = [];
+  let bodyTitle = "";
+  let currentSection: "desc" | "mitigation" = "desc";
+
+  for (const line of body.split("\n")) {
+    if (line.startsWith("# ")) {
+      if (!bodyTitle) bodyTitle = line.slice(2).trim();
+      continue;
+    }
+    if (line.match(/^##\s+mitigation/i)) {
+      currentSection = "mitigation";
+      continue;
+    }
+    if (currentSection === "mitigation") {
+      mitigationLines.push(line);
+    } else {
+      descLines.push(line);
+    }
+  }
+
+  return {
+    bodyTitle,
+    description: descLines.join("\n").trim() || undefined,
+    mitigation: mitigationLines.join("\n").trim() || undefined,
+  };
+}
 /** Persists Risk entities as markdown with a SQLite cache mirror. */
 export class RiskRepository extends CachedMarkdownRepository<
   Risk,
@@ -56,53 +92,33 @@ export class RiskRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = resolveEntityId(filename, fm);
 
-    const lines = body.split("\n");
-    let title = fm.title ? String(fm.title) : "";
-    const descLines: string[] = [];
-    const mitigationLines: string[] = [];
-    let currentSection: "desc" | "mitigation" = "desc";
-
-    for (const line of lines) {
-      if (line.startsWith("# ")) {
-        if (!title) title = line.slice(2).trim();
-        continue;
-      }
-      if (line.match(/^##\s+mitigation/i)) {
-        currentSection = "mitigation";
-        continue;
-      }
-      if (currentSection === "mitigation") {
-        mitigationLines.push(line);
-      } else {
-        descLines.push(line);
-      }
-    }
-
-    const description = descLines.join("\n").trim() || undefined;
-    const bodyMitigation = mitigationLines.join("\n").trim() || undefined;
-    const mitigation = bodyMitigation ??
-      (fm.mitigation != null ? String(fm.mitigation) : undefined);
+    const { bodyTitle, description, mitigation: bodyMitigation } =
+      parseRiskBody(
+        body,
+      );
+    const title = fm.title ? String(fm.title) : bodyTitle;
+    const mitigation = bodyMitigation ?? fmStr(fm, "mitigation");
 
     return {
       id,
       title: title || "Untitled Risk",
       description,
       category: (fm.category as Risk["category"]) ?? "other",
-      likelihood: fm.likelihood != null ? Number(fm.likelihood) : 3,
-      impact: fm.impact != null ? Number(fm.impact) : 3,
+      likelihood: fmNum(fm, "likelihood") ?? 3,
+      impact: fmNum(fm, "impact") ?? 3,
       status: (fm.status as Risk["status"]) ?? "open",
       mitigation,
-      owner: fm.owner != null ? String(fm.owner) : undefined,
-      project: fm.project != null ? String(fm.project) : undefined,
+      owner: fmStr(fm, "owner"),
+      project: fmStr(fm, "project"),
       tags: Array.isArray(fm.tags)
         ? fm.tags.map(String)
         : fm.tags != null
         ? [String(fm.tags)]
         : [],
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

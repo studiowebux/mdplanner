@@ -128,46 +128,41 @@ export async function fetchDashboardItems(): Promise<PortfolioDashboardItem[]> {
   );
 }
 
+// Sort-key → value accessor. Each returns a same-typed comparable for a column.
+type SortAccessor = (i: PortfolioDashboardItem) => string | number;
+const SORT_ACCESSORS: Record<string, SortAccessor> = {
+  name: (i) => i.name,
+  status: (i) => i.status,
+  activity: (i) => i.lastActivity ?? "",
+  milestone: (i) => i.milestone?.name ?? "",
+  commit: (i) => i.github?.lastCommitDate ?? "",
+  prs: (i) => i.github?.openPrs ?? 0,
+  issues: (i) => i.github?.openIssues ?? 0,
+  ci: (i) => i.github?.ciSuccessRate ?? -1,
+};
+
+/** Resolve the accessor for a sort key, including dynamic `section_<abbrev>`. */
+function sortAccessor(sort: string): SortAccessor | null {
+  if (sort in SORT_ACCESSORS) return SORT_ACCESSORS[sort];
+  if (sort.startsWith("section_")) {
+    const abbrev = sort.slice("section_".length);
+    return (i) => i.tasks[abbrev] ?? 0;
+  }
+  return null;
+}
+
 export function sortItems(
   items: PortfolioDashboardItem[],
   sort?: string,
   order?: string,
 ): PortfolioDashboardItem[] {
   if (!sort) return items;
+  const accessor = sortAccessor(sort);
+  if (!accessor) return [...items];
   const dir = order === "desc" ? -1 : 1;
   return [...items].sort((a, b) => {
-    let va: string | number | null = null;
-    let vb: string | number | null = null;
-    if (sort === "name") {
-      va = a.name;
-      vb = b.name;
-    } else if (sort === "status") {
-      va = a.status;
-      vb = b.status;
-    } else if (sort === "activity") {
-      va = a.lastActivity ?? "";
-      vb = b.lastActivity ?? "";
-    } else if (sort === "milestone") {
-      va = a.milestone?.name ?? "";
-      vb = b.milestone?.name ?? "";
-    } else if (sort === "commit") {
-      va = a.github?.lastCommitDate ?? "";
-      vb = b.github?.lastCommitDate ?? "";
-    } else if (sort === "prs") {
-      va = a.github?.openPrs ?? 0;
-      vb = b.github?.openPrs ?? 0;
-    } else if (sort === "issues") {
-      va = a.github?.openIssues ?? 0;
-      vb = b.github?.openIssues ?? 0;
-    } else if (sort === "ci") {
-      va = a.github?.ciSuccessRate ?? -1;
-      vb = b.github?.ciSuccessRate ?? -1;
-    } else if (sort.startsWith("section_")) {
-      const abbrev = sort.slice("section_".length);
-      va = a.tasks[abbrev] ?? 0;
-      vb = b.tasks[abbrev] ?? 0;
-    }
-    if (va === null || vb === null) return 0;
+    const va = accessor(a);
+    const vb = accessor(b);
     return va < vb ? -dir : va > vb ? dir : 0;
   });
 }

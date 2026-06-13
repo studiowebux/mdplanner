@@ -18,6 +18,28 @@ import type { PeopleRepository } from "../../repositories/people.repository.ts";
 import type { Person } from "../../types/person.types.ts";
 import { PEOPLE_SCHEMA, PEOPLE_TABLE } from "./constants.ts";
 
+// Nullable [column, Person key] string mappings, copied verbatim. Enum-typed
+// columns (agent_type/status) widen through the Record cast at runtime — the
+// stored value is whatever the DB holds, identical to the prior `as` casts.
+const PERSON_STR_COLS: readonly (readonly [string, keyof Person])[] = [
+  ["title", "title"],
+  ["role", "role"],
+  ["reports_to", "reportsTo"],
+  ["email", "email"],
+  ["phone", "phone"],
+  ["start_date", "startDate"],
+  ["notes", "notes"],
+  ["agent_type", "agentType"],
+  ["system_prompt", "systemPrompt"],
+  ["status", "status"],
+  ["last_seen", "lastSeen"],
+  ["current_task_id", "currentTaskId"],
+  ["created_at", "createdAt"],
+  ["updated_at", "updatedAt"],
+  ["created_by", "createdBy"],
+  ["updated_by", "updatedBy"],
+];
+
 /** Deserialize a SQLite row to a Person. */
 export function rowToPerson(
   row: Record<string, string | number | null>,
@@ -26,48 +48,46 @@ export function rowToPerson(
     id: row.id as string,
     name: row.name as string,
   };
-  if (row.title != null) person.title = row.title as string;
-  if (row.role != null) person.role = row.role as string;
-  const depts = parseJson<string[]>(row.departments);
-  if (depts) person.departments = depts;
-  if (row.reports_to != null) person.reportsTo = row.reports_to as string;
-  if (row.email != null) person.email = row.email as string;
-  if (row.phone != null) person.phone = row.phone as string;
-  if (row.start_date != null) person.startDate = row.start_date as string;
-  if (row.hours_per_day != null) {
-    person.hoursPerDay = row.hours_per_day as number;
-  }
-  const wd = parseJson<string[]>(row.working_days);
-  if (wd) person.workingDays = wd as Person["workingDays"];
-  if (row.notes != null) person.notes = row.notes as string;
-  if (row.agent_type != null) {
-    person.agentType = row.agent_type as Person["agentType"];
-  }
-  const skills = parseJson<string[]>(row.skills);
-  if (skills) person.skills = skills;
-  const models = parseJson<Person["models"]>(row.models);
-  if (models) person.models = models;
-  if (row.system_prompt != null) {
-    person.systemPrompt = row.system_prompt as string;
-  }
-  if (row.status != null) person.status = row.status as Person["status"];
-  if (row.last_seen != null) person.lastSeen = row.last_seen as string;
-  if (row.current_task_id != null) {
-    person.currentTaskId = row.current_task_id as string;
-  }
-  const accounts = parseJson<Record<string, string>>(row.accounts);
-  if (accounts) person.accounts = accounts;
-  const preferences = parseJson<Person["preferences"]>(row.preferences);
-  if (preferences) person.preferences = preferences;
+  applyPersonScalars(person, row);
+  applyPersonJson(person, row);
   const archive = archiveFieldsFromRow(row);
   if (archive.archived !== undefined) person.archived = archive.archived;
   if (archive.archivedAt !== undefined) person.archivedAt = archive.archivedAt;
   if (archive.archivedBy !== undefined) person.archivedBy = archive.archivedBy;
-  if (row.created_at != null) person.createdAt = row.created_at as string;
-  if (row.updated_at != null) person.updatedAt = row.updated_at as string;
-  if (row.created_by != null) person.createdBy = row.created_by as string;
-  if (row.updated_by != null) person.updatedBy = row.updated_by as string;
   return person;
+}
+
+/** Copy the nullable scalar columns (string/number) onto the person. */
+function applyPersonScalars(
+  person: Person,
+  row: Record<string, string | number | null>,
+): void {
+  const p = person as Record<string, unknown>;
+  for (const [col, key] of PERSON_STR_COLS) {
+    if (row[col] != null) p[key] = row[col] as string;
+  }
+  if (row.hours_per_day != null) {
+    person.hoursPerDay = row.hours_per_day as number;
+  }
+}
+
+/** Parse and assign the JSON-encoded columns onto the person. */
+function applyPersonJson(
+  person: Person,
+  row: Record<string, string | number | null>,
+): void {
+  const depts = parseJson<string[]>(row.departments);
+  if (depts) person.departments = depts;
+  const wd = parseJson<string[]>(row.working_days);
+  if (wd) person.workingDays = wd as Person["workingDays"];
+  const skills = parseJson<string[]>(row.skills);
+  if (skills) person.skills = skills;
+  const models = parseJson<Person["models"]>(row.models);
+  if (models) person.models = models;
+  const accounts = parseJson<Record<string, string>>(row.accounts);
+  if (accounts) person.accounts = accounts;
+  const preferences = parseJson<Person["preferences"]>(row.preferences);
+  if (preferences) person.preferences = preferences;
 }
 
 /** Insert or replace a Person in the cache table. */
