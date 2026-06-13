@@ -46,7 +46,136 @@ const InlineEditSection: FC<{
 };
 
 // ---------------------------------------------------------------------------
-// Main view
+// Co-located sections — each owns its own conditional rendering.
+// ---------------------------------------------------------------------------
+
+const InvoiceHeader: FC<
+  { invoice: Invoice; displayStatus: string; editing: boolean }
+> = ({ invoice, displayStatus, editing }) => (
+  <header class="detail-section detail-header invoice-detail__header">
+    <div class="detail-title-row invoice-detail__title-row">
+      <h1 class="detail-title invoice-detail__title">
+        {invoice.number}
+        <span class="invoice-detail__title-sep">&mdash;</span>
+        {invoice.title}
+      </h1>
+      <span class={badgeClass(INVOICE_STATUS_VARIANTS, displayStatus)}>
+        {displayStatus}
+      </span>
+    </div>
+    <div class="invoice-detail__actions-row">
+      <DetailActions
+        entity="invoices"
+        id={invoice.id}
+        title={invoice.title}
+        formContainerId="invoices-form-container"
+        archived={invoice.archived === true}
+      >
+        <EditModeToggle
+          href={`/invoices/${invoice.id}`}
+          editing={editing}
+        />
+      </DetailActions>
+      {invoice.status === "draft" && (
+        <button
+          class="btn btn--primary btn--sm"
+          type="button"
+          hx-post={`/invoices/${invoice.id}/send`}
+          hx-confirm="Send this invoice?"
+          hx-swap="none"
+        >
+          Send
+        </button>
+      )}
+      <a
+        class="btn btn--secondary btn--sm invoice-detail__print-btn"
+        href={`/invoices/${invoice.id}/print`}
+        target="_blank"
+        rel="noopener"
+      >
+        Print / Save as PDF
+      </a>
+    </div>
+  </header>
+);
+
+const InvoiceInfoRow: FC<{ invoice: Invoice }> = ({ invoice }) => (
+  <div class="detail-section detail-info-row">
+    <InfoItem label="Customer">
+      <a href={`/customers/${invoice.customerId}`}>
+        {invoice.customerId}
+      </a>
+    </InfoItem>
+    {invoice.quoteId && (
+      <InfoItem label="Quote">
+        <a href={`/quotes/${invoice.quoteId}`}>{invoice.quoteId}</a>
+      </InfoItem>
+    )}
+    {invoice.currency && (
+      <InfoItem label="Currency">{invoice.currency}</InfoItem>
+    )}
+    {invoice.dueDate && <InfoItem label="Due">{invoice.dueDate}</InfoItem>}
+    {invoice.paymentTerms && (
+      <InfoItem label="Terms">{invoice.paymentTerms}</InfoItem>
+    )}
+  </div>
+);
+
+const InvoiceBalance: FC<{ invoice: Invoice }> = ({ invoice }) => {
+  const balance = invoice.total - invoice.paidAmount;
+  return (
+    <div class="detail-section invoice-detail__balance">
+      <div class="invoice-detail__balance-item">
+        <span class="invoice-detail__balance-label">Total</span>
+        <span class="invoice-detail__balance-value">
+          {formatCurrency(invoice.total) || "$0"}
+        </span>
+      </div>
+      <div class="invoice-detail__balance-item">
+        <span class="invoice-detail__balance-label">Paid</span>
+        <span class="invoice-detail__balance-value invoice-detail__balance-value--paid">
+          {formatCurrency(invoice.paidAmount) || "$0"}
+        </span>
+      </div>
+      {balance > 0 && (
+        <div class="invoice-detail__balance-item">
+          <span class="invoice-detail__balance-label">Balance Due</span>
+          <span class="invoice-detail__balance-value invoice-detail__balance-value--due">
+            {formatCurrency(balance) || "$0"}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const InvoiceFooter: FC<
+  { invoice: Invoice; billingConfig: ProjectConfig; editing: boolean }
+> = ({ invoice, billingConfig, editing }) => {
+  if (editing) {
+    return <InlineEditSection invoice={invoice} field="footer" title="Terms" />;
+  }
+  if (!(invoice.footer || billingConfig.billingDefaultFooter)) return null;
+  return (
+    <section class="detail-section invoice-detail__footer">
+      <h2 class="section-heading">Terms</h2>
+      <p>{invoice.footer || billingConfig.billingDefaultFooter}</p>
+    </section>
+  );
+};
+
+const InvoiceMetaRow: FC<{ invoice: Invoice }> = ({ invoice }) => {
+  if (!(invoice.sentAt || invoice.paidAt)) return null;
+  return (
+    <div class="detail-section invoice-detail__meta">
+      {invoice.sentAt && <span>Sent {formatDate(invoice.sentAt)}</span>}
+      {invoice.paidAt && <span>Paid {formatDate(invoice.paidAt)}</span>}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Main view — thin shell composing the sections above.
 // ---------------------------------------------------------------------------
 
 export const InvoiceDetailView: FC<
@@ -65,8 +194,6 @@ export const InvoiceDetailView: FC<
     ...viewProps
   },
 ) => {
-  const balance = invoice.total - invoice.paidAmount;
-
   return (
     <MainLayout
       title={`${invoice.number} — ${invoice.title}`}
@@ -95,102 +222,18 @@ export const InvoiceDetailView: FC<
 
         <BillingDocumentHeader config={billingConfig} />
 
-        {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section detail-header invoice-detail__header">
-          <div class="detail-title-row invoice-detail__title-row">
-            <h1 class="detail-title invoice-detail__title">
-              {invoice.number}
-              <span class="invoice-detail__title-sep">&mdash;</span>
-              {invoice.title}
-            </h1>
-            <span class={badgeClass(INVOICE_STATUS_VARIANTS, displayStatus)}>
-              {displayStatus}
-            </span>
-          </div>
-          <div class="invoice-detail__actions-row">
-            <DetailActions
-              entity="invoices"
-              id={invoice.id}
-              title={invoice.title}
-              formContainerId="invoices-form-container"
-              archived={invoice.archived === true}
-            >
-              <EditModeToggle
-                href={`/invoices/${invoice.id}`}
-                editing={editing}
-              />
-            </DetailActions>
-            {invoice.status === "draft" && (
-              <button
-                class="btn btn--primary btn--sm"
-                type="button"
-                hx-post={`/invoices/${invoice.id}/send`}
-                hx-confirm="Send this invoice?"
-                hx-swap="none"
-              >
-                Send
-              </button>
-            )}
-            <a
-              class="btn btn--secondary btn--sm invoice-detail__print-btn"
-              href={`/invoices/${invoice.id}/print`}
-              target="_blank"
-              rel="noopener"
-            >
-              Print / Save as PDF
-            </a>
-          </div>
-        </header>
+        <InvoiceHeader
+          invoice={invoice}
+          displayStatus={displayStatus}
+          editing={editing}
+        />
 
         <ArchivedBanner entity={invoice} />
 
-        {/* -- Info ------------------------------------------------------- */}
-        <div class="detail-section detail-info-row">
-          <InfoItem label="Customer">
-            <a href={`/customers/${invoice.customerId}`}>
-              {invoice.customerId}
-            </a>
-          </InfoItem>
-          {invoice.quoteId && (
-            <InfoItem label="Quote">
-              <a href={`/quotes/${invoice.quoteId}`}>{invoice.quoteId}</a>
-            </InfoItem>
-          )}
-          {invoice.currency && (
-            <InfoItem label="Currency">{invoice.currency}</InfoItem>
-          )}
-          {invoice.dueDate && <InfoItem label="Due">{invoice.dueDate}
-          </InfoItem>}
-          {invoice.paymentTerms && (
-            <InfoItem label="Terms">{invoice.paymentTerms}</InfoItem>
-          )}
-        </div>
+        <InvoiceInfoRow invoice={invoice} />
 
-        {/* -- Balance --------------------------------------------------- */}
-        <div class="detail-section invoice-detail__balance">
-          <div class="invoice-detail__balance-item">
-            <span class="invoice-detail__balance-label">Total</span>
-            <span class="invoice-detail__balance-value">
-              {formatCurrency(invoice.total) || "$0"}
-            </span>
-          </div>
-          <div class="invoice-detail__balance-item">
-            <span class="invoice-detail__balance-label">Paid</span>
-            <span class="invoice-detail__balance-value invoice-detail__balance-value--paid">
-              {formatCurrency(invoice.paidAmount) || "$0"}
-            </span>
-          </div>
-          {balance > 0 && (
-            <div class="invoice-detail__balance-item">
-              <span class="invoice-detail__balance-label">Balance Due</span>
-              <span class="invoice-detail__balance-value invoice-detail__balance-value--due">
-                {formatCurrency(balance) || "$0"}
-              </span>
-            </div>
-          )}
-        </div>
+        <InvoiceBalance invoice={invoice} />
 
-        {/* -- Line items ------------------------------------------------ */}
         <section class="detail-section">
           <h2 class="section-heading">Line Items</h2>
           <LineItemsTable items={invoice.lineItems} />
@@ -203,28 +246,18 @@ export const InvoiceDetailView: FC<
           />
         </section>
 
-        {/* -- Footer ---------------------------------------------------- */}
-        {editing
-          ? <InlineEditSection invoice={invoice} field="footer" title="Terms" />
-          : (invoice.footer || billingConfig.billingDefaultFooter) && (
-            <section class="detail-section invoice-detail__footer">
-              <h2 class="section-heading">Terms</h2>
-              <p>{invoice.footer || billingConfig.billingDefaultFooter}</p>
-            </section>
-          )}
+        <InvoiceFooter
+          invoice={invoice}
+          billingConfig={billingConfig}
+          editing={editing}
+        />
 
-        {/* -- Notes ------------------------------------------------------ */}
         {editing
           ? <InlineEditSection invoice={invoice} field="notes" title="Notes" />
           : <MarkdownSection title="Notes" markdown={invoice.notes} />}
 
-        {/* -- Meta ------------------------------------------------------- */}
-        {(invoice.sentAt || invoice.paidAt) && (
-          <div class="detail-section invoice-detail__meta">
-            {invoice.sentAt && <span>Sent {formatDate(invoice.sentAt)}</span>}
-            {invoice.paidAt && <span>Paid {formatDate(invoice.paidAt)}</span>}
-          </div>
-        )}
+        <InvoiceMetaRow invoice={invoice} />
+
         <AuditMeta
           createdAt={invoice.createdAt}
           updatedAt={invoice.updatedAt}

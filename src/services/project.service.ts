@@ -11,6 +11,30 @@ import { WEEKDAYS } from "../constants/mod.ts";
 
 type Weekday = typeof WEEKDAYS[number];
 
+// Fields updateConfig copies through from a partial update, in declaration
+// order. Excludes sectionOrder/kpiMetrics/milestoneStatuses (own setters).
+const UPDATE_CONFIG_KEYS = [
+  "name",
+  "description",
+  "startDate",
+  "workingDaysPerWeek",
+  "workingDays",
+  "tags",
+  "links",
+  "features",
+  "navCategories",
+  "locale",
+  "currency",
+  "port",
+  "staleDays",
+  "hideCompletedAfterDays",
+  "githubToken",
+  "cloudflareToken",
+  "pipelinesPerPage",
+  "tasksPerSection",
+  "cerveauDir",
+] as const satisfies readonly (keyof UpdateProjectConfig)[];
+
 /** Project configuration service (no entity repository): reads/updates project config — features, schedule, tags, links, section order, nav categories, KPI metrics, milestone statuses. */
 export class ProjectService {
   constructor(private repo: ProjectRepository) {}
@@ -21,37 +45,11 @@ export class ProjectService {
 
   async updateConfig(data: UpdateProjectConfig): Promise<ProjectConfig> {
     const current = await this.repo.read();
-    if (data.name !== undefined) current.name = data.name;
-    if (data.description !== undefined) current.description = data.description;
-    if (data.startDate !== undefined) current.startDate = data.startDate;
-    if (data.workingDaysPerWeek !== undefined) {
-      current.workingDaysPerWeek = data.workingDaysPerWeek;
+    // Whitelist: sectionOrder/kpiMetrics/milestoneStatuses are owned by their
+    // own update* methods and intentionally excluded here.
+    for (const k of UPDATE_CONFIG_KEYS) {
+      if (data[k] !== undefined) Object.assign(current, { [k]: data[k] });
     }
-    if (data.workingDays !== undefined) current.workingDays = data.workingDays;
-    if (data.tags !== undefined) current.tags = data.tags;
-    if (data.links !== undefined) current.links = data.links;
-    if (data.features !== undefined) current.features = data.features;
-    if (data.navCategories !== undefined) {
-      current.navCategories = data.navCategories;
-    }
-    if (data.locale !== undefined) current.locale = data.locale;
-    if (data.currency !== undefined) current.currency = data.currency;
-    if (data.port !== undefined) current.port = data.port;
-    if (data.staleDays !== undefined) current.staleDays = data.staleDays;
-    if (data.hideCompletedAfterDays !== undefined) {
-      current.hideCompletedAfterDays = data.hideCompletedAfterDays;
-    }
-    if (data.githubToken !== undefined) current.githubToken = data.githubToken;
-    if (data.cloudflareToken !== undefined) {
-      current.cloudflareToken = data.cloudflareToken;
-    }
-    if (data.pipelinesPerPage !== undefined) {
-      current.pipelinesPerPage = data.pipelinesPerPage;
-    }
-    if (data.tasksPerSection !== undefined) {
-      current.tasksPerSection = data.tasksPerSection;
-    }
-    if (data.cerveauDir !== undefined) current.cerveauDir = data.cerveauDir;
     await this.repo.write(current);
     return current;
   }
