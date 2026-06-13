@@ -16,6 +16,9 @@ import {
 } from "../domains/marketing-plan/cache.ts";
 
 import {
+  fmNum,
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -108,15 +111,13 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
 
     return {
       id,
-      name: fm.name ? String(fm.name) : "",
-      description: fm.description != null ? String(fm.description) : undefined,
+      name: fmStr(fm, "name") ?? "",
+      description: fmStr(fm, "description"),
       status: (fm.status as MarketingPlan["status"]) ?? "draft",
-      budgetTotal: fm.budgetTotal != null ? Number(fm.budgetTotal) : undefined,
-      budgetCurrency: fm.budgetCurrency != null
-        ? String(fm.budgetCurrency)
-        : undefined,
-      startDate: fm.startDate != null ? String(fm.startDate) : undefined,
-      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
+      budgetTotal: fmNum(fm, "budgetTotal"),
+      budgetCurrency: fmStr(fm, "budgetCurrency"),
+      startDate: fmStr(fm, "startDate"),
+      endDate: fmStr(fm, "endDate"),
       targetAudiences: this.parseArray<MarketingTargetAudience>(
         fm.targetAudiences,
         (raw) => ({
@@ -142,14 +143,10 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
         fm.campaigns,
         parseCampaign,
       ),
-      linkedGoals: Array.isArray(fm.linkedGoals)
-        ? (fm.linkedGoals as unknown[]).map(String)
-        : undefined,
-      project: fm.project != null ? String(fm.project) : undefined,
-      responsible: fm.responsible != null ? String(fm.responsible) : undefined,
-      team: Array.isArray(fm.team)
-        ? (fm.team as unknown[]).map(String)
-        : undefined,
+      linkedGoals: fmStrArr(fm, "linkedGoals"),
+      project: fmStr(fm, "project"),
+      responsible: fmStr(fm, "responsible"),
+      team: fmStrArr(fm, "team"),
       hypothesis: this.parseArray(
         fm.hypothesis,
         (raw) => ({
@@ -162,10 +159,10 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
         (raw) => ({ text: String(raw.text ?? raw) }),
       ),
       notes: body.trim() || undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

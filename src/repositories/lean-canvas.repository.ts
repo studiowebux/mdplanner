@@ -88,24 +88,16 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
       : "";
 
     const sections = this.parseSections(bodyText);
+    const sectionFields = Object.fromEntries(
+      LEAN_CANVAS_SECTIONS.map((s) => [s.key, sections[s.key] ?? []]),
+    ) as Record<LeanCanvasSectionKey, string[]>;
 
     return {
       id,
       title,
       project: fmStr(fm, "project"),
       date: fmStr(fm, "date"),
-      problem: sections.problem ?? [],
-      solution: sections.solution ?? [],
-      uniqueValueProp: sections.uniqueValueProp ?? [],
-      unfairAdvantage: sections.unfairAdvantage ?? [],
-      customerSegments: sections.customerSegments ?? [],
-      existingAlternatives: sections.existingAlternatives ?? [],
-      keyMetrics: sections.keyMetrics ?? [],
-      highLevelConcept: sections.highLevelConcept ?? [],
-      channels: sections.channels ?? [],
-      earlyAdopters: sections.earlyAdopters ?? [],
-      costStructure: sections.costStructure ?? [],
-      revenueStreams: sections.revenueStreams ?? [],
+      ...sectionFields,
       completedSections: 0,
       sectionCount: 0,
       completionPct: 0,
