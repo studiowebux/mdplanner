@@ -12,9 +12,45 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { HABIT_TABLE, rowToHabit } from "../domains/habit/cache.ts";
 
 import {
+  fmNum,
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
+
+/** Extract the body title (first `# heading`) and trailing description. */
+function parseHabitBody(body: string): {
+  bodyTitle: string;
+  description?: string;
+} {
+  let bodyTitle = "";
+  const descLines: string[] = [];
+  for (const line of body.split("\n")) {
+    if (line.startsWith("# ")) {
+      if (!bodyTitle) bodyTitle = line.slice(2).trim();
+      continue;
+    }
+    descLines.push(line);
+  }
+  return { bodyTitle, description: descLines.join("\n").trim() || undefined };
+}
+
+/** Normalize the frontmatter completedDates payload into CompletionEntry[]. */
+function parseCompletionEntries(raw: unknown): CompletionEntry[] {
+  const arr: unknown[] = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+    ? JSON.parse(raw)
+    : [];
+  return arr.map((entry) =>
+    typeof entry === "string" ? { date: entry } : {
+      date: String((entry as Record<string, unknown>).date ?? ""),
+      note: (entry as Record<string, unknown>).note as string | undefined,
+      userId: (entry as Record<string, unknown>).userId as string | undefined,
+    }
+  );
+}
+
 /** Persists Habit entities as markdown with a SQLite cache mirror; per-user completions live in the body. */
 export class HabitRepository extends CachedMarkdownRepository<
   Habit,
@@ -56,54 +92,29 @@ export class HabitRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = resolveEntityId(filename, fm);
 
-    const lines = body.split("\n");
-    let title = fm.title ? String(fm.title) : fm.name ? String(fm.name) : "";
-    const descLines: string[] = [];
-
-    for (const line of lines) {
-      if (line.startsWith("# ")) {
-        if (!title) title = line.slice(2).trim();
-        continue;
-      }
-      descLines.push(line);
-    }
-
-    const description = descLines.join("\n").trim() || undefined;
-
     // mapKeysFromFm has already converted snake_case → camelCase
-    const rawDates: unknown[] = Array.isArray(fm.completedDates)
-      ? fm.completedDates
-      : typeof fm.completedDates === "string"
-      ? JSON.parse(fm.completedDates)
-      : [];
-    const completedDates: CompletionEntry[] = rawDates.map((entry) =>
-      typeof entry === "string" ? { date: entry } : {
-        date: String((entry as Record<string, unknown>).date ?? ""),
-        note: (entry as Record<string, unknown>).note as string | undefined,
-        userId: (entry as Record<string, unknown>).userId as string | undefined,
-      }
-    );
+    const { bodyTitle, description } = parseHabitBody(body);
+    const title = fmStr(fm, "title") ?? fmStr(fm, "name") ?? bodyTitle;
+    const completedDates = parseCompletionEntries(fm.completedDates);
 
     return {
       id,
       title: title || "Untitled Habit",
       description,
       frequency: (fm.frequency as Habit["frequency"]) ?? "daily",
-      targetPerPeriod: fm.targetPerPeriod != null
-        ? Number(fm.targetPerPeriod)
-        : 1,
-      unit: fm.unit != null ? String(fm.unit) : undefined,
+      targetPerPeriod: fmNum(fm, "targetPerPeriod") ?? 1,
+      unit: fmStr(fm, "unit"),
       completedDates,
-      color: fm.color != null ? String(fm.color) : undefined,
+      color: fmStr(fm, "color"),
       tags: Array.isArray(fm.tags)
         ? fm.tags.map(String)
         : fm.tags != null
         ? [String(fm.tags)]
         : [],
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

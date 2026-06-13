@@ -14,11 +14,13 @@ import {
   CreatePortfolioItemSchema,
   type PortfolioDashboardItem,
   PortfolioDashboardSchema,
+  type PortfolioItem,
   PortfolioItemSchema,
   PortfolioStatusUpdateSchema,
   PortfolioSummarySchema,
   UpdatePortfolioItemSchema,
 } from "../../../types/portfolio.types.ts";
+import type { Task } from "../../../types/task.types.ts";
 import {
   errorContent,
   IdParam,
@@ -135,6 +137,73 @@ const dashboardRoute = createRoute({
   },
 });
 
+/** Task counts per section abbreviation (e.g. "In Progress" → "IP"). */
+function computeTaskCounts(
+  projectTasks: Task[],
+  sections: readonly string[],
+): Record<string, number> {
+  const tasks: Record<string, number> = {};
+  for (const section of sections) {
+    const abbrev = section.split(/\s+/).map((w) => w[0].toUpperCase()).join("");
+    tasks[abbrev] = projectTasks.filter((t) =>
+      ciEquals(t.section, section)
+    ).length;
+  }
+  return tasks;
+}
+
+/** Most recent updatedAt across the item's tasks + status updates. */
+function computeLastActivity(
+  projectTasks: Task[],
+  item: PortfolioItem,
+): string | null {
+  let lastActivity: string | null = null;
+  for (const t of projectTasks) {
+    if (t.updatedAt && (!lastActivity || t.updatedAt > lastActivity)) {
+      lastActivity = t.updatedAt;
+    }
+  }
+  if (item.updatedAt && (!lastActivity || item.updatedAt > lastActivity)) {
+    lastActivity = item.updatedAt;
+  }
+  for (const su of item.statusUpdates ?? []) {
+    if (su.date && (!lastActivity || su.date > lastActivity)) {
+      lastActivity = su.date;
+    }
+  }
+  return lastActivity;
+}
+
+/** GitHub repo/CI summary for a portfolio item — null when absent or on error. */
+async function fetchGithubData(
+  item: PortfolioItem,
+  githubSvc: ReturnType<typeof getGitHubService>,
+): Promise<PortfolioDashboardItem["github"]> {
+  if (!item.githubRepo) return null;
+  try {
+    const [repo, { runs }] = await Promise.all([
+      githubSvc.getRepo(item.githubRepo),
+      githubSvc.listWorkflowRuns(item.githubRepo, { perPage: 10 }),
+    ]);
+    const completed = runs.filter((r) => r.status === "completed");
+    const successes = completed.filter((r) => r.conclusion === "success");
+    return {
+      lastCommitDate: repo.lastCommitAt,
+      openPrs: repo.openPRs,
+      openIssues: repo.openIssues,
+      ciSuccessRate: completed.length > 0
+        ? Math.round((successes.length / completed.length) * 100)
+        : null,
+    };
+  } catch (err) {
+    log.warn(
+      `[portfolio-api] GitHub data fetch failed for ${item.githubRepo}:`,
+      err,
+    );
+    return null;
+  }
+}
+
 portfolioRouter.openapi(dashboardRoute, async (c) => {
   const [items, allTasks, allMilestones] = await Promise.all([
     getPortfolioService().list(),
@@ -162,11 +231,7 @@ portfolioRouter.openapi(dashboardRoute, async (c) => {
     else milestonesByProject.set(key, [m]);
   }
 
-  // Build section abbreviation map from project config
-  // e.g. "Backlog" → "B", "In Progress" → "IP", "Pending Review" → "PR"
   const sections = getSectionOrder();
-  const sectionAbbrev = (name: string) =>
-    name.split(/\s+/).map((w) => w[0].toUpperCase()).join("");
 
   const dashboard: PortfolioDashboardItem[] = await Promise.all(
     items.map(async (item) => {
@@ -174,72 +239,9 @@ portfolioRouter.openapi(dashboardRoute, async (c) => {
       const projectMilestones = milestonesByProject.get(
         item.name.toLowerCase(),
       ) ?? [];
-
-      // Task counts keyed by section abbreviation
-      const tasks: Record<string, number> = {};
-      for (const section of sections) {
-        const abbrev = sectionAbbrev(section);
-        tasks[abbrev] = projectTasks.filter((t) =>
-          ciEquals(t.section, section)
-        ).length;
-      }
-
-      // Last activity: most recent updatedAt across tasks + status updates
-      let lastActivity: string | null = null;
-      for (const t of projectTasks) {
-        if (t.updatedAt && (!lastActivity || t.updatedAt > lastActivity)) {
-          lastActivity = t.updatedAt;
-        }
-      }
-      if (item.updatedAt && (!lastActivity || item.updatedAt > lastActivity)) {
-        lastActivity = item.updatedAt;
-      }
-      for (const su of item.statusUpdates ?? []) {
-        if (su.date && (!lastActivity || su.date > lastActivity)) {
-          lastActivity = su.date;
-        }
-      }
-
-      // Active milestone: first open milestone, with completion %
-      const activeMilestone = projectMilestones.find(
-        (m) => m.status === "open",
+      const activeMilestone = projectMilestones.find((m) =>
+        m.status === "open"
       );
-      const milestone = activeMilestone
-        ? {
-          name: activeMilestone.name,
-          completionPct: activeMilestone.progress ?? 0,
-        }
-        : null;
-
-      // GitHub data — fetched in parallel, null on error
-      let github: PortfolioDashboardItem["github"] = null;
-      if (item.githubRepo) {
-        try {
-          const [repo, { runs }] = await Promise.all([
-            githubSvc.getRepo(item.githubRepo),
-            githubSvc.listWorkflowRuns(item.githubRepo, {
-              perPage: 10,
-            }),
-          ]);
-          const completed = runs.filter((r) => r.status === "completed");
-          const successes = completed.filter(
-            (r) => r.conclusion === "success",
-          );
-          github = {
-            lastCommitDate: repo.lastCommitAt,
-            openPrs: repo.openPRs,
-            openIssues: repo.openIssues,
-            ciSuccessRate: completed.length > 0
-              ? Math.round((successes.length / completed.length) * 100)
-              : null,
-          };
-        } catch (err) {
-          log.warn(
-            `[portfolio-api] GitHub data fetch failed for ${item.githubRepo}:`,
-            err,
-          );
-        }
-      }
 
       return {
         id: item.id,
@@ -247,10 +249,15 @@ portfolioRouter.openapi(dashboardRoute, async (c) => {
         status: item.status,
         category: item.category,
         githubRepo: item.githubRepo,
-        tasks,
-        lastActivity,
-        milestone,
-        github,
+        tasks: computeTaskCounts(projectTasks, sections),
+        lastActivity: computeLastActivity(projectTasks, item),
+        milestone: activeMilestone
+          ? {
+            name: activeMilestone.name,
+            completionPct: activeMilestone.progress ?? 0,
+          }
+          : null,
+        github: await fetchGithubData(item, githubSvc),
       };
     }),
   );

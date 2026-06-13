@@ -183,34 +183,47 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
 
   protected serialize(item: MarketingPlan): string {
     const fm: Record<string, unknown> = {};
+    // truthy = emit when truthy; defined = emit when != null; array = non-empty.
+    const set = (
+      key: string,
+      v: unknown,
+      mode: "truthy" | "defined" | "array",
+    ) => {
+      if (mode === "truthy") {
+        if (v) fm[key] = v;
+      } else if (mode === "defined") {
+        if (v != null) fm[key] = v;
+      } else if (Array.isArray(v) && v.length) {
+        fm[key] = v;
+      }
+    };
+
     fm.name = item.name;
-    if (item.description) fm.description = item.description;
+    set("description", item.description, "truthy");
     fm.status = item.status;
-    if (item.budgetTotal != null) fm.budget_total = item.budgetTotal;
-    if (item.budgetCurrency) fm.budget_currency = item.budgetCurrency;
-    if (item.startDate) fm.start_date = item.startDate;
-    if (item.endDate) fm.end_date = item.endDate;
-    if (item.targetAudiences?.length) {
-      fm.target_audiences = item.targetAudiences;
-    }
-    if (item.channels?.length) fm.channels = item.channels;
+    set("budget_total", item.budgetTotal, "defined");
+    set("budget_currency", item.budgetCurrency, "truthy");
+    set("start_date", item.startDate, "truthy");
+    set("end_date", item.endDate, "truthy");
+    set("target_audiences", item.targetAudiences, "array");
+    set("channels", item.channels, "array");
     if (item.campaigns?.length) {
       fm.campaigns = item.campaigns.map(serializeCampaign);
     }
-    if (item.linkedGoals?.length) fm.linked_goals = item.linkedGoals;
-    if (item.project) fm.project = item.project;
-    if (item.responsible) fm.responsible = item.responsible;
-    if (item.team?.length) fm.team = item.team;
-    if (item.hypothesis?.length) fm.hypothesis = item.hypothesis;
-    if (item.learnings?.length) fm.learnings = item.learnings;
+    set("linked_goals", item.linkedGoals, "array");
+    set("project", item.project, "truthy");
+    set("responsible", item.responsible, "truthy");
+    set("team", item.team, "array");
+    set("hypothesis", item.hypothesis, "array");
+    set("learnings", item.learnings, "array");
     fm.created_at = item.createdAt;
     fm.updated_at = item.updatedAt;
-    if (item.createdBy) fm.created_by = item.createdBy;
-    if (item.updatedBy) fm.updated_by = item.updatedBy;
+    set("created_by", item.createdBy, "truthy");
+    set("updated_by", item.updatedBy, "truthy");
     // Preserve archive fields — custom serializers must round-trip these.
-    if (item.archived) fm.archived = item.archived;
-    if (item.archivedAt) fm.archived_at = item.archivedAt;
-    if (item.archivedBy) fm.archived_by = item.archivedBy;
+    set("archived", item.archived, "truthy");
+    set("archived_at", item.archivedAt, "truthy");
+    set("archived_by", item.archivedBy, "truthy");
 
     return serializeFrontmatter(fm, item.notes ?? "");
   }

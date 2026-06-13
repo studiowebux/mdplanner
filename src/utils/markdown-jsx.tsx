@@ -20,22 +20,72 @@ function blocks(tokens: Token[], render?: TextRender): Child[] {
   return tokens.map((t) => block(t, render));
 }
 
+function headingBlock(h: Tokens.Heading, render?: TextRender): Child {
+  const c = inlines(h.tokens, render);
+  if (h.depth === 1) return <h1>{c}</h1>;
+  if (h.depth === 2) return <h2>{c}</h2>;
+  if (h.depth === 3) return <h3>{c}</h3>;
+  if (h.depth === 4) return <h4>{c}</h4>;
+  if (h.depth === 5) return <h5>{c}</h5>;
+  return <h6>{c}</h6>;
+}
+
+function codeBlock(c: Tokens.Code): Child {
+  return (
+    <div class="code-block">
+      <div class="code-block__header">
+        {c.lang && <span class="code-block__lang">{c.lang}</span>}
+        <button type="button" class="code-block__copy" data-action="copy-code">
+          Copy
+        </button>
+      </div>
+      <pre class="note-detail__code">
+        <code class={c.lang ? `language-${c.lang}` : undefined}>{c.text}</code>
+      </pre>
+    </div>
+  );
+}
+
+function listBlock(l: Tokens.List, render?: TextRender): Child {
+  const items = l.items.map((item, i) => (
+    <li key={i}>{blocks(item.tokens, render)}</li>
+  ));
+  return l.ordered
+    ? <ol start={l.start || undefined}>{items}</ol>
+    : <ul>{items}</ul>;
+}
+
+function tableBlock(tb: Tokens.Table, render?: TextRender): Child {
+  return (
+    <table>
+      <thead>
+        <tr>
+          {tb.header.map((cell, i) => (
+            <th key={i} scope="col">{inlines(cell.tokens, render)}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {tb.rows.map((row) => (
+          <tr>
+            {row.map((cell, ci) => (
+              <td key={ci}>{inlines(cell.tokens, render)}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 function block(t: Token, render?: TextRender): Child {
   switch (t.type) {
     case "space":
       return null;
     case "paragraph":
       return <p>{inlines((t as Tokens.Paragraph).tokens, render)}</p>;
-    case "heading": {
-      const h = t as Tokens.Heading;
-      const c = inlines(h.tokens, render);
-      if (h.depth === 1) return <h1>{c}</h1>;
-      if (h.depth === 2) return <h2>{c}</h2>;
-      if (h.depth === 3) return <h3>{c}</h3>;
-      if (h.depth === 4) return <h4>{c}</h4>;
-      if (h.depth === 5) return <h5>{c}</h5>;
-      return <h6>{c}</h6>;
-    }
+    case "heading":
+      return headingBlock(t as Tokens.Heading, render);
     case "blockquote":
       return (
         <blockquote>
@@ -44,60 +94,12 @@ function block(t: Token, render?: TextRender): Child {
       );
     case "hr":
       return <hr />;
-    case "code": {
-      const c = t as Tokens.Code;
-      return (
-        <div class="code-block">
-          <div class="code-block__header">
-            {c.lang && <span class="code-block__lang">{c.lang}</span>}
-            <button
-              type="button"
-              class="code-block__copy"
-              data-action="copy-code"
-            >
-              Copy
-            </button>
-          </div>
-          <pre class="note-detail__code">
-            <code class={c.lang ? `language-${c.lang}` : undefined}>
-              {c.text}
-            </code>
-          </pre>
-        </div>
-      );
-    }
-    case "list": {
-      const l = t as Tokens.List;
-      const items = l.items.map((item, i) => (
-        <li key={i}>{blocks(item.tokens, render)}</li>
-      ));
-      return l.ordered
-        ? <ol start={l.start || undefined}>{items}</ol>
-        : <ul>{items}</ul>;
-    }
-    case "table": {
-      const tb = t as Tokens.Table;
-      return (
-        <table>
-          <thead>
-            <tr>
-              {tb.header.map((cell, i) => (
-                <th key={i} scope="col">{inlines(cell.tokens, render)}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tb.rows.map((row) => (
-              <tr>
-                {row.map((cell, ci) => (
-                  <td key={ci}>{inlines(cell.tokens, render)}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-    }
+    case "code":
+      return codeBlock(t as Tokens.Code);
+    case "list":
+      return listBlock(t as Tokens.List, render);
+    case "table":
+      return tableBlock(t as Tokens.Table, render);
     case "text": {
       const tx = t as Tokens.Text;
       return tx.tokens
