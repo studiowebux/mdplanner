@@ -420,6 +420,13 @@ const SectionJumpBar: FC<{ sections: string[] }> = ({ sections }) => (
 // select + button pairing; no JS (native <details> popover, htmx-only).
 // ---------------------------------------------------------------------------
 
+// Shared hx-include for every bulk-bar action: the checked row checkboxes, the
+// hidden `allSection` inputs (per-section select-all — task-list.js fills
+// #task-bulk-extra), and the toolbar so the server resolves "select all" against
+// the SAME filter state the user sees (htmx forces omitted toggles to false).
+const BULK_INCLUDE =
+  ".task-list__select:checked, #task-bulk-extra, #tasks-toolbar";
+
 const BulkFieldRow: FC<
   { label: string; endpoint: string; controlId: string; children: Child }
 > = ({ label, endpoint, controlId, children }) => (
@@ -430,7 +437,7 @@ const BulkFieldRow: FC<
       type="button"
       class="btn btn--secondary btn--sm"
       hx-post={endpoint}
-      hx-include={`.task-list__select:checked, #${controlId}`}
+      hx-include={`${BULK_INCLUDE}, #${controlId}`}
       hx-swap="none"
     >
       Apply
@@ -583,6 +590,12 @@ export const TaskListView: FC<ListProps> = (
         <span class="task-list__bulk-count" id="task-bulk-count">
           0 selected
         </span>
+        {
+          /* Per-section select-all writes hidden `allSection` inputs here;
+            every bulk action includes them so the server resolves the whole
+            filtered section (task-list.js). */
+        }
+        <span id="task-bulk-extra" hidden />
         <select
           class="form__select form__select--sm"
           id="task-bulk-section"
@@ -597,7 +610,7 @@ export const TaskListView: FC<ListProps> = (
           class="btn btn--secondary btn--sm"
           id="task-bulk-move"
           hx-post="/tasks/batch-move"
-          hx-include=".task-list__select:checked, #task-bulk-section"
+          hx-include={`${BULK_INCLUDE}, #task-bulk-section`}
           hx-swap="none"
         >
           Move
@@ -607,7 +620,7 @@ export const TaskListView: FC<ListProps> = (
           class="btn btn--secondary btn--sm"
           id="task-bulk-complete"
           hx-post="/tasks/batch-complete"
-          hx-include=".task-list__select:checked"
+          hx-include={BULK_INCLUDE}
           hx-swap="none"
         >
           Mark complete
@@ -617,7 +630,7 @@ export const TaskListView: FC<ListProps> = (
           class="btn btn--danger btn--sm"
           id="task-bulk-delete"
           hx-post="/tasks/batch-delete"
-          hx-include=".task-list__select:checked"
+          hx-include={BULK_INCLUDE}
           hx-swap="none"
           hx-confirm="Delete the selected tasks? They can be restored from the archive."
         >
@@ -638,7 +651,7 @@ export const TaskListView: FC<ListProps> = (
             class="btn btn--secondary btn--sm"
             id="task-bulk-tag-add"
             hx-post="/tasks/batch-tag"
-            hx-include=".task-list__select:checked, #task-bulk-tag"
+            hx-include={`${BULK_INCLUDE}, #task-bulk-tag`}
             hx-vals='{"mode": "add"}'
             hx-swap="none"
           >
@@ -649,7 +662,7 @@ export const TaskListView: FC<ListProps> = (
             class="btn btn--secondary btn--sm"
             id="task-bulk-tag-remove"
             hx-post="/tasks/batch-tag"
-            hx-include=".task-list__select:checked, #task-bulk-tag"
+            hx-include={`${BULK_INCLUDE}, #task-bulk-tag`}
             hx-vals='{"mode": "remove"}'
             hx-swap="none"
           >

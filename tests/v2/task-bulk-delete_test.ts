@@ -71,6 +71,44 @@ Deno.test("bulk-delete — POST /tasks/batch-delete archives checked tasks", asy
     );
 
     await t.step(
+      "allSection resolves every task in the section server-side (beyond page size)",
+      async () => {
+        // More tasks than any page size — none of these are sent as taskId, the
+        // server must resolve them from the `allSection` flag alone.
+        const ids: string[] = [];
+        for (let i = 0; i < 30; i++) {
+          const tk = await service.create({
+            title: `Sweep ${i}`,
+            section: "Backlog",
+          });
+          ids.push(tk.id);
+        }
+        const other = await service.create({
+          title: "Other section",
+          section: "Todo",
+        });
+
+        const form = new URLSearchParams();
+        form.append("allSection", "Backlog");
+        const res = await viewRouter.request(
+          new Request("http://localhost/batch-delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: form.toString(),
+          }),
+        );
+        assertEquals(res.status, 204);
+        await res.body?.cancel();
+
+        for (const id of ids) {
+          assertEquals((await service.getById(id))!.archived, true);
+        }
+        // A task outside the section is untouched.
+        assertEquals((await service.getById(other.id))!.archived, undefined);
+      },
+    );
+
+    await t.step(
       "list view delete button is htmx-wired + checkbox carries name/value",
       async () => {
         const task = await service.create({
@@ -87,8 +125,11 @@ Deno.test("bulk-delete — POST /tasks/batch-delete archives checked tasks", asy
           "delete button must POST to /tasks/batch-delete via htmx",
         );
         assert(
-          html.includes('hx-include=".task-list__select:checked"'),
-          "delete button must include checked row checkboxes",
+          html.includes(
+            'hx-include=".task-list__select:checked, #task-bulk-extra, #tasks-toolbar"',
+          ),
+          "delete button must include checked row checkboxes + the per-section " +
+            "select-all (#task-bulk-extra) + the toolbar filter state",
         );
         assert(
           html.includes('name="taskId"') &&

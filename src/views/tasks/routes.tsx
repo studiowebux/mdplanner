@@ -468,6 +468,31 @@ function parseTaskIds(raw: unknown): string[] {
   return raw != null ? [String(raw)] : [];
 }
 
+// Resolve the target task IDs for a bulk-bar action. Unions the explicitly
+// checked `taskId` fields with every live task in any section flagged via
+// `allSection` (the per-section select-all). The section IDs are resolved
+// server-side through the IDENTICAL filter pipeline as /more-section
+// (loadFilteredItems + the request's filterState), so "select all" covers the
+// whole filtered section regardless of how many rows are paginated into the
+// DOM — no "Load more" spam required.
+async function resolveBulkIds(
+  c: AppContext,
+  body: Record<string, unknown>,
+): Promise<string[]> {
+  const ids = new Set(parseTaskIds(body["taskId"]));
+  const sections = parseTaskIds(body["allSection"]);
+  if (sections.length > 0) {
+    const want = new Set(sections);
+    const state = c.get("filterState" as never) as DomainFilterState;
+    const { helpers } = resolveDomainHelpers(taskConfig);
+    const { filtered } = await loadFilteredItems(c, taskConfig, helpers, state);
+    for (const t of filtered) {
+      if (t.archived !== true && want.has(t.section)) ids.add(t.id);
+    }
+  }
+  return Array.from(ids);
+}
+
 // POST /reorder — SortableJS drag reorder/move. Reads the target
 // `reorderSection` plus the ordered `sid` fields (one hidden input per row, in
 // post-drag DOM order) and reconciles section + order in a single pass. A
@@ -512,7 +537,7 @@ tasksRouter.post("/reorder", async (c) => {
 // to refresh so the deleted rows drop out of the list.
 tasksRouter.post("/batch-delete", async (c) => {
   const body = await c.req.parseBody({ all: true });
-  const ids = parseTaskIds(body["taskId"]);
+  const ids = await resolveBulkIds(c, body);
 
   for (const id of ids) {
     const task = await getTaskService().getById(id);
@@ -530,7 +555,7 @@ tasksRouter.post("/batch-delete", async (c) => {
 // then refreshes the list.
 tasksRouter.post("/batch-move", async (c) => {
   const body = await c.req.parseBody({ all: true });
-  const ids = parseTaskIds(body["taskId"]);
+  const ids = await resolveBulkIds(c, body);
   const section = String(body["section"] ?? "").trim();
 
   if (ids.length > 0 && section) {
@@ -559,7 +584,7 @@ tasksRouter.post("/batch-move", async (c) => {
 // tasks; archived tasks are skipped.
 tasksRouter.post("/batch-complete", async (c) => {
   const body = await c.req.parseBody({ all: true });
-  const ids = parseTaskIds(body["taskId"]);
+  const ids = await resolveBulkIds(c, body);
 
   if (ids.length > 0) {
     const svc = getTaskService();
@@ -586,7 +611,7 @@ tasksRouter.post("/batch-complete", async (c) => {
 // tag set is computed per task server-side, then the list refreshes.
 tasksRouter.post("/batch-tag", async (c) => {
   const body = await c.req.parseBody({ all: true });
-  const ids = parseTaskIds(body["taskId"]);
+  const ids = await resolveBulkIds(c, body);
   const tag = String(body["tag"] ?? "").trim();
   const mode = String(body["mode"] ?? "add");
 
@@ -628,7 +653,7 @@ async function batchSetField(
   buildPatch: (body: BulkBody) => Partial<UpdateTask> | undefined,
 ) {
   const body = await c.req.parseBody({ all: true });
-  const ids = parseTaskIds(body["taskId"]);
+  const ids = await resolveBulkIds(c, body);
   const patch = buildPatch(body);
 
   if (ids.length > 0 && patch) {

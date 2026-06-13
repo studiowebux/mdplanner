@@ -7,7 +7,13 @@
 // ---------------------------------------------------------------------------
 
 (function () {
+  // Individually checked rows (visible in the DOM).
   var selected = new Set();
+  // Sections whose select-all is on. These act server-side on EVERY task in the
+  // section (all filtered pages), not just the rendered rows — the bulk action
+  // posts a hidden `allSection` input per name (#task-bulk-extra) and the server
+  // resolves the full set. See resolveBulkIds in views/tasks/routes.tsx.
+  var allSections = new Set();
 
   // -- Helpers (always read elements from DOM — survives htmx swaps) ----------
 
@@ -18,13 +24,60 @@
     return document.getElementById("task-bulk-count");
   }
 
+  // Total task count for a section, read from its header count badge — this is
+  // the whole filtered section, not just the paginated-in rows.
+  function sectionTotal(name) {
+    var scb = document.querySelector(
+      ".task-list__select-all-section[data-section='" + name + "']",
+    );
+    var section = scb && scb.closest(".task-list__section");
+    var badge = section &&
+      section.querySelector(".task-list__section-count");
+    var n = badge ? parseInt(badge.textContent || "0", 10) : 0;
+    return isNaN(n) ? 0 : n;
+  }
+
+  // Mirror the allSections set into hidden inputs the bulk actions include.
+  function syncAllSectionInputs() {
+    var holder = document.getElementById("task-bulk-extra");
+    if (!holder) return;
+    holder.textContent = "";
+    allSections.forEach(function (name) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "allSection";
+      input.value = name;
+      holder.appendChild(input);
+    });
+  }
+
   // -- Render -----------------------------------------------------------------
+
+  // Section name a visible checkbox belongs to (its enclosing section's
+  // select-all data-section), or "" if none.
+  function sectionOfBox(box) {
+    var section = box.closest(".task-list__section");
+    var scb = section &&
+      section.querySelector(".task-list__select-all-section");
+    return (scb && scb.getAttribute("data-section")) || "";
+  }
 
   function updateBar() {
     var bar = getBar();
     var countEl = getCountEl();
     if (!bar || !countEl) return;
-    var n = selected.size;
+    // Total = every task in the fully-selected sections (server-side) + the
+    // individually checked rows that live OUTSIDE those sections.
+    var n = 0;
+    allSections.forEach(function (name) {
+      n += sectionTotal(name);
+    });
+    selected.forEach(function (id) {
+      var box = document.querySelector(
+        ".task-list__select[data-task-id='" + id + "']",
+      );
+      if (box && !allSections.has(sectionOfBox(box))) n += 1;
+    });
     countEl.textContent = n + " selected";
     if (n > 0) {
       bar.classList.remove("is-hidden");
@@ -55,6 +108,13 @@
       var scb = sectionCbs[i];
       var section = scb.closest(".task-list__section");
       if (!section) continue;
+      // Server-side select-all: the whole section is selected regardless of how
+      // many rows are paginated in, so show it fully checked (never partial).
+      if (allSections.has(scb.getAttribute("data-section"))) {
+        scb.checked = true;
+        scb.indeterminate = false;
+        continue;
+      }
       var sectionBoxes = section.querySelectorAll(".task-list__select");
       var checkedCount = 0;
       for (var j = 0; j < sectionBoxes.length; j++) {
@@ -95,6 +155,8 @@
     for (var i = 0; i < ids.length; i++) {
       setRowSelected(ids[i], false);
     }
+    allSections.clear();
+    syncAllSectionInputs();
     updateBar();
   }
 
@@ -104,6 +166,12 @@
     // Per-section select-all
     var scb = e.target.closest(".task-list__select-all-section");
     if (scb) {
+      var name = scb.getAttribute("data-section");
+      if (name) {
+        if (scb.checked) allSections.add(name);
+        else allSections.delete(name);
+        syncAllSectionInputs();
+      }
       var section = scb.closest(".task-list__section");
       if (section) {
         var sectionBoxes = section.querySelectorAll(".task-list__select");
@@ -130,6 +198,16 @@
     } else {
       var taskId = cb.getAttribute("data-task-id");
       if (taskId) setRowSelected(taskId, cb.checked);
+      // Unchecking a row inside a server-side-selected section downgrades it to
+      // individual selection — otherwise the server would still act on the row
+      // the user just cleared. The other visible rows stay checked.
+      if (!cb.checked) {
+        var sName = sectionOfBox(cb);
+        if (sName && allSections.has(sName)) {
+          allSections.delete(sName);
+          syncAllSectionInputs();
+        }
+      }
     }
     updateBar();
   });
@@ -165,6 +243,8 @@
   document.addEventListener("htmx:afterSettle", function (e) {
     if (e.detail && e.detail.target && e.detail.target.id === "tasks-view") {
       selected.clear();
+      allSections.clear();
+      syncAllSectionInputs();
       var checked = document.querySelectorAll(".task-list__select:checked");
       for (var i = 0; i < checked.length; i++) {
         checked[i].checked = false;
