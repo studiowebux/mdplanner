@@ -10,7 +10,7 @@ import {
   DEFAULT_NAV_CATEGORIES,
   ENTITY_TYPE_LABELS,
 } from "../constants/mod.ts";
-import type { ProjectConfig } from "../types/project.types.ts";
+import type { PublicProjectConfig } from "../types/project.types.ts";
 import type { PersonPreferences } from "../types/person.types.ts";
 import { ViewsTab } from "./settings/tabs/views-tab.tsx";
 import { ProjectTab } from "./settings/tabs/project-tab.tsx";
@@ -30,7 +30,7 @@ import { DisplayTab } from "./settings/tabs/display-tab.tsx";
 import { ShortcutsTab } from "./settings/tabs/shortcuts-tab.tsx";
 
 type SettingsProps = ViewProps & {
-  config: ProjectConfig;
+  config: PublicProjectConfig;
   preferences?: PersonPreferences;
 };
 

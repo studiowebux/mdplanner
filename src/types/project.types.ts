@@ -187,6 +187,45 @@ export const UpdateProjectConfigSchema = ProjectConfigSchema.partial().openapi(
 export type UpdateProjectConfig = z.infer<typeof UpdateProjectConfigSchema>;
 
 // ---------------------------------------------------------------------------
+// PublicProjectConfig — the DTO sent to the browser/API.
+// Secrets (githubToken, cloudflareToken, apiKeys[].key) are NEVER echoed:
+// tokens collapse to presence booleans and API keys to {name, hasKey}.
+// ---------------------------------------------------------------------------
+
+export const RedactedApiKeySchema = z.object({
+  name: z.string().openapi({
+    description: "Human-readable label for this key",
+    example: "CI Bot",
+  }),
+  hasKey: z.boolean().openapi({
+    description: "Whether a key value is stored (the value is never returned)",
+    example: true,
+  }),
+}).openapi("RedactedApiKey");
+
+export const PublicProjectConfigSchema = ProjectConfigSchema.omit({
+  githubToken: true,
+  cloudflareToken: true,
+  apiKeys: true,
+}).extend({
+  hasGithubToken: z.boolean().optional().openapi({
+    description:
+      "Whether a GitHub token is stored (the value is never returned)",
+    example: true,
+  }),
+  hasCloudflareToken: z.boolean().optional().openapi({
+    description:
+      "Whether a Cloudflare token is stored (the value is never returned)",
+    example: true,
+  }),
+  apiKeys: z.array(RedactedApiKeySchema).optional().openapi({
+    description: "API key labels with presence flags (values never returned)",
+  }),
+}).openapi("PublicProjectConfig");
+
+export type PublicProjectConfig = z.infer<typeof PublicProjectConfigSchema>;
+
+// ---------------------------------------------------------------------------
 // Features list — used by GET/PUT /features endpoints
 // ---------------------------------------------------------------------------
 

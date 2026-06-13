@@ -5,6 +5,7 @@ import type { ProjectRepository } from "../repositories/project.repository.ts";
 import type {
   ProjectConfig,
   ProjectLink,
+  PublicProjectConfig,
   UpdateProjectConfig,
 } from "../types/project.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
@@ -41,6 +42,25 @@ export class ProjectService {
 
   async getConfig(): Promise<ProjectConfig> {
     return this.repo.read();
+  }
+
+  /**
+   * Redact secrets for the browser/API: tokens collapse to presence booleans
+   * and API keys to {name, hasKey}. The raw values never leave the server.
+   */
+  static toPublicConfig(config: ProjectConfig): PublicProjectConfig {
+    const { githubToken, cloudflareToken, apiKeys, ...rest } = config;
+    return {
+      ...rest,
+      hasGithubToken: Boolean(githubToken),
+      hasCloudflareToken: Boolean(cloudflareToken),
+      apiKeys: apiKeys?.map((k) => ({ name: k.name, hasKey: Boolean(k.key) })),
+    };
+  }
+
+  /** Redacted config safe to send to the browser/API. */
+  async getPublicConfig(): Promise<PublicProjectConfig> {
+    return ProjectService.toPublicConfig(await this.repo.read());
   }
 
   async updateConfig(data: UpdateProjectConfig): Promise<ProjectConfig> {

@@ -58,6 +58,14 @@ Deno.test("Settings → Project saves every submitted field", async () => {
     assertEquals(config.hideCompletedAfterDays, 7);
     assertEquals(config.githubToken, "ghp_testtoken");
     assertEquals(config.cloudflareToken, "cf_testtoken");
+
+    // SECURITY: the public config (browser/API DTO) never echoes the raw
+    // secrets — only presence booleans.
+    const pub = await getProjectService().getPublicConfig();
+    assertEquals("githubToken" in pub, false);
+    assertEquals("cloudflareToken" in pub, false);
+    assertEquals(pub.hasGithubToken, true);
+    assertEquals(pub.hasCloudflareToken, true);
   } finally {
     await Deno.remove(dir, { recursive: true });
   }
@@ -91,7 +99,10 @@ Deno.test("Settings → Project clears clearable fields on empty submit", async 
     const seeded = await getProjectService().getConfig();
     assertEquals(seeded.cloudflareToken, "cf_testtoken");
 
-    // Re-submit the form with those fields present but empty → they clear.
+    // Re-submit with non-secret fields empty (they're pre-filled, so empty ==
+    // clear) but the secret fields blank WITHOUT a clear flag. SECURITY: tokens
+    // are no longer echoed into the form, so a blank token submit must KEEP the
+    // stored value, not wipe it.
     await post({
       name: "My Project",
       description: "",
@@ -101,17 +112,25 @@ Deno.test("Settings → Project clears clearable fields on empty submit", async 
       cloudflareToken: "",
     });
 
+    const kept = await getProjectService().getConfig();
+    assertEquals(kept.name, "My Project"); // required field untouched
+    // Non-secret clearable fields read back as undefined (repo truthy-guard).
+    assertEquals(kept.description, undefined);
+    assertEquals(kept.locale, undefined);
+    assertEquals(kept.currency, undefined);
+    // Secrets survive a blank submit.
+    assertEquals(kept.githubToken, "ghp_testtoken");
+    assertEquals(kept.cloudflareToken, "cf_testtoken");
+
+    // Explicit Clear (hidden <field>Clear flag = "1") wipes the token.
+    await post({
+      name: "My Project",
+      githubToken: "",
+      githubTokenClear: "1",
+      cloudflareToken: "",
+      cloudflareTokenClear: "1",
+    });
     const cleared = await getProjectService().getConfig();
-    assertEquals(cleared.name, "My Project"); // required field untouched
-    // The repo write omits empty values (truthy guards: `if (config.locale)`,
-    // `if (config.description)`, `if (config.githubToken)`…), so every cleared
-    // field reads back as undefined — the unset state. The fix's job was to send
-    // "" from the handler so updateConfig overwrites the old value with empty;
-    // the repo then drops it. Before the fix the handler sent undefined →
-    // updateConfig skipped → old value survived.
-    assertEquals(cleared.description, undefined);
-    assertEquals(cleared.locale, undefined);
-    assertEquals(cleared.currency, undefined);
     assertEquals(cleared.githubToken, undefined);
     assertEquals(cleared.cloudflareToken, undefined);
   } finally {

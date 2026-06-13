@@ -30,8 +30,24 @@ import { SETTINGS_FORM_FIELDS } from "./tabs/shortcuts-tab.tsx";
 
 export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 
+/**
+ * Resolve a masked secret field submitted by the project form.
+ * - typed value      → replace with it
+ * - blank + clear="1" → "" (explicit wipe; repo truthy-guard drops the key)
+ * - blank, no clear  → undefined (leave unchanged — never echoed, never wiped)
+ */
+function resolveSecretField(
+  value: string | File | undefined,
+  clearFlag: string | File | undefined,
+): string | undefined {
+  const v = typeof value === "string" ? value.trim() : "";
+  if (v) return v;
+  if (String(clearFlag ?? "") === "1") return "";
+  return undefined;
+}
+
 settingsViewRouter.get("/", async (c) => {
-  const config = await getProjectService().getConfig();
+  const config = await getProjectService().getPublicConfig();
   const actor = c.get("actor");
   const preferences = actor?.id
     ? (await getPeopleService().getById(actor.id))?.preferences
@@ -109,12 +125,15 @@ settingsViewRouter.post("/project", async (c) => {
     tasksPerSection: tasksPerSectionRaw && !isNaN(tasksPerSectionRaw)
       ? tasksPerSectionRaw
       : undefined,
-    githubToken: body.githubToken !== undefined
-      ? String(body.githubToken)
-      : undefined,
-    cloudflareToken: body.cloudflareToken !== undefined
-      ? String(body.cloudflareToken)
-      : undefined,
+    // Secrets are no longer pre-filled in the form, so a blank field means
+    // "leave unchanged" (NOT "clear"). Wiping requires the explicit Clear
+    // button, which sets the hidden <field>Clear flag to "1" → send "" so the
+    // repo truthy-guard drops the key. A typed value always replaces.
+    githubToken: resolveSecretField(body.githubToken, body.githubTokenClear),
+    cloudflareToken: resolveSecretField(
+      body.cloudflareToken,
+      body.cloudflareTokenClear,
+    ),
     cerveauDir: body.cerveauDir !== undefined
       ? String(body.cerveauDir).trim()
       : undefined,

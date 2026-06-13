@@ -1,9 +1,9 @@
 import type { FC } from "hono/jsx";
 import { FormActions } from "../../../components/ui/form-actions.tsx";
-import type { ProjectConfig } from "../../../types/project.types.ts";
+import type { PublicProjectConfig } from "../../../types/project.types.ts";
 
 type BillingTabProps = {
-  config: ProjectConfig;
+  config: PublicProjectConfig;
 };
 
 export const BillingTab: FC<BillingTabProps> = ({ config }) => (

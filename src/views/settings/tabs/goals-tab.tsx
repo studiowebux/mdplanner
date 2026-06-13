@@ -1,10 +1,10 @@
 import type { FC } from "hono/jsx";
 import { FormActions } from "../../../components/ui/form-actions.tsx";
 import { DEFAULT_KPI_METRICS } from "../../../constants/mod.ts";
-import type { ProjectConfig } from "../../../types/project.types.ts";
+import type { PublicProjectConfig } from "../../../types/project.types.ts";
 
 type GoalsTabProps = {
-  config: ProjectConfig;
+  config: PublicProjectConfig;
 };
 
 export const GoalsTab: FC<GoalsTabProps> = ({ config }) => (

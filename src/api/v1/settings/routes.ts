@@ -14,9 +14,10 @@ import { hxTrigger } from "../../../utils/hx-trigger.ts";
 import { jsonContent, notFound } from "../../../types/api.ts";
 import {
   FeaturesListSchema,
-  ProjectConfigSchema,
+  PublicProjectConfigSchema,
   UpdateProjectConfigSchema,
 } from "../../../types/project.types.ts";
+import { ProjectService } from "../../../services/project.service.ts";
 import {
   SetGlobalFiltersSchema,
   SetIdentitySchema,
@@ -32,15 +33,16 @@ const getSettingsRoute = createRoute({
   tags: ["Settings"],
   summary: "Get project configuration",
   description:
-    "Returns the full project configuration from project.md frontmatter.",
+    "Returns the project configuration from project.md frontmatter. Secrets " +
+    "(GitHub/Cloudflare tokens, API keys) are redacted to presence flags.",
   operationId: "getSettings",
   responses: {
-    200: jsonContent(ProjectConfigSchema, "Project configuration"),
+    200: jsonContent(PublicProjectConfigSchema, "Project configuration"),
   },
 });
 
 settingsRouter.openapi(getSettingsRoute, async (c) => {
-  const config = await getProjectService().getConfig();
+  const config = await getProjectService().getPublicConfig();
   return c.json(config, 200);
 });
 
@@ -60,14 +62,17 @@ const updateSettingsRoute = createRoute({
     },
   },
   responses: {
-    200: jsonContent(ProjectConfigSchema, "Updated project configuration"),
+    200: jsonContent(
+      PublicProjectConfigSchema,
+      "Updated project configuration",
+    ),
   },
 });
 
 settingsRouter.openapi(updateSettingsRoute, async (c) => {
   const data = c.req.valid("json");
   const config = await getProjectService().updateConfig(data);
-  return c.json(config, 200);
+  return c.json(ProjectService.toPublicConfig(config), 200);
 });
 
 // GET /features

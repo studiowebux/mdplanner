@@ -1,9 +1,9 @@
 import type { FC } from "hono/jsx";
 import { FormActions } from "../../../components/ui/form-actions.tsx";
-import type { ProjectConfig } from "../../../types/project.types.ts";
+import type { PublicProjectConfig } from "../../../types/project.types.ts";
 
 type ProjectTabProps = {
-  config: ProjectConfig;
+  config: PublicProjectConfig;
 };
 
 export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
@@ -175,10 +175,17 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
             type="password"
             id="cfg-github-token"
             name="githubToken"
-            value={config.githubToken ?? ""}
-            placeholder="ghp_..."
+            placeholder={config.hasGithubToken
+              ? "•••••••• (set — leave blank to keep)"
+              : "ghp_..."}
             class="settings-field__input"
             autocomplete="off"
+          />
+          <input
+            type="hidden"
+            id="cfg-github-token-clear"
+            name="githubTokenClear"
+            value=""
           />
           <button
             type="button"
@@ -189,6 +196,7 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
           </button>
         </div>
         <span class="settings-field__hint">
+          {config.hasGithubToken ? "A token is set. " : "No token set. "}
           Shared across all portfolio items. Set MDPLANNER_SECRET_KEY to encrypt
           at rest.
         </span>
@@ -203,10 +211,17 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
             type="password"
             id="cfg-cloudflare-token"
             name="cloudflareToken"
-            value={config.cloudflareToken ?? ""}
-            placeholder="Bearer token..."
+            placeholder={config.hasCloudflareToken
+              ? "•••••••• (set — leave blank to keep)"
+              : "Bearer token..."}
             class="settings-field__input"
             autocomplete="off"
+          />
+          <input
+            type="hidden"
+            id="cfg-cloudflare-token-clear"
+            name="cloudflareTokenClear"
+            value=""
           />
           <button
             type="button"
@@ -217,6 +232,7 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
           </button>
         </div>
         <span class="settings-field__hint">
+          {config.hasCloudflareToken ? "A token is set. " : "No token set. "}
           Used for DNS sync. Requires Zone:Read, DNS:Read permissions.
           Registrar:Read is optional for expiry data.
         </span>

@@ -16,6 +16,13 @@ request management, and PR merging.
 When `MDPLANNER_SECRET_KEY` is set, the token is encrypted with AES-256-GCM
 before being stored in `project.md`. Without the key, it is stored in plaintext.
 
+For security, the stored token is **never sent back to the browser or API** —
+the Settings form and the `GET /api/v1/settings` response only expose a
+presence flag (`hasGithubToken` / `hasCloudflareToken`), not the value. The
+token field shows a masked placeholder when a token is already set. Leaving it
+blank on save keeps the existing token; type a new value to replace it, or use
+the **Clear** button to remove it.
+
 ## Generate a secret key
 
 ```bash

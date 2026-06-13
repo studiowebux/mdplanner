@@ -603,6 +603,11 @@
     if (!input) return;
     input.value = "";
     input.dispatchEvent(new Event("input", { bubbles: true }));
+    // Masked secret fields aren't pre-filled, so a blank submit means "keep".
+    // Clearing must set the paired hidden <id>-clear flag to "1" so the server
+    // wipes the stored value explicitly.
+    var clearFlag = document.getElementById(inputId + "-clear");
+    if (clearFlag) clearFlag.value = "1";
     var form = input.closest("form");
     if (form && form.id) checkDirty(form.id);
   });
