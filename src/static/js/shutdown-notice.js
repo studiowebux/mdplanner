@@ -1,11 +1,16 @@
 // Server-shutdown client notice.
 //
-// Opens a dedicated EventSource to /sse and listens for the named
-// `server.shutdown` event the server publishes during graceful shutdown
-// (src/bin.ts shutdown()). On that event it shows a persistent warning toast
-// so the user knows the connection is about to drop and will recover on its
-// own — the browser's native EventSource reconnects when the server is back,
+// Listens for the named `server.shutdown` event the server publishes during
+// graceful shutdown (src/bin.ts shutdown()). On that event it shows a
+// persistent warning toast so the user knows the connection is about to drop
+// and will recover on its own — the source reconnects when the server is back,
 // at which point the notice is cleared.
+//
+// To avoid holding a SECOND persistent /sse connection per tab (which, with the
+// htmx sse-ext source, saturates the browser's ~6 HTTP/1.1 connections-per-host
+// cap once a few tabs are open — deadlocking saves/navigation), this shares the
+// single htmx-created EventSource via SseBfcache.onSource. It only opens its own
+// EventSource as a fallback when that shared source is unavailable.
 //
 // DOM-free logic (showShutdownNotice / clearShutdownNotice) is exposed on
 // window.ShutdownNotice for unit testing; the EventSource wiring in init()
@@ -38,24 +43,31 @@
     activeToast = null;
   }
 
+  // Attach the shutdown/reconnect listeners to one /sse source. Called for
+  // every htmx-created source (and on the fallback source). On `open` we clear
+  // any active notice unconditionally — a fresh connection means the server is
+  // back; with no active toast it is a harmless no-op, which keeps this robust
+  // across htmx recreating the source (bfcache restore, reconnect).
+  function wire(source) {
+    source.addEventListener("server.shutdown", function () {
+      showShutdownNotice(root.toast);
+    });
+    source.addEventListener("open", function () {
+      clearShutdownNotice();
+    });
+  }
+
   function init() {
     if (typeof EventSource === "undefined") return;
 
-    var source = new EventSource("/sse");
-    var sawShutdown = false;
+    // Preferred: share the single htmx-created /sse stream — no extra socket.
+    if (root.SseBfcache && typeof root.SseBfcache.onSource === "function") {
+      root.SseBfcache.onSource(wire);
+      return;
+    }
 
-    source.addEventListener("server.shutdown", function () {
-      sawShutdown = true;
-      showShutdownNotice(root.toast);
-    });
-
-    // A successful (re)connection after a shutdown means the server is back.
-    source.addEventListener("open", function () {
-      if (sawShutdown) {
-        sawShutdown = false;
-        clearShutdownNotice();
-      }
-    });
+    // Fallback only when the shared source is unavailable.
+    wire(new EventSource("/sse"));
   }
 
   root.ShutdownNotice = {

@@ -23,6 +23,29 @@
   var CLOSED = 2; // EventSource.CLOSED
   var live = new Set();
   var pending = [];
+  var sourceHooks = [];
+
+  // Run a hook over a source, swallowing handler errors so one bad subscriber
+  // does not block the others (and the source still gets tracked).
+  function runHook(cb, es) {
+    try {
+      cb(es);
+    } catch (_) {
+      // Subscriber threw — skip; other hooks/sources are unaffected.
+    }
+  }
+
+  // Register a callback invoked for every htmx-created EventSource, so other
+  // modules can share the single /sse stream instead of opening their own.
+  // Existing live sources are replayed immediately, so a late subscriber still
+  // wires up the source that is already open.
+  function onSource(cb) {
+    if (typeof cb !== "function") return;
+    sourceHooks.push(cb);
+    live.forEach(function (es) {
+      runHook(cb, es);
+    });
+  }
 
   // Close every still-open source, returning the ones closed so the caller can
   // reconnect them later. Pure over the provided iterable (testable).
@@ -69,6 +92,9 @@
       es.addEventListener("error", function () {
         if (es.readyState === CLOSED) live.delete(es);
       });
+      sourceHooks.forEach(function (cb) {
+        runHook(cb, es);
+      });
       return es;
     };
     return true;
@@ -91,6 +117,7 @@
   root.SseBfcache = {
     collectAndClose: collectAndClose,
     reconnect: reconnect,
+    onSource: onSource,
   };
 
   if (typeof root.document !== "undefined") init();
