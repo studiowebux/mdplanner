@@ -45,6 +45,139 @@ export { createDomainForm } from "./domain-form.tsx";
 export function createDomainViewContainer<T extends Entity>(
   cfg: DomainConfig<T, unknown, unknown>,
 ) {
+  const plural = cfg.plural ?? `${cfg.singular}s`;
+
+  // OOB-swapped header controls emitted only on fragment (htmx) responses.
+  const FragmentControls: FC<{
+    items: T[];
+    totalCount?: number;
+    filteredCount?: number;
+    state: DomainFilterState;
+  }> = ({ items, totalCount, filteredCount, state }) => (
+    <>
+      <span
+        id={`${cfg.name}-count`}
+        class="domain-page__count"
+        {...{ "hx-swap-oob": "morph" }}
+      >
+        {totalCount !== undefined &&
+            (filteredCount ?? items.length) !== totalCount
+          ? `${filteredCount ?? items.length}/${totalCount}`
+          : `${filteredCount ?? items.length} total`}
+      </span>
+      <ViewToggleButtons
+        domain={cfg.name}
+        view={state.view}
+        oobSwap="morph"
+        extraModes={cfg.extraViewModes}
+        hideDefault={cfg.hideDefaultViews}
+        hideGrid={cfg.hideGridView}
+      />
+      <div
+        id={`${cfg.name}-column-toggle-wrapper`}
+        {...{ "hx-swap-oob": "morph" }}
+      >
+        <ColumnToggle
+          domain={cfg.name}
+          columns={cfg.columns}
+          view={state.view}
+        />
+      </div>
+      {hasFilterControls(cfg) && (
+        <FilterCountBadge
+          domain={cfg.name}
+          count={countActiveFilters(cfg, state)}
+          oob
+        />
+      )}
+    </>
+  );
+
+  // The view body: custom content, empty state, table, or card grid.
+  const ViewBody: FC<{
+    items: T[];
+    state: DomainFilterState;
+    archivedActive: boolean;
+    effectiveColumns: ColumnDef[];
+    customContent?: ReturnType<FC>;
+    hasMore?: boolean;
+    nextOffset?: number;
+  }> = (
+    {
+      items,
+      state,
+      archivedActive,
+      effectiveColumns,
+      customContent,
+      hasMore,
+      nextOffset,
+    },
+  ) => {
+    if (customContent) return <>{customContent}</>;
+    if (items.length === 0) {
+      return (
+        <EmptyState
+          message={archivedActive
+            ? `No archived ${plural} yet.`
+            : cfg.emptyMessage}
+        />
+      );
+    }
+    if (state.view === "table" || cfg.hideGridView) {
+      return (
+        <DataTable
+          id={`${cfg.name}-table`}
+          domain={cfg.name}
+          compact
+          columns={effectiveColumns}
+          rows={cfg.mapRows
+            ? cfg.mapRows(items, state)
+            : items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
+          sort={{
+            url: `/${cfg.name}/view`,
+            target: `#${cfg.name}-view`,
+            include: `#${cfg.name}-toolbar`,
+            current: state.sort,
+            order: state.order,
+          }}
+          tbodyFooter={hasMore && nextOffset !== undefined
+            ? (
+              <TableSentinelRow
+                domain={cfg.name}
+                stateKeys={cfg.stateKeys}
+                state={state}
+                nextOffset={nextOffset}
+                columnCount={cfg.columns.length}
+              />
+            )
+            : undefined}
+        />
+      );
+    }
+    if (cfg.Card) {
+      return (
+        <GridView
+          Card={cfg.Card}
+          items={items}
+          toRow={cfg.toRow}
+          name={cfg.name}
+          q={state.q}
+          sentinel={hasMore && nextOffset !== undefined
+            ? (
+              <GridSentinelDiv
+                domain={cfg.name}
+                stateKeys={cfg.stateKeys}
+                state={state}
+                nextOffset={nextOffset}
+              />
+            )
+            : undefined}
+        />
+      );
+    }
+    return <EmptyState message={cfg.emptyMessage} />;
+  };
+
   const DomainViewContainer: FC<{
     items: T[];
     totalCount?: number;
@@ -82,107 +215,24 @@ export function createDomainViewContainer<T extends Entity>(
     return (
       <>
         {fragment && (
-          <span
-            id={`${cfg.name}-count`}
-            class="domain-page__count"
-            {...{ "hx-swap-oob": "morph" }}
-          >
-            {totalCount !== undefined &&
-                (filteredCount ?? items.length) !== totalCount
-              ? `${filteredCount ?? items.length}/${totalCount}`
-              : `${filteredCount ?? items.length} total`}
-          </span>
-        )}
-        {fragment && (
-          <ViewToggleButtons
-            domain={cfg.name}
-            view={state.view}
-            oobSwap="morph"
-            extraModes={cfg.extraViewModes}
-            hideDefault={cfg.hideDefaultViews}
-            hideGrid={cfg.hideGridView}
-          />
-        )}
-        {fragment && (
-          <div
-            id={`${cfg.name}-column-toggle-wrapper`}
-            {...{ "hx-swap-oob": "morph" }}
-          >
-            <ColumnToggle
-              domain={cfg.name}
-              columns={cfg.columns}
-              view={state.view}
-            />
-          </div>
-        )}
-        {fragment && hasFilterControls(cfg) && (
-          <FilterCountBadge
-            domain={cfg.name}
-            count={countActiveFilters(cfg, state)}
-            oob
+          <FragmentControls
+            items={items}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            state={state}
           />
         )}
         <div id={`${cfg.name}-view`} class="view-container">
           <input type="hidden" name="view" value={state.view} />
-          {customContent ? customContent : items.length === 0
-            ? (
-              <EmptyState
-                message={archivedActive
-                  ? `No archived ${cfg.plural ?? `${cfg.singular}s`} yet.`
-                  : cfg.emptyMessage}
-              />
-            )
-            : (state.view === "table" || cfg.hideGridView)
-            ? (
-              <DataTable
-                id={`${cfg.name}-table`}
-                domain={cfg.name}
-                compact
-                columns={effectiveColumns}
-                rows={cfg.mapRows
-                  ? cfg.mapRows(items, state)
-                  : items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
-                sort={{
-                  url: `/${cfg.name}/view`,
-                  target: `#${cfg.name}-view`,
-                  include: `#${cfg.name}-toolbar`,
-                  current: state.sort,
-                  order: state.order,
-                }}
-                tbodyFooter={hasMore && nextOffset !== undefined
-                  ? (
-                    <TableSentinelRow
-                      domain={cfg.name}
-                      stateKeys={cfg.stateKeys}
-                      state={state}
-                      nextOffset={nextOffset}
-                      columnCount={cfg.columns.length}
-                    />
-                  )
-                  : undefined}
-              />
-            )
-            : cfg.Card
-            ? (
-              <GridView
-                Card={cfg.Card}
-                items={items}
-                toRow={cfg.toRow}
-                name={cfg.name}
-                q={state.q}
-                sentinel={hasMore && nextOffset !== undefined
-                  ? (
-                    <GridSentinelDiv
-                      domain={cfg.name}
-                      stateKeys={cfg.stateKeys}
-                      state={state}
-                      nextOffset={nextOffset}
-                    />
-                  )
-                  : undefined}
-              />
-            )
-            : <EmptyState message={cfg.emptyMessage} />}
+          <ViewBody
+            items={items}
+            state={state}
+            archivedActive={archivedActive}
+            effectiveColumns={effectiveColumns}
+            customContent={customContent}
+            hasMore={hasMore}
+            nextOffset={nextOffset}
+          />
         </div>
       </>
     );

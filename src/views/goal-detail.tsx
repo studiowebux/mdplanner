@@ -57,33 +57,37 @@ type SmartCriterion = {
   value: string;
 };
 
+/** Human-readable "Measurable" criterion value for a goal. */
+function smartMeasurable(goal: Goal): string {
+  const kpi = (goal.kpi ?? "").trim();
+  const kpiMetric = (goal.kpiMetric ?? "").trim();
+  if (kpi) return `KPI: ${kpi}`;
+  if (kpiMetric) return `Metric: ${kpiMetric}`;
+  if (goal.kpiTarget != null) return `Target: ${goal.kpiTarget}`;
+  if (goal.progress != null) return `Progress: ${goal.progress}%`;
+  return "No measurable target";
+}
+
+/** Human-readable "Time-bound" criterion value for a goal. */
+function smartTimeBound(goal: Goal): string {
+  if (goal.startDate && goal.endDate) {
+    return `${formatDate(goal.startDate)} → ${formatDate(goal.endDate)}`;
+  }
+  if (goal.startDate) return `From ${formatDate(goal.startDate)}`;
+  if (goal.endDate) return `Until ${formatDate(goal.endDate)}`;
+  return "No timeline";
+}
+
 function evaluateSmart(goal: Goal): SmartCriterion[] {
   const title = (goal.title ?? "").trim();
   const description = (goal.description ?? "").trim();
-  const kpi = (goal.kpi ?? "").trim();
-  const kpiMetric = (goal.kpiMetric ?? "").trim();
   const project = (goal.project ?? "").trim();
 
-  const measurableValue = kpi
-    ? `KPI: ${kpi}`
-    : kpiMetric
-    ? `Metric: ${kpiMetric}`
-    : goal.kpiTarget != null
-    ? `Target: ${goal.kpiTarget}`
-    : goal.progress != null
-    ? `Progress: ${goal.progress}%`
-    : "No measurable target";
-
-  const isMeasurable = kpi.length > 0 || kpiMetric.length > 0 ||
+  const measurableValue = smartMeasurable(goal);
+  const isMeasurable = (goal.kpi ?? "").trim().length > 0 ||
+    (goal.kpiMetric ?? "").trim().length > 0 ||
     goal.kpiTarget != null || goal.progress != null;
-
-  const timeBound = goal.startDate && goal.endDate
-    ? `${formatDate(goal.startDate)} → ${formatDate(goal.endDate)}`
-    : goal.startDate
-    ? `From ${formatDate(goal.startDate)}`
-    : goal.endDate
-    ? `Until ${formatDate(goal.endDate)}`
-    : "No timeline";
+  const timeBound = smartTimeBound(goal);
 
   return [
     {

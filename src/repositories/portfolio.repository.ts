@@ -29,6 +29,37 @@ import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
 import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
 import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
 
+// Serialize field rules (camelCase keys → raw record, then mapKeysToFm):
+//  truthy  — emit when truthy   defined — emit when != null   array — emit when non-empty
+type SerMode = "truthy" | "defined" | "array";
+const PORTFOLIO_SER_FIELDS:
+  readonly (readonly [keyof PortfolioItem, SerMode])[] = [
+    ["client", "truthy"],
+    ["revenue", "defined"],
+    ["expenses", "defined"],
+    ["progress", "defined"],
+    ["startDate", "truthy"],
+    ["endDate", "truthy"],
+    ["team", "array"],
+    ["techStack", "array"],
+    ["logo", "truthy"],
+    ["license", "truthy"],
+    ["githubRepo", "truthy"],
+    ["billingCustomerId", "truthy"],
+    ["brainManaged", "defined"],
+    ["linkedGoals", "array"],
+    ["kpis", "array"],
+    ["urls", "array"],
+    ["statusUpdates", "array"],
+    ["createdAt", "truthy"],
+    ["updatedAt", "truthy"],
+    ["createdBy", "truthy"],
+    ["updatedBy", "truthy"],
+    ["archived", "truthy"],
+    ["archivedAt", "truthy"],
+    ["archivedBy", "truthy"],
+  ];
+
 /** Persists PortfolioItem entities as markdown with a SQLite cache mirror; standalone (not BaseMarkdownRepository) with disk/cache split reads (findAllFromDisk/findFromDisk), full-text search, soft-delete, and status updates. */
 export class PortfolioRepository {
   private dir: string;
@@ -441,30 +472,17 @@ export class PortfolioRepository {
       category: item.category,
       status: item.status,
     };
-    if (item.client) raw.client = item.client;
-    if (item.revenue != null) raw.revenue = item.revenue;
-    if (item.expenses != null) raw.expenses = item.expenses;
-    if (item.progress != null) raw.progress = item.progress;
-    if (item.startDate) raw.startDate = item.startDate;
-    if (item.endDate) raw.endDate = item.endDate;
-    if (item.team?.length) raw.team = item.team;
-    if (item.techStack?.length) raw.techStack = item.techStack;
-    if (item.logo) raw.logo = item.logo;
-    if (item.license) raw.license = item.license;
-    if (item.githubRepo) raw.githubRepo = item.githubRepo;
-    if (item.billingCustomerId) raw.billingCustomerId = item.billingCustomerId;
-    if (item.brainManaged != null) raw.brainManaged = item.brainManaged;
-    if (item.linkedGoals?.length) raw.linkedGoals = item.linkedGoals;
-    if (item.kpis?.length) raw.kpis = item.kpis;
-    if (item.urls?.length) raw.urls = item.urls;
-    if (item.statusUpdates?.length) raw.statusUpdates = item.statusUpdates;
-    if (item.createdAt) raw.createdAt = item.createdAt;
-    if (item.updatedAt) raw.updatedAt = item.updatedAt;
-    if (item.createdBy) raw.createdBy = item.createdBy;
-    if (item.updatedBy) raw.updatedBy = item.updatedBy;
-    if (item.archived) raw.archived = item.archived;
-    if (item.archivedAt) raw.archivedAt = item.archivedAt;
-    if (item.archivedBy) raw.archivedBy = item.archivedBy;
+    const src = item as Record<string, unknown>;
+    for (const [key, mode] of PORTFOLIO_SER_FIELDS) {
+      const v = src[key];
+      if (mode === "truthy") {
+        if (v) raw[key] = v;
+      } else if (mode === "defined") {
+        if (v != null) raw[key] = v;
+      } else if (Array.isArray(v) && v.length > 0) {
+        raw[key] = v;
+      }
+    }
 
     const fm = mapKeysToFm(raw);
     const body = `# ${item.name}\n\n${item.description ?? ""}`.trimEnd();

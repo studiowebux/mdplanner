@@ -141,6 +141,71 @@ function parseMap(
  * (whose remaining fields appear on deeper-indented continuation lines), or
  * deeper nested maps.
  */
+/**
+ * Resolve an empty-valued key to its deeper-indented nested array or map.
+ * `from` is the line index just past the key line; returns null when no block
+ * is indented strictly deeper than `parentIndent`.
+ */
+function parseNestedBlock(
+  lines: string[],
+  from: number,
+  parentIndent: number,
+): { value: unknown; next: number } | null {
+  const childStart = nextNonEmpty(lines, from);
+  if (childStart === -1) return null;
+  const childIndent = leadingSpaces(lines[childStart]);
+  if (childIndent <= parentIndent) return null;
+  return lines[childStart].trim().startsWith("-")
+    ? parseBlockArray(lines, childStart, childIndent)
+    : parseMap(lines, childStart, childIndent);
+}
+
+/** Parse the `key: value` continuation lines for one block-array object. */
+function parseItemContinuation(
+  lines: string[],
+  start: number,
+  indent: number,
+  obj: Record<string, unknown>,
+): number {
+  let i = start;
+  while (i < lines.length) {
+    const cline = lines[i];
+    if (!cline.trim() || cline.trim().startsWith("#")) {
+      i++;
+      continue;
+    }
+    const cIndent = leadingSpaces(cline);
+    if (cIndent <= indent) break;
+    if (cline.trim().startsWith("-")) break;
+    const ctrim = cline.trim();
+    const cc = ctrim.indexOf(":");
+    if (cc === -1) {
+      i++;
+      continue;
+    }
+    const ck = ctrim.slice(0, cc).trim();
+    const cv = ctrim.slice(cc + 1).trim();
+    if (cv === "") {
+      const nested = parseNestedBlock(lines, i + 1, cIndent);
+      if (nested) {
+        obj[ck] = nested.value;
+        i = nested.next;
+      } else {
+        i++;
+      }
+      continue;
+    }
+    if (cv.startsWith("[") && cv.endsWith("]")) {
+      const inner = cv.slice(1, -1);
+      obj[ck] = inner ? inner.split(",").map((s) => parseScalar(s.trim())) : [];
+    } else {
+      obj[ck] = parseScalar(cv);
+    }
+    i++;
+  }
+  return i;
+}
+
 function parseBlockArray(
   lines: string[],
   start: number,
@@ -187,81 +252,15 @@ function parseBlockArray(
       obj[firstKey] = parseScalar(firstVal);
     } else {
       // Empty inline value: the first field may carry a nested map/array on
-      // deeper-indented lines (mirror the continuation empty-value path below).
-      const childStart = nextNonEmpty(lines, i);
-      if (childStart !== -1) {
-        const childIndent = leadingSpaces(lines[childStart]);
-        if (childIndent > dashKeyIndent) {
-          if (lines[childStart].trim().startsWith("-")) {
-            const { value, next } = parseBlockArray(
-              lines,
-              childStart,
-              childIndent,
-            );
-            obj[firstKey] = value;
-            i = next;
-          } else {
-            const { value, next } = parseMap(lines, childStart, childIndent);
-            obj[firstKey] = value;
-            i = next;
-          }
-        }
+      // deeper-indented lines (same rule as the continuation empty-value path).
+      const nested = parseNestedBlock(lines, i, dashKeyIndent);
+      if (nested) {
+        obj[firstKey] = nested.value;
+        i = nested.next;
       }
     }
 
-    // Continuation lines for this object: indented strictly deeper than the dash.
-    while (i < lines.length) {
-      const cline = lines[i];
-      if (!cline.trim() || cline.trim().startsWith("#")) {
-        i++;
-        continue;
-      }
-      const cIndent = leadingSpaces(cline);
-      if (cIndent <= indent) break;
-      if (cline.trim().startsWith("-")) break;
-      const ctrim = cline.trim();
-      const cc = ctrim.indexOf(":");
-      if (cc === -1) {
-        i++;
-        continue;
-      }
-      const ck = ctrim.slice(0, cc).trim();
-      const cv = ctrim.slice(cc + 1).trim();
-      if (cv === "") {
-        const grandStart = nextNonEmpty(lines, i + 1);
-        if (grandStart !== -1) {
-          const grandIndent = leadingSpaces(lines[grandStart]);
-          if (grandIndent > cIndent) {
-            if (lines[grandStart].trim().startsWith("-")) {
-              const { value, next } = parseBlockArray(
-                lines,
-                grandStart,
-                grandIndent,
-              );
-              obj[ck] = value;
-              i = next;
-              continue;
-            }
-            const { value, next } = parseMap(lines, grandStart, grandIndent);
-            obj[ck] = value;
-            i = next;
-            continue;
-          }
-        }
-        i++;
-        continue;
-      }
-      if (cv.startsWith("[") && cv.endsWith("]")) {
-        const inner = cv.slice(1, -1);
-        obj[ck] = inner
-          ? inner.split(",").map((s) => parseScalar(s.trim()))
-          : [];
-      } else {
-        obj[ck] = parseScalar(cv);
-      }
-      i++;
-    }
-
+    i = parseItemContinuation(lines, i, indent, obj);
     items.push(obj);
   }
 

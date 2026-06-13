@@ -6,6 +6,36 @@ import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import { type Entity } from "./domain.types.ts";
 
+/** Stringify a raw entity value for a form field by field type. */
+function fieldToValue(type: string, raw: unknown): string {
+  if (type === "textarea" && Array.isArray(raw)) return raw.join("\n");
+  if (type === "tags" && Array.isArray(raw)) return raw.join(",");
+  if (type === "array-table" && Array.isArray(raw)) return JSON.stringify(raw);
+  return String(raw ?? "");
+}
+
+/**
+ * Resolve the fields actually rendered: drop inline-edited fields in edit mode,
+ * then apply config-driven select options.
+ */
+function resolveFormFields(
+  fields: FieldDef[],
+  isEdit: boolean,
+  inline: string[] | undefined,
+  dynamicOptions?: Record<string, { value: string; label: string }[]>,
+): FieldDef[] {
+  const formFields = isEdit && inline && inline.length > 0
+    ? fields.filter((f) => f.type === "hidden" || !inline.includes(f.name))
+    : fields;
+  return dynamicOptions
+    ? formFields.map((f) =>
+      f.type === "select" && dynamicOptions[f.name]
+        ? { ...f, options: dynamicOptions[f.name] }
+        : f
+    )
+    : formFields;
+}
+
 /** Factory: builds a domain create/edit FormBuilder FC from a FieldDef set; hides inlineEditFields and applies formValueOverrides in edit mode. */
 export function createDomainForm<T extends Entity>(cfg: {
   domain: string;
@@ -31,16 +61,7 @@ export function createDomainForm<T extends Entity>(cfg: {
     const values: Record<string, string> = {};
     if (item) {
       for (const f of cfg.fields) {
-        const raw = item[f.name as keyof T];
-        if (f.type === "textarea" && Array.isArray(raw)) {
-          values[f.name] = raw.join("\n");
-        } else if (f.type === "tags" && Array.isArray(raw)) {
-          values[f.name] = raw.join(",");
-        } else if (f.type === "array-table" && Array.isArray(raw)) {
-          values[f.name] = JSON.stringify(raw);
-        } else {
-          values[f.name] = String(raw ?? "");
-        }
+        values[f.name] = fieldToValue(f.type, item[f.name as keyof T]);
       }
     }
     // Apply domain-supplied overrides — replace keys after the default
@@ -55,21 +76,12 @@ export function createDomainForm<T extends Entity>(cfg: {
         if (!values[k]) values[k] = v;
       }
     }
-    // In edit mode, drop fields edited in-place on the detail page.
-    const inline = cfg.inlineEditFields;
-    const formFields = isEdit && inline && inline.length > 0
-      ? cfg.fields.filter((f) =>
-        f.type === "hidden" || !inline.includes(f.name)
-      )
-      : cfg.fields;
-    // Override select options with config-driven values when provided.
-    const fields = dynamicOptions
-      ? formFields.map((f) =>
-        f.type === "select" && dynamicOptions[f.name]
-          ? { ...f, options: dynamicOptions[f.name] }
-          : f
-      )
-      : formFields;
+    const fields = resolveFormFields(
+      cfg.fields,
+      isEdit,
+      cfg.inlineEditFields,
+      dynamicOptions,
+    );
     return (
       <FormBuilder
         id={`${cfg.domain}-form`}
