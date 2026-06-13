@@ -11,6 +11,7 @@ import { CONTACT_TABLE, rowToContact } from "../domains/contact/cache.ts";
 import { CONTACT_BODY_KEYS } from "../domains/contact/constants.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -93,17 +94,17 @@ export class ContactRepository extends CachedMarkdownRepository<
     return {
       id,
       name,
-      email: fm.email != null ? String(fm.email) : undefined,
-      phone: fm.phone != null ? String(fm.phone) : undefined,
-      role: fm.role != null ? String(fm.role) : undefined,
-      company: fm.company != null ? String(fm.company) : undefined,
+      email: fmStr(fm, "email"),
+      phone: fmStr(fm, "phone"),
+      role: fmStr(fm, "role"),
+      company: fmStr(fm, "company"),
       type,
       notes,
       tags,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 
