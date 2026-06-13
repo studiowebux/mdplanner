@@ -44,6 +44,80 @@ export interface WebDavContext {
 
 // ── PROPFIND response builder ───────────────────────────────────────────────
 
+/** Resolved inputs every live-property builder shares. */
+interface PropArgs {
+  ctx: WebDavContext;
+  fsPath: string;
+  info: Deno.FileInfo;
+  isDir: boolean;
+  tag: string;
+  disp: string;
+}
+
+// Standard DAV live properties, in canonical response order. Each builder
+// returns the property's XML, or null when it does not apply to the resource
+// (e.g. getcontentlength on a collection). The order of this table IS the wire
+// order — independent of the order props were requested in.
+const LIVE_PROPS: ReadonlyArray<[string, (a: PropArgs) => string | null]> = [
+  [
+    "resourcetype",
+    ({ isDir }) =>
+      `<D:resourcetype>${isDir ? "<D:collection/>" : ""}</D:resourcetype>`,
+  ],
+  [
+    "displayname",
+    ({ fsPath }) => `<D:displayname>${xe(basename(fsPath))}</D:displayname>`,
+  ],
+  [
+    "getcontentlength",
+    ({ isDir, info }) =>
+      isDir ? null : `<D:getcontentlength>${info.size}</D:getcontentlength>`,
+  ],
+  [
+    "getcontenttype",
+    ({ isDir, fsPath }) =>
+      `<D:getcontenttype>${
+        isDir ? "httpd/unix-directory" : guessMime(fsPath)
+      }</D:getcontenttype>`,
+  ],
+  [
+    "getlastmodified",
+    ({ info }) =>
+      `<D:getlastmodified>${xmlDate(info.mtime)}</D:getlastmodified>`,
+  ],
+  [
+    "creationdate",
+    ({ info }) =>
+      `<D:creationdate>${
+        iso8601(info.birthtime ?? info.mtime)
+      }</D:creationdate>`,
+  ],
+  ["getetag", ({ tag }) => `<D:getetag>${tag}</D:getetag>`],
+  ["supportedlock", () =>
+    `<D:supportedlock>
+      <D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry>
+      <D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry>
+    </D:supportedlock>`],
+  [
+    "lockdiscovery",
+    ({ ctx, fsPath, disp }) =>
+      `<D:lockdiscovery>${
+        ctx.locks.getActive(fsPath).map((l) => `
+      <D:activelock>
+        <D:locktype><D:write/></D:locktype><D:lockscope><D:${l.scope}/></D:lockscope>
+        <D:depth>${l.depth}</D:depth><D:owner>${xe(l.owner)}</D:owner>
+        <D:timeout>Second-${
+          Math.max(0, Math.floor((l.timeout - Date.now()) / 1000))
+        }</D:timeout>
+        <D:locktoken><D:href>${l.token}</D:href></D:locktoken>
+        <D:lockroot><D:href>${xe(disp)}</D:href></D:lockroot>
+      </D:activelock>`).join("")
+      }</D:lockdiscovery>`,
+  ],
+];
+
+const KNOWN_PROPS = new Set(LIVE_PROPS.map(([name]) => name));
+
 async function buildPropResponse(
   ctx: WebDavContext,
   fsPath: string,
@@ -57,65 +131,13 @@ async function buildPropResponse(
   const dp = ctx.props.get(fsPath);
   const all = requestedProps === null;
   const want = (n: string) => all || (requestedProps?.includes(n) ?? false);
+  const args: PropArgs = { ctx, fsPath, info, isDir, tag, disp };
 
   const p200: string[] = [];
-  const p404: string[] = [];
-
-  if (want("resourcetype")) {
-    p200.push(
-      `<D:resourcetype>${isDir ? "<D:collection/>" : ""}</D:resourcetype>`,
-    );
-  }
-  if (want("displayname")) {
-    p200.push(`<D:displayname>${xe(basename(fsPath))}</D:displayname>`);
-  }
-  if (want("getcontentlength") && !isDir) {
-    p200.push(
-      `<D:getcontentlength>${info.size}</D:getcontentlength>`,
-    );
-  }
-  if (want("getcontenttype")) {
-    p200.push(
-      `<D:getcontenttype>${
-        isDir ? "httpd/unix-directory" : guessMime(fsPath)
-      }</D:getcontenttype>`,
-    );
-  }
-  if (want("getlastmodified")) {
-    p200.push(
-      `<D:getlastmodified>${xmlDate(info.mtime)}</D:getlastmodified>`,
-    );
-  }
-  if (want("creationdate")) {
-    p200.push(
-      `<D:creationdate>${
-        iso8601(info.birthtime ?? info.mtime)
-      }</D:creationdate>`,
-    );
-  }
-  if (want("getetag")) p200.push(`<D:getetag>${tag}</D:getetag>`);
-  if (want("supportedlock")) {
-    p200.push(`<D:supportedlock>
-      <D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry>
-      <D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry>
-    </D:supportedlock>`);
-  }
-  if (want("lockdiscovery")) {
-    const al = ctx.locks.getActive(fsPath);
-    p200.push(
-      `<D:lockdiscovery>${
-        al.map((l) => `
-      <D:activelock>
-        <D:locktype><D:write/></D:locktype><D:lockscope><D:${l.scope}/></D:lockscope>
-        <D:depth>${l.depth}</D:depth><D:owner>${xe(l.owner)}</D:owner>
-        <D:timeout>Second-${
-          Math.max(0, Math.floor((l.timeout - Date.now()) / 1000))
-        }</D:timeout>
-        <D:locktoken><D:href>${l.token}</D:href></D:locktoken>
-        <D:lockroot><D:href>${xe(disp)}</D:href></D:lockroot>
-      </D:activelock>`).join("")
-      }</D:lockdiscovery>`,
-    );
+  for (const [name, build] of LIVE_PROPS) {
+    if (!want(name)) continue;
+    const xml = build(args);
+    if (xml !== null) p200.push(xml);
   }
 
   for (const [key, val] of dp) {
@@ -127,21 +149,11 @@ async function buildPropResponse(
     }
   }
 
+  const p404: string[] = [];
   if (requestedProps) {
-    const known = new Set([
-      "resourcetype",
-      "displayname",
-      "getcontentlength",
-      "getcontenttype",
-      "getlastmodified",
-      "creationdate",
-      "getetag",
-      "supportedlock",
-      "lockdiscovery",
-    ]);
     for (const p of requestedProps) {
       if (
-        !known.has(p) &&
+        !KNOWN_PROPS.has(p) &&
         ![...dp.keys()].some((k) => k.endsWith(`:${p}`))
       ) {
         p404.push(`<D:${p}/>`);
@@ -213,35 +225,31 @@ export async function handleHead(
   });
 }
 
-export async function handleGet(
-  req: Request,
+/** Render the HTML directory index for a GET on a collection. */
+async function renderDirIndex(
   fsPath: string,
   reqPath: string,
 ): Promise<Response> {
-  const info = await fsStat(fsPath);
-  if (!info) return httpErr(404, "Not Found");
-
-  if (info.isDirectory) {
-    const entries: Deno.DirEntry[] = [];
-    for await (const e of Deno.readDir(fsPath)) entries.push(e);
-    entries.sort((a, b) => {
-      if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-    const base = reqPath.endsWith("/") ? reqPath : reqPath + "/";
-    const parent = base === "/"
-      ? null
-      : base.slice(0, base.slice(0, -1).lastIndexOf("/") + 1) || "/";
-    const rows = entries
-      .map((e) => {
-        const href = base + encodeURIComponent(e.name) +
-          (e.isDirectory ? "/" : "");
-        return `<tr><td><a href="${href}">${xe(e.name)}${
-          e.isDirectory ? "/" : ""
-        }</a></td></tr>`;
-      })
-      .join("\n");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  const entries: Deno.DirEntry[] = [];
+  for await (const e of Deno.readDir(fsPath)) entries.push(e);
+  entries.sort((a, b) => {
+    if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+  const base = reqPath.endsWith("/") ? reqPath : reqPath + "/";
+  const parent = base === "/"
+    ? null
+    : base.slice(0, base.slice(0, -1).lastIndexOf("/") + 1) || "/";
+  const rows = entries
+    .map((e) => {
+      const href = base + encodeURIComponent(e.name) +
+        (e.isDirectory ? "/" : "");
+      return `<tr><td><a href="${href}">${xe(e.name)}${
+        e.isDirectory ? "/" : ""
+      }</a></td></tr>`;
+    })
+    .join("\n");
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <title>Index of ${xe(reqPath)}</title>
 <style>body{font-family:monospace;margin:2rem;max-width:800px}
 h2{margin-bottom:1rem}table{width:100%;border-collapse:collapse}
@@ -251,95 +259,117 @@ a{text-decoration:none;color:#0070f3}a:hover{text-decoration:underline}</style>
 <tr><th scope="col">Name</th></tr>
 ${parent !== null ? `<tr><td><a href="${parent}">..</a></td></tr>` : ""}
 ${rows}</table></body></html>`;
-    return new Response(html, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/html;charset=utf-8",
-        DAV: "1, 2, 3",
-        ...corsHeaders(),
-      },
-    });
-  }
+  return new Response(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html;charset=utf-8",
+      DAV: "1, 2, 3",
+      ...corsHeaders(),
+    },
+  });
+}
 
-  const tag = await fileEtag(info);
+/**
+ * Evaluate GET conditional headers. Returns the short-circuit response
+ * (412 Precondition Failed / 304 Not Modified) or null to serve the body.
+ */
+function evaluateConditionals(
+  req: Request,
+  info: Deno.FileInfo,
+  tag: string,
+): Response | null {
+  const notModified = () =>
+    new Response(null, {
+      status: 304,
+      headers: { ETag: tag, ...corsHeaders() },
+    });
+
   const ifMatch = req.headers.get("If-Match");
   if (ifMatch && ifMatch !== "*" && ifMatch !== tag) {
     return httpErr(412, "Precondition Failed");
   }
   const ifNoneMatch = req.headers.get("If-None-Match");
   if (ifNoneMatch && (ifNoneMatch === "*" || ifNoneMatch === tag)) {
-    return new Response(null, {
-      status: 304,
-      headers: { ETag: tag, ...corsHeaders() },
-    });
+    return notModified();
   }
   const ifModifiedSince = req.headers.get("If-Modified-Since");
   if (
-    ifModifiedSince && info.mtime &&
-    new Date(ifModifiedSince) >= info.mtime
+    ifModifiedSince && info.mtime && new Date(ifModifiedSince) >= info.mtime
   ) {
-    return new Response(null, {
-      status: 304,
-      headers: { ETag: tag, ...corsHeaders() },
-    });
+    return notModified();
   }
   const ifUnmodifiedSince = req.headers.get("If-Unmodified-Since");
   if (
-    ifUnmodifiedSince && info.mtime &&
-    new Date(ifUnmodifiedSince) < info.mtime
+    ifUnmodifiedSince && info.mtime && new Date(ifUnmodifiedSince) < info.mtime
   ) {
     return httpErr(412, "Precondition Failed");
   }
+  return null;
+}
 
+/**
+ * Serve a byte range when the request carries a satisfiable Range header.
+ * Returns null when there is no Range header or it does not parse — the caller
+ * then serves the full body.
+ */
+async function serveRange(
+  req: Request,
+  fsPath: string,
+  info: Deno.FileInfo,
+  tag: string,
+): Promise<Response | null> {
   const rangeHeader = req.headers.get("Range");
-  if (rangeHeader) {
-    const m = rangeHeader.match(/^bytes=(\d*)-(\d*)$/);
-    if (m) {
-      let start = m[1] ? parseInt(m[1]) : undefined;
-      let end = m[2] ? parseInt(m[2]) : undefined;
-      if (start === undefined) {
-        start = Math.max(0, info.size - (end ?? 0));
-        end = info.size - 1;
-      }
-      end = Math.min(end ?? info.size - 1, info.size - 1);
-      if (start > end || start >= info.size) {
-        return new Response("Range Not Satisfiable", {
-          status: 416,
-          headers: {
-            "Content-Range": `bytes */${info.size}`,
-            ...corsHeaders(),
-          },
-        });
-      }
-      const len = end - start + 1;
-      const file = await Deno.open(fsPath, { read: true });
-      try {
-        await file.seek(start, Deno.SeekMode.Start);
-        const buf = new Uint8Array(len);
-        let pos = 0;
-        while (pos < len) {
-          const n = await file.read(buf.subarray(pos));
-          if (n === null) break;
-          pos += n;
-        }
-        return new Response(buf, {
-          status: 206,
-          headers: {
-            "Content-Range": `bytes ${start}-${end}/${info.size}`,
-            "Content-Length": String(len),
-            "Content-Type": guessMime(fsPath),
-            ETag: tag,
-            "Last-Modified": xmlDate(info.mtime),
-            "Accept-Ranges": "bytes",
-            ...corsHeaders(),
-          },
-        });
-      } finally {
-        file.close();
-      }
-    }
-  }
+  if (!rangeHeader) return null;
+  const m = rangeHeader.match(/^bytes=(\d*)-(\d*)$/);
+  if (!m) return null;
 
+  let start = m[1] ? parseInt(m[1]) : undefined;
+  let end = m[2] ? parseInt(m[2]) : undefined;
+  if (start === undefined) {
+    start = Math.max(0, info.size - (end ?? 0));
+    end = info.size - 1;
+  }
+  end = Math.min(end ?? info.size - 1, info.size - 1);
+  if (start > end || start >= info.size) {
+    return new Response("Range Not Satisfiable", {
+      status: 416,
+      headers: { "Content-Range": `bytes */${info.size}`, ...corsHeaders() },
+    });
+  }
+  const len = end - start + 1;
+  const file = await Deno.open(fsPath, { read: true });
+  try {
+    await file.seek(start, Deno.SeekMode.Start);
+    const buf = new Uint8Array(len);
+    let pos = 0;
+    while (pos < len) {
+      const n = await file.read(buf.subarray(pos));
+      if (n === null) break;
+      pos += n;
+    }
+    return new Response(buf, {
+      status: 206,
+      headers: {
+        "Content-Range": `bytes ${start}-${end}/${info.size}`,
+        "Content-Length": String(len),
+        "Content-Type": guessMime(fsPath),
+        ETag: tag,
+        "Last-Modified": xmlDate(info.mtime),
+        "Accept-Ranges": "bytes",
+        ...corsHeaders(),
+      },
+    });
+  } finally {
+    file.close();
+  }
+}
+
+/** Stream the full file body (200). */
+async function serveFullFile(
+  fsPath: string,
+  info: Deno.FileInfo,
+  tag: string,
+): Promise<Response> {
   const file = await Deno.open(fsPath, { read: true });
   return new Response(file.readable, {
     status: 200,
@@ -353,6 +383,25 @@ ${rows}</table></body></html>`;
       ...corsHeaders(),
     },
   });
+}
+
+export async function handleGet(
+  req: Request,
+  fsPath: string,
+  reqPath: string,
+): Promise<Response> {
+  const info = await fsStat(fsPath);
+  if (!info) return httpErr(404, "Not Found");
+  if (info.isDirectory) return renderDirIndex(fsPath, reqPath);
+
+  const tag = await fileEtag(info);
+  const conditional = evaluateConditionals(req, info, tag);
+  if (conditional) return conditional;
+
+  const ranged = await serveRange(req, fsPath, info, tag);
+  if (ranged) return ranged;
+
+  return serveFullFile(fsPath, info, tag);
 }
 
 export async function handlePut(
