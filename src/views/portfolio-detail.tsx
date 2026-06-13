@@ -128,6 +128,295 @@ export const StatusUpdateForm: FC<{ itemId: string }> = ({ itemId }) => (
   </form>
 );
 
+/** Title, status, meta line and progress bar. */
+const HeaderSection: FC<{
+  item: PortfolioItem;
+  clientCustomer: Customer | null;
+  editing: boolean;
+}> = ({ item, clientCustomer, editing }) => {
+  const pct = item.progress ?? 0;
+  return (
+    <header class="detail-section detail-header portfolio-detail__header">
+      <div class="detail-title-row portfolio-detail__title-row">
+        {item.logo && (
+          <img
+            class="portfolio-detail__logo"
+            src={item.logo}
+            alt={`${item.name} logo`}
+          />
+        )}
+        <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
+        <span class={badgeClass(PORTFOLIO_STATUS_VARIANTS, item.status)}>
+          {item.status}
+        </span>
+      </div>
+      <DetailActions
+        entity="portfolio"
+        id={item.id}
+        title={item.name}
+        formContainerId="portfolio-form-container"
+        archived={item.archived === true}
+      >
+        <EditModeToggle href={`/portfolio/${item.id}`} editing={editing} />
+      </DetailActions>
+      <p class="portfolio-detail__meta">
+        {item.category}
+        {(clientCustomer || item.client) && (
+          <>
+            {" "}&middot; {clientCustomer
+              ? (
+                <a href={`/customers/${clientCustomer.id}`}>
+                  {clientCustomer.name}
+                </a>
+              )
+              : item.client}
+          </>
+        )}
+        {item.startDate && <>{" "}&middot; {item.startDate}</>}
+        {item.endDate && <>{" "}to {item.endDate}</>}
+        {item.license && <>{" "}&middot; {item.license}</>}
+      </p>
+      <div class="portfolio-detail__progress">
+        <div class="portfolio-progress">
+          <progress
+            class="progress-bar portfolio-progress__bar"
+            value={pct}
+            max={100}
+          />
+          <span class="portfolio-progress__label">{pct}%</span>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+/** Billing-customer / brain-managed info row. */
+const ExtraInfoRow: FC<{ item: PortfolioItem; customer: Customer | null }> = (
+  { item, customer },
+) => {
+  if (!item.billingCustomerId && item.brainManaged == null) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {item.billingCustomerId && (
+        <InfoItem label="Billing customer">
+          {customer
+            ? <a href={`/customers/${customer.id}`}>{customer.name}</a>
+            : item.billingCustomerId}
+        </InfoItem>
+      )}
+      {item.brainManaged != null && (
+        <InfoItem label="Brain managed">
+          {item.brainManaged ? "Yes" : "No"}
+        </InfoItem>
+      )}
+    </div>
+  );
+};
+
+/** Revenue / expenses / profit cards. */
+const FinancialsSection: FC<{ item: PortfolioItem }> = ({ item }) => {
+  if (item.revenue == null && item.expenses == null) return null;
+  const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
+  return (
+    <div class="portfolio-detail__financials">
+      <div class="portfolio-detail__financial-card">
+        <div class="portfolio-detail__financial-label">Revenue</div>
+        <div class="portfolio-detail__financial-value">
+          {formatCurrency(item.revenue) || "$0"}
+        </div>
+      </div>
+      <div class="portfolio-detail__financial-card">
+        <div class="portfolio-detail__financial-label">Expenses</div>
+        <div class="portfolio-detail__financial-value">
+          {formatCurrency(item.expenses) || "$0"}
+        </div>
+      </div>
+      <div class="portfolio-detail__financial-card">
+        <div class="portfolio-detail__financial-label">Profit</div>
+        <div
+          class={`portfolio-detail__financial-value ${
+            profit >= 0
+              ? "portfolio-detail__financial-value--profit"
+              : "portfolio-detail__financial-value--loss"
+          }`}
+        >
+          {formatCurrency(profit) || "$0"}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/** Description block — editable form or rendered markdown. */
+const DescriptionBlock: FC<{ item: PortfolioItem; editing: boolean }> = (
+  { item, editing },
+) =>
+  editing
+    ? <DescriptionSection item={item} />
+    : <MarkdownSection title="Description" markdown={item.description} />;
+
+/** Tech-stack badges. */
+const TechStackSection: FC<{ item: PortfolioItem }> = ({ item }) => {
+  if (!item.techStack || item.techStack.length === 0) return null;
+  return (
+    <section class="detail-section portfolio-detail__section">
+      <h2 class="section-heading">Tech Stack</h2>
+      <div class="portfolio-card__tech-stack">
+        {item.techStack.map((t) => <span key={t} class="badge">{t}</span>)}
+      </div>
+    </section>
+  );
+};
+
+/** Team member chips. */
+const TeamSection: FC<{
+  item: PortfolioItem;
+  personById: Record<string, string>;
+}> = ({ item, personById }) => {
+  if (!item.team || item.team.length === 0) return null;
+  return (
+    <section class="detail-section portfolio-detail__section">
+      <h2 class="section-heading">Team</h2>
+      <div class="portfolio-detail__team">
+        {item.team.map((m) => {
+          const name = personById[m.personId] ?? m.personId;
+          return (
+            <div key={m.personId} class="portfolio-detail__team-member">
+              <a
+                href={`/people/${m.personId}`}
+                class="portfolio-detail__team-chip"
+              >
+                {name}
+              </a>
+              {m.role && (
+                <span class="portfolio-detail__team-role">{m.role}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+/** KPI table. */
+const KpisSection: FC<{ item: PortfolioItem }> = ({ item }) => {
+  if (!item.kpis || item.kpis.length === 0) return null;
+  return (
+    <section class="portfolio-detail__kpis">
+      <h2 class="section-heading">KPIs</h2>
+      <table class="data-table data-table--header-bg">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+            <th scope="col">Target</th>
+            <th scope="col">Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {item.kpis.map((kpi) => {
+            const met = kpi.target != null &&
+              Number(kpi.value) >= Number(kpi.target);
+            return (
+              <tr key={kpi.name}>
+                <td>{kpi.name}</td>
+                <td class={met ? "portfolio-detail__kpi-met" : ""}>
+                  {kpi.value}
+                </td>
+                <td>{kpi.target ?? ""}</td>
+                <td>{kpi.unit ?? ""}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
+/** External link buttons. */
+const LinksSection: FC<{ item: PortfolioItem }> = ({ item }) => {
+  if (!item.urls || item.urls.length === 0) return null;
+  return (
+    <section class="detail-section portfolio-detail__section">
+      <h2 class="section-heading">Links</h2>
+      <div class="portfolio-detail__urls">
+        {item.urls.map((u) => (
+          <a
+            key={u.href}
+            href={u.href}
+            class="btn btn--secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {u.label}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+/** Status-update feed with quick-add form. */
+const StatusUpdatesSection: FC<{ item: PortfolioItem }> = ({ item }) => (
+  <section class="portfolio-detail__status-updates">
+    <h2 class="section-heading">Status Updates</h2>
+
+    <StatusUpdateForm itemId={item.id} />
+
+    <div id="status-updates-list">
+      {(item.statusUpdates ?? []).map((u) => (
+        <StatusUpdateRow key={u.id} u={u} itemId={item.id} />
+      ))}
+    </div>
+  </section>
+);
+
+/** Linked-goals table. */
+const LinkedGoalsSection: FC<{ goals: Goal[] }> = ({ goals }) => {
+  if (goals.length === 0) return null;
+  return (
+    <section class="detail-section portfolio-detail__section">
+      <h2 class="section-heading">Linked Goals</h2>
+      <table class="data-table data-table--header-bg">
+        <thead>
+          <tr>
+            <th scope="col">Goal</th>
+            <th scope="col">Status</th>
+            <th scope="col">KPI</th>
+            <th scope="col">Metric</th>
+            <th scope="col">Value</th>
+            <th scope="col">Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          {goals.map((g) => (
+            <tr key={g.id}>
+              <td>
+                <a href={`/goals/${g.id}`}>{g.title}</a>
+              </td>
+              <td>
+                <span class={badgeClass(GOAL_STATUS_VARIANTS, g.status)}>
+                  {g.status}
+                </span>
+              </td>
+              <td>{g.kpi ?? ""}</td>
+              <td>{g.kpiMetric ?? ""}</td>
+              <td>
+                {g.kpiValue != null && g.kpiTarget != null
+                  ? <KpiGauge value={g.kpiValue} target={g.kpiTarget} />
+                  : (g.kpiValue ?? "")}
+              </td>
+              <td>{g.kpiTarget ?? ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
 export const PortfolioDetailView: FC<Props> = (
   {
     item,
@@ -138,296 +427,65 @@ export const PortfolioDetailView: FC<Props> = (
     editing = false,
     ...viewProps
   },
-) => {
-  const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
-  const pct = item.progress ?? 0;
-  const hasExtraInfo = !!item.billingCustomerId || item.brainManaged != null;
-
-  return (
-    <MainLayout
-      title={item.name}
-      {...viewProps}
-      styles={[
-        "/css/views/portfolio.css",
-        "/css/views/github.css",
-        ...(goals.length ? ["/css/views/goals.css"] : []),
-      ]}
-      scripts={[
-        ...(item.githubRepo ? ["/js/github-tabs.js"] : []),
-        ...(goals.length || item.githubRepo ? ["/js/kpi-gauge.js"] : []),
-        "/js/inline-edit.js",
-      ]}
+) => (
+  <MainLayout
+    title={item.name}
+    {...viewProps}
+    styles={[
+      "/css/views/portfolio.css",
+      "/css/views/github.css",
+      ...(goals.length ? ["/css/views/goals.css"] : []),
+    ]}
+    scripts={[
+      ...(item.githubRepo ? ["/js/github-tabs.js"] : []),
+      ...(goals.length || item.githubRepo ? ["/js/kpi-gauge.js"] : []),
+      "/js/inline-edit.js",
+    ]}
+  >
+    <SseRefresh
+      getUrl={"/portfolio/" + item.id + (editing ? "?editing=true" : "")}
+      trigger="sse:portfolio.updated, sse:portfolio.deleted"
+      targetId="portfolio-detail-root"
+    />
+    <main
+      id="portfolio-detail-root"
+      class={`detail-view portfolio-detail${
+        editing ? " portfolio-detail--editing" : ""
+      }`}
     >
-      <SseRefresh
-        getUrl={"/portfolio/" + item.id + (editing ? "?editing=true" : "")}
-        trigger="sse:portfolio.updated, sse:portfolio.deleted"
-        targetId="portfolio-detail-root"
+      <Breadcrumb
+        items={[
+          { label: "Portfolio", href: "/portfolio" },
+          { label: item.name },
+        ]}
       />
-      <main
-        id="portfolio-detail-root"
-        class={`detail-view portfolio-detail${
-          editing ? " portfolio-detail--editing" : ""
-        }`}
-      >
-        <Breadcrumb
-          items={[
-            { label: "Portfolio", href: "/portfolio" },
-            { label: item.name },
-          ]}
-        />
-        <BackButton href="/portfolio" label="Back to portfolio" />
+      <BackButton href="/portfolio" label="Back to portfolio" />
 
-        <ArchivedBanner entity={item} />
+      <ArchivedBanner entity={item} />
 
-        <header class="detail-section detail-header portfolio-detail__header">
-          <div class="detail-title-row portfolio-detail__title-row">
-            {item.logo && (
-              <img
-                class="portfolio-detail__logo"
-                src={item.logo}
-                alt={`${item.name} logo`}
-              />
-            )}
-            <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
-            <span class={badgeClass(PORTFOLIO_STATUS_VARIANTS, item.status)}>
-              {item.status}
-            </span>
-          </div>
-          <DetailActions
-            entity="portfolio"
-            id={item.id}
-            title={item.name}
-            formContainerId="portfolio-form-container"
-            archived={item.archived === true}
-          >
-            <EditModeToggle href={`/portfolio/${item.id}`} editing={editing} />
-          </DetailActions>
-          <p class="portfolio-detail__meta">
-            {item.category}
-            {(clientCustomer || item.client) && (
-              <>
-                {" "}&middot; {clientCustomer
-                  ? (
-                    <a href={`/customers/${clientCustomer.id}`}>
-                      {clientCustomer.name}
-                    </a>
-                  )
-                  : item.client}
-              </>
-            )}
-            {item.startDate && <>{" "}&middot; {item.startDate}</>}
-            {item.endDate && <>{" "}to {item.endDate}</>}
-            {item.license && <>{" "}&middot; {item.license}</>}
-          </p>
-          <div class="portfolio-detail__progress">
-            <div class="portfolio-progress">
-              <progress
-                class="progress-bar portfolio-progress__bar"
-                value={pct}
-                max={100}
-              />
-              <span class="portfolio-progress__label">{pct}%</span>
-            </div>
-          </div>
-        </header>
+      <HeaderSection
+        item={item}
+        clientCustomer={clientCustomer}
+        editing={editing}
+      />
+      <ExtraInfoRow item={item} customer={customer} />
+      <FinancialsSection item={item} />
+      <DescriptionBlock item={item} editing={editing} />
+      <TechStackSection item={item} />
+      <TeamSection item={item} personById={personById} />
+      <KpisSection item={item} />
+      <LinksSection item={item} />
+      <StatusUpdatesSection item={item} />
+      <LinkedGoalsSection goals={goals} />
 
-        {hasExtraInfo && (
-          <div class="detail-section detail-info-row">
-            {item.billingCustomerId && (
-              <InfoItem label="Billing customer">
-                {customer
-                  ? <a href={`/customers/${customer.id}`}>{customer.name}</a>
-                  : item.billingCustomerId}
-              </InfoItem>
-            )}
-            {item.brainManaged != null && (
-              <InfoItem label="Brain managed">
-                {item.brainManaged ? "Yes" : "No"}
-              </InfoItem>
-            )}
-          </div>
-        )}
-
-        {(item.revenue != null || item.expenses != null) && (
-          <div class="portfolio-detail__financials">
-            <div class="portfolio-detail__financial-card">
-              <div class="portfolio-detail__financial-label">Revenue</div>
-              <div class="portfolio-detail__financial-value">
-                {formatCurrency(item.revenue) || "$0"}
-              </div>
-            </div>
-            <div class="portfolio-detail__financial-card">
-              <div class="portfolio-detail__financial-label">Expenses</div>
-              <div class="portfolio-detail__financial-value">
-                {formatCurrency(item.expenses) || "$0"}
-              </div>
-            </div>
-            <div class="portfolio-detail__financial-card">
-              <div class="portfolio-detail__financial-label">Profit</div>
-              <div
-                class={`portfolio-detail__financial-value ${
-                  profit >= 0
-                    ? "portfolio-detail__financial-value--profit"
-                    : "portfolio-detail__financial-value--loss"
-                }`}
-              >
-                {formatCurrency(profit) || "$0"}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {editing
-          ? <DescriptionSection item={item} />
-          : <MarkdownSection title="Description" markdown={item.description} />}
-
-        {item.techStack && item.techStack.length > 0 && (
-          <section class="detail-section portfolio-detail__section">
-            <h2 class="section-heading">Tech Stack</h2>
-            <div class="portfolio-card__tech-stack">
-              {item.techStack.map((t) => (
-                <span key={t} class="badge">{t}</span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {item.team && item.team.length > 0 && (
-          <section class="detail-section portfolio-detail__section">
-            <h2 class="section-heading">Team</h2>
-            <div class="portfolio-detail__team">
-              {item.team.map((m) => {
-                const name = personById[m.personId] ?? m.personId;
-                return (
-                  <div key={m.personId} class="portfolio-detail__team-member">
-                    <a
-                      href={`/people/${m.personId}`}
-                      class="portfolio-detail__team-chip"
-                    >
-                      {name}
-                    </a>
-                    {m.role && (
-                      <span class="portfolio-detail__team-role">{m.role}</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {item.kpis && item.kpis.length > 0 && (
-          <section class="portfolio-detail__kpis">
-            <h2 class="section-heading">KPIs</h2>
-            <table class="data-table data-table--header-bg">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Value</th>
-                  <th scope="col">Target</th>
-                  <th scope="col">Unit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {item.kpis.map((kpi) => {
-                  const met = kpi.target != null &&
-                    Number(kpi.value) >= Number(kpi.target);
-                  return (
-                    <tr key={kpi.name}>
-                      <td>{kpi.name}</td>
-                      <td class={met ? "portfolio-detail__kpi-met" : ""}>
-                        {kpi.value}
-                      </td>
-                      <td>{kpi.target ?? ""}</td>
-                      <td>{kpi.unit ?? ""}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </section>
-        )}
-
-        {item.urls && item.urls.length > 0 && (
-          <section class="detail-section portfolio-detail__section">
-            <h2 class="section-heading">Links</h2>
-            <div class="portfolio-detail__urls">
-              {item.urls.map((u) => (
-                <a
-                  key={u.href}
-                  href={u.href}
-                  class="btn btn--secondary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {u.label}
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section class="portfolio-detail__status-updates">
-          <h2 class="section-heading">Status Updates</h2>
-
-          <StatusUpdateForm itemId={item.id} />
-
-          <div id="status-updates-list">
-            {(item.statusUpdates ?? []).map((u) => (
-              <StatusUpdateRow key={u.id} u={u} itemId={item.id} />
-            ))}
-          </div>
-        </section>
-
-        {goals.length > 0 && (
-          <section class="detail-section portfolio-detail__section">
-            <h2 class="section-heading">Linked Goals</h2>
-            <table class="data-table data-table--header-bg">
-              <thead>
-                <tr>
-                  <th scope="col">Goal</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">KPI</th>
-                  <th scope="col">Metric</th>
-                  <th scope="col">Value</th>
-                  <th scope="col">Target</th>
-                </tr>
-              </thead>
-              <tbody>
-                {goals.map((g) => (
-                  <tr key={g.id}>
-                    <td>
-                      <a href={`/goals/${g.id}`}>{g.title}</a>
-                    </td>
-                    <td>
-                      <span class={badgeClass(GOAL_STATUS_VARIANTS, g.status)}>
-                        {g.status}
-                      </span>
-                    </td>
-                    <td>{g.kpi ?? ""}</td>
-                    <td>{g.kpiMetric ?? ""}</td>
-                    <td>
-                      {g.kpiValue != null && g.kpiTarget != null
-                        ? <KpiGauge value={g.kpiValue} target={g.kpiTarget} />
-                        : (g.kpiValue ?? "")}
-                    </td>
-                    <td>{g.kpiTarget ?? ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
-
-        {item.githubRepo && <GitHubSection itemId={item.id} />}
-        <AuditMeta
-          createdAt={item.createdAt}
-          updatedAt={item.updatedAt}
-          createdBy={item.createdBy}
-          updatedBy={item.updatedBy}
-        />
-      </main>
-      <div id="portfolio-form-container" />
-    </MainLayout>
-  );
-};
+      {item.githubRepo && <GitHubSection itemId={item.id} />}
+      <AuditMeta
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        createdBy={item.createdBy}
+        updatedBy={item.updatedBy}
+      />
+    </main>
+    <div id="portfolio-form-container" />
+  </MainLayout>
+);

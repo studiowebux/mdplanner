@@ -8,7 +8,14 @@ import {
 import { toKebab } from "../utils/slug.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { mapKeysToFm, parseAuditFields } from "../utils/frontmatter-mapper.ts";
+import {
+  fmBool,
+  fmNum,
+  fmStr,
+  fmStrArr,
+  mapKeysToFm,
+  parseAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 import type {
   CreatePortfolioItem,
   PortfolioItem,
@@ -376,20 +383,19 @@ export class PortfolioRepository {
       ? lines.slice(titleIdx + 1).join("\n").trim()
       : undefined;
 
+    const statusUpdates = fm.status_updates ?? fm.statusUpdates;
     return {
       id,
       name,
-      category: String(fm.category ?? "Uncategorized"),
-      status: String(fm.status ?? "active") as PortfolioStatus,
+      category: fmStr(fm, "category") ?? "Uncategorized",
+      status: (fmStr(fm, "status") ?? "active") as PortfolioStatus,
       description: desc || undefined,
-      client: fm.client != null ? String(fm.client) : undefined,
-      revenue: typeof fm.revenue === "number" ? fm.revenue : undefined,
-      expenses: typeof fm.expenses === "number" ? fm.expenses : undefined,
-      progress: typeof fm.progress === "number" ? fm.progress : 0,
-      startDate: fm.start_date != null ? String(fm.start_date) : undefined,
-      endDate: (fm.end_date ?? fm.endDate) != null
-        ? String(fm.end_date ?? fm.endDate)
-        : undefined,
+      client: fmStr(fm, "client"),
+      revenue: fmNum(fm, "revenue"),
+      expenses: fmNum(fm, "expenses"),
+      progress: fmNum(fm, "progress") ?? 0,
+      startDate: fmStr(fm, "start_date"),
+      endDate: fmStr(fm, "end_date", "endDate"),
       team: Array.isArray(fm.team)
         ? fm.team.map((m): TeamMember =>
           typeof m === "string" ? { personId: m } : {
@@ -400,33 +406,22 @@ export class PortfolioRepository {
           }
         )
         : undefined,
-      techStack: Array.isArray(fm.tech_stack ?? fm.techStack)
-        ? ((fm.tech_stack ?? fm.techStack) as unknown[]).map(String)
-        : undefined,
-      logo: fm.logo != null ? String(fm.logo) : undefined,
-      license: fm.license != null ? String(fm.license) : undefined,
-      githubRepo: (fm.github_repo ?? fm.githubRepo) != null
-        ? String(fm.github_repo ?? fm.githubRepo)
-        : undefined,
-      billingCustomerId:
-        (fm.billing_customer_id ?? fm.billingCustomerId) != null
-          ? String(fm.billing_customer_id ?? fm.billingCustomerId)
-          : undefined,
-      brainManaged: typeof (fm.brain_managed ?? fm.brainManaged) === "boolean"
-        ? (fm.brain_managed ?? fm.brainManaged) as boolean
-        : undefined,
-      linkedGoals: Array.isArray(fm.linked_goals ?? fm.linkedGoals)
-        ? ((fm.linked_goals ?? fm.linkedGoals) as unknown[]).map(String)
-        : undefined,
+      techStack: fmStrArr(fm, "tech_stack", "techStack"),
+      logo: fmStr(fm, "logo"),
+      license: fmStr(fm, "license"),
+      githubRepo: fmStr(fm, "github_repo", "githubRepo"),
+      billingCustomerId: fmStr(fm, "billing_customer_id", "billingCustomerId"),
+      brainManaged: fmBool(fm, "brain_managed", "brainManaged"),
+      linkedGoals: fmStrArr(fm, "linked_goals", "linkedGoals"),
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
-      statusUpdates: Array.isArray(fm.status_updates ?? fm.statusUpdates)
-        ? ((fm.status_updates ?? fm.statusUpdates) as PortfolioStatusUpdate[])
+      statusUpdates: Array.isArray(statusUpdates)
+        ? (statusUpdates as PortfolioStatusUpdate[])
         : undefined,
       ...parseAuditFields(fm),
       archived: fm.archived === true ? true : undefined,
-      archivedAt: fm.archived_at != null ? String(fm.archived_at) : undefined,
-      archivedBy: fm.archived_by != null ? String(fm.archived_by) : undefined,
+      archivedAt: fmStr(fm, "archived_at"),
+      archivedBy: fmStr(fm, "archived_by"),
     };
   }
 

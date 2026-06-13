@@ -20,7 +20,6 @@ import { TASK_SCHEMA, TASK_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a Task. */
 export function rowToTask(row: Record<string, string | number | null>): Task {
-  const approvalArr = parseJson<unknown[]>(row.approval_request);
   const task: Task = {
     id: row.id as string,
     title: row.title as string,
@@ -28,39 +27,75 @@ export function rowToTask(row: Record<string, string | number | null>): Task {
     revision: (row.revision as number) ?? 1,
     section: row.section as string,
   };
-  if (row.completed_at != null) task.completedAt = row.completed_at as string;
-  if (row.created_at != null) task.createdAt = row.created_at as string;
-  if (row.updated_at != null) task.updatedAt = row.updated_at as string;
+  applyTaskScalars(task, row);
+  applyTaskJson(task, row);
+  const archive = archiveFieldsFromRow(row);
+  if (archive.archived !== undefined) task.archived = archive.archived;
+  if (archive.archivedAt !== undefined) task.archivedAt = archive.archivedAt;
+  if (archive.archivedBy !== undefined) task.archivedBy = archive.archivedBy;
+  return task;
+}
+
+// Nullable [column, Task key] mappings, copied verbatim by type. Table-driven
+// so the copy loop stays flat instead of a 20-branch conditional chain.
+const TASK_STR_COLS: readonly (readonly [string, keyof Task])[] = [
+  ["completed_at", "completedAt"],
+  ["created_at", "createdAt"],
+  ["updated_at", "updatedAt"],
+  ["parent_id", "parentId"],
+  ["due_date", "due_date"],
+  ["assignee", "assignee"],
+  ["milestone", "milestone"],
+  ["planned_start", "planned_start"],
+  ["planned_end", "planned_end"],
+  ["project", "project"],
+  ["github_repo", "githubRepo"],
+  ["claimed_by", "claimedBy"],
+  ["claimed_at", "claimedAt"],
+  ["created_by", "createdBy"],
+  ["updated_by", "updatedBy"],
+];
+const TASK_NUM_COLS: readonly (readonly [string, keyof Task])[] = [
+  ["priority", "priority"],
+  ["effort", "effort"],
+  ["sort_order", "order"],
+  ["github_issue", "githubIssue"],
+  ["github_pr", "githubPR"],
+];
+
+/** Copy the nullable scalar columns (string/number) onto the task. */
+function applyTaskScalars(
+  task: Task,
+  row: Record<string, string | number | null>,
+): void {
+  const t = task as Record<string, unknown>;
+  for (const [col, key] of TASK_STR_COLS) {
+    if (row[col] != null) t[key] = row[col] as string;
+  }
+  for (const [col, key] of TASK_NUM_COLS) {
+    if (row[col] != null) t[key] = row[col] as number;
+  }
   if (row.description != null) {
     task.description = (row.description as string).split("\n");
   }
-  if (row.parent_id != null) task.parentId = row.parent_id as string;
+}
+
+/** Parse and assign the JSON-encoded columns onto the task. */
+function applyTaskJson(
+  task: Task,
+  row: Record<string, string | number | null>,
+): void {
   const tags = parseJson<string[]>(row.tags);
   if (tags) task.tags = tags;
-  if (row.due_date != null) task.due_date = row.due_date as string;
-  if (row.assignee != null) task.assignee = row.assignee as string;
-  if (row.priority != null) task.priority = row.priority as number;
-  if (row.effort != null) task.effort = row.effort as number;
   const blockedBy = parseJson<string[]>(row.blocked_by);
   if (blockedBy) task.blocked_by = blockedBy;
-  if (row.milestone != null) task.milestone = row.milestone as string;
-  if (row.planned_start != null) {
-    task.planned_start = row.planned_start as string;
-  }
-  if (row.planned_end != null) task.planned_end = row.planned_end as string;
   const timeEntries = parseJson<Task["time_entries"]>(row.time_entries);
   if (timeEntries) task.time_entries = timeEntries;
-  if (row.sort_order != null) task.order = row.sort_order as number;
   const attachments = parseJson<string[]>(row.attachments);
   if (attachments) task.attachments = attachments;
-  if (row.project != null) task.project = row.project as string;
-  if (row.github_issue != null) task.githubIssue = row.github_issue as number;
-  if (row.github_repo != null) task.githubRepo = row.github_repo as string;
-  if (row.github_pr != null) task.githubPR = row.github_pr as number;
   const comments = parseJson<Task["comments"]>(row.comments);
   if (comments) task.comments = comments;
-  if (row.claimed_by != null) task.claimedBy = row.claimed_by as string;
-  if (row.claimed_at != null) task.claimedAt = row.claimed_at as string;
+  const approvalArr = parseJson<unknown[]>(row.approval_request);
   if (approvalArr?.[0] != null) {
     task.approvalRequest = approvalArr[0] as Task["approvalRequest"];
   }
@@ -68,13 +103,6 @@ export function rowToTask(row: Record<string, string | number | null>): Task {
   if (files) task.files = files;
   const children = parseJson<Task["children"]>(row.children);
   if (children) task.children = children;
-  if (row.created_by != null) task.createdBy = row.created_by as string;
-  if (row.updated_by != null) task.updatedBy = row.updated_by as string;
-  const archive = archiveFieldsFromRow(row);
-  if (archive.archived !== undefined) task.archived = archive.archived;
-  if (archive.archivedAt !== undefined) task.archivedAt = archive.archivedAt;
-  if (archive.archivedBy !== undefined) task.archivedBy = archive.archivedBy;
-  return task;
 }
 
 /** Insert or replace a Task in the cache table. */

@@ -10,6 +10,72 @@ import type { ProjectConfig } from "../types/project.types.ts";
 import { FrontmatterProjectSchema } from "../types/project.types.ts";
 import { encryptSecret } from "../utils/secrets.ts";
 
+// How a config value maps onto frontmatter:
+//  truthy        — set when truthy (strings/arrays that are absent when empty)
+//  defined       — set when !== undefined (numerics/booleans that may be 0/false)
+//  nonEmptyArray — set when a non-empty array
+//  emptyToUndef  — set when !== undefined, coercing "" → undefined (drops the key)
+type WriteMode = "truthy" | "defined" | "nonEmptyArray" | "emptyToUndef";
+type WriteField = readonly [keyof ProjectConfig, string, WriteMode];
+
+// Frontmatter fields written before the async secret block (preserves the
+// historical key order — serializeFrontmatter emits in insertion order).
+const PROJECT_FM_PRE: readonly WriteField[] = [
+  ["startDate", "start_date", "truthy"],
+  ["workingDaysPerWeek", "working_days_per_week", "defined"],
+  ["workingDays", "working_days", "truthy"],
+  ["tags", "tags", "truthy"],
+  ["links", "links", "truthy"],
+  ["features", "features", "nonEmptyArray"],
+  ["navCategories", "nav_categories", "truthy"],
+  ["port", "port", "defined"],
+  ["locale", "locale", "truthy"],
+  ["currency", "currency", "truthy"],
+  ["sectionOrder", "section_order", "nonEmptyArray"],
+  ["pipelinesPerPage", "pipelines_per_page", "defined"],
+  ["tasksPerSection", "tasks_per_section", "defined"],
+  ["staleDays", "stale_days", "defined"],
+  ["hideCompletedAfterDays", "hide_completed_after_days", "defined"],
+  ["stableVersion", "stable_version", "defined"],
+  ["kpiMetrics", "kpi_metrics", "nonEmptyArray"],
+  ["milestoneStatuses", "milestone_statuses", "nonEmptyArray"],
+];
+
+// Frontmatter fields written after the async secret block.
+const PROJECT_FM_POST: readonly WriteField[] = [
+  ["billingCompany", "billing_company", "emptyToUndef"],
+  ["billingAddress", "billing_address", "emptyToUndef"],
+  ["billingLogoUrl", "billing_logo_url", "emptyToUndef"],
+  ["billingDefaultFooter", "billing_default_footer", "emptyToUndef"],
+  ["defaultUserId", "default_user_id", "emptyToUndef"],
+  ["cerveauDir", "cerveau_dir", "emptyToUndef"],
+];
+
+/** Apply a declarative field table onto the frontmatter record. */
+function applyProjectFields(
+  fm: Record<string, unknown>,
+  config: ProjectConfig,
+  fields: readonly WriteField[],
+): void {
+  for (const [key, fmKey, mode] of fields) {
+    const v = config[key];
+    switch (mode) {
+      case "truthy":
+        if (v) fm[fmKey] = v;
+        break;
+      case "defined":
+        if (v !== undefined) fm[fmKey] = v;
+        break;
+      case "nonEmptyArray":
+        if (Array.isArray(v) && v.length > 0) fm[fmKey] = v;
+        break;
+      case "emptyToUndef":
+        if (v !== undefined) fm[fmKey] = v || undefined;
+        break;
+    }
+  }
+}
+
 /** Reads/writes the single project configuration document (read/write); no entity collection. */
 export class ProjectRepository {
   private filePath: string;
@@ -36,44 +102,7 @@ export class ProjectRepository {
   async write(config: ProjectConfig): Promise<void> {
     this.configCache = null;
     const fm: Record<string, unknown> = {};
-    if (config.startDate) fm.start_date = config.startDate;
-    if (config.workingDaysPerWeek !== undefined) {
-      fm.working_days_per_week = config.workingDaysPerWeek;
-    }
-    if (config.workingDays) fm.working_days = config.workingDays;
-    if (config.tags) fm.tags = config.tags;
-    if (config.links) fm.links = config.links;
-    if (config.features && config.features.length > 0) {
-      fm.features = config.features;
-    }
-    if (config.navCategories) fm.nav_categories = config.navCategories;
-    if (config.port !== undefined) fm.port = config.port;
-    if (config.locale) fm.locale = config.locale;
-    if (config.currency) fm.currency = config.currency;
-    if (config.sectionOrder && config.sectionOrder.length > 0) {
-      fm.section_order = config.sectionOrder;
-    }
-    if (config.pipelinesPerPage !== undefined) {
-      fm.pipelines_per_page = config.pipelinesPerPage;
-    }
-    if (config.tasksPerSection !== undefined) {
-      fm.tasks_per_section = config.tasksPerSection;
-    }
-    if (config.staleDays !== undefined) {
-      fm.stale_days = config.staleDays;
-    }
-    if (config.hideCompletedAfterDays !== undefined) {
-      fm.hide_completed_after_days = config.hideCompletedAfterDays;
-    }
-    if (config.stableVersion !== undefined) {
-      fm.stable_version = config.stableVersion;
-    }
-    if (config.kpiMetrics && config.kpiMetrics.length > 0) {
-      fm.kpi_metrics = config.kpiMetrics;
-    }
-    if (config.milestoneStatuses && config.milestoneStatuses.length > 0) {
-      fm.milestone_statuses = config.milestoneStatuses;
-    }
+    applyProjectFields(fm, config, PROJECT_FM_PRE);
     if (config.githubToken) {
       fm.github_token = await encryptSecret(config.githubToken);
     }
@@ -88,24 +117,7 @@ export class ProjectRepository {
         })),
       );
     }
-    if (config.billingCompany !== undefined) {
-      fm.billing_company = config.billingCompany || undefined;
-    }
-    if (config.billingAddress !== undefined) {
-      fm.billing_address = config.billingAddress || undefined;
-    }
-    if (config.billingLogoUrl !== undefined) {
-      fm.billing_logo_url = config.billingLogoUrl || undefined;
-    }
-    if (config.billingDefaultFooter !== undefined) {
-      fm.billing_default_footer = config.billingDefaultFooter || undefined;
-    }
-    if (config.defaultUserId !== undefined) {
-      fm.default_user_id = config.defaultUserId || undefined;
-    }
-    if (config.cerveauDir !== undefined) {
-      fm.cerveau_dir = config.cerveauDir || undefined;
-    }
+    applyProjectFields(fm, config, PROJECT_FM_POST);
     fm.last_updated = new Date().toISOString();
 
     let body = `# ${config.name}`;

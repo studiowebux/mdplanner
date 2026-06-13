@@ -137,6 +137,57 @@ export function parseAuditFields(
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// Scalar field readers — collapse the per-field `fm.x != null ? String(fm.x)
+// : undefined` chains that historically inflated repository parse() complexity.
+// Each accepts the snake_case + camelCase fallback keys in order; the first
+// present (type-matching) value wins. Used by standalone and cached repos.
+// ---------------------------------------------------------------------------
+
+/** First present (non-null) value across keys, coerced to string. */
+export function fmStr(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): string | undefined {
+  for (const k of keys) {
+    if (fm[k] != null) return String(fm[k]);
+  }
+  return undefined;
+}
+
+/** First number-typed value across keys. */
+export function fmNum(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): number | undefined {
+  for (const k of keys) {
+    if (typeof fm[k] === "number") return fm[k] as number;
+  }
+  return undefined;
+}
+
+/** First boolean-typed value across keys. */
+export function fmBool(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): boolean | undefined {
+  for (const k of keys) {
+    if (typeof fm[k] === "boolean") return fm[k] as boolean;
+  }
+  return undefined;
+}
+
+/** First array-typed value across keys, each element coerced to string. */
+export function fmStrArr(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): string[] | undefined {
+  for (const k of keys) {
+    if (Array.isArray(fm[k])) return (fm[k] as unknown[]).map(String);
+  }
+  return undefined;
+}
+
 /**
  * Derive an entity id from frontmatter, falling back to the filename stem.
  *

@@ -6,6 +6,9 @@ import { GOAL_TABLE, rowToGoal } from "../domains/goal/cache.ts";
 import { GOAL_BODY_KEYS } from "../domains/goal/constants.ts";
 
 import {
+  fmNum,
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -68,39 +71,29 @@ export class GoalRepository extends CachedMarkdownRepository<
       title,
       description,
       type: (fm.type as Goal["type"]) ?? "project",
-      kpi: fm.kpi != null ? String(fm.kpi) : "",
-      kpiMetric: fm.kpiMetric != null ? String(fm.kpiMetric) : undefined,
-      kpiTarget: fm.kpiTarget != null ? Number(fm.kpiTarget) : undefined,
-      kpiValue: fm.kpiValue != null ? Number(fm.kpiValue) : undefined,
-      startDate: String(fm.startDate ?? ""),
-      endDate: String(fm.endDate ?? ""),
+      kpi: fmStr(fm, "kpi") ?? "",
+      kpiMetric: fmStr(fm, "kpiMetric"),
+      kpiTarget: fmNum(fm, "kpiTarget"),
+      kpiValue: fmNum(fm, "kpiValue"),
+      startDate: fmStr(fm, "startDate") ?? "",
+      endDate: fmStr(fm, "endDate") ?? "",
       status: (fm.status as Goal["status"]) ?? "planning",
-      githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
-      githubMilestone: fm.githubMilestone != null
-        ? Number(fm.githubMilestone)
-        : undefined,
-      linkedPortfolioItems: Array.isArray(fm.linkedPortfolioItems)
-        ? (fm.linkedPortfolioItems as unknown[]).map(String)
-        : undefined,
-      project: fm.project != null ? String(fm.project) : undefined,
-      owner: fm.owner != null ? String(fm.owner) : undefined,
-      contributors: Array.isArray(fm.contributors)
-        ? (fm.contributors as unknown[]).map(String)
-        : undefined,
-      priority: fm.priority != null ? Number(fm.priority) : undefined,
-      progress: fm.progress != null ? Number(fm.progress) : undefined,
-      parentGoal: fm.parentGoal != null ? String(fm.parentGoal) : undefined,
-      linkedMilestones: Array.isArray(fm.linkedMilestones)
-        ? (fm.linkedMilestones as unknown[]).map(String)
-        : undefined,
-      tags: Array.isArray(fm.tags)
-        ? (fm.tags as unknown[]).map(String)
-        : undefined,
-      notes: fm.notes != null ? String(fm.notes) : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy ? String(fm.updatedBy) : undefined,
+      githubRepo: fmStr(fm, "githubRepo"),
+      githubMilestone: fmNum(fm, "githubMilestone"),
+      linkedPortfolioItems: fmStrArr(fm, "linkedPortfolioItems"),
+      project: fmStr(fm, "project"),
+      owner: fmStr(fm, "owner"),
+      contributors: fmStrArr(fm, "contributors"),
+      priority: fmNum(fm, "priority"),
+      progress: fmNum(fm, "progress"),
+      parentGoal: fmStr(fm, "parentGoal"),
+      linkedMilestones: fmStrArr(fm, "linkedMilestones"),
+      tags: fmStrArr(fm, "tags"),
+      notes: fmStr(fm, "notes"),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 
