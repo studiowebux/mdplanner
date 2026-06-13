@@ -15,6 +15,72 @@
  * @param fmNotes    Frontmatter notes; used when the body yields no trailing
  *                   notes.
  */
+/** Mutable accumulator threaded through the per-line quadrant walk. */
+interface QuadrantAcc {
+  title: string;
+  quadrants: Record<string, string[]>;
+  currentSection: string | null;
+  extraLines: string[];
+  pastQuadrants: boolean;
+}
+
+/** First quadrant key whose prefix the lowercased `## heading` starts with. */
+function matchQuadrantHeading(
+  heading: string,
+  sectionMap: Record<string, string>,
+): string | null {
+  for (const [prefix, key] of Object.entries(sectionMap)) {
+    if (heading.startsWith(prefix)) return key;
+  }
+  return null;
+}
+
+/** Apply one body line to the accumulator (heading / item / notes routing). */
+function processQuadrantLine(
+  line: string,
+  sectionMap: Record<string, string>,
+  acc: QuadrantAcc,
+): void {
+  if (line.startsWith("# ")) {
+    if (!acc.title) acc.title = line.slice(2).trim();
+    return;
+  }
+
+  const h2Match = line.match(/^##\s+(.+)$/);
+  if (h2Match) {
+    const key = matchQuadrantHeading(h2Match[1].toLowerCase(), sectionMap);
+    if (key) {
+      acc.currentSection = key;
+    } else {
+      acc.currentSection = null;
+      acc.pastQuadrants = true;
+      acc.extraLines.push(line);
+    }
+    return;
+  }
+
+  const listMatch = line.match(/^[-*]\s+(.+)$/);
+  if (listMatch && acc.currentSection && !acc.pastQuadrants) {
+    acc.quadrants[acc.currentSection].push(listMatch[1].trim());
+    return;
+  }
+
+  if (acc.currentSection === null && !acc.pastQuadrants) {
+    if (line.trim()) acc.extraLines.push(line);
+    return;
+  }
+
+  if (acc.currentSection && !acc.pastQuadrants && line.trim()) {
+    acc.pastQuadrants = true;
+    acc.extraLines.push(line);
+    return;
+  }
+
+  if (acc.pastQuadrants) {
+    acc.extraLines.push(line);
+  }
+}
+
 export function parseQuadrantMarkdown(
   body: string,
   sectionMap: Record<string, string>,
@@ -25,63 +91,22 @@ export function parseQuadrantMarkdown(
   quadrants: Record<string, string[]>;
   notes: string | undefined;
 } {
-  const lines = body.split("\n");
-  let title = fmTitle ? String(fmTitle) : "";
   const quadrants: Record<string, string[]> = {};
   for (const key of Object.values(sectionMap)) quadrants[key] = [];
-  let currentSection: string | null = null;
-  const extraLines: string[] = [];
-  let pastQuadrants = false;
+  const acc: QuadrantAcc = {
+    title: fmTitle ? String(fmTitle) : "",
+    quadrants,
+    currentSection: null,
+    extraLines: [],
+    pastQuadrants: false,
+  };
 
-  for (const line of lines) {
-    if (line.startsWith("# ")) {
-      if (!title) title = line.slice(2).trim();
-      continue;
-    }
-
-    const h2Match = line.match(/^##\s+(.+)$/);
-    if (h2Match) {
-      const heading = h2Match[1].toLowerCase();
-      let matched = false;
-      for (const [prefix, key] of Object.entries(sectionMap)) {
-        if (heading.startsWith(prefix)) {
-          currentSection = key;
-          matched = true;
-          break;
-        }
-      }
-      if (!matched) {
-        currentSection = null;
-        pastQuadrants = true;
-        extraLines.push(line);
-      }
-      continue;
-    }
-
-    const listMatch = line.match(/^[-*]\s+(.+)$/);
-    if (listMatch && currentSection && !pastQuadrants) {
-      quadrants[currentSection].push(listMatch[1].trim());
-      continue;
-    }
-
-    if (currentSection === null && !pastQuadrants) {
-      if (line.trim()) extraLines.push(line);
-      continue;
-    }
-
-    if (currentSection && !pastQuadrants && line.trim()) {
-      pastQuadrants = true;
-      extraLines.push(line);
-      continue;
-    }
-
-    if (pastQuadrants) {
-      extraLines.push(line);
-    }
+  for (const line of body.split("\n")) {
+    processQuadrantLine(line, sectionMap, acc);
   }
 
-  const bodyNotes = extraLines.join("\n").trim();
+  const bodyNotes = acc.extraLines.join("\n").trim();
   const fmNotesStr = fmNotes != null ? String(fmNotes) : "";
   const notes = bodyNotes || fmNotesStr || undefined;
-  return { title, quadrants, notes };
+  return { title: acc.title, quadrants, notes };
 }

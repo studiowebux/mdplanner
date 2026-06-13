@@ -16,6 +16,7 @@ import {
 import { LEAN_CANVAS_BODY_KEYS } from "../domains/lean-canvas/constants.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -91,8 +92,8 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
     return {
       id,
       title,
-      project: fm.project != null ? String(fm.project) : undefined,
-      date: fm.date != null ? String(fm.date) : undefined,
+      project: fmStr(fm, "project"),
+      date: fmStr(fm, "date"),
       problem: sections.problem ?? [],
       solution: sections.solution ?? [],
       uniqueValueProp: sections.uniqueValueProp ?? [],
@@ -108,10 +109,10 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
       completedSections: 0,
       sectionCount: 0,
       completionPct: 0,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

@@ -16,6 +16,7 @@ import {
 } from "../domains/business-model/cache.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -53,6 +54,62 @@ function matchSection(heading: string): BusinessModelSectionKey | null {
     if (prefixes.some((p) => lower.startsWith(p))) return key;
   }
   return null;
+}
+
+/** Parse a canvas body into its nine sections, body title, and trailing notes. */
+function parseBmSections(lines: string[]): {
+  bodyTitle: string;
+  sections: Record<BusinessModelSectionKey, string[]>;
+  notes: string;
+} {
+  const sections: Record<BusinessModelSectionKey, string[]> = {
+    keyPartners: [],
+    keyActivities: [],
+    keyResources: [],
+    valueProposition: [],
+    customerRelationships: [],
+    channels: [],
+    customerSegments: [],
+    costStructure: [],
+    revenueStreams: [],
+  };
+  let bodyTitle = "";
+  let currentSection: BusinessModelSectionKey | null = null;
+  const extraLines: string[] = [];
+  let pastSections = false;
+
+  for (const line of lines) {
+    if (line.startsWith("# ")) {
+      if (!bodyTitle) bodyTitle = line.slice(2).trim();
+      continue;
+    }
+
+    const h2Match = line.match(/^##\s+(.+)$/);
+    if (h2Match) {
+      const key = matchSection(h2Match[1]);
+      if (key) {
+        currentSection = key;
+        pastSections = false;
+      } else {
+        currentSection = null;
+        pastSections = true;
+        extraLines.push(line);
+      }
+      continue;
+    }
+
+    const listMatch = line.match(/^[-*]\s+(.+)$/);
+    if (listMatch && currentSection && !pastSections) {
+      sections[currentSection].push(listMatch[1].trim());
+      continue;
+    }
+
+    if (pastSections) {
+      extraLines.push(line);
+    }
+  }
+
+  return { bodyTitle, sections, notes: extraLines.join("\n").trim() };
 }
 
 /** Persists BusinessModel entities as markdown (nine-block canvas body) with a SQLite cache mirror. */
@@ -112,69 +169,23 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = resolveEntityId(filename, fm);
 
-    const lines = body.split("\n");
-    let title = fm.title ? String(fm.title) : "";
-    const sections: Record<BusinessModelSectionKey, string[]> = {
-      keyPartners: [],
-      keyActivities: [],
-      keyResources: [],
-      valueProposition: [],
-      customerRelationships: [],
-      channels: [],
-      customerSegments: [],
-      costStructure: [],
-      revenueStreams: [],
-    };
-    let currentSection: BusinessModelSectionKey | null = null;
-    const extraLines: string[] = [];
-    let pastSections = false;
-
-    for (const line of lines) {
-      if (line.startsWith("# ")) {
-        if (!title) title = line.slice(2).trim();
-        continue;
-      }
-
-      const h2Match = line.match(/^##\s+(.+)$/);
-      if (h2Match) {
-        const key = matchSection(h2Match[1]);
-        if (key) {
-          currentSection = key;
-          pastSections = false;
-        } else {
-          currentSection = null;
-          pastSections = true;
-          extraLines.push(line);
-        }
-        continue;
-      }
-
-      const listMatch = line.match(/^[-*]\s+(.+)$/);
-      if (listMatch && currentSection && !pastSections) {
-        sections[currentSection].push(listMatch[1].trim());
-        continue;
-      }
-
-      if (pastSections) {
-        extraLines.push(line);
-      }
-    }
-
-    const bodyNotes = extraLines.join("\n").trim();
-    const fmNotes = fm.notes != null ? String(fm.notes) : "";
-    const notes = bodyNotes || fmNotes || undefined;
+    const { bodyTitle, sections, notes: bodyNotes } = parseBmSections(
+      body.split("\n"),
+    );
+    const title = fm.title ? String(fm.title) : bodyTitle;
+    const notes = bodyNotes || fmStr(fm, "notes") || undefined;
 
     return {
       id,
       title: title || "Untitled Business Model",
-      date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
+      date: fmStr(fm, "date") ?? new Date().toISOString().split("T")[0],
       ...sections,
-      project: fm.project != null ? String(fm.project) : undefined,
+      project: fmStr(fm, "project"),
       notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

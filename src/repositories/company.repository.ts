@@ -12,6 +12,8 @@ import { COMPANY_TABLE, rowToCompany } from "../domains/company/cache.ts";
 import { COMPANY_BODY_KEYS } from "../domains/company/cache.ts";
 
 import {
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -89,36 +91,32 @@ export class CompanyRepository extends CachedMarkdownRepository<
       notes = bodyText || undefined;
     }
 
-    const typeRaw = fm.type != null ? String(fm.type) : undefined;
+    const typeRaw = fmStr(fm, "type");
     const type = typeRaw && COMPANY_TYPES.includes(typeRaw as CompanyType)
       ? (typeRaw as CompanyType)
       : undefined;
 
-    const sizeRaw = fm.size != null ? String(fm.size) : undefined;
+    const sizeRaw = fmStr(fm, "size");
     const size = sizeRaw && COMPANY_SIZES.includes(sizeRaw as CompanySize)
       ? (sizeRaw as CompanySize)
       : undefined;
 
-    const tags = Array.isArray(fm.tags)
-      ? (fm.tags as unknown[]).map(String)
-      : [];
-
     return {
       id,
       name,
-      website: fm.website != null ? String(fm.website) : undefined,
-      industry: fm.industry != null ? String(fm.industry) : undefined,
+      website: fmStr(fm, "website"),
+      industry: fmStr(fm, "industry"),
       size,
       type,
-      phone: fm.phone != null ? String(fm.phone) : undefined,
-      email: fm.email != null ? String(fm.email) : undefined,
-      address: fm.address != null ? String(fm.address) : undefined,
+      phone: fmStr(fm, "phone"),
+      email: fmStr(fm, "email"),
+      address: fmStr(fm, "address"),
       notes,
-      tags,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      tags: fmStrArr(fm, "tags") ?? [],
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

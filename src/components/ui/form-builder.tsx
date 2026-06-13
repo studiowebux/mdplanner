@@ -320,161 +320,207 @@ const Field: FC<
           <span class="form__required" aria-hidden="true">*</span>
         )}
       </label>
-      {def.type === "text" && (
-        <input
-          type="text"
-          id={id}
-          name={def.name}
-          class="form__input"
-          required={def.required}
-          placeholder={def.placeholder}
-          maxlength={def.maxLength}
-          value={value ?? ""}
-          autocomplete="do-not-autofill"
-        />
-      )}
-      {def.type === "number" && (
-        <input
-          type="number"
-          id={id}
-          name={def.name}
-          class="form__input"
-          required={def.required}
-          min={def.min}
-          max={def.max}
-          value={value ?? ""}
-          autocomplete="off"
-        />
-      )}
-      {def.type === "date" && (
-        <input
-          type="date"
-          id={id}
-          name={def.name}
-          class="form__input"
-          required={def.required}
-          value={value ?? ""}
-        />
-      )}
-      {def.type === "select" && (
-        <select
-          id={id}
-          name={def.name}
-          class="form__select"
-          required={def.required}
-          {...(def.hx
-            ? {
-              "hx-get": def.hx.get,
-              "hx-target": def.hx.target,
-              "hx-trigger": def.hx.trigger ?? "change",
-              "hx-swap": def.hx.swap ?? "innerHTML",
-            }
-            : {})}
-        >
-          {def.options.map((o) => (
-            <option key={o.value} value={o.value} selected={value === o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      )}
-      {def.type === "textarea" && (
-        <FormTextarea
-          id={id}
-          name={def.name}
-          rows={def.rows ?? 4}
-          required={def.required}
-          maxlength={def.maxLength}
-          value={value ?? ""}
-        />
-      )}
-      {def.type === "boolean" && (
-        <label class="form__checkbox-label">
-          <input
-            type="checkbox"
-            id={id}
-            name={def.name}
-            value="true"
-            checked={value === "true"}
-            class="form__checkbox"
-          />
-          {def.label}
-        </label>
-      )}
-      {def.type === "autocomplete" && (
-        <AutocompleteWidget
-          id={id}
-          name={def.name}
-          source={def.source}
-          value={value}
-          displayValue={displayValue}
-          placeholder={def.placeholder}
-          required={def.required}
-          freetext={def.freetext}
-        />
-      )}
-      {def.type === "tags" && (() => {
-        const tags = (value ?? "").split(",").map((s) => s.trim()).filter(
-          Boolean,
-        );
-        return (
-          <div class="form__tags" data-tags-field={id}>
-            <div class="form__tags-pills" id={`${id}-pills`}>
-              {tags.map((tag) => (
-                <span key={tag} class="form__tags-pill" data-tag-value={tag}>
-                  {tag}
-                  <button
-                    type="button"
-                    class="form__tags-pill-remove"
-                    data-tag-remove={tag}
-                    aria-label={`Remove ${tag}`}
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-            </div>
-            <input
-              type="text"
-              id={`${id}-input`}
-              class="form__input form__tags-input"
-              placeholder={def.placeholder ?? "Type and press Enter..."}
-              autocomplete="off"
-              name="q"
-              data-tags-target={id}
-              {...(def.source
-                ? {
-                  "hx-get": `/autocomplete/${def.source}`,
-                  "hx-trigger": "input changed delay:150ms, focus",
-                  "hx-target": `#${id}-results`,
-                  "hx-swap": "innerHTML",
-                }
-                : {})}
-            />
-            <input
-              type="hidden"
-              id={id}
-              name={def.name}
-              value={value ?? ""}
-            />
-            {def.source && (
-              <ul class="form__autocomplete-list" id={`${id}-results`} />
-            )}
-          </div>
-        );
-      })()}
-      {def.type === "array-table" && (
-        <ArrayTable
-          section={def.section}
-          itemFields={def.itemFields}
-          rows={parseJson<Record<string, unknown>[]>(value) ?? []}
-          rowsId={`${id}-rows`}
-          addLabel={def.addLabel ?? `Add ${def.label}`}
-          rowsDisplayData={arrayDisplayRows}
+      <FieldControl
+        id={id}
+        def={def}
+        value={value}
+        displayValue={displayValue}
+        arrayDisplayRows={arrayDisplayRows}
+      />
+    </div>
+  );
+};
+
+/** Select control — options + optional htmx wiring. */
+const SelectControl: FC<{
+  id: string;
+  def: Extract<FieldDef, { type: "select" }>;
+  value?: string;
+}> = ({ id, def, value }) => (
+  <select
+    id={id}
+    name={def.name}
+    class="form__select"
+    required={def.required}
+    {...(def.hx
+      ? {
+        "hx-get": def.hx.get,
+        "hx-target": def.hx.target,
+        "hx-trigger": def.hx.trigger ?? "change",
+        "hx-swap": def.hx.swap ?? "innerHTML",
+      }
+      : {})}
+  >
+    {def.options.map((o) => (
+      <option key={o.value} value={o.value} selected={value === o.value}>
+        {o.label}
+      </option>
+    ))}
+  </select>
+);
+
+/** Tags control — comma-encoded pills + add input with optional autocomplete. */
+const TagsControl: FC<{
+  id: string;
+  def: Extract<FieldDef, { type: "tags" }>;
+  value?: string;
+}> = ({ id, def, value }) => {
+  const tags = (value ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return (
+    <div class="form__tags" data-tags-field={id}>
+      <div class="form__tags-pills" id={`${id}-pills`}>
+        {tags.map((tag) => (
+          <span key={tag} class="form__tags-pill" data-tag-value={tag}>
+            {tag}
+            <button
+              type="button"
+              class="form__tags-pill-remove"
+              data-tag-remove={tag}
+              aria-label={`Remove ${tag}`}
+            >
+              &times;
+            </button>
+          </span>
+        ))}
+      </div>
+      <input
+        type="text"
+        id={`${id}-input`}
+        class="form__input form__tags-input"
+        placeholder={def.placeholder ?? "Type and press Enter..."}
+        autocomplete="off"
+        name="q"
+        data-tags-target={id}
+        {...(def.source
+          ? {
+            "hx-get": `/autocomplete/${def.source}`,
+            "hx-trigger": "input changed delay:150ms, focus",
+            "hx-target": `#${id}-results`,
+            "hx-swap": "innerHTML",
+          }
+          : {})}
+      />
+      <input type="hidden" id={id} name={def.name} value={value ?? ""} />
+      {def.source && (
+        <ul
+          class="form__autocomplete-list"
+          id={`${id}-results`}
         />
       )}
     </div>
   );
+};
+
+/** Renders the type-specific input control for one field (no label wrapper). */
+const FieldControl: FC<{
+  id: string;
+  def: FieldDef;
+  value?: string;
+  displayValue?: string;
+  arrayDisplayRows?: Record<string, string>[];
+}> = ({ id, def, value, displayValue, arrayDisplayRows }) => {
+  if (def.type === "text") {
+    return (
+      <input
+        type="text"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        placeholder={def.placeholder}
+        maxlength={def.maxLength}
+        value={value ?? ""}
+        autocomplete="do-not-autofill"
+      />
+    );
+  }
+  if (def.type === "number") {
+    return (
+      <input
+        type="number"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        min={def.min}
+        max={def.max}
+        value={value ?? ""}
+        autocomplete="off"
+      />
+    );
+  }
+  if (def.type === "date") {
+    return (
+      <input
+        type="date"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        value={value ?? ""}
+      />
+    );
+  }
+  if (def.type === "select") {
+    return <SelectControl id={id} def={def} value={value} />;
+  }
+  if (def.type === "textarea") {
+    return (
+      <FormTextarea
+        id={id}
+        name={def.name}
+        rows={def.rows ?? 4}
+        required={def.required}
+        maxlength={def.maxLength}
+        value={value ?? ""}
+      />
+    );
+  }
+  if (def.type === "boolean") {
+    return (
+      <label class="form__checkbox-label">
+        <input
+          type="checkbox"
+          id={id}
+          name={def.name}
+          value="true"
+          checked={value === "true"}
+          class="form__checkbox"
+        />
+        {def.label}
+      </label>
+    );
+  }
+  if (def.type === "autocomplete") {
+    return (
+      <AutocompleteWidget
+        id={id}
+        name={def.name}
+        source={def.source}
+        value={value}
+        displayValue={displayValue}
+        placeholder={def.placeholder}
+        required={def.required}
+        freetext={def.freetext}
+      />
+    );
+  }
+  if (def.type === "tags") {
+    return <TagsControl id={id} def={def} value={value} />;
+  }
+  if (def.type === "array-table") {
+    return (
+      <ArrayTable
+        section={def.section}
+        itemFields={def.itemFields}
+        rows={parseJson<Record<string, unknown>[]>(value) ?? []}
+        rowsId={`${id}-rows`}
+        addLabel={def.addLabel ?? `Add ${def.label}`}
+        rowsDisplayData={arrayDisplayRows}
+      />
+    );
+  }
+  return null;
 };
 
 /** Renders a complete create/edit form from a FieldDef[]; supports array-table rows, autocomplete, and nested sidenav fields. */
