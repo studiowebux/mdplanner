@@ -26,10 +26,18 @@
     return div.innerHTML;
   }
 
-  // `this` is the textarea — grow it to fit its content.
+  // `this` is the textarea — grow it to fit its content. The momentary
+  // `height:auto` collapses a tall textarea, which shrinks the scroll container
+  // (`.app-shell__content`, overflow-y:auto — NOT the window) and bounces its
+  // scrollTop toward the top on every keystroke in a long note. Preserve and
+  // restore the container's scrollTop around the height mutation.
   function autoResize() {
+    var scroller = this.closest(".app-shell__content") ||
+      document.scrollingElement;
+    var top = scroller ? scroller.scrollTop : 0;
     this.style.height = "auto";
     this.style.height = this.scrollHeight + "px";
+    if (scroller) scroller.scrollTop = top;
   }
 
   // Merge an ordered list of sub-blocks into a single raw-markdown string.
