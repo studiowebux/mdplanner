@@ -96,6 +96,18 @@
   // Toggle edit mode
   // -------------------------------------------------------------------------
 
+  // Size every freshly-built textarea to its content. autoResize is otherwise
+  // only an `input` listener, so a pre-filled long-note textarea keeps its
+  // default height and shows its OWN scrollbar (scroll-in-scroll) until the
+  // first keystroke. Run once on enter-edit; autoResize preserves the
+  // .app-shell__content scrollTop, so this never bounces the page.
+  function sizeAllTextareas() {
+    var areas = document.querySelectorAll(
+      ".note-detail__body .note-editor__textarea",
+    );
+    for (var i = 0; i < areas.length; i++) U.autoResize.call(areas[i]);
+  }
+
   function toggleEdit() {
     editing = !editing;
     var body = qs(".note-detail__body");
@@ -110,6 +122,7 @@
       createSaveBar();
       showEditorControls();
       Convert.convertToEditable(markDirty);
+      sizeAllTextareas();
       trackDirtyInputs();
       disableFieldSwaps();
     } else {
