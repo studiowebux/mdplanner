@@ -6,7 +6,10 @@ import type {
   CreateBillingRate,
   UpdateBillingRate,
 } from "../../types/billing-rate.types.ts";
-import { getBillingRateService } from "../../singletons/services.ts";
+import {
+  getBillingRateService,
+  getPeopleService,
+} from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
   BILLING_RATE_FORM_FIELDS,
@@ -61,6 +64,17 @@ export const billingRateConfig: DomainConfig<
   },
 
   getService: () => getBillingRateService(),
+
+  // Assignee is stored as a person ID; resolve it to a name for the edit form's
+  // autocomplete display (the hidden value keeps the ID).
+  resolveFormValues: async (values) => {
+    const resolved = { ...values };
+    if (values.assignee) {
+      const person = await getPeopleService().getById(values.assignee);
+      if (person) resolved.assignee = person.name;
+    }
+    return resolved;
+  },
 
   searchPredicate: createSearchPredicate<BillingRate>([
     { type: "string", get: (r) => r.name },

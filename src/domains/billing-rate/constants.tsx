@@ -95,10 +95,11 @@ export const BILLING_RATE_FORM_FIELDS: FieldDef[] = [
     placeholder: "CAD",
   },
   {
-    type: "text",
+    type: "autocomplete",
     name: "assignee",
     label: "Assignee",
-    placeholder: "Person ID (optional)",
+    source: "people",
+    placeholder: "Search people... (optional)",
   },
   {
     type: "boolean",
