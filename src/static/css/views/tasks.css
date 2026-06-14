@@ -62,6 +62,11 @@
 .task-list__select {
   flex-shrink: 0;
   width: var(--task-select-w);
+  height: var(--task-select-w);
+  /* Padding grows the clickable target; negative margin keeps the visual
+     position (and the row's flex gap) unchanged. */
+  padding: var(--space-xs);
+  margin: calc(var(--space-xs) * -1);
   accent-color: var(--color-accent);
   cursor: pointer;
 }
@@ -367,6 +372,12 @@
 
 .task-list__row:hover {
   background: var(--color-bg-hover);
+}
+
+/* Hovering a selected row keeps the selected background (hover must not wipe
+   selection state). Later source + higher specificity beats the hover rule. */
+.task-list__row--selected:hover {
+  background: var(--color-bg-selected);
 }
 
 .task-list__select,
