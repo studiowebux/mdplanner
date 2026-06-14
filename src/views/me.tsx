@@ -61,7 +61,9 @@ export const MeDashboard: FC<MeDashboardProps> = ({
               {/* My Tasks */}
               {tasks.length > 0 && (
                 <section class="me-dashboard__card detail-section">
-                  <h2 class="me-dashboard__card-title">My Tasks</h2>
+                  <h2 class="me-dashboard__card-title">
+                    My Tasks ({tasks.length})
+                  </h2>
                   <ul class="me-dashboard__list">
                     <MyTasksChunk
                       tasks={tasks}

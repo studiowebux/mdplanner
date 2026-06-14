@@ -22,7 +22,7 @@ export const GitHubSummaryView: FC<Props> = ({
     styles={["/css/views/github-summary.css", "/css/views/github.css"]}
   >
     <main class="github-summary">
-      <h1 class="github-summary__title">GitHub</h1>
+      <h1 class="github-summary__title">GitHub ({items.length})</h1>
 
       {items.length === 0
         ? (
