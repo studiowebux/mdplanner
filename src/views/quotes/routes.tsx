@@ -86,7 +86,9 @@ quotesRouter.get("/:id/print", async (c) => {
 quotesRouter.put("/:id/notes", async (c) => {
   const id = c.req.param("id")!;
   const body = await c.req.parseBody();
-  const notes = String(body.notes ?? "").trim() || undefined;
+  // Keep the empty string (don't collapse to undefined) so clearing the note
+  // persists — mergeFields skips undefined, which would preserve the old value.
+  const notes = String(body.notes ?? "").trim();
   await getQuoteService().update(id, { notes });
   return renderDetail(c, id);
 });
@@ -95,7 +97,8 @@ quotesRouter.put("/:id/notes", async (c) => {
 quotesRouter.put("/:id/footer", async (c) => {
   const id = c.req.param("id")!;
   const body = await c.req.parseBody();
-  const footer = String(body.footer ?? "").trim() || undefined;
+  // Keep the empty string so clearing the footer persists (see notes route).
+  const footer = String(body.footer ?? "").trim();
   await getQuoteService().update(id, { footer });
   return renderDetail(c, id);
 });

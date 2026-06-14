@@ -148,6 +148,28 @@ Deno.test("QuoteRepository - update preserves sibling fields", async () => {
   }
 });
 
+Deno.test("QuoteRepository - update with empty-string notes/footer clears them", async () => {
+  const { repo, dir } = await setup();
+  try {
+    const created = await repo.create({
+      customerId: "c1",
+      title: "Clearable",
+      currency: "USD",
+      footer: "Terms apply.",
+      notes: "Internal notes.",
+      lineItems: [],
+    });
+    await repo.update(created.id, { notes: "", footer: "" });
+    const fetched = await repo.findById(created.id);
+    assertExists(fetched);
+    // Empty string must persist as cleared, not fall back to the old value.
+    assertEquals(fetched!.notes ?? "", "");
+    assertEquals(fetched!.footer ?? "", "");
+  } finally {
+    await cleanup(dir);
+  }
+});
+
 Deno.test("QuoteRepository - update returns null for non-existent ID", async () => {
   const { repo, dir } = await setup();
   try {
