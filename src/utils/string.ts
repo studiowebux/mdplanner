@@ -20,6 +20,32 @@ export function ciIncludes(
 }
 
 /**
+ * Fold a string for fuzzy matching: lowercase, strip diacritics (NFD + remove
+ * combining marks), and drop everything that isn't a latin letter or digit
+ * (spaces, punctuation). So "Génie" → "genie" and "MD Planner" → "mdplanner".
+ */
+export function foldText(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * Diacritic-, space-, and punctuation-insensitive substring match. Used by
+ * autocomplete so "genie" matches "Génie" and "mdplanner" matches "MD Planner".
+ * Returns false if the haystack is nullish.
+ */
+export function foldIncludes(
+  haystack: string | null | undefined,
+  needle: string,
+): boolean {
+  if (!haystack) return false;
+  return foldText(haystack).includes(foldText(needle));
+}
+
+/**
  * Extract sorted unique non-empty string values from an array of items.
  * Replaces the `[...new Set(items.map(i => i.field).filter(Boolean))].sort()` pattern.
  */
