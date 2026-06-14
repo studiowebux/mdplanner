@@ -51,17 +51,12 @@
 
     if (type === "tabs") {
       config.tabs = [];
-      qsa("[data-tab-panel]", el).forEach(function (tabEl) {
-        config.tabs.push({
-          id: tabEl.dataset.tabPanel,
-          title: tabEl.dataset.tabPanelTitle || "Tab",
-          content: collectContainerContent(tabEl),
-        });
-      });
-      // Also collect from editor-created tab items
+      // Both newly-added and saved tabs are stacked [data-tab-id] items in edit
+      // mode (convertTabsToEditable rebuilds saved tabs into this same shape),
+      // so a single pass collects them all. The role="tab" guard skips any
+      // residual read-only tab-bar buttons.
       qsa("[data-tab-id]", el).forEach(function (tabEl) {
         if (tabEl.getAttribute("role") === "tab") return; // skip tab bar buttons
-        if (tabEl.dataset.tabPanel) return; // skip panels already collected
         config.tabs.push({
           id: tabEl.dataset.tabId,
           title: tabEl.dataset.tabTitle || "Tab",

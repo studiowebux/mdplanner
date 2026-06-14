@@ -64,51 +64,63 @@
     });
   }
 
-  // Wire an inline title input into each existing tab bar button so the
-  // user can rename tabs while in edit mode. Mirrors the title input
-  // pattern used by createTabElement for newly added tabs.
-  function makeTabTitlesEditable(section, markDirty) {
-    qsa("[data-tab-id][role='tab']", section).forEach(function (btn) {
-      if (btn.dataset.titleEditable) return;
-      btn.dataset.titleEditable = "true";
-
-      var tabId = btn.dataset.tabId;
-      var current = btn.dataset.tabTitle || btn.textContent.trim();
-      btn.textContent = "";
-
-      var input = document.createElement("input");
-      input.type = "text";
-      input.className = "note-editor__tab-title-input";
-      input.value = current;
-      // Prevent the tab-switch click delegate from firing on input
-      // interactions — the surrounding button stays clickable for switching.
-      input.addEventListener("mousedown", function (e) {
-        e.stopPropagation();
+  // Build a single raw markdown string from a container's sub-blocks
+  // (DOM datasets → fenced markdown). Shared by the tab and merge converters.
+  function subBlocksToMarkdown(container) {
+    var blocks = [];
+    container.querySelectorAll("[data-sub-block-id]").forEach(function (sub) {
+      blocks.push({
+        type: sub.dataset.blockType || "text",
+        content: sub.dataset.blockContent || "",
+        lang: sub.dataset.blockLang || "",
       });
-      input.addEventListener("click", function (e) {
-        e.stopPropagation();
-      });
-      input.addEventListener("input", function () {
-        var v = this.value;
-        btn.dataset.tabTitle = v;
-        var panel = section.querySelector(
-          '[data-tab-panel="' + tabId + '"]',
-        );
-        if (panel) panel.dataset.tabPanelTitle = v;
-        markDirty();
-      });
-      btn.appendChild(input);
     });
+    return U.subBlocksToMarkdown(blocks);
   }
 
-  // Merge sub-blocks inside a container (tab panel, timeline item, column)
-  // into a single raw markdown textarea. Code blocks get ``` fences restored.
+  // Convert a saved tabs section (read-only tab bar + [data-tab-panel] panels)
+  // into the SAME self-contained, stacked [data-tab-id] items that
+  // createTabElement builds for newly added tabs — a title input + a raw
+  // markdown textarea per tab. The previous approach nested an <input> inside
+  // each role="tab" <button>, where the caret/typing was unreliable and tab
+  // switching broke, so neither renaming a tab nor editing a non-first tab's
+  // content persisted on saved notes. Collection then runs through the single
+  // [data-tab-id] path for both new and saved tabs.
+  function convertTabsToEditable(section) {
+    var tabsWrap = qs(".note-detail__tabs", section);
+    var panels = qsa("[data-tab-panel]", section);
+    if (panels.length === 0) return;
+
+    panels.forEach(function (panel) {
+      var id = panel.dataset.tabPanel;
+      var title = panel.dataset.tabPanelTitle;
+      if (!title) {
+        var btn = section.querySelector(
+          '[data-tab-id="' + id + '"][role="tab"]',
+        );
+        title = btn ? (btn.dataset.tabTitle || btn.textContent.trim()) : "Tab";
+      }
+
+      var md = subBlocksToMarkdown(panel);
+      var item = root.NoteEditorBuilders.createTabElement(id, title);
+      var ta = qs(".note-editor__raw-block .note-editor__textarea", item);
+      if (ta) {
+        ta.value = md;
+        ta.rows = Math.max(3, md.split("\n").length + 1);
+      }
+
+      if (tabsWrap) tabsWrap.before(item);
+      else section.appendChild(item);
+    });
+
+    if (tabsWrap) tabsWrap.remove();
+  }
+
+  // Merge sub-blocks inside a container (timeline item, column) into a single
+  // raw markdown textarea. Code blocks get ``` fences restored. Tabs use
+  // convertTabsToEditable instead (rebuilt as stacked editable items).
   function mergeSubBlocksToMarkdown(section) {
     var containers = [];
-    // Tabs: each tab panel
-    qsa("[data-tab-panel]", section).forEach(function (el) {
-      containers.push(el);
-    });
     // Timeline: each timeline item content area
     qsa("[data-timeline-item-id]", section).forEach(function (el) {
       var content = qs(".note-detail__timeline-content", el);
@@ -124,17 +136,8 @@
       var subs = container.querySelectorAll("[data-sub-block-id]");
       if (subs.length === 0) return;
 
-      // Build raw markdown from sub-blocks (DOM datasets → fenced markdown).
-      var blocks = [];
-      subs.forEach(function (sub) {
-        blocks.push({
-          type: sub.dataset.blockType || "text",
-          content: sub.dataset.blockContent || "",
-          lang: sub.dataset.blockLang || "",
-        });
-      });
-
-      // Remove sub-blocks from DOM
+      // Build raw markdown from sub-blocks, then remove them from the DOM.
+      var md = subBlocksToMarkdown(container);
       subs.forEach(function (sub) {
         sub.remove();
       });
@@ -146,7 +149,7 @@
 
       var ta = document.createElement("textarea");
       ta.className = "note-editor__textarea";
-      ta.value = U.subBlocksToMarkdown(blocks);
+      ta.value = md;
       ta.rows = Math.max(3, ta.value.split("\n").length + 1);
       ta.addEventListener("input", autoResize);
       wrapper.appendChild(ta);
@@ -262,15 +265,17 @@
       var title = qs(".note-detail__section-title", section);
       if (title) title.after(sectionControls);
 
-      // Merge all sub-blocks into one raw markdown textarea per container.
-      // Code blocks get their ``` fences restored. The parser splits them
-      // back into typed blocks on save.
-      mergeSubBlocksToMarkdown(section);
-
+      // Tabs rebuild into stacked editable items (title input + raw textarea);
+      // timeline/split merge their sub-blocks into one raw markdown textarea per
+      // container. Code blocks get their ``` fences restored either way; the
+      // parser splits them back into typed blocks on save.
       if (section.dataset.sectionType === "tabs") {
-        makeTabTitlesEditable(section, markDirty);
-      } else if (section.dataset.sectionType === "timeline") {
-        makeTimelineHeadersEditable(section, markDirty);
+        convertTabsToEditable(section);
+      } else {
+        mergeSubBlocksToMarkdown(section);
+        if (section.dataset.sectionType === "timeline") {
+          makeTimelineHeadersEditable(section, markDirty);
+        }
       }
 
       addSectionAddButtons(section);
