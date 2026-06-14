@@ -137,14 +137,15 @@ export const StickyNoteCanvas: FC<Props> = (
       </div>
       <div class="sticky-canvas__viewport" data-canvas-viewport>
         <div class="sticky-canvas__board" data-canvas-board>
-          {notes.length === 0
-            ? (
-              <div class="sticky-canvas__empty">
-                <p>Double-click anywhere to add a note</p>
-              </div>
-            )
-            : notes.map((note) => <StickyNoteCard key={note.id} note={note} />)}
+          {notes.map((note) => <StickyNoteCard key={note.id} note={note} />)}
         </div>
+        {notes.length === 0
+          ? (
+            <div class="sticky-canvas__empty">
+              <p>Double-click anywhere to add a note</p>
+            </div>
+          )
+          : null}
       </div>
       {
         /* SSE listener — opens the shared /sse EventSource and subscribes to the

@@ -362,14 +362,15 @@
 
   function checkEmpty() {
     var b = board();
-    if (!b) return;
+    var v = vp();
+    if (!b || !v) return;
     var hasNotes = b.querySelector("[data-canvas-note]");
-    var empty = b.querySelector(".sticky-canvas__empty");
+    var empty = v.querySelector(".sticky-canvas__empty");
     if (!hasNotes && !empty) {
       var div = document.createElement("div");
       div.className = "sticky-canvas__empty";
       div.textContent = "Double-click anywhere to add your first note";
-      b.appendChild(div);
+      v.appendChild(div);
     } else if (hasNotes && empty) {
       empty.remove();
     }
@@ -478,7 +479,8 @@
       .then(function (note) {
         var b = board();
         if (!b || !note || !note.id) return;
-        var empty = b.querySelector(".sticky-canvas__empty");
+        var emptyVp = vp();
+        var empty = emptyVp && emptyVp.querySelector(".sticky-canvas__empty");
         if (empty) empty.remove();
         var el = buildNoteEl(note);
         b.appendChild(el);
