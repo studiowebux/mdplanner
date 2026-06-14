@@ -167,6 +167,7 @@ export const HABIT_TABLE_COLUMNS: ColumnDef[] = [
       </a>
     ),
   },
+  { key: "description", label: "Notes", sortable: false },
   { key: "frequency", label: "Frequency", sortable: true },
   { key: "streak", label: "Streak", sortable: true },
   { key: "thisMonth", label: "This month", sortable: false },
@@ -275,6 +276,7 @@ export function habitToRow(h: Habit): Record<string, unknown> {
   return {
     id: h.id,
     title: h.title,
+    description: h.description ?? "",
     frequency: h.frequency,
     streak: String(computeStreak(h.completedDates, h.frequency)),
     thisMonth: `${computeThisMonth(h.completedDates)} / ${

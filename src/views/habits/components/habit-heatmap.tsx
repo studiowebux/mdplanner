@@ -60,7 +60,9 @@ export const HabitHeatmapRow: FC<{
     <a
       class="habit-heatmap__label"
       href={`/habits/${habit.id}`}
-      title={habit.title}
+      title={habit.description
+        ? `${habit.title} — ${habit.description}`
+        : habit.title}
     >
       {habit.title}
     </a>

@@ -39,6 +39,9 @@ export const HabitCard: FC<Props> = ({ item, q, oobSwap }) => {
       }
     >
       <CardMeta>
+        {item.description && (
+          <CardMetaItem label="Notes">{item.description}</CardMetaItem>
+        )}
         <CardMetaItem label="Streak">
           <span class="habit-streak">{streak}</span>
         </CardMetaItem>

@@ -62,6 +62,11 @@
   font-size: var(--font-size-sm);
 }
 
+/* Preserve author line breaks in plain-text terms/footer. */
+.invoice-detail__footer p {
+  white-space: pre-line;
+}
+
 .invoice-detail__meta {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
@@ -178,4 +183,6 @@
 
 .invoice-print__footer p {
   margin: 0;
+  /* Preserve author line breaks in plain-text terms/footer. */
+  white-space: pre-line;
 }

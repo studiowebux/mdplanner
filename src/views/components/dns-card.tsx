@@ -27,6 +27,9 @@ export const DnsCard: FC<Props> = ({ item, q }) => (
       {item.provider && (
         <CardMetaItem label="Provider">{item.provider}</CardMetaItem>
       )}
+      {item.project && (
+        <CardMetaItem label="Project">{item.project}</CardMetaItem>
+      )}
       {item.expiryDate && (
         <CardMetaItem label="Expires">
           {formatDate(item.expiryDate)}

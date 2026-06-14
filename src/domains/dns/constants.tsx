@@ -96,6 +96,12 @@ export const DNS_TABLE_COLUMNS: ColumnDef[] = [
     label: "Records",
     sortable: true,
   },
+  {
+    key: "project",
+    label: "Project",
+    sortable: true,
+    render: (v, row) => <Highlight text={String(v)} q={row._q as string} />,
+  },
   { key: "_actions", label: "", render: actionBtns },
 ];
 
