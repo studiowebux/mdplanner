@@ -7,7 +7,7 @@ import { getHabitService } from "../../singletons/services.ts";
 import { HabitDetailView } from "../habit-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { renderToString } from "hono/jsx/dom/server";
-import { HabitHeatmapRow } from "./components/habit-heatmap.tsx";
+import { HabitHeatmap, HabitHeatmapRow } from "./components/habit-heatmap.tsx";
 import { HabitStats } from "./components/habit-stats.tsx";
 import { HabitCompletionLog } from "./components/habit-completion-log.tsx";
 import { HabitCard } from "../components/habit-card.tsx";
@@ -15,6 +15,22 @@ import type { Habit } from "../../types/habit.types.ts";
 import { resolveUserScope } from "../../utils/actor.ts";
 
 export const habitRouter = createDomainRoutes(habitConfig);
+
+// Heatmap fragment — the list view's heatmap lives in the page topSlot, OUTSIDE
+// the SSE-refreshed `#habits-view` container, so creating/deleting a habit left
+// it stale. A hidden SSE-refresh node (rendered in the topSlot) re-fetches this
+// fragment on `habit.updated`/`habit.deleted` and morphs `#habits-heatmap`
+// (create publishes `<prefix>.updated`, not `.created`, in BaseService).
+// Registered before the custom `/:id` route so it is not captured as an id.
+habitRouter.get("/heatmap", async (c) => {
+  const scope = await resolveUserScope(c);
+  const habits = await getHabitService().listForUser({}, scope);
+  return c.html(
+    <div id="habits-heatmap">
+      <HabitHeatmap habits={habits} />
+    </div>,
+  );
+});
 
 /** Current-month day cells for the heatmap row. */
 function currentMonthDays(): { date: string; day: number }[] {

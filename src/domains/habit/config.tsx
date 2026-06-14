@@ -54,7 +54,31 @@ export const habitConfig: DomainConfig<Habit, CreateHabit, UpdateHabit> = {
   topSlot: async (c) => {
     const scope = await resolveUserScope(c);
     const habits = await getHabitService().listForUser({}, scope);
-    return <HabitHeatmap habits={habits} />;
+    return (
+      <>
+        {
+          /*
+          Background SSE refresh for the heatmap. It lives in the topSlot (inside
+          <main>, which owns sse-connect) and carries its OWN hx-get — htmx 2.x
+          does not inherit the request verb. Re-fetches /habits/heatmap and morphs
+          #habits-heatmap when a habit row is added/removed, since the heatmap
+          sits outside the SSE-refreshed #habits-view container.
+        */
+        }
+        <span
+          hidden
+          hx-get="/habits/heatmap"
+          hx-trigger="sse:habit.updated delay:200ms, sse:habit.deleted delay:200ms"
+          hx-target="#habits-heatmap"
+          hx-select="#habits-heatmap"
+          hx-swap="morph:outerHTML"
+          hx-indicator="this"
+        />
+        <div id="habits-heatmap">
+          <HabitHeatmap habits={habits} />
+        </div>
+      </>
+    );
   },
 
   toRow: habitToRow,
