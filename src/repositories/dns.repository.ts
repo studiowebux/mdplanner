@@ -75,15 +75,21 @@ export class DnsRepository extends CachedMarkdownRepository<
     domainName: string,
     fields: Partial<DnsDomain>,
   ): Promise<{ item: DnsDomain; created: boolean }> {
+    // Cloudflare-sourced upsert: the record's provider is known, so set/override
+    // it to "cloudflare" on both create and update (an existing manually-entered
+    // provider on a domain that also lives in Cloudflare is corrected to match).
+    const withProvider = { ...fields, provider: "cloudflare" };
     const existing = await this.findByName(domainName);
     if (existing) {
-      const updated = await this.update(existing.id, fields as UpdateDnsDomain);
+      const updated = await this.update(
+        existing.id,
+        withProvider as UpdateDnsDomain,
+      );
       return { item: updated!, created: false };
     }
     const item = await this.create({
       domain: domainName,
-      provider: "cloudflare",
-      ...fields,
+      ...withProvider,
     } as CreateDnsDomain);
     return { item, created: true };
   }

@@ -320,6 +320,33 @@ Deno.test("DnsRepository - upsertByDomain creates when missing, updates when pre
   }
 });
 
+Deno.test("DnsRepository - upsertByDomain sets/overrides provider to cloudflare", async () => {
+  const { repo, dir } = await setup();
+  try {
+    // New domain: provider is set even when not passed in the synced fields.
+    const created = await repo.upsertByDomain("provider.example.com", {
+      status: "active",
+    });
+    assertEquals(created.created, true);
+    assertEquals(created.item.provider, "cloudflare");
+
+    // Pre-existing domain with a different provider: a later sync overrides it.
+    const manual = await repo.create({
+      domain: "manual.example.com",
+      provider: "manual",
+    });
+    assertEquals(manual.provider, "manual");
+
+    const synced = await repo.upsertByDomain("manual.example.com", {
+      status: "active",
+    });
+    assertEquals(synced.created, false);
+    assertEquals(synced.item.provider, "cloudflare");
+  } finally {
+    await cleanup(dir);
+  }
+});
+
 // === edges ===
 
 Deno.test("DnsRepository - optional fields left undefined round-trip as undefined", async () => {
