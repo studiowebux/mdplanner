@@ -47,13 +47,14 @@ export function registerEntityRoutes<T extends Entity, C, U>(
         (data as Record<string, unknown>).createdBy = actor.name;
         (data as Record<string, unknown>).updatedBy = actor.name;
       }
-      await cfg.getService().create(data);
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "HX-Trigger": hxTrigger("success", `${cfg.singular} created`),
-        },
-      });
+      const created = await cfg.getService().create(data);
+      const headers: Record<string, string> = {
+        "HX-Trigger": hxTrigger("success", `${cfg.singular} created`),
+      };
+      if (cfg.createRedirect) {
+        headers["HX-Redirect"] = cfg.createRedirect(created);
+      }
+      return new Response(null, { status: 204, headers });
     } catch (err) {
       const message = err instanceof Error
         ? err.message

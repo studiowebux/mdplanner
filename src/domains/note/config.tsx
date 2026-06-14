@@ -72,6 +72,8 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
     >,
 
   getService: () => getNoteService(),
+  // Land on the new note's detail page (the editor) instead of the list.
+  createRedirect: (note) => `/notes/${note.id}`,
   projectField: "project",
 
   extractFilterOptions: async () => ({

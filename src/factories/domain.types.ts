@@ -187,6 +187,15 @@ export type DomainConfig<T extends Entity, C, U> = {
    */
   formValueOverrides?: (item: T) => Record<string, string>;
 
+  /**
+   * Optional post-create redirect. When set, the factory's create handler emits
+   * an `HX-Redirect` to this URL (built from the freshly created entity) instead
+   * of staying on the list with the success toast. Use for domains whose create
+   * should land on the new record (e.g. notes open straight into the editor at
+   * `/notes/:id`). Omit to keep the default in-place list refresh.
+   */
+  createRedirect?: (item: T) => string;
+
   /** Hide the default Grid/Table view toggle buttons. Use when all views are custom. */
   hideDefaultViews?: boolean;
 
