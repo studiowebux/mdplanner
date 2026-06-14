@@ -173,6 +173,24 @@
   page-break-inside: avoid;
 }
 
+/* Terms and Conditions */
+.invoice-print__terms-heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.invoice-print__terms p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  /* Preserve author line breaks in plain-text terms. */
+  white-space: pre-line;
+}
+
 /* Footer / terms */
 .invoice-print__footer {
   border-top: var(--border-width) solid var(--color-border-default);

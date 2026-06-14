@@ -124,14 +124,22 @@ export const InvoicePrintView: FC<Props> = (
             />
           </section>
 
-          {/* Footer / terms */}
-          {(invoice.footer || billingConfig.billingDefaultFooter) && (
-            <section class="invoice-print__footer">
-              <p>{invoice.footer ?? billingConfig.billingDefaultFooter}</p>
+          {/* Terms and Conditions (invoice-specific) */}
+          {invoice.footer && (
+            <section class="invoice-print__terms">
+              <h2 class="invoice-print__terms-heading">Terms and Conditions</h2>
+              <p>{invoice.footer}</p>
             </section>
           )}
 
           <MarkdownSection title="Notes" markdown={invoice.notes} />
+
+          {/* Configurable footer from Settings → Billing */}
+          {billingConfig.billingDefaultFooter && (
+            <footer class="invoice-print__footer">
+              <p>{billingConfig.billingDefaultFooter}</p>
+            </footer>
+          )}
         </main>
       </body>
     </html>
