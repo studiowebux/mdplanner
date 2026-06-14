@@ -23,6 +23,7 @@ export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
     label: "Category",
     source: "portfolio-categories",
     placeholder: "Search categories...",
+    freetext: true,
   },
   {
     type: "select",
