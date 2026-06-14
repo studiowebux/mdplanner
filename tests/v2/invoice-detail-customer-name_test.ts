@@ -11,6 +11,7 @@ import { invoicesRouter } from "../../src/views/invoices/routes.tsx";
 import {
   getCustomerService,
   getInvoiceService,
+  getQuoteService,
   initServices,
 } from "../../src/singletons/services.ts";
 
@@ -19,11 +20,12 @@ Deno.test("invoice detail shows the customer name, not the id", async () => {
   initServices(dir, { cache: false });
   try {
     const customer = await getCustomerService().create({ name: "Acme Corp" });
-    const invoice = await getInvoiceService().create({
+    const quote = await getQuoteService().create({
       customerId: customer.id,
       title: "Year 1 Plan",
       lineItems: [],
     });
+    const invoice = await getInvoiceService().create({ quoteId: quote.id });
 
     const res = await invoicesRouter.request(`http://localhost/${invoice.id}`);
     assertEquals(res.status, 200);
@@ -48,11 +50,12 @@ Deno.test("invoice detail falls back to the id for a missing customer", async ()
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-invoice-cust2-" });
   initServices(dir, { cache: false });
   try {
-    const invoice = await getInvoiceService().create({
+    const quote = await getQuoteService().create({
       customerId: "customer_does_not_exist",
       title: "Orphan Invoice",
       lineItems: [],
     });
+    const invoice = await getInvoiceService().create({ quoteId: quote.id });
 
     const res = await invoicesRouter.request(`http://localhost/${invoice.id}`);
     assertEquals(res.status, 200);

@@ -69,6 +69,10 @@ export const QuoteSchema = z.object({
     description: "Customer ID this quote is for",
     example: "customer_startup",
   }),
+  projectId: z.string().nullable().optional().openapi({
+    description: "Optional project this quote bills against",
+    example: "project_redesign",
+  }),
   title: z.string().openapi({
     description: "Quote title",
     example: "Team Plan Annual Subscription",
@@ -149,6 +153,7 @@ export type Quote = z.infer<typeof QuoteSchema>;
 
 export const CreateQuoteSchema = QuoteSchema.pick({
   customerId: true,
+  projectId: true,
   title: true,
   status: true,
   currency: true,
@@ -160,6 +165,7 @@ export const CreateQuoteSchema = QuoteSchema.pick({
   footer: true,
 }).partial({
   status: true,
+  projectId: true,
   currency: true,
   expiresAt: true,
   paymentSchedule: true,

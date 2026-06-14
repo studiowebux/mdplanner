@@ -10,6 +10,7 @@ import { invoicesRouter } from "../../src/views/invoices/routes.tsx";
 import {
   getCustomerService,
   getInvoiceService,
+  getQuoteService,
   initServices,
 } from "../../src/singletons/services.ts";
 
@@ -20,11 +21,12 @@ Deno.test("invoice list shows the customer name, not the id", async () => {
   initServices(dir, { cache: false });
   try {
     const customer = await getCustomerService().create({ name: "Acme Corp" });
-    await getInvoiceService().create({
+    const quote = await getQuoteService().create({
       customerId: customer.id,
       title: "Year 1 Plan",
       lineItems: [],
     });
+    await getInvoiceService().create({ quoteId: quote.id });
 
     const res = await invoicesRouter.request("http://localhost/");
     assertEquals(res.status, 200);
@@ -50,11 +52,12 @@ Deno.test("invoice list falls back to the id for a missing customer", async () =
   });
   initServices(dir, { cache: false });
   try {
-    await getInvoiceService().create({
+    const quote = await getQuoteService().create({
       customerId: "customer_does_not_exist",
       title: "Orphan Invoice",
       lineItems: [],
     });
+    await getInvoiceService().create({ quoteId: quote.id });
 
     const res = await invoicesRouter.request("http://localhost/");
     assertEquals(res.status, 200);

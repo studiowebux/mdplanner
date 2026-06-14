@@ -30,7 +30,8 @@ export function rowToInvoice(
     id: row.id as string,
     number: (row.number as string) ?? "",
     customerId: (row.customer_id as string) ?? "",
-    quoteId: row.quote_id as string | undefined,
+    quoteId: (row.quote_id as string) ?? "",
+    projectId: row.project_id as string | undefined,
     title: (row.title as string) ?? "",
     status: (row.status as Invoice["status"]) ?? "draft",
     currency: row.currency as string | undefined,
@@ -56,6 +57,7 @@ const INVOICE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${INVOICE_TABLE} (
   number TEXT,
   customer_id TEXT,
   quote_id TEXT,
+  project_id TEXT,
   title TEXT NOT NULL,
   status TEXT,
   currency TEXT,
@@ -86,17 +88,18 @@ function insertInvoiceRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${INVOICE_TABLE} (id, number, customer_id, quote_id,
-       title, status, currency, due_date, payment_terms, line_items,
+       project_id, title, status, currency, due_date, payment_terms, line_items,
        subtotal, tax, tax_rate, total, paid_amount, notes, footer,
        sent_at, paid_at,
        ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(inv.id),
       val(inv.number),
       val(inv.customerId),
       val(inv.quoteId),
+      val(inv.projectId),
       val(inv.title),
       val(inv.status),
       val(inv.currency),
@@ -126,6 +129,7 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
     schema: INVOICE_SCHEMA,
     migrations: [
       "ALTER TABLE invoices ADD COLUMN line_items TEXT",
+      "ALTER TABLE invoices ADD COLUMN project_id TEXT",
       ...archiveMigrations(INVOICE_TABLE),
     ],
     fts: {

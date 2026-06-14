@@ -5,7 +5,7 @@ import type {
   Invoice,
   UpdateInvoice,
 } from "../types/invoice.types.ts";
-import { parseBillingBody, parseLineItems } from "../utils/billing-parse.ts";
+import { parseBillingBody } from "../utils/billing-parse.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { INVOICE_TABLE, rowToInvoice } from "../domains/invoice/cache.ts";
 import { INVOICE_BODY_KEYS } from "../domains/invoice/constants.ts";
@@ -46,8 +46,11 @@ export class InvoiceRepository extends CachedMarkdownRepository<
       ...data,
       id,
       number: "",
+      title: data.title ?? "",
       status: data.status ?? "draft",
-      lineItems: data.lineItems ?? [],
+      // Derived from the referenced quote at read time — never stored.
+      customerId: "",
+      lineItems: [],
       subtotal: 0,
       total: 0,
       paidAmount: 0,
@@ -64,23 +67,24 @@ export class InvoiceRepository extends CachedMarkdownRepository<
     const id = resolveEntityId(filename, fm);
 
     const { title, notes } = parseBillingBody(fm.title, body);
-    const lineItems = parseLineItems(fm.lineItems);
 
     return {
       id,
       number: fmStr(fm, "number") ?? "",
-      customerId: fmStr(fm, "customerId") ?? "",
-      quoteId: fmStr(fm, "quoteId"),
+      // Derived from the referenced quote at read time (InvoiceService.hydrate).
+      customerId: "",
+      quoteId: fmStr(fm, "quoteId") ?? "",
+      projectId: fmStr(fm, "projectId"),
       title,
       status: (fm.status as Invoice["status"]) ?? "draft",
       currency: fmStr(fm, "currency"),
       dueDate: fmStr(fm, "dueDate"),
       paymentTerms: fmStr(fm, "paymentTerms"),
-      lineItems,
-      subtotal: fmNum(fm, "subtotal") ?? 0,
-      tax: fmNum(fm, "tax"),
-      taxRate: fmNum(fm, "taxRate"),
-      total: fmNum(fm, "total") ?? 0,
+      lineItems: [],
+      subtotal: 0,
+      tax: undefined,
+      taxRate: undefined,
+      total: 0,
       paidAmount: fmNum(fm, "paidAmount") ?? 0,
       notes,
       footer: fmStr(fm, "footer"),

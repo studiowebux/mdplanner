@@ -39,12 +39,17 @@ export const InvoiceSchema = z.object({
     description: "Invoice number (INV-YYYY-NNN)",
     example: "INV-2026-001",
   }),
-  customerId: z.string().openapi({
-    description: "Customer ID this invoice is for",
-    example: "customer_startup",
+  quoteId: z.string().openapi({
+    description: "Source quote ID — invoices derive from a quote (required)",
+    example: "quote_startup",
   }),
-  quoteId: z.string().nullable().optional().openapi({
-    description: "Source quote ID (if converted from quote)",
+  projectId: z.string().nullable().optional().openapi({
+    description: "Optional project this invoice bills against",
+    example: "project_redesign",
+  }),
+  customerId: z.string().openapi({
+    description: "Customer ID — derived from the referenced quote (read-only)",
+    example: "customer_startup",
   }),
   title: z.string().openapi({
     description: "Invoice title",
@@ -67,21 +72,21 @@ export const InvoiceSchema = z.object({
     example: "NET 30",
   }),
   lineItems: z.array(LineItemSchema).openapi({
-    description: "Invoice line items",
+    description: "Derived from the referenced quote (read-only; not stored)",
   }),
   subtotal: z.number().openapi({
-    description: "Sum of line item amounts",
+    description: "Derived from the referenced quote (read-only; not stored)",
     example: 1152,
   }),
   tax: z.number().nullable().optional().openapi({
-    description: "Computed tax amount",
+    description: "Derived from the referenced quote (read-only; not stored)",
   }),
   taxRate: z.number().nullable().optional().openapi({
-    description: "Tax rate percentage",
+    description: "Derived from the referenced quote (read-only; not stored)",
     example: 15,
   }),
   total: z.number().openapi({
-    description: "Grand total (subtotal + tax)",
+    description: "Derived from the referenced quote (read-only; not stored)",
     example: 1152,
   }),
   paidAmount: z.number().openapi({
@@ -109,24 +114,22 @@ export type Invoice = z.infer<typeof InvoiceSchema>;
 // ---------------------------------------------------------------------------
 
 export const CreateInvoiceSchema = InvoiceSchema.pick({
-  customerId: true,
   quoteId: true,
+  projectId: true,
   title: true,
   status: true,
   currency: true,
   dueDate: true,
   paymentTerms: true,
-  lineItems: true,
-  taxRate: true,
   notes: true,
   footer: true,
 }).partial({
   status: true,
-  quoteId: true,
+  projectId: true,
+  title: true,
   currency: true,
   dueDate: true,
   paymentTerms: true,
-  taxRate: true,
   notes: true,
   footer: true,
 }).openapi("CreateInvoice");

@@ -113,6 +113,11 @@ const InvoiceInfoRow: FC<{ invoice: Invoice; customerName?: string }> = (
         <a href={`/quotes/${invoice.quoteId}`}>{invoice.quoteId}</a>
       </InfoItem>
     )}
+    {invoice.projectId && (
+      <InfoItem label="Project">
+        <a href={`/projects/${invoice.projectId}`}>{invoice.projectId}</a>
+      </InfoItem>
+    )}
     {invoice.currency && (
       <InfoItem label="Currency">{invoice.currency}</InfoItem>
     )}

@@ -1,5 +1,6 @@
 // Invoice service — business logic over InvoiceRepository.
-// Handles filtering, totals calculation, number generation, and overdue detection.
+// Invoices derive from a quote: customer, line items, and totals are hydrated
+// from the referenced quote at read time (never stored on the invoice).
 
 import type { InvoiceRepository } from "../repositories/invoice.repository.ts";
 import type {
@@ -8,19 +9,88 @@ import type {
   ListInvoiceOptions,
   UpdateInvoice,
 } from "../types/invoice.types.ts";
+import type { Quote } from "../types/quote.types.ts";
+import type { QuoteService } from "./quote.service.ts";
 import { ciIncludes } from "../utils/string.ts";
-import { computeLineAmount, round2 } from "../utils/billing.ts";
+import { round2 } from "../utils/billing.ts";
 import { BaseService } from "./base.service.ts";
 
-/** Invoice service: CRUD plus total calculation, overdue/display-status derivation (isOverdue/displayStatus), and paid-amount sync (updatePaidAmount); filters by customerId, status, and text query (q). */
+/** Invoice service: derives customer/line-items/totals from the referenced quote (hydrate), overdue/display-status derivation (isOverdue/displayStatus), and paid-amount sync (updatePaidAmount); filters by customerId, status, and text query (q). */
 export class InvoiceService extends BaseService<
   Invoice,
   CreateInvoice,
   UpdateInvoice,
   ListInvoiceOptions
 > {
-  constructor(private invoiceRepo: InvoiceRepository) {
+  constructor(
+    private invoiceRepo: InvoiceRepository,
+    private quoteService: QuoteService,
+  ) {
     super(invoiceRepo);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Quote-derived hydration — the invoice owns no line items or totals.
+  // ---------------------------------------------------------------------------
+
+  /** Inject customer, line items, and totals from a (pre-loaded) quote. */
+  private hydrateWith(invoice: Invoice, quote: Quote | undefined): Invoice {
+    if (!quote) {
+      return {
+        ...invoice,
+        lineItems: [],
+        subtotal: 0,
+        tax: undefined,
+        taxRate: undefined,
+        total: 0,
+      };
+    }
+    return {
+      ...invoice,
+      customerId: quote.customerId,
+      projectId: invoice.projectId ?? quote.projectId,
+      currency: invoice.currency ?? quote.currency,
+      lineItems: quote.lineItems.filter((li) => !li.optional),
+      subtotal: quote.subtotal,
+      tax: quote.tax,
+      taxRate: quote.taxRate,
+      total: quote.total,
+    };
+  }
+
+  /** Hydrate a single invoice from its referenced quote. */
+  private async hydrate(invoice: Invoice): Promise<Invoice> {
+    const quote = invoice.quoteId
+      ? await this.quoteService.getById(invoice.quoteId) ?? undefined
+      : undefined;
+    return this.hydrateWith(invoice, quote);
+  }
+
+  /** Hydrate a batch of invoices with a single quote lookup. */
+  private async hydrateAll(invoices: Invoice[]): Promise<Invoice[]> {
+    const quotes = await this.quoteService.list();
+    const byId = new Map(quotes.map((q) => [q.id, q]));
+    return invoices.map((inv) => this.hydrateWith(inv, byId.get(inv.quoteId)));
+  }
+
+  override async list(options?: ListInvoiceOptions): Promise<Invoice[]> {
+    let items = await this.hydrateAll(await this.invoiceRepo.findAll());
+    if (options) items = this.applyFilters(items, options);
+    return items;
+  }
+
+  override async listArchived(): Promise<Invoice[]> {
+    return this.hydrateAll(await super.listArchived());
+  }
+
+  override async getById(id: string): Promise<Invoice | null> {
+    const invoice = await super.getById(id);
+    return invoice ? this.hydrate(invoice) : null;
+  }
+
+  override async getByName(name: string): Promise<Invoice | null> {
+    const invoice = await super.getByName(name);
+    return invoice ? this.hydrate(invoice) : null;
   }
 
   protected applyFilters(
@@ -64,34 +134,6 @@ export class InvoiceService extends BaseService<
     return invoice.status;
   }
 
-  /** Recalculate all line amounts, subtotal, tax, and total. */
-  calculateTotals(invoice: Invoice): Invoice {
-    const lineItems = invoice.lineItems.map((li) => ({
-      ...li,
-      amount: computeLineAmount(li),
-    }));
-
-    const subtotal = round2(
-      lineItems
-        .filter((li) => li.type !== "text")
-        .reduce((sum, li) => sum + li.amount, 0),
-    );
-
-    let tax: number | undefined;
-    if (invoice.taxRate && invoice.taxRate > 0) {
-      const taxableTotal = round2(
-        lineItems
-          .filter((li) => li.type !== "text" && li.taxable !== false)
-          .reduce((sum, li) => sum + li.amount, 0),
-      );
-      tax = round2(taxableTotal * (invoice.taxRate / 100));
-    }
-
-    const total = round2(subtotal + (tax ?? 0));
-
-    return { ...invoice, lineItems, subtotal, tax, total };
-  }
-
   /** Generate next sequential invoice number for the current year. */
   private async generateNumber(): Promise<string> {
     const year = new Date().getFullYear();
@@ -107,12 +149,12 @@ export class InvoiceService extends BaseService<
     return `${prefix}${String(max + 1).padStart(3, "0")}`;
   }
 
-  /** Update paid amount and auto-transition status. */
+  /** Update paid amount and auto-transition status (uses the quote-derived total). */
   async updatePaidAmount(
     invoiceId: string,
     totalPaid: number,
   ): Promise<Invoice | null> {
-    const invoice = await this.invoiceRepo.findById(invoiceId);
+    const invoice = await this.getById(invoiceId);
     if (!invoice) return null;
 
     const paidAmount = round2(totalPaid);
@@ -128,27 +170,22 @@ export class InvoiceService extends BaseService<
       updates.paidAt = null;
     }
 
-    return this.invoiceRepo.update(invoiceId, updates as UpdateInvoice);
+    await this.invoiceRepo.update(invoiceId, updates as UpdateInvoice);
+    return this.getById(invoiceId);
   }
 
   override async create(data: CreateInvoice): Promise<Invoice> {
-    const invoice = await super.create(data);
-    const number = invoice.number || await this.generateNumber();
-    const withTotals = this.calculateTotals({ ...invoice, number });
-    return (await this.invoiceRepo.update(invoice.id, withTotals)) ??
-      withTotals;
-  }
+    const quote = await this.quoteService.getById(data.quoteId);
+    if (!quote) throw new Error(`Quote '${data.quoteId}' not found`);
 
-  override async update(
-    id: string,
-    data: UpdateInvoice,
-  ): Promise<Invoice | null> {
-    const updated = await super.update(id, data);
-    if (!updated) return null;
-    if (data.lineItems || data.taxRate !== undefined) {
-      const withTotals = this.calculateTotals(updated);
-      return (await this.invoiceRepo.update(id, withTotals)) ?? withTotals;
-    }
-    return updated;
+    const created = await super.create({
+      ...data,
+      title: data.title || quote.title,
+      currency: data.currency ?? quote.currency,
+      projectId: data.projectId ?? quote.projectId,
+    });
+    const number = created.number || await this.generateNumber();
+    await this.invoiceRepo.update(created.id, { number } as UpdateInvoice);
+    return await this.getById(created.id) ?? created;
   }
 }

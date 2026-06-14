@@ -1,6 +1,5 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
-import { BASE_LINE_ITEM_FIELDS } from "../billing/constants.ts";
 import type { Invoice } from "../../types/invoice.types.ts";
 import { INVOICE_STATUSES } from "../../types/invoice.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
@@ -106,24 +105,25 @@ export const INVOICE_TABLE_COLUMNS: ColumnDef[] = [
 
 export const INVOICE_FORM_FIELDS: FieldDef[] = [
   {
+    type: "autocomplete",
+    name: "quoteId",
+    label: "Quote",
+    source: "quotes-by-id",
+    required: true,
+    placeholder: "Search accepted quotes… (customer + items derive from it)",
+  },
+  {
+    type: "text",
+    name: "projectId",
+    label: "Project ID",
+    placeholder: "project_... (optional)",
+  },
+  {
     type: "text",
     name: "title",
     label: "Title",
-    required: true,
+    placeholder: "Defaults to the quote title",
     maxLength: 200,
-  },
-  {
-    type: "text",
-    name: "customerId",
-    label: "Customer ID",
-    required: true,
-    placeholder: "customer_...",
-  },
-  {
-    type: "text",
-    name: "quoteId",
-    label: "Quote ID",
-    placeholder: "quote_... (optional)",
   },
   {
     type: "select",
@@ -147,19 +147,6 @@ export const INVOICE_FORM_FIELDS: FieldDef[] = [
     name: "paymentTerms",
     label: "Payment Terms",
     options: PAYMENT_TERMS_OPTIONS,
-  },
-  {
-    type: "number",
-    name: "taxRate",
-    label: "Tax Rate (%)",
-  },
-  {
-    type: "array-table",
-    name: "lineItems",
-    label: "Line Item",
-    section: "invoice_line_items",
-    addLabel: "Add line item",
-    itemFields: BASE_LINE_ITEM_FIELDS,
   },
   { type: "textarea", name: "notes", label: "Notes", rows: 4 },
   { type: "textarea", name: "footer", label: "Footer", rows: 3 },

@@ -577,6 +577,7 @@ Directory: `billing/quotes/`
 id: quote_startup
 number: Q-2026-001
 customerId: customer_startup
+projectId: project_redesign
 title: Team Plan Annual Subscription
 status: accepted
 expiresAt: 2026-03-01
@@ -612,22 +613,29 @@ Annual subscription with 20% discount.
 12 month commitment, annual billing upfront.
 ```
 
-Fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `title`, `status`
-(`draft`, `sent`, `accepted`, `rejected`), `currency`, `expiresAt`,
-`lineItems` (array of LineItem), `paymentSchedule` (optional array),
-`subtotal`, `tax`, `taxRate`, `total`, `notes`, `footer`, `revision`,
+Fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `projectId` (optional),
+`title`, `status` (`draft`, `sent`, `accepted`, `rejected`), `currency`,
+`expiresAt`, `lineItems` (array of LineItem), `paymentSchedule` (optional
+array), `subtotal`, `tax`, `taxRate`, `total`, `notes`, `footer`, `revision`,
 `convertedToInvoice`, `sentAt`, `acceptedAt`, `created_at`, `updated_at`.
 
 ## Invoices
 
 Directory: `billing/invoices/`
 
+An invoice **derives from a quote**: `quoteId` is required and the invoice owns
+no billable data of its own. The customer, line items, and totals
+(`subtotal`/`tax`/`total`) are derived from the referenced quote at read time and
+are **not** stored in the invoice file — to change billable items you edit the
+quote. The invoice persists only its own fields (status, dates, terms, payment
+tracking, notes/footer) plus the `quoteId`/`projectId` references.
+
 ```yaml
 ---
 id: invoice_startup1
 number: INV-2026-001
-customerId: customer_startup
 quoteId: quote_startup
+projectId: project_redesign
 title: Team Plan Annual - Year 1
 status: paid
 dueDate: 2026-03-01
@@ -635,29 +643,21 @@ paymentTerms: NET 30
 created_at: 2026-02-15
 sent_at: 2026-02-15
 paid_at: 2026-02-18
-subtotal: 1152
-total: 1152
-paidAmount: 1152
-lineItems:
-  - id: li_1
-    type: service
-    description: Team Plan (12 users) - Annual Subscription
-    quantity: 12
-    unit: unit
-    unitRate: 96
-    amount: 1152
+paidAmount: 1324.80
 ---
 
 # Invoice: Startup Labs - Year 1
 
-Paid in full via Stripe.
+Paid in full via Stripe. Line items and totals derive from quote Q-2026-001.
 ```
 
-Fields: `id`, `number` (INV-YYYY-NNN), `customerId`, `quoteId` (optional),
-`title`, `status` (`draft`, `sent`, `paid`, `overdue`, `cancelled`),
-`currency`, `dueDate`, `paymentTerms`, `lineItems` (array of LineItem),
-`subtotal`, `tax`, `taxRate`, `total`, `paidAmount`, `notes`, `footer`,
-`sentAt`, `paidAt`, `created_at`, `updated_at`.
+Stored fields: `id`, `number` (INV-YYYY-NNN), `quoteId` (required), `projectId`
+(optional), `title`, `status` (`draft`, `sent`, `paid`, `overdue`,
+`cancelled`), `currency`, `dueDate`, `paymentTerms`, `paidAmount`, `notes`,
+`footer`, `sentAt`, `paidAt`, `created_at`, `updated_at`.
+
+Derived (read-only, from the quote — never stored): `customerId`, `lineItems`,
+`subtotal`, `tax`, `taxRate`, `total`.
 
 ## Payments
 

@@ -15,12 +15,10 @@ runSoftDeleteSuite({
   registerEntity: (repo) => registerInvoiceEntity(repo as InvoiceRepository),
   seedTarget: () => ({
     title: "To Be Archived",
-    customerId: "customer_x",
-    lineItems: [],
+    quoteId: "quote_x",
   }),
   seedControl: () => ({
     title: "Stays Visible",
-    customerId: "customer_y",
-    lineItems: [],
+    quoteId: "quote_y",
   }),
 });

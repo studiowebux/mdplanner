@@ -324,9 +324,10 @@ export function initServices(
   const billingRateRepo = new BillingRateRepository(projectDir);
   _set(_svc, "billingRate", new BillingRateService(billingRateRepo));
   const quoteRepo = new QuoteRepository(projectDir);
-  _set(_svc, "quote", new QuoteService(quoteRepo));
+  const quoteService = new QuoteService(quoteRepo);
+  _set(_svc, "quote", quoteService);
   const invoiceRepo = new InvoiceRepository(projectDir);
-  const invoiceService = new InvoiceService(invoiceRepo);
+  const invoiceService = new InvoiceService(invoiceRepo, quoteService);
   _set(_svc, "invoice", invoiceService);
   const paymentRepo = new PaymentRepository(projectDir);
   _set(_svc, "payment", new PaymentService(paymentRepo, invoiceService));

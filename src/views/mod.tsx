@@ -90,6 +90,7 @@ import {
   getPeopleService,
   getPortfolioService,
   getProjectService,
+  getQuoteService,
   getReflectionTemplateService,
   getTaskService,
 } from "../singletons/services.ts";
@@ -269,6 +270,35 @@ registerAutocompleteSource("customers", {
     return all.filter((c) => foldIncludes(c.name, q));
   },
   displayKey: "name",
+  valueKey: "id",
+});
+
+// Invoice → quote reference. Only ACCEPTED, not-yet-converted quotes are
+// eligible (an invoice derives from one quote). Label shows number — title —
+// customer; the stored value is the quote id.
+async function quoteAutocompleteOptions(): Promise<
+  Array<{ id: string; label: string }>
+> {
+  const [quotes, customers] = await Promise.all([
+    getQuoteService().list(),
+    getCustomerService().list(),
+  ]);
+  const customerName = new Map(customers.map((c) => [c.id, c.name]));
+  return quotes
+    .filter((q) => q.status === "accepted" && !q.convertedToInvoice)
+    .map((q) => ({
+      id: q.id,
+      label: `${q.number} — ${q.title} (${
+        customerName.get(q.customerId) ?? q.customerId
+      })`,
+    }));
+}
+
+registerAutocompleteSource("quotes-by-id", {
+  list: () => quoteAutocompleteOptions(),
+  search: async (q) =>
+    (await quoteAutocompleteOptions()).filter((o) => foldIncludes(o.label, q)),
+  displayKey: "label",
   valueKey: "id",
 });
 

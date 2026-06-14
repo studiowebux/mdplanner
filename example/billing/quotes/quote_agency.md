@@ -3,7 +3,7 @@ id: quote_agency
 number: Q-2026-002
 customer_id: customer_agency
 title: Business Plan Q1 Subscription
-status: sent
+status: accepted
 currency: CAD
 expires_at: 2026-03-15
 tax_rate: 15
@@ -12,8 +12,10 @@ tax: 135
 total: 1035
 revision: 1
 sent_at: 2026-02-10
+accepted_at: 2026-02-12
+converted_to_invoice: invoice_agency1
 created_at: 2026-02-10
-updated_at: 2026-02-10
+updated_at: 2026-02-12
 line_items:
   - id: li_1
     type: service

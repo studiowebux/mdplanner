@@ -10,6 +10,7 @@ import { INVOICE_STATUSES } from "../../types/invoice.types.ts";
 import {
   getCustomerService,
   getInvoiceService,
+  getQuoteService,
 } from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
@@ -21,7 +22,6 @@ import {
 let _customerNames: Map<string, string> = new Map();
 import { InvoiceCard } from "../../views/components/invoice-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
-import { buildRateNameById } from "../billing/rate-display.ts";
 
 export const invoiceConfig: DomainConfig<
   Invoice,
@@ -76,28 +76,28 @@ export const invoiceConfig: DomainConfig<
 
   Card: ({ item, q }) => <InvoiceCard item={item} q={q} />,
 
-  parseCreate: (body) => {
-    const data = parseFormBody(INVOICE_FORM_FIELDS, body);
-    if (data.taxRate != null) data.taxRate = Number(data.taxRate);
-    return data as CreateInvoice;
-  },
+  parseCreate: (body) =>
+    parseFormBody(INVOICE_FORM_FIELDS, body) as CreateInvoice,
 
-  parseUpdate: (body) => {
-    const data = parseFormBody(INVOICE_FORM_FIELDS, body, {
+  parseUpdate: (body) =>
+    parseFormBody(INVOICE_FORM_FIELDS, body, {
       clearEmpty: true,
-    });
-    if (data.taxRate != null) data.taxRate = Number(data.taxRate);
-    return data as Partial<UpdateInvoice>;
-  },
+    }) as Partial<UpdateInvoice>,
 
-  // Resolve rate IDs to rate names for the lineItems[] array-table autocomplete.
-  // Unresolved IDs produce an empty search input — user re-picks.
-  resolveArrayDisplayValues: async (item) => {
-    const rateName = await buildRateNameById(item.lineItems ?? []);
+  // Edit form: show the quote's label in the autocomplete search box while the
+  // hidden value stays the quote id.
+  resolveFormValues: async (values) => {
+    if (!values.quoteId) return values;
+    const quote = await getQuoteService().getById(values.quoteId);
+    if (!quote) return values;
+    const customer = quote.customerId
+      ? await getCustomerService().getById(quote.customerId)
+      : null;
     return {
-      lineItems: (item.lineItems ?? []).map((li) => ({
-        rateId: (li.rateId && rateName[li.rateId]) || "",
-      })),
+      ...values,
+      quoteId: `${quote.number} — ${quote.title} (${
+        customer?.name ?? quote.customerId
+      })`,
     };
   },
 

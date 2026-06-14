@@ -328,17 +328,13 @@ quotesRouter.post("/:id/to-invoice", async (c) => {
     return c.json(invalidState("Quote already converted to invoice"), 422);
   }
 
-  const nonOptionalItems = quote.lineItems
-    .filter((li) => !li.optional)
-    .map(({ optional: _, ...rest }) => rest);
-
+  // Invoice references the quote read-only — no line-item copy (line items and
+  // totals are derived from the quote at read time).
   const invoice = await getInvoiceService().create({
-    customerId: quote.customerId,
     quoteId: quote.id,
+    projectId: quote.projectId,
     title: quote.title,
-    lineItems: nonOptionalItems,
     currency: quote.currency,
-    taxRate: quote.taxRate,
   });
 
   await service.update(id, {
