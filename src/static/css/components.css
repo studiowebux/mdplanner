@@ -2532,17 +2532,28 @@ div.load-more-sentinel {
   content: "";
   position: absolute;
   inset: 0;
-  width: 40%;
   border-radius: var(--radius-full);
-  background: var(--color-accent);
-  animation: global-loading-slide 1s ease-in-out infinite;
+  /* A scrolling accent stripe driven by background-position. Unlike a single
+     translateX slider (which spent part of every cycle fully off-screen, leaving
+     the bar blank → visible pulsing/flicker on slow requests), the repeated
+     gradient stripe is always present, so the indeterminate sweep is continuous
+     and gap-free. */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-accent) 50%,
+    transparent 100%
+  );
+  background-size: 50% 100%;
+  background-repeat: repeat-x;
+  animation: global-loading-slide 1.2s linear infinite;
 }
 
 @keyframes global-loading-slide {
   0% {
-    transform: translateX(-100%);
+    background-position: 0% 0;
   }
   100% {
-    transform: translateX(350%);
+    background-position: 100% 0;
   }
 }
