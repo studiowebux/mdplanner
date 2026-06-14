@@ -50,31 +50,57 @@
   });
 
   // SSE connection-state feedback — the htmx SSE extension auto-reconnects but
-  // gives the user no cue that live updates paused. Show a subtle, non-blocking
-  // pill on htmx:sseError and clear it on the next htmx:sseOpen. The pill is
-  // created once and toggled, so flapping connections never spam it.
-  var ssePill = null;
+  // gives the user no cue that live updates paused. Surface it through the one
+  // toast system (window.toast): a persistent warning toast on htmx:sseError,
+  // dismissed on the next htmx:sseOpen. De-duplicated so flapping connections
+  // never spam it.
+  var sseToast = null;
   var sseReconnecting = false;
+  // Browser back/forward (bfcache) restore deterministically tears down and
+  // re-creates the /sse source (sse-bfcache.js), firing a benign htmx:sseError
+  // → htmx:sseOpen pair. Arm on pagehide (runs before the page is frozen,
+  // regardless of script order) so the first reconnect error after a restore is
+  // suppressed instead of toasting.
+  var bfcacheArmed = false;
 
-  function getSsePill() {
-    if (ssePill) return ssePill;
-    ssePill = document.createElement("div");
-    ssePill.className = "sse-status";
-    ssePill.setAttribute("role", "status");
-    ssePill.setAttribute("aria-live", "polite");
-    ssePill.textContent = "Live updates paused — reconnecting…";
-    document.body.appendChild(ssePill);
-    return ssePill;
+  function dismissSseToast() {
+    if (!sseToast) return;
+    var btn = sseToast.querySelector(".toast__close");
+    if (btn) btn.click();
+    sseToast = null;
   }
 
   document.body.addEventListener("htmx:sseError", function () {
     sseReconnecting = true;
-    getSsePill().classList.add("sse-status--visible");
+    if (bfcacheArmed) {
+      bfcacheArmed = false; // one-shot: a bfcache restore reconnect, not a drop
+      return;
+    }
+    if (!sseToast && window.toast) {
+      sseToast = window.toast({
+        type: "warning",
+        message: "Live updates paused — reconnecting…",
+        duration: 0,
+      }) || null;
+    }
   });
   document.body.addEventListener("htmx:sseOpen", function () {
     if (!sseReconnecting) return; // ignore the initial connect
     sseReconnecting = false;
-    if (ssePill) ssePill.classList.remove("sse-status--visible");
+    dismissSseToast();
+  });
+
+  window.addEventListener("pagehide", function (e) {
+    if (e.persisted) bfcacheArmed = true;
+  });
+  window.addEventListener("pageshow", function (e) {
+    // Defensive: if a restore produced no reconnect error, drop the arm so a
+    // later genuine disconnect still surfaces a toast.
+    if (e.persisted) {
+      setTimeout(function () {
+        bfcacheArmed = false;
+      }, 0);
+    }
   });
 
   document.addEventListener("closeSidenav", function () {

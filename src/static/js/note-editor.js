@@ -228,6 +228,9 @@
     }).then(function (res) {
       if (res.ok) {
         exitEditMode(); // clears dirty + re-renders the saved view via htmx
+        if (window.toast) {
+          window.toast({ type: "success", message: "Note saved" });
+        }
       } else {
         throw new Error("Save failed (" + res.status + ")");
       }
