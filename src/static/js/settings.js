@@ -122,6 +122,7 @@
     "nav-categories-form": "tab-navigation",
     "kpi-metrics-form": "tab-goals",
     "milestone-statuses-form": "tab-milestones",
+    "billing-form": "tab-billing",
     "shortcuts-form": "tab-shortcuts",
   };
 
@@ -180,6 +181,7 @@
     "nav-categories-form",
     "kpi-metrics-form",
     "milestone-statuses-form",
+    "billing-form",
   ].forEach(trackForm);
 
   // -----------------------------------------------------------------------
