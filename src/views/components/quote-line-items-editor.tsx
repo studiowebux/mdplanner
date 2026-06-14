@@ -227,7 +227,7 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => (
               scope="col"
               class="line-items-table__th line-items-table__th--right"
             >
-              Rate
+              Unit Price
             </th>
             <th
               scope="col"

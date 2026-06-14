@@ -128,7 +128,7 @@ export const LineItemsTable: FC<LineItemsTableProps> = (
               scope="col"
               class="line-items-table__th line-items-table__th--right"
             >
-              Rate
+              Unit Price
             </th>
             <th
               scope="col"
