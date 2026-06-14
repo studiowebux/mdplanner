@@ -147,30 +147,32 @@
 .note-detail__tab-bar {
   display: flex;
   gap: var(--space-xs);
-  border-bottom: var(--border-width) var(--border-style)
-    var(--color-border-default);
-  padding-bottom: var(--space-xs);
 }
 
 .note-detail__tab-btn {
   padding: var(--space-xs) var(--space-md);
-  border: none;
-  background: none;
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   cursor: pointer;
-  border-bottom: var(--note-tab-indicator-w) solid transparent;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .note-detail__tab-btn:hover {
   color: var(--color-text-primary);
+  background: var(--color-bg-hover);
 }
 
 .note-detail__tab-btn--active {
   color: var(--color-accent);
-  border-bottom: var(--note-tab-indicator-w) solid var(--color-accent);
+  background: var(--color-bg-active);
+  border-color: var(--color-border-focus);
 }
 
 .note-detail__tab-panel {
