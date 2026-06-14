@@ -23,6 +23,9 @@ async function renderDetail(c: AppContext, id: string) {
     getProjectService().getConfig(),
   ]);
   if (!invoice) return c.notFound();
+  const customer = invoice.customerId
+    ? await getCustomerService().getById(invoice.customerId)
+    : null;
   const editing = c.req.query("editing") === "true";
   return c.html(
     <InvoiceDetailView
@@ -30,6 +33,7 @@ async function renderDetail(c: AppContext, id: string) {
       item={invoice}
       displayStatus={service.displayStatus(invoice)}
       billingConfig={billingConfig}
+      customerName={customer?.name}
       editing={editing}
     />,
   );

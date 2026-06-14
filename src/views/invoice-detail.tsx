@@ -99,11 +99,13 @@ const InvoiceHeader: FC<
   </header>
 );
 
-const InvoiceInfoRow: FC<{ invoice: Invoice }> = ({ invoice }) => (
+const InvoiceInfoRow: FC<{ invoice: Invoice; customerName?: string }> = (
+  { invoice, customerName },
+) => (
   <div class="detail-section detail-info-row">
     <InfoItem label="Customer">
       <a href={`/customers/${invoice.customerId}`}>
-        {invoice.customerId}
+        {customerName ?? invoice.customerId}
       </a>
     </InfoItem>
     {invoice.quoteId && (
@@ -183,6 +185,7 @@ export const InvoiceDetailView: FC<
     item: Invoice;
     displayStatus: string;
     billingConfig: ProjectConfig;
+    customerName?: string;
     editing?: boolean;
   }
 > = (
@@ -190,6 +193,7 @@ export const InvoiceDetailView: FC<
     item: invoice,
     displayStatus,
     billingConfig,
+    customerName,
     editing = false,
     ...viewProps
   },
@@ -230,7 +234,7 @@ export const InvoiceDetailView: FC<
 
         <ArchivedBanner entity={invoice} />
 
-        <InvoiceInfoRow invoice={invoice} />
+        <InvoiceInfoRow invoice={invoice} customerName={customerName} />
 
         <InvoiceBalance invoice={invoice} />
 
