@@ -175,6 +175,7 @@ const ArrayTableRowField: FC<
           value={value ?? ""}
           min={field.min}
           max={field.max}
+          step="any"
           autocomplete="off"
         />
       )}
@@ -444,6 +445,7 @@ const FieldControl: FC<{
         required={def.required}
         min={def.min}
         max={def.max}
+        step="any"
         value={value ?? ""}
         autocomplete="off"
       />
