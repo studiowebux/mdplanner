@@ -281,7 +281,7 @@ export type DomainConfig<T extends Entity, C, U> = {
 
   /**
    * Soft-delete (archive) opt-out. Defaults to `true` — `DELETE /:id` routes
-   * call `service.archive`, the toolbar gains a "Show archived" toggle, and
+   * call `service.archive`, the toolbar gains a "View archived" toggle, and
    * archived rows render with Restore + Delete Permanently actions. Set to
    * `false` for domains that should always hard-delete (e.g. brain-agent
    * People records that must never be archivable). When false, the factory

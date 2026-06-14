@@ -515,7 +515,7 @@ export function createDomainPage<T extends Entity>(
                         hx-include={`#${cfg.name}-toolbar`}
                       />
                       <span class="domain-toolbar__toggle-label">
-                        Show archived
+                        View archived
                       </span>
                     </label>
                   )}

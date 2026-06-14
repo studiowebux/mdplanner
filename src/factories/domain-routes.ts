@@ -30,7 +30,7 @@ export function resolveDomainHelpers<T extends Entity, C, U>(
   // Injected state keys — added here so every domain gets them without editing
   // 40+ domain configs' stateKeys arrays:
   //  - date range from/to keys: the universal date range filter.
-  //  - archived: "Show archived" toggle (only when supportsArchive !== false).
+  //  - archived: "View archived" toggle (only when supportsArchive !== false).
   const dateRange = effectiveDateRangeFilter(cfg);
   const archiveEnabled = cfg.supportsArchive !== false;
   const stateKeys = [
