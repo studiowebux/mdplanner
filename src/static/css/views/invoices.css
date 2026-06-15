@@ -101,6 +101,14 @@
   flex: 1 1 auto;
 }
 
+/* BillingDocumentHeader draws its own border/margin for the detail page;
+   suppress both inside the print header which provides its own divider. */
+.invoice-print__header-left .billing-document-header {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
 .invoice-print__header-right {
   flex: 0 0 auto;
   text-align: right;

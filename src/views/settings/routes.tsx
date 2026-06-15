@@ -257,6 +257,12 @@ settingsViewRouter.post("/billing", async (c) => {
     billingDefaultFooter: body.billingDefaultFooter
       ? String(body.billingDefaultFooter)
       : "",
+    billingTaxNumber: body.billingTaxNumber
+      ? String(body.billingTaxNumber)
+      : "",
+    billingBusinessNumber: body.billingBusinessNumber
+      ? String(body.billingBusinessNumber)
+      : "",
   });
   return new Response(null, {
     status: 204,

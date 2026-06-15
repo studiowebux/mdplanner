@@ -36,6 +36,20 @@ export const BillingDocumentHeader: FC<BillingDocumentHeaderProps> = (
             ))}
           </address>
         )}
+        {(config.billingTaxNumber || config.billingBusinessNumber) && (
+          <div class="billing-document-header__numbers">
+            {config.billingTaxNumber && (
+              <span class="billing-document-header__number">
+                Tax: {config.billingTaxNumber}
+              </span>
+            )}
+            {config.billingBusinessNumber && (
+              <span class="billing-document-header__number">
+                Business #: {config.billingBusinessNumber}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

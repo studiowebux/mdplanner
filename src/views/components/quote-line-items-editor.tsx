@@ -207,58 +207,101 @@ const EditableRow: FC<{ quoteId: string; index: number; item: LineItem }> = (
   );
 };
 
+/** Group line items by group field, preserving original array indices. */
+function groupByIndex(
+  items: LineItem[],
+): { group: string | null; rows: { item: LineItem; index: number }[] }[] {
+  const groups: {
+    group: string | null;
+    rows: { item: LineItem; index: number }[];
+  }[] = [];
+  let currentGroup: string | null = null;
+  let currentRows: { item: LineItem; index: number }[] = [];
+
+  items.forEach((item, index) => {
+    const g = item.group ?? null;
+    if (g !== currentGroup) {
+      if (currentRows.length > 0) {
+        groups.push({ group: currentGroup, rows: currentRows });
+      }
+      currentGroup = g;
+      currentRows = [{ item, index }];
+    } else {
+      currentRows.push({ item, index });
+    }
+  });
+  if (currentRows.length > 0) {
+    groups.push({ group: currentGroup, rows: currentRows });
+  }
+  return groups;
+}
+
 /** Full editable line-items section — re-rendered on every add/remove. */
-export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => (
-  <section class="detail-section" id="quote-line-items-section">
-    <h2 class="section-heading">Line Items</h2>
-    <div class="line-items-table__wrapper">
-      <table class="line-items-table qli-table">
-        <thead>
-          <tr>
-            <th scope="col" class="line-items-table__th">Type</th>
-            <th scope="col" class="line-items-table__th">Description</th>
-            <th
-              scope="col"
-              class="line-items-table__th line-items-table__th--right"
-            >
-              Qty
-            </th>
-            <th
-              scope="col"
-              class="line-items-table__th line-items-table__th--right"
-            >
-              Unit Price
-            </th>
-            <th
-              scope="col"
-              class="line-items-table__th line-items-table__th--right"
-            >
-              Amount
-            </th>
-            <th scope="col" class="line-items-table__th" />
-          </tr>
-        </thead>
-        <tbody>
-          {quote.lineItems.map((item, index) => (
-            <EditableRow
-              key={item.id || index}
-              quoteId={quote.id}
-              index={index}
-              item={item}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
-    <button
-      type="button"
-      class="btn btn--secondary btn--sm qli-add"
-      hx-post={`/quotes/${quote.id}/line-items`}
-      hx-target="#quote-line-items-section"
-      hx-swap="outerHTML"
-    >
-      + Add row
-    </button>
-    <QuoteTotals quote={quote} />
-  </section>
-);
+export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
+  const groups = groupByIndex(quote.lineItems);
+  return (
+    <section class="detail-section" id="quote-line-items-section">
+      <h2 class="section-heading">Line Items</h2>
+      <div class="line-items-table__wrapper">
+        <table class="line-items-table qli-table">
+          <thead>
+            <tr>
+              <th scope="col" class="line-items-table__th">Type</th>
+              <th scope="col" class="line-items-table__th">Description</th>
+              <th
+                scope="col"
+                class="line-items-table__th line-items-table__th--right"
+              >
+                Qty
+              </th>
+              <th
+                scope="col"
+                class="line-items-table__th line-items-table__th--right"
+              >
+                Unit Price
+              </th>
+              <th
+                scope="col"
+                class="line-items-table__th line-items-table__th--right"
+              >
+                Amount
+              </th>
+              <th scope="col" class="line-items-table__th" />
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map(({ group, rows }) => (
+              <>
+                {group && (
+                  <tr class="line-items-table__group-header">
+                    <td colSpan={6} class="line-items-table__group-label">
+                      {group}
+                    </td>
+                  </tr>
+                )}
+                {rows.map(({ item, index }) => (
+                  <EditableRow
+                    key={item.id || index}
+                    quoteId={quote.id}
+                    index={index}
+                    item={item}
+                  />
+                ))}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <button
+        type="button"
+        class="btn btn--secondary btn--sm qli-add"
+        hx-post={`/quotes/${quote.id}/line-items`}
+        hx-target="#quote-line-items-section"
+        hx-swap="outerHTML"
+      >
+        + Add row
+      </button>
+      <QuoteTotals quote={quote} />
+    </section>
+  );
+};

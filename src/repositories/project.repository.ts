@@ -47,6 +47,8 @@ const PROJECT_FM_POST: readonly WriteField[] = [
   ["billingAddress", "billing_address", "emptyToUndef"],
   ["billingLogoUrl", "billing_logo_url", "emptyToUndef"],
   ["billingDefaultFooter", "billing_default_footer", "emptyToUndef"],
+  ["billingTaxNumber", "billing_tax_number", "emptyToUndef"],
+  ["billingBusinessNumber", "billing_business_number", "emptyToUndef"],
   ["defaultUserId", "default_user_id", "emptyToUndef"],
   ["cerveauDir", "cerveau_dir", "emptyToUndef"],
 ];

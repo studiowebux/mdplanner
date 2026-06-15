@@ -82,6 +82,43 @@ export const BillingTab: FC<BillingTabProps> = ({ config }) => (
         </span>
       </div>
 
+      <div class="settings-field">
+        <label class="settings-field__label" for="cfg-billing-tax-number">
+          Tax number
+        </label>
+        <input
+          type="text"
+          id="cfg-billing-tax-number"
+          name="billingTaxNumber"
+          value={config.billingTaxNumber ?? ""}
+          placeholder="GST 123456789 RT 0001"
+          class="settings-field__input"
+        />
+        <span class="settings-field__hint">
+          Shown on quotes and invoices (e.g. GST/HST, TVQ, VAT).
+        </span>
+      </div>
+
+      <div class="settings-field">
+        <label
+          class="settings-field__label"
+          for="cfg-billing-business-number"
+        >
+          Business number
+        </label>
+        <input
+          type="text"
+          id="cfg-billing-business-number"
+          name="billingBusinessNumber"
+          value={config.billingBusinessNumber ?? ""}
+          placeholder="1234567890"
+          class="settings-field__input"
+        />
+        <span class="settings-field__hint">
+          Business registration number shown on quotes and invoices.
+        </span>
+      </div>
+
       <FormActions />
     </form>
   </div>

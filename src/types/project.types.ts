@@ -156,6 +156,15 @@ export const ProjectConfigSchema = z.object({
       "Default footer text for quotes and invoices (overridden per-document)",
     example: "Thank you for your business.",
   }),
+  billingTaxNumber: z.string().optional().openapi({
+    description:
+      "Tax number shown on quotes and invoices (e.g. GST/HST number)",
+    example: "GST 123456789 RT 0001",
+  }),
+  billingBusinessNumber: z.string().optional().openapi({
+    description: "Business registration number shown on quotes and invoices",
+    example: "1234567890",
+  }),
   apiKeys: z.array(ApiKeySchema).optional().openapi({
     description:
       "API keys for programmatic access (MCP, CI, CLI). Stored encrypted in project.md.",
@@ -276,6 +285,8 @@ export const FrontmatterProjectSchema = z.object({
   billing_address: z.string().optional(),
   billing_logo_url: z.string().optional(),
   billing_default_footer: z.string().optional(),
+  billing_tax_number: z.string().optional(),
+  billing_business_number: z.string().optional(),
   api_keys: z.array(z.unknown()).optional(),
   default_user_id: z.string().optional(),
   cerveau_dir: z.string().optional(),
@@ -340,6 +351,8 @@ export const FrontmatterProjectSchema = z.object({
       billingAddress: fm.billing_address,
       billingLogoUrl: fm.billing_logo_url,
       billingDefaultFooter: fm.billing_default_footer,
+      billingTaxNumber: fm.billing_tax_number,
+      billingBusinessNumber: fm.billing_business_number,
       apiKeys: Array.isArray(fm.api_keys)
         ? await Promise.all(
           (fm.api_keys as { name?: unknown; key?: unknown }[])

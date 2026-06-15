@@ -62,12 +62,27 @@ dnsRouter.post("/sync", async (c) => {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const raw = err instanceof Error ? err.message : String(err);
+    let message: string;
+    if (raw.includes("CLOUDFLARE_API_ERROR")) {
+      if (raw.includes("403") || /auth/i.test(raw)) {
+        message =
+          "Cloudflare authentication failed — check your token in Settings → Project";
+      } else {
+        message = "Cloudflare sync failed: " +
+          raw.replace(/^CLOUDFLARE_API_ERROR:\s*\d+\s*[—-]\s*/, "").replace(
+            /\[.*\]$/,
+            "",
+          ).trim();
+      }
+    } else {
+      message = raw;
+    }
     return new Response(null, {
       status: 200,
       headers: {
         "HX-Trigger": JSON.stringify({
-          showToast: { type: "error", message: msg },
+          showToast: { type: "error", message },
         }),
       },
     });
