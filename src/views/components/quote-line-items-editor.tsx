@@ -14,6 +14,7 @@ export const EDITABLE_LINE_ITEM_FIELDS = [
   "description",
   "quantity",
   "unitRate",
+  "group",
 ] as const;
 
 export type EditableLineItemField = (typeof EDITABLE_LINE_ITEM_FIELDS)[number];
@@ -24,6 +25,7 @@ export function lineItemFieldValue(
   field: EditableLineItemField,
 ): string {
   if (field === "description") return item.description ?? "";
+  if (field === "group") return item.group ?? "";
   const v = item[field];
   return v == null ? "" : String(v);
 }
@@ -66,7 +68,12 @@ export const EditCell: FC<{
   field: EditableLineItemField;
   value: string;
 }> = ({ quoteId, index, field, value }) => {
-  const numeric = field !== "description";
+  const numeric = field !== "description" && field !== "group";
+  const isGroup = field === "group";
+  const postUrl = `/quotes/${quoteId}/line-items/${index}?field=${field}`;
+  // Group saves re-render the whole section (grouping reshuffles rows).
+  const hxTarget = isGroup ? "#quote-line-items-section" : "closest td";
+  const hxSwap = isGroup ? "outerHTML" : "outerHTML";
   return (
     <td class="qli-cell qli-cell--editing">
       <input
@@ -74,14 +81,15 @@ export const EditCell: FC<{
         class="qli-input"
         type="text"
         inputmode={numeric ? "decimal" : undefined}
+        list={isGroup ? `qli-groups-${quoteId}` : undefined}
         name="value"
         value={value}
         autofocus
         autocomplete="off"
-        data-quadrant-edit={`/quotes/${quoteId}/line-items/${index}?field=${field}`}
-        hx-post={`/quotes/${quoteId}/line-items/${index}?field=${field}`}
-        hx-target="closest td"
-        hx-swap="outerHTML"
+        data-quadrant-edit={postUrl}
+        hx-post={postUrl}
+        hx-target={hxTarget}
+        hx-swap={hxSwap}
         hx-trigger="quadrant-save"
       />
       <button
@@ -168,6 +176,12 @@ const EditableRow: FC<{
         index={index}
         field="description"
         value={item.description ?? ""}
+      />
+      <ReadCell
+        quoteId={quoteId}
+        index={index}
+        field="group"
+        value={item.group ?? ""}
       />
       {isText
         ? (
@@ -268,15 +282,26 @@ function groupByIndex(
 /** Full editable line-items section — re-rendered on every add/remove. */
 export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
   const groups = groupByIndex(quote.lineItems);
+  const distinctGroups = [
+    ...new Set(
+      quote.lineItems.map((li) => li.group).filter((g): g is string => !!g),
+    ),
+  ];
   return (
     <section class="detail-section" id="quote-line-items-section">
       <h2 class="section-heading">Line Items</h2>
+      {distinctGroups.length > 0 && (
+        <datalist id={`qli-groups-${quote.id}`}>
+          {distinctGroups.map((g) => <option key={g} value={g} />)}
+        </datalist>
+      )}
       <div class="line-items-table__wrapper">
         <table class="line-items-table qli-table">
           <thead>
             <tr>
               <th scope="col" class="line-items-table__th">Type</th>
               <th scope="col" class="line-items-table__th">Description</th>
+              <th scope="col" class="line-items-table__th">Group</th>
               <th
                 scope="col"
                 class="line-items-table__th line-items-table__th--right"
@@ -303,7 +328,7 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
               <>
                 {group && (
                   <tr class="line-items-table__group-header">
-                    <td colSpan={6} class="line-items-table__group-label">
+                    <td colSpan={7} class="line-items-table__group-label">
                       {group}
                     </td>
                   </tr>

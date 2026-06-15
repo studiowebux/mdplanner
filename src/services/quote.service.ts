@@ -173,13 +173,15 @@ export class QuoteService extends BaseService<
   updateLineItemField(
     quote: Quote,
     index: number,
-    field: "description" | "quantity" | "unitRate",
+    field: "description" | "quantity" | "unitRate" | "group",
     raw: string,
   ): Promise<Quote | null> {
     const lineItems = quote.lineItems.map((li) => ({ ...li }));
     const item = lineItems[index];
     if (field === "description") {
       item.description = raw;
+    } else if (field === "group") {
+      item.group = raw.trim() || null;
     } else {
       const trimmed = raw.trim();
       item[field] = trimmed === "" ? undefined : Number(trimmed);

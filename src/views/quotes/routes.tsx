@@ -279,6 +279,7 @@ quotesRouter.get("/:id/line-items/:idx/edit", async (c) => {
 });
 
 // POST /:id/line-items/:idx?field=… — save a cell, return read cell + OOB.
+// group saves re-render the full section because row grouping reshuffles.
 quotesRouter.post("/:id/line-items/:idx", async (c) => {
   const id = c.req.param("id");
   const idx = Number(c.req.param("idx"));
@@ -293,6 +294,9 @@ quotesRouter.post("/:id/line-items/:idx", async (c) => {
   const raw = typeof body.value === "string" ? body.value : "";
   const updated = await service.updateLineItemField(quote, idx, field, raw);
   if (!updated) return c.notFound();
+  if (field === "group") {
+    return c.html(<QuoteLineItemsSection quote={updated} />);
+  }
   const item = updated.lineItems[idx];
   return c.html(
     <>
