@@ -145,10 +145,17 @@ export const QuoteTotals: FC<{ quote: Quote; oob?: boolean }> = (
 // Section
 // ---------------------------------------------------------------------------
 
-const EditableRow: FC<{ quoteId: string; index: number; item: LineItem }> = (
-  { quoteId, index, item },
+const EditableRow: FC<{
+  quoteId: string;
+  index: number;
+  item: LineItem;
+  total: number;
+}> = (
+  { quoteId, index, item, total },
 ) => {
   const isText = item.type === "text";
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
   return (
     <tr class="qli-row">
       <td class="qli-cell qli-cell--type">
@@ -189,6 +196,28 @@ const EditableRow: FC<{ quoteId: string; index: number; item: LineItem }> = (
         )}
       <LineItemAmountCell index={index} amount={item.amount} />
       <td class="qli-cell qli-cell--actions">
+        <button
+          type="button"
+          class="btn btn--ghost btn--sm qli-move"
+          aria-label="Move up"
+          disabled={isFirst}
+          hx-post={`/quotes/${quoteId}/line-items/${index}/move?dir=up`}
+          hx-target="#quote-line-items-section"
+          hx-swap="outerHTML"
+        >
+          ↑
+        </button>
+        <button
+          type="button"
+          class="btn btn--ghost btn--sm qli-move"
+          aria-label="Move down"
+          disabled={isLast}
+          hx-post={`/quotes/${quoteId}/line-items/${index}/move?dir=down`}
+          hx-target="#quote-line-items-section"
+          hx-swap="outerHTML"
+        >
+          ↓
+        </button>
         <button
           type="button"
           class="btn btn--danger btn--sm qli-delete"
@@ -285,6 +314,7 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
                     quoteId={quote.id}
                     index={index}
                     item={item}
+                    total={quote.lineItems.length}
                   />
                 ))}
               </>

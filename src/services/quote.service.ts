@@ -214,4 +214,22 @@ export class QuoteService extends BaseService<
       .map((li) => ({ ...li }));
     return this.update(quote.id, { lineItems });
   }
+
+  /** Swap a line item with its neighbour (up = lower index, down = higher). */
+  moveLineItem(
+    quote: Quote,
+    index: number,
+    dir: "up" | "down",
+  ): Promise<Quote | null> {
+    const lineItems = quote.lineItems.map((li) => ({ ...li }));
+    const swapIdx = dir === "up" ? index - 1 : index + 1;
+    if (swapIdx < 0 || swapIdx >= lineItems.length) {
+      return Promise.resolve(quote);
+    }
+    [lineItems[index], lineItems[swapIdx]] = [
+      lineItems[swapIdx],
+      lineItems[index],
+    ];
+    return this.update(quote.id, { lineItems });
+  }
 }

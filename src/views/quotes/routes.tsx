@@ -328,3 +328,19 @@ quotesRouter.delete("/:id/line-items/:idx", async (c) => {
   if (!updated) return c.notFound();
   return c.html(<QuoteLineItemsSection quote={updated} />);
 });
+
+// POST /:id/line-items/:idx/move?dir=up|down — reorder a row, re-render section.
+quotesRouter.post("/:id/line-items/:idx/move", async (c) => {
+  const id = c.req.param("id");
+  const idx = Number(c.req.param("idx"));
+  const dir = c.req.query("dir");
+  if (dir !== "up" && dir !== "down") return c.notFound();
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.notFound();
+  if (quote.status !== "draft") return notDraftResponse();
+  if (!quote.lineItems[idx]) return c.notFound();
+  const updated = await service.moveLineItem(quote, idx, dir);
+  if (!updated) return c.notFound();
+  return c.html(<QuoteLineItemsSection quote={updated} />);
+});
