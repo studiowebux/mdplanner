@@ -43,6 +43,7 @@ export function rowToInvoice(
     taxRate: row.tax_rate != null ? Number(row.tax_rate) : undefined,
     total: Number(row.total) || 0,
     paidAmount: Number(row.paid_amount) || 0,
+    description: row.description as string | undefined,
     notes: row.notes as string | undefined,
     footer: row.footer as string | undefined,
     sentAt: row.sent_at as string | undefined,
@@ -69,6 +70,7 @@ const INVOICE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${INVOICE_TABLE} (
   tax_rate REAL,
   total REAL,
   paid_amount REAL,
+  description TEXT,
   notes TEXT,
   footer TEXT,
   ${ARCHIVE_COLS_DDL},
@@ -89,11 +91,11 @@ function insertInvoiceRow(
   db.execute(
     `INSERT OR REPLACE INTO ${INVOICE_TABLE} (id, number, customer_id, quote_id,
        project_id, title, status, currency, due_date, payment_terms, line_items,
-       subtotal, tax, tax_rate, total, paid_amount, notes, footer,
+       subtotal, tax, tax_rate, total, paid_amount, description, notes, footer,
        sent_at, paid_at,
        ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(inv.id),
       val(inv.number),
@@ -111,6 +113,7 @@ function insertInvoiceRow(
       inv.taxRate ?? null,
       inv.total,
       inv.paidAmount,
+      val(inv.description),
       val(inv.notes),
       val(inv.footer),
       val(inv.sentAt),
@@ -131,6 +134,7 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
       "ALTER TABLE invoices ADD COLUMN line_items TEXT",
       "ALTER TABLE invoices ADD COLUMN project_id TEXT",
       ...archiveMigrations(INVOICE_TABLE),
+      "ALTER TABLE invoices ADD COLUMN description TEXT",
     ],
     fts: {
       type: "invoice",

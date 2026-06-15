@@ -175,6 +175,18 @@
   font-weight: var(--font-weight-semibold);
 }
 
+/* Short description / summary above line items */
+.invoice-print__description {
+  margin: 0;
+}
+
+.invoice-print__description p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
 /* Line items section */
 .invoice-print__items {
   break-inside: avoid;

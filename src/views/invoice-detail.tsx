@@ -27,7 +27,7 @@ import { InlineEditable } from "./components/inline-editable.tsx";
 
 const InlineEditSection: FC<{
   invoice: Invoice;
-  field: "notes" | "footer";
+  field: "description" | "notes" | "footer";
   title: string;
 }> = ({ invoice, field, title }) => {
   const value = (invoice[field] ?? "") as string;
@@ -240,6 +240,21 @@ export const InvoiceDetailView: FC<
         <ArchivedBanner entity={invoice} />
 
         <InvoiceInfoRow invoice={invoice} customerName={customerName} />
+
+        {editing
+          ? (
+            <InlineEditSection
+              invoice={invoice}
+              field="description"
+              title="Description"
+            />
+          )
+          : invoice.description && (
+            <section class="detail-section">
+              <h2 class="section-heading">Description</h2>
+              <p class="detail-description">{invoice.description}</p>
+            </section>
+          )}
 
         <InvoiceBalance invoice={invoice} />
 

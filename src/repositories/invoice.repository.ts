@@ -86,6 +86,7 @@ export class InvoiceRepository extends CachedMarkdownRepository<
       taxRate: undefined,
       total: 0,
       paidAmount: fmNum(fm, "paidAmount") ?? 0,
+      description: fmStr(fm, "description"),
       notes,
       footer: fmStr(fm, "footer"),
       createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),

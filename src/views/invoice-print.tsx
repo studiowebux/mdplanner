@@ -112,6 +112,13 @@ export const InvoicePrintView: FC<Props> = (
             </section>
           )}
 
+          {/* Short description / summary */}
+          {invoice.description && (
+            <section class="invoice-print__description">
+              <p>{invoice.description}</p>
+            </section>
+          )}
+
           {/* Line items */}
           <section class="invoice-print__items">
             <LineItemsTable items={invoice.lineItems} />

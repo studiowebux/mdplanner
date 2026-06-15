@@ -48,6 +48,23 @@
   letter-spacing: var(--letter-spacing-wide);
 }
 
+/* Group subtotal row */
+.line-items-table__group-subtotal td {
+  padding: var(--space-xs) var(--space-sm);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.line-items-table__group-subtotal-label {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.line-items-table__group-subtotal-amount {
+  font-weight: var(--font-weight-semibold);
+  text-align: right;
+}
+
 /* Text-only row (description spans full width) */
 .line-items-table__row--text td {
   color: var(--color-text-secondary);

@@ -102,6 +102,12 @@ const LineItemRow: FC<{ item: LineItem; showOptional?: boolean }> = ({
   );
 };
 
+function groupSubtotal(items: LineItem[]): number {
+  return items
+    .filter((i) => i.type !== "text" && !i.optional)
+    .reduce((sum, i) => sum + (i.amount ?? 0), 0);
+}
+
 export const LineItemsTable: FC<LineItemsTableProps> = (
   { items, showOptional },
 ) => {
@@ -110,6 +116,8 @@ export const LineItemsTable: FC<LineItemsTableProps> = (
   const visibleItems = showOptional ? items : items.filter((i) => !i.optional);
 
   const groups = groupItems(visibleItems);
+  const showGroupSubtotals = groups.length > 1 &&
+    groups.some(({ group }) => group !== null);
 
   return (
     <div class="line-items-table__wrapper">
@@ -161,6 +169,19 @@ export const LineItemsTable: FC<LineItemsTableProps> = (
                   showOptional={showOptional}
                 />
               ))}
+              {showGroupSubtotals && group && (
+                <tr class="line-items-table__group-subtotal">
+                  <td
+                    colSpan={5}
+                    class="line-items-table__group-subtotal-label"
+                  >
+                    {group} subtotal
+                  </td>
+                  <td class="line-items-table__amount line-items-table__group-subtotal-amount">
+                    {formatCurrency(groupSubtotal(groupItems)) || "$0"}
+                  </td>
+                </tr>
+              )}
             </>
           ))}
         </tbody>

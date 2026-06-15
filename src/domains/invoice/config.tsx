@@ -37,7 +37,7 @@ export const invoiceConfig: DomainConfig<
   defaultView: "table",
 
   // `notes` and `footer` edit in-place on the detail page via "Edit Mode".
-  inlineEditFields: ["notes", "footer"],
+  inlineEditFields: ["description", "notes", "footer"],
 
   stateKeys: [
     "view",

@@ -93,6 +93,10 @@ export const InvoiceSchema = z.object({
     description: "Total amount paid (sum of payments)",
     example: 0,
   }),
+  description: z.string().nullable().optional().openapi({
+    description:
+      "Short client-visible summary (appears on the invoice above line items)",
+  }),
   notes: z.string().nullable().optional().openapi({
     description: "Internal notes (markdown)",
   }),
@@ -121,6 +125,7 @@ export const CreateInvoiceSchema = InvoiceSchema.pick({
   currency: true,
   dueDate: true,
   paymentTerms: true,
+  description: true,
   notes: true,
   footer: true,
 }).partial({
@@ -130,6 +135,7 @@ export const CreateInvoiceSchema = InvoiceSchema.pick({
   currency: true,
   dueDate: true,
   paymentTerms: true,
+  description: true,
   notes: true,
   footer: true,
 }).openapi("CreateInvoice");

@@ -148,6 +148,12 @@ export const INVOICE_FORM_FIELDS: FieldDef[] = [
     label: "Payment Terms",
     options: PAYMENT_TERMS_OPTIONS,
   },
+  {
+    type: "textarea",
+    name: "description",
+    label: "Description",
+    rows: 2,
+  },
   { type: "textarea", name: "notes", label: "Notes", rows: 4 },
   { type: "textarea", name: "footer", label: "Footer", rows: 3 },
 ];

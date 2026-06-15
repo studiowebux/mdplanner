@@ -74,6 +74,15 @@ invoicesRouter.post("/:id/send", async (c) => {
 
 invoicesRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
 
+// In-place description save (Edit Mode).
+invoicesRouter.put("/:id/description", async (c) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.parseBody();
+  const description = String(body.description ?? "").trim() || undefined;
+  await getInvoiceService().update(id, { description });
+  return renderDetail(c, id);
+});
+
 // In-place notes save (Edit Mode). Factory provides edit/delete routes.
 invoicesRouter.put("/:id/notes", async (c) => {
   const id = c.req.param("id")!;
