@@ -15,7 +15,7 @@ export function parseLineItems(fmLineItems: unknown): LineItem[] {
     : [];
   return rawItems.map((li) => ({
     id: String(li.id ?? ""),
-    type: (li.type as LineItem["type"]) ?? "service",
+    type: String(li.type ?? "service"),
     description: String(li.description ?? ""),
     group: li.group != null ? String(li.group) : undefined,
     quantity: li.quantity != null ? Number(li.quantity) : undefined,

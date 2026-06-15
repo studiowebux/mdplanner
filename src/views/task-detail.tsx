@@ -250,9 +250,11 @@ export const LogTimeForm: FC<{
             />
           </div>
         </div>
-        <div class="form__footer">
+        <div class="form__actions">
           <button type="submit" class="btn btn--primary">Log time</button>
-          <button type="button" class="btn" data-sidenav-close>Cancel</button>
+          <button type="button" class="btn btn--secondary" data-sidenav-close>
+            Cancel
+          </button>
         </div>
       </form>
     </Sidenav>

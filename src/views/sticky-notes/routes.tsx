@@ -149,7 +149,9 @@ export const NewBoardForm: FC = () => (
     </div>
     <div class="form__actions">
       <button type="submit" class="btn btn--primary">Create Board</button>
-      <button type="button" class="btn" data-sidenav-close>Cancel</button>
+      <button type="button" class="btn btn--secondary" data-sidenav-close>
+        Cancel
+      </button>
     </div>
   </form>
 );

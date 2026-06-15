@@ -13,7 +13,7 @@ export const LINE_ITEM_TYPES = [
   "product",
   "expense",
   "text",
-] as const;
+] as const satisfies readonly string[];
 
 export const DISCOUNT_TYPES = ["percent", "fixed"] as const;
 
@@ -28,9 +28,9 @@ export const LineItemSchema = z.object({
     description: "Line item ID",
     example: "li_1",
   }),
-  type: z.enum(LINE_ITEM_TYPES).openapi({
+  type: z.string().openapi({
     description:
-      "Line item type: service (hours x rate), product (qty x price), expense (pass-through), text (description only)",
+      "Line item type: built-ins are service/product/expense/text; users may define custom types (free text)",
     example: "service",
   }),
   description: z.string().openapi({

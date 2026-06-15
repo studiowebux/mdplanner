@@ -86,9 +86,15 @@ export const MemberForm: FC<{
           />
         </div>
       </div>
-      <div class="form__footer">
+      <div class="form__actions">
         <button type="submit" class="btn btn--primary">Add Member</button>
-        <button type="button" class="btn" data-sidenav-close>Cancel</button>
+        <button
+          type="button"
+          class="btn btn--secondary"
+          data-sidenav-close
+        >
+          Cancel
+        </button>
       </div>
     </form>
   </Sidenav>
@@ -239,11 +245,17 @@ export const AllocationForm: FC<{
             />
           </div>
         </div>
-        <div class="form__footer">
+        <div class="form__actions">
           <button type="submit" class="btn btn--primary">
             {isEdit ? "Save" : "Add Allocation"}
           </button>
-          <button type="button" class="btn" data-sidenav-close>Cancel</button>
+          <button
+            type="button"
+            class="btn btn--secondary"
+            data-sidenav-close
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </Sidenav>

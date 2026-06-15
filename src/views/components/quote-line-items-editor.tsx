@@ -6,15 +6,17 @@
 import type { FC } from "hono/jsx";
 import type { Quote } from "../../types/quote.types.ts";
 import type { LineItem } from "../../types/billing.types.ts";
+import { LINE_ITEM_TYPES } from "../../types/billing.types.ts";
 import { formatCurrency } from "../../utils/format.ts";
 import { BillingTotals } from "./billing-totals.tsx";
 
-/** Fields the inline editor allows editing. Type/unit/discount stay in sidenav. */
+/** Fields the inline editor allows editing. Unit/discount stay in sidenav. */
 export const EDITABLE_LINE_ITEM_FIELDS = [
   "description",
   "quantity",
   "unitRate",
   "group",
+  "type",
 ] as const;
 
 export type EditableLineItemField = (typeof EDITABLE_LINE_ITEM_FIELDS)[number];
@@ -26,7 +28,8 @@ export function lineItemFieldValue(
 ): string {
   if (field === "description") return item.description ?? "";
   if (field === "group") return item.group ?? "";
-  const v = item[field];
+  if (field === "type") return item.type ?? "service";
+  const v = item[field as "quantity" | "unitRate"];
   return v == null ? "" : String(v);
 }
 
@@ -104,6 +107,50 @@ export const EditCell: FC<{
   );
 };
 
+/** Editing cell for the type field — datalist with built-ins + custom types already in the quote. */
+export const EditTypeCell: FC<{
+  quoteId: string;
+  index: number;
+  value: string;
+  distinctTypes: string[];
+}> = ({ quoteId, index, value, distinctTypes }) => {
+  const postUrl = `/quotes/${quoteId}/line-items/${index}?field=type`;
+  const listId = `qli-types-${quoteId}`;
+  return (
+    <td class="qli-cell qli-cell--editing qli-cell--type">
+      <input
+        id={`qli-${index}-type`}
+        class="qli-input qli-input--type"
+        type="text"
+        list={listId}
+        name="value"
+        value={value}
+        autofocus
+        autocomplete="off"
+        data-quadrant-edit={postUrl}
+        hx-post={postUrl}
+        hx-target="#quote-line-items-section"
+        hx-swap="outerHTML"
+        hx-trigger="quadrant-save"
+      />
+      <datalist id={listId}>
+        {LINE_ITEM_TYPES.map((t) => <option key={t} value={t} />)}
+        {distinctTypes
+          .filter((t) => !(LINE_ITEM_TYPES as readonly string[]).includes(t))
+          .map((t) => <option key={t} value={t} />)}
+      </datalist>
+      <button
+        type="button"
+        class="quadrant-card__save btn btn--primary btn--sm is-hidden"
+        data-quadrant-save-for={`qli-${index}-type`}
+        aria-label="Save"
+      >
+        ✓
+      </button>
+    </td>
+  );
+};
+
 /** Read cell for a single editable field — returned after a save. */
 export const LineItemReadCell: FC<{
   quoteId: string;
@@ -158,15 +205,22 @@ const EditableRow: FC<{
   index: number;
   item: LineItem;
   total: number;
+  distinctTypes: string[];
 }> = (
-  { quoteId, index, item, total },
+  { quoteId, index, item, total, distinctTypes },
 ) => {
   const isText = item.type === "text";
   const isFirst = index === 0;
   const isLast = index === total - 1;
   return (
     <tr class="qli-row">
-      <td class="qli-cell qli-cell--type">
+      <td
+        class="qli-cell qli-cell--type"
+        hx-get={`/quotes/${quoteId}/line-items/${index}/edit?field=type`}
+        hx-target="this"
+        hx-swap="outerHTML"
+        title="Click to change type"
+      >
         <span class="badge badge--sm">
           {TYPE_LABEL[item.type] ?? item.type}
         </span>
@@ -287,6 +341,9 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
       quote.lineItems.map((li) => li.group).filter((g): g is string => !!g),
     ),
   ];
+  const distinctTypes = [
+    ...new Set(quote.lineItems.map((li) => li.type).filter(Boolean)),
+  ];
   return (
     <section class="detail-section" id="quote-line-items-section">
       <h2 class="section-heading">Line Items</h2>
@@ -340,6 +397,7 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
                     index={index}
                     item={item}
                     total={quote.lineItems.length}
+                    distinctTypes={distinctTypes}
                   />
                 ))}
               </>

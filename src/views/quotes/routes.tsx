@@ -16,6 +16,7 @@ import {
   EDITABLE_LINE_ITEM_FIELDS,
   type EditableLineItemField,
   EditCell,
+  EditTypeCell,
   LineItemAmountCell,
   lineItemFieldValue,
   LineItemReadCell,
@@ -268,6 +269,19 @@ quotesRouter.get("/:id/line-items/:idx/edit", async (c) => {
   if (!quote || quote.status !== "draft") return c.notFound();
   const item = quote.lineItems[idx];
   if (!item) return c.notFound();
+  if (field === "type") {
+    const distinctTypes = [
+      ...new Set(quote.lineItems.map((li) => li.type).filter(Boolean)),
+    ];
+    return c.html(
+      <EditTypeCell
+        quoteId={id}
+        index={idx}
+        value={item.type ?? "service"}
+        distinctTypes={distinctTypes}
+      />,
+    );
+  }
   return c.html(
     <EditCell
       quoteId={id}
@@ -294,7 +308,7 @@ quotesRouter.post("/:id/line-items/:idx", async (c) => {
   const raw = typeof body.value === "string" ? body.value : "";
   const updated = await service.updateLineItemField(quote, idx, field, raw);
   if (!updated) return c.notFound();
-  if (field === "group") {
+  if (field === "group" || field === "type") {
     return c.html(<QuoteLineItemsSection quote={updated} />);
   }
   const item = updated.lineItems[idx];
