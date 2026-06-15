@@ -123,25 +123,6 @@ export const QUOTE_FORM_FIELDS: FieldDef[] = [
   },
   {
     type: "array-table",
-    name: "lineItems",
-    label: "Line Item",
-    section: "quote_line_items",
-    addLabel: "Add line item",
-    itemFields: [
-      ...BASE_LINE_ITEM_FIELDS,
-      {
-        type: "select",
-        name: "optional",
-        label: "Optional",
-        options: [
-          { value: "", label: "No" },
-          { value: "true", label: "Yes" },
-        ],
-      },
-    ],
-  },
-  {
-    type: "array-table",
     name: "paymentSchedule",
     label: "Payment Milestone",
     section: "payment_schedule",
