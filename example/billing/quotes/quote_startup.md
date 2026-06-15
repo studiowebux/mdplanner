@@ -7,9 +7,6 @@ status: accepted
 currency: CAD
 expires_at: 2026-03-01
 tax_rate: 15
-subtotal: 1152
-tax: 172.80
-total: 1324.80
 revision: 1
 sent_at: 2026-02-02
 accepted_at: 2026-02-05
@@ -24,7 +21,6 @@ line_items:
     unit: unit
     unit_rate: 96
     taxable: true
-    amount: 1152
 ---
 
 # Quote: Team Plan Annual

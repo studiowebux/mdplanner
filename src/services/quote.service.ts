@@ -24,6 +24,34 @@ export class QuoteService extends BaseService<
     super(quoteRepo);
   }
 
+  // ---------------------------------------------------------------------------
+  // Derive-on-read — subtotal/tax/total and per-line amounts are never stored
+  // (see QUOTE_BODY_KEYS / QuoteRepository.serialize). calculateTotals runs on
+  // every read so callers always see correct computed values.
+  // ---------------------------------------------------------------------------
+
+  override async list(options?: ListQuoteOptions): Promise<Quote[]> {
+    let items = (await this.quoteRepo.findAll()).map((q) =>
+      this.calculateTotals(q)
+    );
+    if (options) items = this.applyFilters(items, options);
+    return items;
+  }
+
+  override async listArchived(): Promise<Quote[]> {
+    return (await super.listArchived()).map((q) => this.calculateTotals(q));
+  }
+
+  override async getById(id: string): Promise<Quote | null> {
+    const quote = await super.getById(id);
+    return quote ? this.calculateTotals(quote) : null;
+  }
+
+  override async getByName(name: string): Promise<Quote | null> {
+    const quote = await super.getByName(name);
+    return quote ? this.calculateTotals(quote) : null;
+  }
+
   protected applyFilters(
     quotes: Quote[],
     options: ListQuoteOptions,
@@ -93,9 +121,12 @@ export class QuoteService extends BaseService<
 
   override async create(data: CreateQuote): Promise<Quote> {
     const quote = await super.create(data);
-    const number = quote.number || await this.generateNumber();
-    const withTotals = this.calculateTotals({ ...quote, number });
-    return (await this.quoteRepo.update(quote.id, withTotals)) ?? withTotals;
+    if (!quote.number) {
+      await this.quoteRepo.update(quote.id, {
+        number: await this.generateNumber(),
+      } as UpdateQuote);
+    }
+    return await this.getById(quote.id) ?? this.calculateTotals(quote);
   }
 
   /** Snapshot the current quote state, then transition to sent. */
@@ -130,11 +161,7 @@ export class QuoteService extends BaseService<
   ): Promise<Quote | null> {
     const updated = await super.update(id, data);
     if (!updated) return null;
-    if (data.lineItems || data.taxRate !== undefined) {
-      const withTotals = this.calculateTotals(updated);
-      return (await this.quoteRepo.update(id, withTotals)) ?? withTotals;
-    }
-    return updated;
+    return this.calculateTotals(updated);
   }
 
   // ---------------------------------------------------------------------------

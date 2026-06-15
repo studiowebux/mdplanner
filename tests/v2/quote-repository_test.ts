@@ -14,7 +14,10 @@
  * blank service line with crypto id), removeLineItem (by index). Each
  * persists via `update({lineItems})` which recomputes totals.
  *
- * QUOTE_BODY_KEYS = ["id","notes"] — id in body, parse-guard via fm.title.
+ * QUOTE_BODY_KEYS = ["id","notes","subtotal","tax","total"] — id in body,
+ * parse-guard via fm.title; subtotal/tax/total are DERIVED (never persisted).
+ * Per-line `amount` is likewise stripped on serialize and recomputed on read
+ * (QuoteService.calculateTotals) — repo-direct reads return amount 0.
  */
 
 import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
@@ -117,7 +120,73 @@ Deno.test("QuoteRepository - findById succeeds after update with lineItems popul
     assertEquals(fetched!.lineItems.length, 1);
     assertEquals(fetched!.lineItems[0].id, "li_1");
     assertEquals(fetched!.lineItems[0].quantity, 10);
+    // Per-line amount is derived, not persisted — repo-direct read returns 0.
+    assertEquals(fetched!.lineItems[0].amount, 0);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+// === derive-on-read: totals + line amounts are never persisted ===
+
+Deno.test("QuoteService - subtotal/tax/total + line amount derived on read, absent from disk", async () => {
+  const { service, dir } = await setup();
+  try {
+    const created = await service.create({
+      customerId: "c1",
+      title: "Derive On Read",
+      taxRate: 10,
+      lineItems: [
+        line({ id: "li_1", quantity: 10, unitRate: 100 }),
+        line({ id: "li_2", type: "text", description: "Section" }),
+      ],
+    });
+
+    // Service computes totals + line amounts on read.
+    const fetched = await service.getById(created.id);
+    assertExists(fetched);
     assertEquals(fetched!.lineItems[0].amount, 1000);
+    assertEquals(fetched!.lineItems[1].amount, 0);
+    assertEquals(fetched!.subtotal, 1000);
+    assertEquals(fetched!.tax, 100);
+    assertEquals(fetched!.total, 1100);
+
+    // The .md file on disk holds none of the derived values.
+    const raw = await Deno.readTextFile(
+      join(dir, "billing/quotes", `${created.id}.md`),
+    );
+    assertEquals(/^subtotal:/m.test(raw), false);
+    assertEquals(/^tax:/m.test(raw), false);
+    assertEquals(/^total:/m.test(raw), false);
+    assertEquals(/amount:/.test(raw), false);
+    // tax_rate (an input, not derived) IS persisted.
+    assertEquals(/tax_rate:/.test(raw), true);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("QuoteService - editing qty in the .md recomputes totals on next read", async () => {
+  const { service, dir } = await setup();
+  try {
+    const created = await service.create({
+      customerId: "c1",
+      title: "Hand Edit",
+      lineItems: [line({ id: "li_1", quantity: 2, unitRate: 100 })],
+    });
+    assertEquals((await service.getById(created.id))!.total, 200);
+
+    // Simulate a hand-edit of the file: bump quantity 2 -> 5.
+    const path = join(dir, "billing/quotes", `${created.id}.md`);
+    const edited = (await Deno.readTextFile(path)).replace(
+      "quantity: 2",
+      "quantity: 5",
+    );
+    await Deno.writeTextFile(path, edited);
+
+    const reread = await service.getById(created.id);
+    assertEquals(reread!.lineItems[0].amount, 500);
+    assertEquals(reread!.total, 500);
   } finally {
     await cleanup(dir);
   }

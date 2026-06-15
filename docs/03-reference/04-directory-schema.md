@@ -582,9 +582,6 @@ title: Team Plan Annual Subscription
 status: accepted
 expiresAt: 2026-03-01
 taxRate: 15
-subtotal: 1152
-tax: 172.8
-total: 1324.8
 revision: 1
 created_at: 2026-02-01
 lineItems:
@@ -594,7 +591,6 @@ lineItems:
     quantity: 12
     unit: unit
     unitRate: 96
-    amount: 1152
 paymentSchedule:
   - description: 50% deposit
     percent: 50
@@ -613,11 +609,16 @@ Annual subscription with 20% discount.
 12 month commitment, annual billing upfront.
 ```
 
-Fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `projectId` (optional),
-`title`, `status` (`draft`, `sent`, `accepted`, `rejected`), `currency`,
-`expiresAt`, `lineItems` (array of LineItem), `paymentSchedule` (optional
-array), `subtotal`, `tax`, `taxRate`, `total`, `notes`, `footer`, `revision`,
+Stored fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `projectId`
+(optional), `title`, `status` (`draft`, `sent`, `accepted`, `rejected`),
+`currency`, `expiresAt`, `lineItems` (array of LineItem), `taxRate`,
+`paymentSchedule` (optional array), `notes`, `footer`, `revision`,
 `convertedToInvoice`, `sentAt`, `acceptedAt`, `created_at`, `updated_at`.
+
+Derived (computed on read from the line items — **never stored**): each line
+item's `amount`, plus the quote-level `subtotal`, `tax`, and `total`. Editing
+quantities/rates in the `.md` directly yields correct recomputed totals on the
+next read.
 
 ## Invoices
 

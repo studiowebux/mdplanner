@@ -16,6 +16,7 @@ import {
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
 import { parseBillingBody, parseLineItems } from "../utils/billing-parse.ts";
+import type { LineItem } from "../types/billing.types.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { QUOTE_TABLE, rowToQuote } from "../domains/quote/cache.ts";
@@ -162,7 +163,20 @@ export class QuoteRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Quote): string {
-    return this.serializeStandard(item, QUOTE_BODY_KEYS, this.buildBody(item));
+    // Per-line `amount` is derived (computeLineAmount) — strip it so it is
+    // never persisted, matching the subtotal/tax/total exclusion in
+    // QUOTE_BODY_KEYS. It is recomputed on read by QuoteService.calculateTotals.
+    const persisted: Quote = {
+      ...item,
+      lineItems: item.lineItems.map(({ amount: _amount, ...li }) =>
+        li as LineItem
+      ),
+    };
+    return this.serializeStandard(
+      persisted,
+      QUOTE_BODY_KEYS,
+      this.buildBody(item),
+    );
   }
 
   private buildBody(item: Quote): string {
