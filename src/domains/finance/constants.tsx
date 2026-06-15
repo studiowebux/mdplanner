@@ -85,10 +85,9 @@ export const FINANCE_FORM_FIELDS: FieldDef[] = [
     options: FINANCE_TYPE_OPTIONS,
   },
   {
-    type: "number",
+    type: "money",
     name: "amount",
     label: "Amount",
-    min: 0,
   },
   {
     type: "text",
