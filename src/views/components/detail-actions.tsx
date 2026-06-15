@@ -92,7 +92,7 @@ export function DetailActions(
       </button>
       {children}
       <button
-        class="btn btn--danger btn--sm"
+        class="btn btn--secondary btn--sm"
         type="button"
         {...deleteAttrs}
       >

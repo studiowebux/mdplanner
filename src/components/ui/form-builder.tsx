@@ -595,6 +595,9 @@ export const FormBuilder: FC<Props> = (
         <button type="submit" class="btn btn--primary">
           {submitLabel ?? "Save"}
         </button>
+        <button type="button" class="btn btn--secondary" data-sidenav-close>
+          Cancel
+        </button>
       </div>
     </form>
   </Sidenav>

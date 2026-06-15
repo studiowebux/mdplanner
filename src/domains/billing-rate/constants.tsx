@@ -70,7 +70,7 @@ export const BILLING_RATE_FORM_FIELDS: FieldDef[] = [
     placeholder: "e.g. Senior Dev",
   },
   {
-    type: "number",
+    type: "money",
     name: "rate",
     label: "Rate",
     required: true,

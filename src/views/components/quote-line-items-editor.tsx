@@ -72,8 +72,8 @@ export const EditCell: FC<{
       <input
         id={`qli-${index}-${field}`}
         class="qli-input"
-        type={numeric ? "number" : "text"}
-        step={numeric ? "0.01" : undefined}
+        type="text"
+        inputmode={numeric ? "decimal" : undefined}
         name="value"
         value={value}
         autofocus
