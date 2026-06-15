@@ -14,6 +14,7 @@ import {
 } from "./database.ts";
 import { ENTITIES, type EntityDef } from "./entities.ts";
 import type { SearchOptions, SearchResult } from "../../types/search.types.ts";
+import { foldIncludes } from "../../utils/string.ts";
 
 function getFtsEntities() {
   return ENTITIES.filter((e) => e.fts !== undefined);
@@ -56,7 +57,13 @@ export class SearchEngine {
     // Type-name search: "person" → all people, "tasks" → all tasks
     results.push(...this.searchByTypeName(trimmed, limit, project));
 
-    results.sort((a, b) => a.score - b.score);
+    // Boost results whose title contains the raw query — surfaces exact-title
+    // matches above content-only BM25 hits regardless of document length.
+    const titleBoost = (r: SearchResult) =>
+      foldIncludes(r.title, trimmed) ? -1000 : 0;
+    results.sort((a, b) =>
+      (a.score + titleBoost(a)) - (b.score + titleBoost(b))
+    );
 
     const seen = new Set<string>();
     const deduped = results.filter((r) => {
