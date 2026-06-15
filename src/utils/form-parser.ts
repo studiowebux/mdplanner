@@ -5,6 +5,7 @@ import type {
   ArrayTableItemField,
   FieldDef,
 } from "../components/ui/form-builder.tsx";
+import { parseMoney } from "./money.ts";
 
 /**
  * Parse a form body into a typed object using field definitions.
@@ -29,6 +30,8 @@ function coerceScalarField(
   switch (type) {
     case "number":
       return Number(val);
+    case "money":
+      return parseMoney(val) ?? 0;
     case "boolean":
       return val === "true";
     case "tags":
@@ -65,7 +68,11 @@ function buildArrayTableItems(
       if (!trimmed) continue;
       hasValue = true;
       const type = fieldTypes.get(field);
-      obj[field] = type === "number" ? Number(trimmed) : trimmed;
+      obj[field] = type === "number"
+        ? Number(trimmed)
+        : type === "money"
+        ? (parseMoney(trimmed) ?? 0)
+        : trimmed;
     }
 
     // Skip completely empty rows.

@@ -65,17 +65,13 @@ export const paymentConfig: DomainConfig<
   Card: ({ item, q }) => <PaymentCard item={item} q={q} />,
 
   parseCreate: (body) => {
-    const data = parseFormBody(PAYMENT_FORM_FIELDS, body);
-    if (data.amount != null) data.amount = Number(data.amount);
-    return data as CreatePayment;
+    return parseFormBody(PAYMENT_FORM_FIELDS, body) as CreatePayment;
   },
 
   parseUpdate: (body) => {
-    const data = parseFormBody(PAYMENT_FORM_FIELDS, body, {
+    return parseFormBody(PAYMENT_FORM_FIELDS, body, {
       clearEmpty: true,
-    });
-    if (data.amount != null) data.amount = Number(data.amount);
-    return data as Partial<UpdatePayment>;
+    }) as Partial<UpdatePayment>;
   },
 
   extractFilterOptions: async () => {

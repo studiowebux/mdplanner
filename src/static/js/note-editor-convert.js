@@ -212,7 +212,8 @@
         ' hx-post="/notes/preview-block"' +
         ' hx-include="closest .note-editor__block"' +
         ' hx-target="next .note-editor__preview"' +
-        ' hx-swap="innerHTML">Preview</button>' +
+        ' hx-swap="innerHTML"' +
+        ' hx-trigger="click, input delay:400ms from:closest .note-editor__block">Preview</button>' +
         '<button type="button" class="btn btn--danger btn--sm" data-action="delete-block">Del</button>';
       block.appendChild(controls);
 

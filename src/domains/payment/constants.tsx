@@ -104,7 +104,7 @@ export const PAYMENT_FORM_FIELDS: FieldDef[] = [
     placeholder: "invoice_...",
   },
   {
-    type: "number",
+    type: "money",
     name: "amount",
     label: "Amount",
     required: true,

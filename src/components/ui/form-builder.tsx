@@ -12,6 +12,7 @@ export type ArrayTableItemField =
   | { type: "hidden"; name: string }
   | { type: "text"; name: string; label: string; placeholder?: string }
   | { type: "number"; name: string; label: string; min?: number; max?: number }
+  | { type: "money"; name: string; label: string; placeholder?: string }
   | { type: "date"; name: string; label: string }
   | { type: "select"; name: string; label: string; options: Option[] }
   | {
@@ -54,6 +55,13 @@ export type FieldDef =
     required?: boolean;
     min?: number;
     max?: number;
+  }
+  | {
+    type: "money";
+    name: string;
+    label: string;
+    required?: boolean;
+    placeholder?: string;
   }
   | { type: "date"; name: string; label: string; required?: boolean }
   | {
@@ -176,6 +184,17 @@ const ArrayTableRowField: FC<
           min={field.min}
           max={field.max}
           step="any"
+          autocomplete="off"
+        />
+      )}
+      {field.type === "money" && (
+        <input
+          type="text"
+          inputmode="decimal"
+          name={name}
+          class="form__input"
+          value={value ?? ""}
+          placeholder={field.placeholder ?? "0.00"}
           autocomplete="off"
         />
       )}
@@ -446,6 +465,21 @@ const FieldControl: FC<{
         min={def.min}
         max={def.max}
         step="any"
+        value={value ?? ""}
+        autocomplete="off"
+      />
+    );
+  }
+  if (def.type === "money") {
+    return (
+      <input
+        type="text"
+        inputmode="decimal"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        placeholder={def.placeholder ?? "0.00"}
         value={value ?? ""}
         autocomplete="off"
       />

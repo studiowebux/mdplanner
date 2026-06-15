@@ -154,7 +154,7 @@ export const QUOTE_FORM_FIELDS: FieldDef[] = [
         placeholder: "e.g. 50% deposit",
       },
       { type: "number", name: "percent", label: "%" },
-      { type: "number", name: "amount", label: "Amount" },
+      { type: "money", name: "amount", label: "Amount" },
       { type: "date", name: "dueDate", label: "Due" },
     ],
   },

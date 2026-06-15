@@ -60,8 +60,8 @@ export const BASE_LINE_ITEM_FIELDS: ArrayTableItemField[] = [
     label: "Unit",
     options: UNIT_OPTIONS,
   },
-  { type: "number", name: "unitRate", label: "Rate" },
-  { type: "number", name: "discount", label: "Discount" },
+  { type: "money", name: "unitRate", label: "Rate" },
+  { type: "money", name: "discount", label: "Discount" },
   {
     type: "select",
     name: "discountType",
