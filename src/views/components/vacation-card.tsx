@@ -33,6 +33,28 @@ export const VacationCard: FC<Props> = ({ item, q }) => {
           >
             Edit
           </button>
+          {item.status === "pending" && (
+            <>
+              <button
+                class="btn btn--success btn--sm"
+                type="button"
+                hx-post={`/vacation/${item.id}/approve`}
+                hx-swap="none"
+                hx-confirm="Approve this request?"
+              >
+                Approve
+              </button>
+              <button
+                class="btn btn--warning btn--sm"
+                type="button"
+                hx-post={`/vacation/${item.id}/reject`}
+                hx-swap="none"
+                hx-confirm="Reject this request?"
+              >
+                Reject
+              </button>
+            </>
+          )}
           <button
             class="btn btn--danger btn--sm"
             type="button"

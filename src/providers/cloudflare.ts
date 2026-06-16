@@ -107,6 +107,14 @@ export class CloudflareDnsProvider implements IDnsProvider {
         proxied: r.proxied,
       }));
     } catch (err) {
+      // Re-throw API errors (auth failures, rate limits) so the caller can
+      // surface them to the user. Unexpected non-API errors are logged and
+      // treated as empty to allow partial zone results.
+      if (
+        err instanceof Error && err.message.startsWith("CLOUDFLARE_API_ERROR")
+      ) {
+        throw err;
+      }
       log.warn("[cloudflare] DNS records fetch failed:", err);
       return [];
     }
