@@ -92,7 +92,7 @@ Todo.
 | **Strategic Levels** | Hierarchical strategy documents linking goals to execution   |
 | **Meetings**         | Meeting notes with attendees, agenda, action items           |
 | **Journal**          | Personal journal entries with mood tracking                  |
-| **Habits**           | Habit tracking with completion streaks                       |
+| **Habits**           | Habit tracking with completion streaks and per-day target counts (e.g. 3×/day) |
 
 ## Portfolio and Tools
 

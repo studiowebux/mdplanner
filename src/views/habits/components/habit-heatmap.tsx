@@ -36,8 +36,8 @@ function todayStr(): string {
   return new Date().toLocaleDateString("en-CA");
 }
 
-function isDone(completedDates: CompletionEntry[], date: string): boolean {
-  return completedDates.some((e) => e.date === date);
+function countFor(completedDates: CompletionEntry[], date: string): number {
+  return completedDates.filter((e) => e.date === date).length;
 }
 
 function noteFor(
@@ -51,49 +51,70 @@ export const HabitHeatmapRow: FC<{
   habit: Habit;
   days: { date: string; day: number }[];
   today: string;
-}> = ({ habit, days, today }) => (
-  <div
-    class="habit-heatmap__row"
-    id={`hrow-${habit.id}`}
-    data-habit-id={habit.id}
-  >
-    <a
-      class="habit-heatmap__label"
-      href={`/habits/${habit.id}`}
-      title={habit.description
-        ? `${habit.title} — ${habit.description}`
-        : habit.title}
+}> = ({ habit, days, today }) => {
+  const target = habit.targetPerPeriod ?? 1;
+  return (
+    <div
+      class="habit-heatmap__row"
+      id={`hrow-${habit.id}`}
+      data-habit-id={habit.id}
     >
-      {habit.title}
-    </a>
-    <div class="habit-heatmap__cells">
-      {days.map(({ date }) => {
-        const done = isDone(habit.completedDates, date);
-        const note = noteFor(habit.completedDates, date);
-        const isToday = date === today;
-        const tooltip = note ? `${date} — ${note}` : date;
-        return (
-          <span
-            key={date}
-            class={`habit-heatmap__cell${
-              isToday ? " habit-heatmap__cell--today" : ""
-            }`}
-            data-done={done ? "true" : "false"}
-            data-date={date}
-            title={tooltip}
-            {...(done
-              ? {
-                "hx-post": `/habits/${habit.id}/toggle-date/${date}`,
-                "hx-target": `#hrow-${habit.id}`,
-                "hx-swap": "outerHTML",
-              }
-              : {})}
-          />
-        );
-      })}
+      <a
+        class="habit-heatmap__label"
+        href={`/habits/${habit.id}`}
+        title={habit.description
+          ? `${habit.title} — ${habit.description}`
+          : habit.title}
+      >
+        {habit.title}
+      </a>
+      <div class="habit-heatmap__cells">
+        {days.map(({ date }) => {
+          const count = countFor(habit.completedDates, date);
+          const done = count >= target;
+          const partial = count > 0 && !done;
+          const note = noteFor(habit.completedDates, date);
+          const isToday = date === today;
+          const countLabel = target > 1 ? ` (${count}/${target})` : "";
+          const tooltip = note
+            ? `${date}${countLabel} — ${note}`
+            : `${date}${countLabel}`;
+          const ratio = target > 1 ? count / target : undefined;
+          return (
+            <span
+              key={date}
+              class={`habit-heatmap__cell${
+                isToday ? " habit-heatmap__cell--today" : ""
+              }`}
+              data-done={done ? "true" : "false"}
+              data-partial={partial ? "true" : "false"}
+              data-count={String(count)}
+              data-target={String(target)}
+              data-date={date}
+              title={tooltip}
+              style={ratio !== undefined
+                ? `--habit-ratio:${ratio.toFixed(3)}`
+                : undefined}
+              {...(done
+                ? {
+                  "hx-post": `/habits/${habit.id}/toggle-date/${date}`,
+                  "hx-target": `#hrow-${habit.id}`,
+                  "hx-swap": "outerHTML",
+                }
+                : partial
+                ? {
+                  "hx-post": `/habits/${habit.id}/toggle-date/${date}`,
+                  "hx-target": `#hrow-${habit.id}`,
+                  "hx-swap": "outerHTML",
+                }
+                : {})}
+            />
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const HabitHeatmap: FC<{ habits: Habit[] }> = ({ habits }) => {
   const days = currentMonthDays();

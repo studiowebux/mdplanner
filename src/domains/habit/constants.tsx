@@ -28,6 +28,46 @@ export const HABIT_FREQUENCY_OPTIONS = HABIT_FREQUENCIES.map((f) => ({
 }));
 
 // ---------------------------------------------------------------------------
+// Multi-count helpers
+// ---------------------------------------------------------------------------
+
+/** Number of completions a user has logged for a specific date. */
+export function countForDate(
+  completedDates: CompletionEntry[],
+  date: string,
+): number {
+  return completedDates.filter((e) => e.date === date).length;
+}
+
+/** Whether a date is fully done (count >= target). */
+export function isDoneForDate(
+  completedDates: CompletionEntry[],
+  date: string,
+  targetPerPeriod: number,
+): boolean {
+  return countForDate(completedDates, date) >= targetPerPeriod;
+}
+
+/**
+ * Unique set of dates where the user's completion count meets the target.
+ * Used by streak and stats so they count "completed days", not raw entries.
+ */
+export function doneDates(
+  completedDates: CompletionEntry[],
+  targetPerPeriod: number,
+): Set<string> {
+  const counts = new Map<string, number>();
+  for (const e of completedDates) {
+    counts.set(e.date, (counts.get(e.date) ?? 0) + 1);
+  }
+  const result = new Set<string>();
+  for (const [date, count] of counts) {
+    if (count >= targetPerPeriod) result.add(date);
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // Streak computation
 // ---------------------------------------------------------------------------
 
@@ -35,10 +75,14 @@ export const HABIT_FREQUENCY_OPTIONS = HABIT_FREQUENCIES.map((f) => ({
 export function computeStreak(
   completedDates: CompletionEntry[],
   frequency: Habit["frequency"],
+  targetPerPeriod = 1,
 ): number {
   if (!completedDates || completedDates.length === 0) return 0;
 
-  const sorted = completedDates.map((e) => e.date).sort().reverse();
+  const done = doneDates(completedDates, targetPerPeriod);
+  if (done.size === 0) return 0;
+
+  const sorted = [...done].sort().reverse();
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
@@ -108,9 +152,12 @@ export function computeStreak(
 export function computeLongestStreak(
   completedDates: CompletionEntry[],
   frequency: Habit["frequency"],
+  targetPerPeriod = 1,
 ): number {
   if (!completedDates || completedDates.length === 0) return 0;
-  const sorted = completedDates.map((e) => e.date).sort();
+  const done = doneDates(completedDates, targetPerPeriod);
+  if (done.size === 0) return 0;
+  const sorted = [...done].sort();
   let longest = 0;
   let current = 0;
 
@@ -129,16 +176,22 @@ export function computeLongestStreak(
     return longest;
   }
 
-  // For weekly/monthly, reuse computeStreak logic on each contiguous window
-  return computeStreak(completedDates, frequency);
+  return computeStreak(completedDates, frequency, targetPerPeriod);
 }
 
-export function computeThisMonth(completedDates: CompletionEntry[]): number {
+export function computeThisMonth(
+  completedDates: CompletionEntry[],
+  targetPerPeriod = 1,
+): number {
   const now = new Date();
   const ym = `${now.getFullYear()}-${
     String(now.getMonth() + 1).padStart(2, "0")
   }`;
-  return completedDates.filter((e) => e.date.startsWith(ym)).length;
+  const done = doneDates(
+    completedDates.filter((e) => e.date.startsWith(ym)),
+    targetPerPeriod,
+  );
+  return done.size;
 }
 
 export function lastCompleted(completedDates: CompletionEntry[]): string {
@@ -147,9 +200,12 @@ export function lastCompleted(completedDates: CompletionEntry[]): string {
     .date;
 }
 
-export function isDoneToday(completedDates: CompletionEntry[]): boolean {
+export function isDoneToday(
+  completedDates: CompletionEntry[],
+  targetPerPeriod = 1,
+): boolean {
   const today = new Date().toLocaleDateString("en-CA");
-  return completedDates.some((e) => e.date === today);
+  return countForDate(completedDates, today) >= targetPerPeriod;
 }
 
 // ---------------------------------------------------------------------------
@@ -273,16 +329,17 @@ export function periodDenominator(frequency: Habit["frequency"]): number {
 }
 
 export function habitToRow(h: Habit): Record<string, unknown> {
+  const target = h.targetPerPeriod ?? 1;
   return {
     id: h.id,
     title: h.title,
     description: h.description ?? "",
     frequency: h.frequency,
-    streak: String(computeStreak(h.completedDates, h.frequency)),
-    thisMonth: `${computeThisMonth(h.completedDates)} / ${
+    streak: String(computeStreak(h.completedDates, h.frequency, target)),
+    thisMonth: `${computeThisMonth(h.completedDates, target)} / ${
       periodDenominator(h.frequency)
     }`,
     lastDone: lastCompleted(h.completedDates),
-    doneToday: String(isDoneToday(h.completedDates)),
+    doneToday: String(isDoneToday(h.completedDates, target)),
   };
 }

@@ -120,6 +120,15 @@
   border-color: var(--color-success);
 }
 
+.habit-heatmap__cell[data-partial="true"] {
+  background: linear-gradient(
+    to top,
+    var(--color-success) calc(var(--habit-ratio, 0) * 100%),
+    transparent calc(var(--habit-ratio, 0) * 100%)
+  );
+  border-color: var(--color-success);
+}
+
 .habit-heatmap__cell--today {
   border-color: var(--color-accent);
   border-width: var(--border-width-thick);

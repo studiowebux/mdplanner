@@ -23,9 +23,11 @@
   document.addEventListener("click", (e) => {
     const cell = e.target.closest(".habit-heatmap__cell");
     if (!cell) return;
-    // Done cells: native hx-post on the element handles the toggle directly.
+    // Done cells: native hx-post on the element handles the clear directly.
     if (cell.dataset.done === "true") return;
-    // Not-done cells: open note dialog, form submits via htmx.
+    // Partial cells (multi-count in progress): direct htmx post to increment.
+    if (cell.dataset.partial === "true") return;
+    // Empty cells (count=0): open note dialog for optional note on first log.
     const row = cell.closest(".habit-heatmap__row");
     const habitId = row.dataset.habitId;
     const date = cell.dataset.date;

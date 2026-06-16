@@ -713,3 +713,105 @@ Deno.test("HabitRepository - findByName returns matching habit (case-insensitive
     await cleanup(dir);
   }
 });
+
+// === multi-count tracking (targetPerPeriod > 1) ===
+
+Deno.test("HabitService.markComplete - allows up to targetPerPeriod entries per date", async () => {
+  const { repo, service, dir } = await setup();
+  try {
+    const h = await repo.create({ title: "3x daily", targetPerPeriod: 3 });
+    // First completion
+    let after = await service.markComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 1);
+    // Second
+    after = await service.markComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 2);
+    // Third
+    after = await service.markComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 3);
+    // Fourth — capped at target, no-op
+    after = await service.markComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 3);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("HabitService.markComplete - targetPerPeriod=1 remains idempotent", async () => {
+  const { repo, service, dir } = await setup();
+  try {
+    const h = await repo.create({ title: "Once daily", targetPerPeriod: 1 });
+    await service.markComplete(h.id, "2026-06-16", ALICE);
+    const after = await service.markComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 1);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("HabitService.unmarkComplete - decrements by one (not clear all)", async () => {
+  const { repo, service, dir } = await setup();
+  try {
+    const h = await repo.create({
+      title: "3x daily",
+      targetPerPeriod: 3,
+      completedDates: [
+        { date: "2026-06-16", userId: "alice" },
+        { date: "2026-06-16", userId: "alice" },
+        { date: "2026-06-16", userId: "alice" },
+      ],
+    });
+    // Remove one
+    let after = await service.unmarkComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 2);
+    // Remove another
+    after = await service.unmarkComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 1);
+    // Remove last
+    after = await service.unmarkComplete(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 0);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("HabitService.toggleDate - increments up to target then clears all", async () => {
+  const { repo, service, dir } = await setup();
+  try {
+    const h = await repo.create({ title: "2x daily", targetPerPeriod: 2 });
+    // 0 → 1
+    let after = await service.toggleDate(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 1);
+    // 1 → 2 (now done)
+    after = await service.toggleDate(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 2);
+    // 2 → 0 (clear all — was fully done)
+    after = await service.toggleDate(h.id, "2026-06-16", ALICE);
+    assertEquals(after!.completedDates.length, 0);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
+Deno.test("HabitService.toggleDate - note only attached to first completion", async () => {
+  const { repo, service, dir } = await setup();
+  try {
+    const h = await repo.create({ title: "2x note test", targetPerPeriod: 2 });
+    // First: with note
+    let after = await service.toggleDate(
+      h.id,
+      "2026-06-16",
+      ALICE,
+      "Morning",
+    );
+    assertEquals(after!.completedDates[0].note, "Morning");
+    // Second: note ignored (not first)
+    after = await service.toggleDate(h.id, "2026-06-16", ALICE, "Evening");
+    assertEquals(after!.completedDates.length, 2);
+    // Second entry has no note
+    const secondEntry = after!.completedDates.find((e) => !e.note);
+    assertEquals(secondEntry?.note, undefined);
+  } finally {
+    await cleanup(dir);
+  }
+});

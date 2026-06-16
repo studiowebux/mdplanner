@@ -10,6 +10,7 @@ import {
   computeLongestStreak,
   computeStreak,
   computeThisMonth,
+  doneDates,
   lastCompleted,
   periodDenominator,
 } from "../../../domains/habit/constants.tsx";
@@ -17,13 +18,15 @@ import {
 export const HabitStats: FC<{ habit: Habit; oob?: boolean }> = (
   { habit, oob },
 ) => {
-  const streak = computeStreak(habit.completedDates, habit.frequency);
+  const target = habit.targetPerPeriod ?? 1;
+  const streak = computeStreak(habit.completedDates, habit.frequency, target);
   const longestStreak = computeLongestStreak(
     habit.completedDates,
     habit.frequency,
+    target,
   );
-  const thisMonth = computeThisMonth(habit.completedDates);
-  const allTime = habit.completedDates.length;
+  const thisMonth = computeThisMonth(habit.completedDates, target);
+  const allTime = doneDates(habit.completedDates, target).size;
   const lastDone = lastCompleted(habit.completedDates);
 
   return (

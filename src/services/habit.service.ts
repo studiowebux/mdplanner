@@ -92,17 +92,17 @@ export class HabitService extends BaseService<
   ): Promise<Habit | null> {
     const habit = await this.habitRepo.findById(id);
     if (!habit) return null;
-    const exists = habit.completedDates.some((e) =>
-      e.date === date && this.ownedBy(e, scope)
-    );
-    if (!exists) {
+    const target = habit.targetPerPeriod ?? 1;
+    const currentCount =
+      habit.completedDates.filter((e) =>
+        e.date === date && this.ownedBy(e, scope)
+      ).length;
+    if (currentCount < target) {
       habit.completedDates = [
         ...habit.completedDates,
         { date, userId: scope.userId },
       ].sort((a, b) => a.date.localeCompare(b.date));
-      await this.update(id, {
-        completedDates: habit.completedDates,
-      });
+      await this.update(id, { completedDates: habit.completedDates });
     }
     return this.getForUser(id, scope);
   }
@@ -114,9 +114,15 @@ export class HabitService extends BaseService<
   ): Promise<Habit | null> {
     const habit = await this.habitRepo.findById(id);
     if (!habit) return null;
-    habit.completedDates = habit.completedDates.filter((e) =>
-      !(e.date === date && this.ownedBy(e, scope))
-    );
+    // Decrement by one: remove the last owned entry for this date.
+    let removed = false;
+    habit.completedDates = [...habit.completedDates].reverse().filter((e) => {
+      if (!removed && e.date === date && this.ownedBy(e, scope)) {
+        removed = true;
+        return false;
+      }
+      return true;
+    }).reverse();
     await this.update(id, { completedDates: habit.completedDates });
     return this.getForUser(id, scope);
   }
@@ -129,16 +135,20 @@ export class HabitService extends BaseService<
   ): Promise<Habit | null> {
     const habit = await this.habitRepo.findById(id);
     if (!habit) return null;
-    const exists = habit.completedDates.some((e) =>
-      e.date === date && this.ownedBy(e, scope)
-    );
-    if (exists) {
+    const target = habit.targetPerPeriod ?? 1;
+    const currentCount =
+      habit.completedDates.filter((e) =>
+        e.date === date && this.ownedBy(e, scope)
+      ).length;
+    if (currentCount >= target) {
+      // Fully done — clear all entries for this date.
       habit.completedDates = habit.completedDates.filter((e) =>
         !(e.date === date && this.ownedBy(e, scope))
       );
     } else {
+      // Increment: add one more entry. Note only on the very first (0→1).
       const entry: CompletionEntry = { date, userId: scope.userId };
-      if (note) entry.note = note;
+      if (note && currentCount === 0) entry.note = note;
       habit.completedDates = [...habit.completedDates, entry].sort((a, b) =>
         a.date.localeCompare(b.date)
       );
