@@ -6,6 +6,7 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { portfolioConfig } from "../../domains/portfolio/config.tsx";
 import {
   getCustomerService,
+  getDnsService,
   getGitHubService,
   getGoalService,
   getPortfolioService,
@@ -355,19 +356,23 @@ async function renderDetail(c: AppContext, id: string) {
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
 
-  const [allGoals, customer, clientCustomer] = await Promise.all([
-    getGoalService().list(),
-    item.billingCustomerId
-      ? getCustomerService().getById(item.billingCustomerId)
-      : Promise.resolve(null),
-    item.client
-      ? getCustomerService().getById(item.client)
-      : Promise.resolve(null),
-  ]);
+  const [allGoals, customer, clientCustomer, allDnsDomains] = await Promise.all(
+    [
+      getGoalService().list(),
+      item.billingCustomerId
+        ? getCustomerService().getById(item.billingCustomerId)
+        : Promise.resolve(null),
+      item.client
+        ? getCustomerService().getById(item.client)
+        : Promise.resolve(null),
+      getDnsService().list(),
+    ],
+  );
   const linkedById = new Set(item.linkedGoals ?? []);
   const goals = allGoals.filter((g) =>
     linkedById.has(g.id) || g.project === item.name
   );
+  const dnsDomains = allDnsDomains.filter((d) => d.project === item.name);
   const personById = await buildTeamPersonById(item.team ?? []);
   const editing = c.req.query("editing") === "true";
 
@@ -379,6 +384,7 @@ async function renderDetail(c: AppContext, id: string) {
       personById={personById}
       customer={customer ?? null}
       clientCustomer={clientCustomer ?? null}
+      dnsDomains={dnsDomains}
       editing={editing}
     />,
   );

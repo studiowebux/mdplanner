@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { Goal } from "../types/goal.types.ts";
 import type { Customer } from "../types/customer.types.ts";
+import type { DnsDomain } from "../types/dns.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
@@ -31,6 +32,7 @@ type Props = ViewProps & {
   personById?: Record<string, string>;
   customer?: Customer | null;
   clientCustomer?: Customer | null;
+  dnsDomains?: DnsDomain[];
   editing?: boolean;
 };
 
@@ -417,6 +419,46 @@ const LinkedGoalsSection: FC<{ goals: Goal[] }> = ({ goals }) => {
   );
 };
 
+const DnsSection: FC<{ domains: DnsDomain[] }> = ({ domains }) => {
+  if (!domains.length) return null;
+  return (
+    <section class="detail-section portfolio-detail__section portfolio-detail__dns">
+      <h2 class="section-heading">DNS</h2>
+      {domains.map((domain) => (
+        <div key={domain.id} class="portfolio-detail__dns-domain">
+          <h3 class="portfolio-detail__dns-domain-name">
+            <a href={`/dns/${domain.id}`}>{domain.domain}</a>
+          </h3>
+          {domain.dnsRecords && domain.dnsRecords.length > 0 && (
+            <table class="data-table portfolio-detail__dns-table">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Content</th>
+                  <th scope="col">TTL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {domain.dnsRecords.map((r, i) => (
+                  <tr key={i}>
+                    <td>
+                      <span class="badge">{r.type}</span>
+                    </td>
+                    <td>{r.name}</td>
+                    <td class="portfolio-detail__dns-content">{r.value}</td>
+                    <td>{r.ttl ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      ))}
+    </section>
+  );
+};
+
 export const PortfolioDetailView: FC<Props> = (
   {
     item,
@@ -424,6 +466,7 @@ export const PortfolioDetailView: FC<Props> = (
     personById = {},
     customer = null,
     clientCustomer = null,
+    dnsDomains = [],
     editing = false,
     ...viewProps
   },
@@ -477,6 +520,7 @@ export const PortfolioDetailView: FC<Props> = (
       <LinksSection item={item} />
       <StatusUpdatesSection item={item} />
       <LinkedGoalsSection goals={goals} />
+      <DnsSection domains={dnsDomains} />
 
       {item.githubRepo && <GitHubSection itemId={item.id} />}
       <AuditMeta
