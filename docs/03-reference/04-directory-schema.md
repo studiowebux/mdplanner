@@ -576,44 +576,53 @@ Directory: `billing/quotes/`
 ---
 id: quote_startup
 number: Q-2026-001
-customerId: customer_startup
-projectId: project_redesign
+customer_id: customer_startup
 title: Team Plan Annual Subscription
 status: accepted
-expiresAt: 2026-03-01
-taxRate: 15
+currency: CAD
+expires_at: 2026-03-01
+tax_rate: 15
 revision: 1
+sent_at: 2026-02-02
+accepted_at: 2026-02-05
+converted_to_invoice: invoice_startup1
 created_at: 2026-02-01
-lineItems:
+updated_at: 2026-02-05
+line_items:
   - id: li_1
     type: service
-    description: Team Plan (12 users) - Annual
+    description: Team Plan (12 users) - Annual Subscription
     quantity: 12
     unit: unit
-    unitRate: 96
-paymentSchedule:
+    unit_rate: 96
+    taxable: true
+payment_schedule:
   - description: 50% deposit
     percent: 50
-    dueDate: 2026-02-15
-  - description: Balance on delivery
+    due_date: 2026-02-15
+  - description: Balance on completion
     percent: 50
-    dueDate: 2026-03-01
+    due_date: 2026-03-01
 ---
 
 # Quote: Team Plan Annual
 
-Annual subscription with 20% discount.
+## Notes
 
-## Terms
+Annual subscription with 12-month commitment.
 
-12 month commitment, annual billing upfront.
+## Footer
+
+Thank you for your business. Payment due within 30 days of invoice.
 ```
 
-Stored fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `projectId`
-(optional), `title`, `status` (`draft`, `sent`, `accepted`, `rejected`),
-`currency`, `expiresAt`, `lineItems` (array of LineItem), `taxRate`,
-`paymentSchedule` (optional array), `notes`, `footer`, `revision`,
-`convertedToInvoice`, `sentAt`, `acceptedAt`, `created_at`, `updated_at`.
+Stored fields: `id`, `number` (Q-YYYY-NNN), `customer_id`, `project_id`
+(optional), `title`, `status` (`draft`, `pending_approval`, `approved`,
+`sent`, `accepted`, `rejected`), `currency`, `expires_at`, `line_items`
+(array of LineItem), `tax_rate`, `payment_schedule` (optional array), `notes`
+(body), `footer` (body), `revision`, `converted_to_invoice`, `sent_at`,
+`accepted_at`, `submitted_for_approval_at`, `approved_by`, `approved_at`,
+`approval_notes`, `created_at`, `updated_at`.
 
 Derived (computed on read from the line items — **never stored**): each line
 item's `amount`, plus the quote-level `subtotal`, `tax`, and `total`. Editing
@@ -635,30 +644,36 @@ tracking, notes/footer) plus the `quoteId`/`projectId` references.
 ---
 id: invoice_startup1
 number: INV-2026-001
-quoteId: quote_startup
-projectId: project_redesign
+quote_id: quote_startup
 title: Team Plan Annual - Year 1
 status: paid
-dueDate: 2026-03-01
-paymentTerms: NET 30
-created_at: 2026-02-15
+currency: CAD
+paid_amount: 1324.80
+due_date: 2026-03-01
+payment_terms: NET 30
 sent_at: 2026-02-15
-paid_at: 2026-02-18
-paidAmount: 1324.80
+paid_at: 2026-02-28
+created_at: 2026-02-15
+updated_at: 2026-02-28
 ---
 
 # Invoice: Startup Labs - Year 1
 
-Paid in full via Stripe. Line items and totals derive from quote Q-2026-001.
+## Notes
+
+Derived from quote Q-2026-001. Full annual subscription; line items and totals
+come from the quote.
 ```
 
-Stored fields: `id`, `number` (INV-YYYY-NNN), `quoteId` (required), `projectId`
-(optional), `title`, `status` (`draft`, `sent`, `paid`, `overdue`,
-`cancelled`), `currency`, `dueDate`, `paymentTerms`, `paidAmount`, `notes`,
-`footer`, `sentAt`, `paidAt`, `created_at`, `updated_at`.
+Stored fields: `id`, `number` (INV-YYYY-NNN), `quote_id` (required),
+`project_id` (optional), `title`, `status` (`draft`, `sent`, `paid`,
+`overdue`, `cancelled`), `currency`, `due_date`, `payment_terms`,
+`paid_amount`, `description` (optional short client-visible summary),
+`notes` (body), `footer` (body), `sent_at`, `paid_at`, `created_at`,
+`updated_at`.
 
-Derived (read-only, from the quote — never stored): `customerId`, `lineItems`,
-`subtotal`, `tax`, `taxRate`, `total`.
+Derived (read-only, from the quote — never stored): `customer_id`,
+`line_items`, `subtotal`, `tax`, `tax_rate`, `total`.
 
 ## Payments
 
@@ -666,25 +681,26 @@ Directory: `billing/payments/`
 
 ```yaml
 ---
-id: payment_001
-invoiceId: invoice_startup1
-amount: 1152
+id: payment_startup_dep
+invoice_id: invoice_startup1
+amount: 662.40
+method: bank
 date: 2026-02-18
-method: card
-reference: ch_1234567890
+reference: EFT-2026-0218
 created_at: 2026-02-18
+updated_at: 2026-02-18
 ---
 
-# Payment ch_1234567890
+# Payment: Startup Labs Deposit
 
 ## Notes
 
-Paid via Stripe.
+50% deposit via electronic funds transfer.
 ```
 
-Fields: `id`, `invoiceId`, `amount` (number), `date` (YYYY-MM-DD),
+Fields: `id`, `invoice_id`, `amount` (number), `date` (YYYY-MM-DD),
 `method` (`bank`, `card`, `cash`, `cheque`, `other`), `reference`,
-`notes`, `created_at`, `updated_at`.
+`notes` (body), `created_at`, `updated_at`.
 
 | CRM             | `crm/`             |
 | Time Tracking   | `timetracking/`    |

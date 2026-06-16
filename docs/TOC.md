@@ -17,6 +17,7 @@
   - [AI Chat Stack](02-guides/06-ai-chat-stack.md)
   - [WebDAV](02-guides/07-webdav.md)
   - [GitHub Integration](02-guides/08-github-integration.md)
+  - [Billing](02-guides/10-billing.md)
 - Reference
   - [CLI](03-reference/01-cli.md)
   - [Directory Schema](03-reference/04-directory-schema.md)
