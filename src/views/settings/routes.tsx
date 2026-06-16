@@ -30,6 +30,15 @@ import { SETTINGS_FORM_FIELDS } from "./tabs/shortcuts-tab.tsx";
 
 export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 
+/** Parse a form field to a valid number, returning undefined for missing/empty/NaN. */
+function parseOptNum(
+  raw: string | File | undefined,
+): number | undefined {
+  if (!raw || typeof raw !== "string") return undefined;
+  const n = Number(raw);
+  return isNaN(n) ? undefined : n;
+}
+
 /**
  * Resolve a masked secret field submitted by the project form.
  * - typed value      → replace with it
@@ -94,15 +103,6 @@ settingsViewRouter.post("/features", async (c) => {
 // -- Project tab: name, description, locale, currency, port, github --
 settingsViewRouter.post("/project", async (c) => {
   const body = await c.req.parseBody();
-  const portRaw = body.port ? Number(body.port) : undefined;
-  const staleDaysRaw = body.staleDays ? Number(body.staleDays) : undefined;
-  const hideCompletedAfterDaysRaw = body.hideCompletedAfterDays !== undefined &&
-      body.hideCompletedAfterDays !== ""
-    ? Number(body.hideCompletedAfterDays)
-    : undefined;
-  const tasksPerSectionRaw = body.tasksPerSection
-    ? Number(body.tasksPerSection)
-    : undefined;
   await getProjectService().updateConfig({
     name: String(body.name ?? ""),
     // Clearable free-text fields: a present-but-empty input means "clear", not
@@ -116,15 +116,10 @@ settingsViewRouter.post("/project", async (c) => {
     currency: body.currency !== undefined
       ? String(body.currency).trim()
       : undefined,
-    port: portRaw && !isNaN(portRaw) ? portRaw : undefined,
-    staleDays: staleDaysRaw && !isNaN(staleDaysRaw) ? staleDaysRaw : undefined,
-    hideCompletedAfterDays: hideCompletedAfterDaysRaw !== undefined &&
-        !isNaN(hideCompletedAfterDaysRaw)
-      ? hideCompletedAfterDaysRaw
-      : undefined,
-    tasksPerSection: tasksPerSectionRaw && !isNaN(tasksPerSectionRaw)
-      ? tasksPerSectionRaw
-      : undefined,
+    port: parseOptNum(body.port),
+    staleDays: parseOptNum(body.staleDays),
+    hideCompletedAfterDays: parseOptNum(body.hideCompletedAfterDays),
+    tasksPerSection: parseOptNum(body.tasksPerSection),
     // Secrets are no longer pre-filled in the form, so a blank field means
     // "leave unchanged" (NOT "clear"). Wiping requires the explicit Clear
     // button, which sets the hidden <field>Clear flag to "1" → send "" so the

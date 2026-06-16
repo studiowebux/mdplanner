@@ -15,6 +15,53 @@ import { COMPANY_TYPE_VARIANTS } from "../domains/company/constants.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
 
+const CompanyInfoSection: FC<{ company: Company }> = ({ company }) => {
+  if (
+    !company.website && !company.phone && !company.email &&
+    !company.industry && !company.size && !company.address
+  ) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {company.website && (
+        <InfoItem label="Website">
+          <a href={company.website} target="_blank" rel="noopener noreferrer">
+            {company.website}
+          </a>
+        </InfoItem>
+      )}
+      {company.industry && (
+        <InfoItem label="Industry">{company.industry}</InfoItem>
+      )}
+      {company.size && <InfoItem label="Size">{company.size}</InfoItem>}
+      {company.phone && (
+        <InfoItem label="Phone">
+          <a href={`tel:${company.phone}`}>{company.phone}</a>
+        </InfoItem>
+      )}
+      {company.email && (
+        <InfoItem label="Email">
+          <a href={`mailto:${company.email}`}>{company.email}</a>
+        </InfoItem>
+      )}
+      {company.address && <InfoItem label="Address">{company.address}
+      </InfoItem>}
+    </div>
+  );
+};
+
+const CompanyTagsSection: FC<{ company: Company }> = ({ company }) => {
+  const tags = company.tags ?? [];
+  if (tags.length === 0) return null;
+  return (
+    <section class="detail-section">
+      <h2 class="section-heading">Tags</h2>
+      <div class="company-detail__tags">
+        {tags.map((t) => <span key={t} class="company-detail__tag">{t}</span>)}
+      </div>
+    </section>
+  );
+};
+
 const NotesSection: FC<{ company: Company }> = ({ company }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
@@ -32,119 +79,71 @@ export const CompanyDetailView: FC<
   ViewProps & { item: Company; editing?: boolean }
 > = (
   { item: company, editing = false, ...viewProps },
-) => {
-  const hasInfo = company.website || company.phone || company.email ||
-    company.industry || company.size || company.address;
-  const tags = company.tags ?? [];
-
-  return (
-    <MainLayout
-      title={company.name}
-      {...viewProps}
-      styles={["/css/views/companies.css"]}
-      scripts={["/js/inline-edit.js"]}
+) => (
+  <MainLayout
+    title={company.name}
+    {...viewProps}
+    styles={["/css/views/companies.css"]}
+    scripts={["/js/inline-edit.js"]}
+  >
+    <SseRefresh
+      getUrl={`/companies/${company.id}${editing ? "?editing=true" : ""}`}
+      trigger="sse:company.updated"
+      targetId="company-detail-root"
+    />
+    <main
+      id="company-detail-root"
+      class={`detail-view company-detail${
+        editing ? " company-detail--editing" : ""
+      }`}
     >
-      <SseRefresh
-        getUrl={`/companies/${company.id}${editing ? "?editing=true" : ""}`}
-        trigger="sse:company.updated"
-        targetId="company-detail-root"
+      <Breadcrumb
+        items={[
+          { label: "Companies", href: "/companies" },
+          { label: company.name },
+        ]}
       />
-      <main
-        id="company-detail-root"
-        class={`detail-view company-detail${
-          editing ? " company-detail--editing" : ""
-        }`}
-      >
-        <Breadcrumb
-          items={[
-            { label: "Companies", href: "/companies" },
-            { label: company.name },
-          ]}
-        />
-        <BackButton href="/companies" label="Back to Companies" />
+      <BackButton href="/companies" label="Back to Companies" />
 
-        <header class="detail-section detail-header company-detail__header">
-          <div class="detail-title-row">
-            <h1 class="detail-title">{company.name}</h1>
-            {company.type && (
-              <span class={badgeClass(COMPANY_TYPE_VARIANTS, company.type)}>
-                {company.type}
-              </span>
-            )}
-          </div>
-          <DetailActions
-            entity="companies"
-            id={company.id}
-            title={company.name}
-            formContainerId="companies-form-container"
-            archived={company.archived === true}
-          >
-            <EditModeToggle
-              href={`/companies/${company.id}`}
-              editing={editing}
-            />
-          </DetailActions>
-        </header>
+      <header class="detail-section detail-header company-detail__header">
+        <div class="detail-title-row">
+          <h1 class="detail-title">{company.name}</h1>
+          {company.type && (
+            <span class={badgeClass(COMPANY_TYPE_VARIANTS, company.type)}>
+              {company.type}
+            </span>
+          )}
+        </div>
+        <DetailActions
+          entity="companies"
+          id={company.id}
+          title={company.name}
+          formContainerId="companies-form-container"
+          archived={company.archived === true}
+        >
+          <EditModeToggle
+            href={`/companies/${company.id}`}
+            editing={editing}
+          />
+        </DetailActions>
+      </header>
 
-        <ArchivedBanner entity={company} />
+      <ArchivedBanner entity={company} />
+      <CompanyInfoSection company={company} />
+      <CompanyTagsSection company={company} />
 
-        {hasInfo && (
-          <div class="detail-section detail-info-row">
-            {company.website && (
-              <InfoItem label="Website">
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {company.website}
-                </a>
-              </InfoItem>
-            )}
-            {company.industry && (
-              <InfoItem label="Industry">{company.industry}</InfoItem>
-            )}
-            {company.size && <InfoItem label="Size">{company.size}</InfoItem>}
-            {company.phone && (
-              <InfoItem label="Phone">
-                <a href={`tel:${company.phone}`}>{company.phone}</a>
-              </InfoItem>
-            )}
-            {company.email && (
-              <InfoItem label="Email">
-                <a href={`mailto:${company.email}`}>{company.email}</a>
-              </InfoItem>
-            )}
-            {company.address && (
-              <InfoItem label="Address">{company.address}</InfoItem>
-            )}
-          </div>
-        )}
+      {editing
+        ? <NotesSection company={company} />
+        : <MarkdownSection title="Notes" markdown={company.notes} />}
 
-        {tags.length > 0 && (
-          <section class="detail-section">
-            <h2 class="section-heading">Tags</h2>
-            <div class="company-detail__tags">
-              {tags.map((t) => (
-                <span key={t} class="company-detail__tag">{t}</span>
-              ))}
-            </div>
-          </section>
-        )}
+      <AuditMeta
+        createdAt={company.createdAt}
+        updatedAt={company.updatedAt}
+        createdBy={company.createdBy}
+        updatedBy={company.updatedBy}
+      />
+    </main>
 
-        {editing
-          ? <NotesSection company={company} />
-          : <MarkdownSection title="Notes" markdown={company.notes} />}
-
-        <AuditMeta
-          createdAt={company.createdAt}
-          updatedAt={company.updatedAt}
-          createdBy={company.createdBy}
-          updatedBy={company.updatedBy}
-        />
-      </main>
-
-      <div id="companies-form-container" />
-    </MainLayout>
-  );
-};
+    <div id="companies-form-container" />
+  </MainLayout>
+);

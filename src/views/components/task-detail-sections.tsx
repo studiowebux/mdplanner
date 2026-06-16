@@ -181,6 +181,66 @@ export const TaskQuickActions: FC<{
 
 // ── Header + metadata ───────────────────────────────────────────────────────
 
+const TaskMetaFields: FC<{
+  task: Task;
+  milestonEntity: Milestone | null;
+  assigneePerson: Person | null;
+}> = ({ task, milestonEntity, assigneePerson }) => (
+  <dl class="task-detail__meta">
+    {task.project && (
+      <MetaField label="Project">
+        <a href={`/portfolio/${toKebab(task.project)}`}>{task.project}</a>
+      </MetaField>
+    )}
+    {task.milestone && (
+      <MetaField label="Milestone">
+        {milestonEntity
+          ? <a href={`/milestones/${milestonEntity.id}`}>{task.milestone}</a>
+          : task.milestone}
+      </MetaField>
+    )}
+    {task.assignee && (
+      <MetaField label="Assignee">
+        {assigneePerson
+          ? <a href={`/people/${assigneePerson.id}`}>{assigneePerson.name}</a>
+          : task.assignee}
+      </MetaField>
+    )}
+    {task.due_date && (
+      <MetaField label="Due">{formatDate(task.due_date)}</MetaField>
+    )}
+    {task.planned_start && (
+      <MetaField label="Planned start">
+        {formatDate(task.planned_start)}
+      </MetaField>
+    )}
+    {task.planned_end && (
+      <MetaField label="Planned end">
+        {formatDate(task.planned_end)}
+      </MetaField>
+    )}
+    {task.effort != null && <MetaField label="Effort">{task.effort}</MetaField>}
+    {task.createdAt && (
+      <MetaField label="Created">
+        {formatDate(task.createdAt, true)}
+      </MetaField>
+    )}
+    {task.updatedAt && (
+      <MetaField label="Updated">{timeAgo(task.updatedAt)}</MetaField>
+    )}
+    {task.claimedBy && (
+      <MetaField label="Claimed by">
+        {task.claimedBy}
+        {task.claimedAt && (
+          <span class="task-detail__meta-hint">
+            &nbsp;({timeAgo(task.claimedAt)})
+          </span>
+        )}
+      </MetaField>
+    )}
+  </dl>
+);
+
 export const TaskMetaHeader: FC<{
   task: Task;
   milestonEntity: Milestone | null;
@@ -219,61 +279,11 @@ export const TaskMetaHeader: FC<{
       </div>
     </div>
 
-    <dl class="task-detail__meta">
-      {task.project && (
-        <MetaField label="Project">
-          <a href={`/portfolio/${toKebab(task.project)}`}>{task.project}</a>
-        </MetaField>
-      )}
-      {task.milestone && (
-        <MetaField label="Milestone">
-          {milestonEntity
-            ? <a href={`/milestones/${milestonEntity.id}`}>{task.milestone}</a>
-            : task.milestone}
-        </MetaField>
-      )}
-      {task.assignee && (
-        <MetaField label="Assignee">
-          {assigneePerson
-            ? <a href={`/people/${assigneePerson.id}`}>{assigneePerson.name}</a>
-            : task.assignee}
-        </MetaField>
-      )}
-      {task.due_date && (
-        <MetaField label="Due">{formatDate(task.due_date)}</MetaField>
-      )}
-      {task.planned_start && (
-        <MetaField label="Planned start">
-          {formatDate(task.planned_start)}
-        </MetaField>
-      )}
-      {task.planned_end && (
-        <MetaField label="Planned end">
-          {formatDate(task.planned_end)}
-        </MetaField>
-      )}
-      {task.effort != null && (
-        <MetaField label="Effort">{task.effort}</MetaField>
-      )}
-      {task.createdAt && (
-        <MetaField label="Created">
-          {formatDate(task.createdAt, true)}
-        </MetaField>
-      )}
-      {task.updatedAt && (
-        <MetaField label="Updated">{timeAgo(task.updatedAt)}</MetaField>
-      )}
-      {task.claimedBy && (
-        <MetaField label="Claimed by">
-          {task.claimedBy}
-          {task.claimedAt && (
-            <span class="task-detail__meta-hint">
-              &nbsp;({timeAgo(task.claimedAt)})
-            </span>
-          )}
-        </MetaField>
-      )}
-    </dl>
+    <TaskMetaFields
+      task={task}
+      milestonEntity={milestonEntity}
+      assigneePerson={assigneePerson}
+    />
 
     {task.tags && task.tags.length > 0 && (
       <div class="task-detail__tags">
