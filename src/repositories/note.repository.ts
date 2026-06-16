@@ -11,6 +11,7 @@ import { generateId } from "../utils/id.ts";
 import { findFileById, mergeFields } from "../utils/repo-helpers.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import {
+  fmStrArr,
   mapKeysToFm,
   parseAuditFields,
   resolveEntityId,
@@ -281,6 +282,7 @@ export class NoteRepository {
       archived: fm.archived === true ? true : undefined,
       archivedAt: fm.archived_at != null ? String(fm.archived_at) : undefined,
       archivedBy: fm.archived_by != null ? String(fm.archived_by) : undefined,
+      attachments: fmStrArr(fm, "attachments"),
     };
   }
 
@@ -311,6 +313,7 @@ export class NoteRepository {
       ...(note.archived ? { archived: note.archived } : {}),
       ...(note.archivedAt ? { archivedAt: note.archivedAt } : {}),
       ...(note.archivedBy ? { archivedBy: note.archivedBy } : {}),
+      ...(note.attachments?.length ? { attachments: note.attachments } : {}),
     });
 
     let body = `# ${note.title}\n\n`;

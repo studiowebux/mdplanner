@@ -2,7 +2,7 @@
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { noteConfig } from "../../domains/note/config.tsx";
-import { getNoteService } from "../../singletons/services.ts";
+import { getNoteService, getProjectDir } from "../../singletons/services.ts";
 import { Sidenav } from "../../components/ui/sidenav.tsx";
 import { NotePreview } from "../components/note-preview.tsx";
 import { NoteDetailView } from "../note-detail.tsx";
@@ -10,6 +10,11 @@ import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { markdownToHtml } from "../../utils/markdown.ts";
 import { escapeHtml } from "../../utils/html.ts";
+import { FileUploadService } from "../../services/file-upload.service.ts";
+
+function noteUploader(): FileUploadService {
+  return new FileUploadService(getProjectDir(), "uploads/notes");
+}
 
 export const notesRouter = createDomainRoutes(noteConfig);
 
@@ -114,4 +119,99 @@ notesRouter.get("/:id/preview", async (c) => {
       <NotePreview note={note} />
     </Sidenav>,
   );
+});
+
+// POST /:id/upload — multipart file upload, stored at uploads/notes/<id>/<filename>
+notesRouter.post("/:id/upload", async (c) => {
+  const id = c.req.param("id")!;
+  const note = await getNoteService().getById(id);
+  if (!note) return c.notFound();
+  if (note.archived === true) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger("error", "Note is archived"),
+      },
+    });
+  }
+  const body = await c.req.parseBody();
+  const file = body["file"];
+  if (!file || typeof file === "string") {
+    return new Response(null, {
+      status: 400,
+      headers: { "HX-Trigger": hxTrigger("error", "No file provided") },
+    });
+  }
+  let stored: { relPath: string };
+  try {
+    stored = await noteUploader().store(id, file);
+  } catch (err) {
+    if ((err as { status?: number }).status === 413) {
+      return new Response(null, {
+        status: 413,
+        headers: { "HX-Trigger": hxTrigger("error", "Max 10 MB per file") },
+      });
+    }
+    throw err;
+  }
+  await getNoteService().addAttachments(id, [stored.relPath]);
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/notes/${id}` },
+  });
+});
+
+// GET /:id/upload/:filename — serve an uploaded file.
+// Images are served inline (no Content-Disposition) so <img src> renders them.
+// All other files force a download.
+const IMAGE_MIME: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+};
+notesRouter.get("/:id/upload/:filename", async (c) => {
+  const id = c.req.param("id")!;
+  const filename = c.req.param("filename");
+  const result = await noteUploader().read(id, filename);
+  if (!result) return c.notFound();
+  const ext = result.safeName.slice(
+    result.safeName.lastIndexOf("."),
+  ).toLowerCase();
+  const mime = IMAGE_MIME[ext];
+  if (mime) {
+    return new Response(result.bytes, { headers: { "Content-Type": mime } });
+  }
+  return new Response(result.bytes, {
+    headers: {
+      "Content-Disposition": `attachment; filename="${result.safeName}"`,
+      "Content-Type": "application/octet-stream",
+    },
+  });
+});
+
+// DELETE /:id/upload/:filename — remove uploaded file and its attachment entry
+notesRouter.delete("/:id/upload/:filename", async (c) => {
+  const id = c.req.param("id")!;
+  const note = await getNoteService().getById(id);
+  if (!note) return c.notFound();
+  if (note.archived === true) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger("error", "Note is archived"),
+      },
+    });
+  }
+  const filename = c.req.param("filename");
+  const removed = await noteUploader().remove(id, filename);
+  if (!removed) return c.notFound();
+  const remaining = (note.attachments ?? []).filter((a) => a !== removed);
+  await getNoteService().update(id, { attachments: remaining });
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/notes/${id}` },
+  });
 });

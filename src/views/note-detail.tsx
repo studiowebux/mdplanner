@@ -12,6 +12,75 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 
 // ---------------------------------------------------------------------------
+// Attachments section — images inline, other files as download links
+// ---------------------------------------------------------------------------
+
+const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]);
+
+const NoteAttachmentsSection: FC<{ note: Note }> = ({ note }) => {
+  const attachments = note.attachments ?? [];
+  return (
+    <section class="detail-section note-detail__attachments">
+      <h2 class="section-heading">Attachments</h2>
+      {attachments.length > 0 && (
+        <ul class="note-detail__files">
+          {attachments.map((a) => {
+            const filename = a.split("/").pop() ?? a;
+            const ext = filename.slice(filename.lastIndexOf(".")).toLowerCase();
+            const isImage = IMAGE_EXTS.has(ext);
+            const href = `/notes/${note.id}/upload/${filename}`;
+            return (
+              <li key={a} class="note-detail__file-row">
+                {isImage
+                  ? (
+                    <a href={href} target="_blank" rel="noopener">
+                      <img
+                        src={href}
+                        alt={filename}
+                        class="note-detail__file-img"
+                      />
+                    </a>
+                  )
+                  : (
+                    <a href={href} class="note-detail__file-link" download>
+                      {filename}
+                    </a>
+                  )}
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--sm note-detail__file-delete"
+                  hx-delete={`/notes/${note.id}/upload/${filename}`}
+                  hx-confirm={`Delete ${filename}?`}
+                  hx-swap="none"
+                >
+                  &times;
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <form
+        class="note-detail__upload-form"
+        hx-encoding="multipart/form-data"
+        hx-post={`/notes/${note.id}/upload`}
+        hx-swap="none"
+      >
+        <input
+          type="file"
+          name="file"
+          class="note-detail__upload-input"
+          required
+        />
+        <button type="submit" class="btn btn--sm btn--secondary">
+          Upload
+        </button>
+      </form>
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
@@ -204,6 +273,7 @@ export const NoteDetailView: FC<Props> = (props) => {
         <section class="detail-section">
           <NoteBlocks note={note} />
         </section>
+        <NoteAttachmentsSection note={note} />
         <AuditMeta
           createdAt={note.createdAt}
           updatedAt={note.updatedAt}

@@ -138,6 +138,9 @@ export const NoteSchema = z.object({
     description: "Project scope",
     example: "MD Planner",
   }),
+  attachments: z.array(z.string()).nullable().optional().openapi({
+    description: "Relative paths to uploaded files",
+  }),
 }).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Note");
 
 export type Note = z.infer<typeof NoteSchema>;
@@ -187,6 +190,9 @@ export const UpdateNoteSchema = CreateNoteSchema
     updatedAt: z.string().nullable().optional().openapi({
       description: "Expected updatedAt for optimistic locking. " +
         "Reject if mismatch (stale update).",
+    }),
+    attachments: z.array(z.string()).nullable().optional().openapi({
+      description: "Relative paths to uploaded files. Set to null to clear.",
     }),
   })
   .openapi("UpdateNote");

@@ -38,4 +38,13 @@ export class NoteService extends BaseService<
     );
     return results.filter((n): n is Note => n !== null);
   }
+
+  async addAttachments(id: string, paths: string[]): Promise<Note | null> {
+    const note = await this.noteRepo.findById(id);
+    if (!note) return null;
+    const attachments = [...(note.attachments ?? []), ...paths];
+    const updated = await this.noteRepo.update(id, { attachments });
+    if (updated) this.publishChange("updated");
+    return updated;
+  }
 }

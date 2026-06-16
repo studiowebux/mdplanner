@@ -142,6 +142,27 @@ const QuoteActions: FC<{ quote: Quote; editing: boolean }> = (
         </button>
       </>
     )}
+    {quote.status === "accepted" && !quote.convertedToInvoice && (
+      <button
+        class="btn btn--primary btn--sm"
+        type="button"
+        hx-post={`/quotes/${quote.id}/to-invoice`}
+        hx-confirm="Create an invoice from this quote?"
+        data-confirm-title="Create Invoice"
+        data-confirm-label="Create Invoice"
+        hx-swap="none"
+      >
+        Create Invoice
+      </button>
+    )}
+    {quote.convertedToInvoice && (
+      <a
+        class="btn btn--secondary btn--sm"
+        href={`/invoices/${quote.convertedToInvoice}`}
+      >
+        View Invoice
+      </a>
+    )}
     <a
       class="btn btn--secondary btn--sm quote-detail__print-btn"
       href={`/quotes/${quote.id}/print`}

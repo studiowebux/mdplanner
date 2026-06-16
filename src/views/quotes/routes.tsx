@@ -5,6 +5,7 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { quoteConfig } from "../../domains/quote/config.tsx";
 import {
   getCustomerService,
+  getInvoiceService,
   getProjectService,
   getQuoteService,
 } from "../../singletons/services.ts";
@@ -245,6 +246,44 @@ quotesRouter.post("/:id/reject", async (c) => {
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/quotes/${id}` },
+  });
+});
+
+// POST /:id/to-invoice — create invoice from accepted quote, redirect to it.
+quotesRouter.post("/:id/to-invoice", async (c) => {
+  const id = c.req.param("id")!;
+  const quoteService = getQuoteService();
+  const quote = await quoteService.getById(id);
+  if (!quote) return c.notFound();
+  if (quote.status !== "accepted") {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger(
+          "error",
+          "Only accepted quotes can be converted to an invoice",
+        ),
+      },
+    });
+  }
+  if (quote.convertedToInvoice) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger("error", "Quote already has an invoice"),
+      },
+    });
+  }
+  const invoice = await getInvoiceService().create({
+    quoteId: quote.id,
+    projectId: quote.projectId,
+    title: quote.title,
+    currency: quote.currency,
+  });
+  await quoteService.update(id, { convertedToInvoice: invoice.id });
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/invoices/${invoice.id}` },
   });
 });
 
