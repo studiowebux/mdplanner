@@ -115,6 +115,7 @@ export const NoteDetailView: FC<Props> = (props) => {
         "/js/note-editor-convert.js",
         "/js/note-editor.js",
         "/js/note-undo.js",
+        "/js/note-select-all.js",
       ]}
     >
       <main
