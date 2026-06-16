@@ -24,6 +24,26 @@ export const ContactTypeSchema = z.enum([
 export type ContactType = z.infer<typeof ContactTypeSchema>;
 
 // ---------------------------------------------------------------------------
+// Position / company history
+// ---------------------------------------------------------------------------
+
+export const PositionHistoryItemSchema = z.object({
+  company: z.string().openapi({ description: "Company name" }),
+  title: z.string().nullable().optional().openapi({
+    description: "Job title at that company",
+  }),
+  from: z.string().openapi({ description: "Start date (YYYY-MM-DD)" }),
+  to: z.string().nullable().optional().openapi({
+    description: "End date (YYYY-MM-DD). Null = current.",
+  }),
+  active: z.boolean().optional().openapi({
+    description: "True when this is the current position",
+  }),
+}).openapi("PositionHistoryItem");
+
+export type PositionHistoryItem = z.infer<typeof PositionHistoryItemSchema>;
+
+// ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
 // ---------------------------------------------------------------------------
 
@@ -63,6 +83,11 @@ export const ContactSchema = z.object({
     description: "Tags for grouping/filtering",
     example: ["vip", "q1-2026"],
   }),
+  positionHistory: z.array(PositionHistoryItemSchema).nullable().optional()
+    .openapi({
+      description:
+        "Additive company/position history (newest first when active)",
+    }),
 }).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Contact");
 
 export type Contact = z.infer<typeof ContactSchema>;
@@ -84,9 +109,9 @@ export const CreateContactSchema = ContactSchema.pick({
 
 export type CreateContact = z.infer<typeof CreateContactSchema>;
 
-export const UpdateContactSchema = CreateContactSchema.partial().openapi(
-  "UpdateContact",
-);
+export const UpdateContactSchema = CreateContactSchema.partial().extend({
+  positionHistory: z.array(PositionHistoryItemSchema).nullable().optional(),
+}).openapi("UpdateContact");
 
 export type UpdateContact = z.infer<typeof UpdateContactSchema>;
 

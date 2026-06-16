@@ -82,6 +82,7 @@ import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
   getBillingRateService,
   getBrainstormTemplateService,
+  getCompanyService,
   getCustomerService,
   getGoalService,
   getIdeaService,
@@ -271,6 +272,16 @@ registerAutocompleteSource("customers", {
   },
   displayKey: "name",
   valueKey: "id",
+});
+
+registerAutocompleteSource("companies", {
+  list: () => getCompanyService().list(),
+  search: async (q) => {
+    const all = await getCompanyService().list();
+    return all.filter((c) => foldIncludes(c.name, q));
+  },
+  displayKey: "name",
+  valueKey: "name",
 });
 
 // Invoice → quote reference. Only ACCEPTED, not-yet-converted quotes are

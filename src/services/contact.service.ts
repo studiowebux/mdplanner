@@ -5,6 +5,7 @@ import type {
   Contact,
   CreateContact,
   ListContactOptions,
+  PositionHistoryItem,
   UpdateContact,
 } from "../types/contact.types.ts";
 import { ciEquals, ciIncludes } from "../utils/string.ts";
@@ -41,5 +42,43 @@ export class ContactService extends BaseService<
       contacts = contacts.filter((c) => ciEquals(c.company, options.company!));
     }
     return contacts;
+  }
+
+  /**
+   * Append a position history entry when company or role changes.
+   * Closes the current active entry (sets `to` + clears `active`), then
+   * prepends a new active entry. Caller passes the NEW company/role values.
+   */
+  override async update(
+    id: string,
+    data: UpdateContact,
+  ): Promise<Contact | null> {
+    const existing = await this.repo.findById(id);
+    if (!existing) return null;
+
+    const newCompany = data.company !== undefined
+      ? data.company
+      : existing.company;
+    const newRole = data.role !== undefined ? data.role : existing.role;
+    const companyChanged = !ciEquals(newCompany, existing.company);
+    const roleChanged = !ciEquals(newRole, existing.role);
+
+    if ((companyChanged || roleChanged) && newCompany) {
+      const today = new Date().toISOString().slice(0, 10);
+      const history: PositionHistoryItem[] = [
+        ...(existing.positionHistory ?? []).map((h) =>
+          h.active ? { ...h, to: today, active: undefined } : h
+        ),
+      ];
+      history.unshift({
+        company: newCompany,
+        title: newRole ?? undefined,
+        from: today,
+        active: true,
+      });
+      data = { ...data, positionHistory: history };
+    }
+
+    return super.update(id, data);
   }
 }

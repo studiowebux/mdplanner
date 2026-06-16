@@ -110,10 +110,12 @@ export const CONTACT_FORM_FIELDS: FieldDef[] = [
     placeholder: "e.g. Head of Marketing",
   },
   {
-    type: "text",
+    type: "autocomplete",
     name: "company",
     label: "Company",
-    placeholder: "Organization name",
+    placeholder: "Search or type a company name…",
+    source: "companies",
+    freetext: true,
   },
   {
     type: "select",

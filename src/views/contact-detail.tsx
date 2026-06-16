@@ -2,7 +2,8 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
-import type { Contact } from "../types/contact.types.ts";
+import type { Contact, PositionHistoryItem } from "../types/contact.types.ts";
+import { formatDate } from "../utils/time.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -14,6 +15,45 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { CONTACT_TYPE_VARIANTS } from "../domains/contact/constants.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
+
+const PositionHistorySection: FC<{ history: PositionHistoryItem[] }> = (
+  { history },
+) => {
+  if (!history.length) return null;
+  return (
+    <section class="detail-section contact-detail__history">
+      <h2 class="section-heading">Position History</h2>
+      <table class="data-table contact-detail__history-table">
+        <thead>
+          <tr>
+            <th scope="col">Company</th>
+            <th scope="col">Title</th>
+            <th scope="col">From</th>
+            <th scope="col">To</th>
+          </tr>
+        </thead>
+        <tbody>
+          {history.map((h, i) => (
+            <tr
+              key={i}
+              class={h.active ? "contact-detail__history-active" : ""}
+            >
+              <td>
+                <a href={`/companies?q=${encodeURIComponent(h.company)}`}>
+                  {h.company}
+                </a>
+                {h.active && <span class="badge badge--success">current</span>}
+              </td>
+              <td>{h.title ?? ""}</td>
+              <td>{formatDate(h.from)}</td>
+              <td>{h.to ? formatDate(h.to) : "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
 
 const NotesSection: FC<{ contact: Contact }> = ({ contact }) => (
   <section class="detail-section">
@@ -123,6 +163,10 @@ export const ContactDetailView: FC<
             </div>
           </section>
         )}
+
+        <PositionHistorySection
+          history={contact.positionHistory ?? []}
+        />
 
         {editing
           ? <NotesSection contact={contact} />

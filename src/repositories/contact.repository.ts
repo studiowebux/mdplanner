@@ -4,6 +4,7 @@ import type {
   Contact,
   ContactType,
   CreateContact,
+  PositionHistoryItem,
   UpdateContact,
 } from "../types/contact.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
@@ -12,6 +13,7 @@ import { CONTACT_BODY_KEYS } from "../domains/contact/constants.ts";
 
 import {
   fmStr,
+  mapArrayFromFm,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -91,6 +93,17 @@ export class ContactRepository extends CachedMarkdownRepository<
       ? (fm.tags as unknown[]).map(String)
       : [];
 
+    const rawHistory = Array.isArray(fm.positionHistory)
+      ? mapArrayFromFm(fm.positionHistory as unknown[])
+      : [];
+    const positionHistory: PositionHistoryItem[] = rawHistory.map((h) => ({
+      company: String(h.company ?? ""),
+      title: h.title != null ? String(h.title) : undefined,
+      from: String(h.from ?? ""),
+      to: h.to != null ? String(h.to) : undefined,
+      active: h.active === true ? true : undefined,
+    }));
+
     return {
       id,
       name,
@@ -101,6 +114,7 @@ export class ContactRepository extends CachedMarkdownRepository<
       type,
       notes,
       tags,
+      positionHistory: positionHistory.length ? positionHistory : undefined,
       createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
       updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
       createdBy: fmStr(fm, "createdBy"),
