@@ -41,25 +41,35 @@ export function createFilterHelpers<T extends Entity, C, U>(
   dateRange: ReturnType<typeof effectiveDateRangeFilter>,
   archiveEnabled: boolean,
 ): FilterHelpers<T> {
+  type KeyEmitter = (state: DomainFilterState, p: URLSearchParams) => void;
+  const KEY_EMITTERS: Record<string, KeyEmitter> = {
+    view: (s, p) => {
+      if (s.view && s.view !== (cfg.defaultView || "grid")) {
+        p.set("view", s.view);
+      }
+    },
+    hideCompleted: (s, p) => {
+      if (s.hideCompleted) p.set("hideCompleted", "true");
+    },
+    archived: (s, p) => {
+      if (s.archived === "true") p.set("archived", "true");
+    },
+    showHidden: (s, p) => {
+      if (s.showHidden === "true" || s.showHidden === true) {
+        p.set("showHidden", "true");
+      }
+    },
+    order: (s, p) => {
+      if (s.order && s.order !== "asc") p.set("order", s.order);
+    },
+  };
+
   function buildCanonicalUrl(state: DomainFilterState): string {
     const params = new URLSearchParams();
     for (const key of stateKeys) {
-      if (key === "view") {
-        if (state.view && state.view !== (cfg.defaultView || "grid")) {
-          params.set("view", state.view);
-        }
-      } else if (key === "hideCompleted") {
-        if (state.hideCompleted) params.set("hideCompleted", "true");
-      } else if (key === "archived") {
-        if (state.archived === "true") params.set("archived", "true");
-      } else if (key === "showHidden") {
-        if (state.showHidden === "true" || state.showHidden === true) {
-          params.set("showHidden", "true");
-        }
-      } else if (key === "order") {
-        if (state.order && state.order !== "asc") {
-          params.set("order", state.order);
-        }
+      const emitter = KEY_EMITTERS[key];
+      if (emitter) {
+        emitter(state, params);
       } else {
         const val = state[key];
         if (val !== undefined && val !== "") params.set(key, String(val));

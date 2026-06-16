@@ -55,6 +55,12 @@ export async function loadFilteredItems<T extends Entity, C, U>(
  * account preferences, expose it as `filterState`, and persist any change back
  * to the account after the request. Registered first so it wraps all routes.
  */
+type PersonPrefs = {
+  viewPrefs?: Record<string, string>;
+  filterDefaults?: Record<string, Record<string, string>>;
+  uiState?: Record<string, Record<string, string>>;
+} | undefined;
+
 export function registerStateMiddleware<T extends Entity, C, U>(
   router: Router,
   cfg: DomainConfig<T, C, U>,
@@ -65,15 +71,47 @@ export function registerStateMiddleware<T extends Entity, C, U>(
   },
 ) {
   const { stateKeys, archiveEnabled, helpers } = opts;
+
+  // Boolean toolbar toggles (hideCompleted / archived / showHidden) submit via
+  // htmx form-include. An unchecked checkbox is OMITTED per HTML spec, so force
+  // absent keys to "false" on htmx requests so unchecks round-trip correctly.
+  function applyHtmxToggleDefaults(
+    params: Record<string, string | undefined>,
+  ): void {
+    if (cfg.hideCompleted && params.hideCompleted === undefined) {
+      params.hideCompleted = "false";
+    }
+    if (archiveEnabled && params.archived === undefined) {
+      params.archived = "false";
+    }
+    if (cfg.showHiddenToggle && params.showHidden === undefined) {
+      params.showHidden = "false";
+    }
+  }
+
+  // Apply Settings-configured view + filter defaults when nothing is saved.
+  function applyPersonDefaults(
+    merged: Record<string, string>,
+    personPrefs: PersonPrefs,
+  ): void {
+    if (!merged.view && personPrefs?.viewPrefs?.[cfg.name]) {
+      merged.view = personPrefs.viewPrefs[cfg.name];
+    }
+    const domainFilterDefaults = personPrefs?.filterDefaults?.[cfg.name];
+    if (domainFilterDefaults) {
+      for (const key of cfg.stateKeys) {
+        if (key !== "view" && !merged[key] && domainFilterDefaults[key]) {
+          merged[key] = domainFilterDefaults[key];
+        }
+      }
+    }
+  }
+
   router.use("*", async (c, next) => {
     const isHtmx = c.req.header("HX-Request") === "true";
     const activePerson = c.get("activePerson" as never) as {
       id?: string;
-      preferences?: {
-        viewPrefs?: Record<string, string>;
-        filterDefaults?: Record<string, Record<string, string>>;
-        uiState?: Record<string, Record<string, string>>;
-      };
+      preferences?: PersonPrefs;
     } | undefined;
     const actorId = activePerson?.id;
     const personPrefs = activePerson?.preferences;
@@ -86,39 +124,9 @@ export function registerStateMiddleware<T extends Entity, C, U>(
     for (const key of stateKeys) {
       params[key] = c.req.query(key);
     }
-    // Boolean toolbar toggles (hideCompleted / archived / showHidden) submit
-    // via htmx form-include. An unchecked checkbox is OMITTED from the form
-    // per the HTML spec, so mergeParams would otherwise fall back to the
-    // saved account value and the toggle would stay stuck "on". Force the
-    // absent key to "false" for htmx requests so the uncheck round-trips.
-    // Only inject the key when the domain actually renders that toggle.
-    if (isHtmx) {
-      if (cfg.hideCompleted && params.hideCompleted === undefined) {
-        params.hideCompleted = "false";
-      }
-      if (archiveEnabled && params.archived === undefined) {
-        params.archived = "false";
-      }
-      if (cfg.showHiddenToggle && params.showHidden === undefined) {
-        params.showHidden = "false";
-      }
-    }
+    if (isHtmx) applyHtmxToggleDefaults(params);
     const merged = mergeParams(params, saved);
-
-    // Configured defaults (Settings) as a fallback when nothing is saved.
-    if (personPrefs) {
-      if (!merged.view && personPrefs.viewPrefs?.[cfg.name]) {
-        merged.view = personPrefs.viewPrefs[cfg.name];
-      }
-      const domainFilterDefaults = personPrefs.filterDefaults?.[cfg.name];
-      if (domainFilterDefaults) {
-        for (const key of cfg.stateKeys) {
-          if (key !== "view" && !merged[key] && domainFilterDefaults[key]) {
-            merged[key] = domainFilterDefaults[key];
-          }
-        }
-      }
-    }
+    if (personPrefs) applyPersonDefaults(merged, personPrefs);
 
     const state = helpers.buildState(merged);
     c.set("filterState" as never, state as never);

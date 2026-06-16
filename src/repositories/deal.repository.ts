@@ -12,6 +12,8 @@ import { DEAL_TABLE, rowToDeal } from "../domains/deal/cache.ts";
 import { DEAL_BODY_KEYS } from "../domains/deal/constants.ts";
 
 import {
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -58,34 +60,28 @@ export class DealRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = resolveEntityId(filename, fm);
 
-    const stageRaw = fm.stage != null ? String(fm.stage) : undefined;
+    const stageRaw = fmStr(fm, "stage");
     const stage: DealStage =
       stageRaw && (DEAL_STAGES as readonly string[]).includes(stageRaw)
         ? (stageRaw as DealStage)
         : "lead";
 
-    const description = body.trim() || undefined;
-
-    const tags = Array.isArray(fm.tags)
-      ? (fm.tags as unknown[]).map(String)
-      : [];
-
     return {
       id,
-      title: fm.title ? String(fm.title) : "Untitled Deal",
+      title: fmStr(fm, "title") ?? "Untitled Deal",
       stage,
       value: fm.value != null ? Number(fm.value) : undefined,
-      currency: fm.currency != null ? String(fm.currency) : undefined,
-      company: fm.company != null ? String(fm.company) : undefined,
-      contact: fm.contact != null ? String(fm.contact) : undefined,
-      assignee: fm.assignee != null ? String(fm.assignee) : undefined,
-      description,
-      tags,
-      closedAt: fm.closedAt != null ? String(fm.closedAt) : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      currency: fmStr(fm, "currency"),
+      company: fmStr(fm, "company"),
+      contact: fmStr(fm, "contact"),
+      assignee: fmStr(fm, "assignee"),
+      description: body.trim() || undefined,
+      tags: fmStrArr(fm, "tags") ?? [],
+      closedAt: fmStr(fm, "closedAt"),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 
