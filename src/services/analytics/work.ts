@@ -20,6 +20,23 @@ import { inDateRange } from "./series.ts";
 // Hours-per-day line chart window (last N calendar days, anchored to filters.to).
 const HOURS_PER_DAY_WINDOW = 30;
 
+function buildHoursPerDay(
+  byDay: Record<string, number>,
+  toDate: string | undefined | null,
+): Array<{ date: string; hours: number }> {
+  const cursor = toDate ? new Date(toDate) : new Date();
+  const result: Array<{ date: string; hours: number }> = [];
+  for (let i = 0; i < HOURS_PER_DAY_WINDOW; i++) {
+    const key = cursor.toISOString().slice(0, 10);
+    result.unshift({
+      date: key,
+      hours: Math.round((byDay[key] ?? 0) * 100) / 100,
+    });
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return result;
+}
+
 /** Task counts grouped by section, priority, and project for the filtered project. */
 export async function collectTaskStats(
   filters: AnalyticsFilters,
@@ -107,16 +124,7 @@ export async function collectTimeEntryStats(
 
   // 30-day series ending at the filter's upper bound (or today), oldest first.
   // Missing days are 0-filled so the line chart stays continuous.
-  const cursor = filters.to ? new Date(filters.to) : new Date();
-  const hoursPerDay: Array<{ date: string; hours: number }> = [];
-  for (let i = 0; i < HOURS_PER_DAY_WINDOW; i++) {
-    const key = cursor.toISOString().slice(0, 10); // YYYY-MM-DD
-    hoursPerDay.unshift({
-      date: key,
-      hours: Math.round((byDay[key] ?? 0) * 100) / 100,
-    });
-    cursor.setDate(cursor.getDate() - 1);
-  }
+  const hoursPerDay = buildHoursPerDay(byDay, filters.to);
 
   return {
     totalHours: Math.round(totalHours * 100) / 100,

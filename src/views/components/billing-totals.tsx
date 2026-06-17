@@ -13,6 +13,10 @@ type BillingTotalsProps = {
   paidAmount?: number | null;
 };
 
+function fmtCurrency(n: number): string {
+  return formatCurrency(n) || "$0";
+}
+
 export const BillingTotals: FC<BillingTotalsProps> = ({
   subtotal,
   discount,
@@ -28,7 +32,7 @@ export const BillingTotals: FC<BillingTotalsProps> = ({
       <div class="billing-totals__row">
         <span class="billing-totals__label">Subtotal</span>
         <span class="billing-totals__value">
-          {formatCurrency(subtotal) || "$0"}
+          {fmtCurrency(subtotal)}
         </span>
       </div>
 
@@ -36,7 +40,7 @@ export const BillingTotals: FC<BillingTotalsProps> = ({
         <div class="billing-totals__row">
           <span class="billing-totals__label">Discount</span>
           <span class="billing-totals__value billing-totals__value--discount">
-            &minus;{formatCurrency(discount) || "$0"}
+            &minus;{fmtCurrency(discount)}
           </span>
         </div>
       )}
@@ -47,7 +51,7 @@ export const BillingTotals: FC<BillingTotalsProps> = ({
             Tax{taxRate ? ` (${taxRate}%)` : ""}
           </span>
           <span class="billing-totals__value">
-            {formatCurrency(tax) || "$0"}
+            {fmtCurrency(tax)}
           </span>
         </div>
       )}
@@ -55,7 +59,7 @@ export const BillingTotals: FC<BillingTotalsProps> = ({
       <div class="billing-totals__row billing-totals__row--total">
         <span class="billing-totals__label">Total</span>
         <span class="billing-totals__value">
-          {formatCurrency(total) || "$0"}
+          {fmtCurrency(total)}
         </span>
       </div>
 
@@ -63,7 +67,7 @@ export const BillingTotals: FC<BillingTotalsProps> = ({
         <div class="billing-totals__row">
           <span class="billing-totals__label">Paid</span>
           <span class="billing-totals__value billing-totals__value--paid">
-            {formatCurrency(paidAmount) || "$0"}
+            {fmtCurrency(paidAmount)}
           </span>
         </div>
       )}
@@ -72,7 +76,7 @@ export const BillingTotals: FC<BillingTotalsProps> = ({
         <div class="billing-totals__row billing-totals__row--balance">
           <span class="billing-totals__label">Balance Due</span>
           <span class="billing-totals__value">
-            {formatCurrency(balance) || "$0"}
+            {fmtCurrency(balance)}
           </span>
         </div>
       )}

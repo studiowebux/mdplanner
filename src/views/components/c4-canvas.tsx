@@ -288,6 +288,50 @@ export type C4CanvasProps = {
   editMode: boolean;
 };
 
+const LEVEL_ORDER = ["context", "container", "component", "code"];
+
+function buildC4Breadcrumb(
+  level: string,
+  parentId: string | undefined,
+  parentName: string | undefined,
+  diagramParam: string,
+): BreadcrumbEntry[] {
+  const breadcrumb: BreadcrumbEntry[] = [
+    { label: "All", href: `/c4?view=canvas${diagramParam}` },
+  ];
+  if (parentId && parentName) {
+    const currentIdx = LEVEL_ORDER.indexOf(level);
+    for (let i = 0; i < currentIdx - 1; i++) {
+      const l = LEVEL_ORDER[i];
+      breadcrumb.push({
+        label: C4_LEVEL_LABELS[l] ?? l,
+        href: `/c4?view=canvas&level=${l}${diagramParam}`,
+      });
+    }
+    const parentLevel = LEVEL_ORDER[currentIdx - 1];
+    if (parentLevel) {
+      breadcrumb.push({
+        label: C4_LEVEL_LABELS[parentLevel] ?? parentLevel,
+        href: `/c4?view=canvas&level=${parentLevel}${diagramParam}`,
+      });
+    }
+    breadcrumb.push({ label: parentName });
+  } else if (level === "context") {
+    breadcrumb.push({ label: C4_LEVEL_LABELS["context"] ?? "Context" });
+  } else {
+    const currentIdx = LEVEL_ORDER.indexOf(level);
+    for (let i = 0; i < currentIdx; i++) {
+      const l = LEVEL_ORDER[i];
+      breadcrumb.push({
+        label: C4_LEVEL_LABELS[l] ?? l,
+        href: `/c4?view=canvas&level=${l}${diagramParam}`,
+      });
+    }
+    breadcrumb.push({ label: C4_LEVEL_LABELS[level] ?? level });
+  }
+  return breadcrumb;
+}
+
 export const C4Canvas: FC<C4CanvasProps> = ({
   components,
   diagram,
@@ -303,44 +347,12 @@ export const C4Canvas: FC<C4CanvasProps> = ({
   const diagramParam = diagram !== "default"
     ? `&diagram=${encodeURIComponent(diagram)}`
     : "";
-  const LEVEL_ORDER = ["context", "container", "component", "code"];
-  const breadcrumb: BreadcrumbEntry[] = [
-    { label: "All", href: `/c4?view=canvas${diagramParam}` },
-  ];
-  if (parentId && parentName) {
-    // level is the children's level; parent sits one level above it.
-    const currentIdx = LEVEL_ORDER.indexOf(level);
-    // Add intermediate level links from context up to (but not including) parent's level.
-    for (let i = 0; i < currentIdx - 1; i++) {
-      const l = LEVEL_ORDER[i];
-      breadcrumb.push({
-        label: C4_LEVEL_LABELS[l] ?? l,
-        href: `/c4?view=canvas&level=${l}${diagramParam}`,
-      });
-    }
-    // Parent's level — all items at that level (without drilling in).
-    const parentLevel = LEVEL_ORDER[currentIdx - 1];
-    if (parentLevel) {
-      breadcrumb.push({
-        label: C4_LEVEL_LABELS[parentLevel] ?? parentLevel,
-        href: `/c4?view=canvas&level=${parentLevel}${diagramParam}`,
-      });
-    }
-    breadcrumb.push({ label: parentName });
-  } else if (level === "context") {
-    breadcrumb.push({ label: C4_LEVEL_LABELS["context"] ?? "Context" });
-  } else {
-    // No parent drill-down: show each level from context to current as links/labels.
-    const currentIdx = LEVEL_ORDER.indexOf(level);
-    for (let i = 0; i < currentIdx; i++) {
-      const l = LEVEL_ORDER[i];
-      breadcrumb.push({
-        label: C4_LEVEL_LABELS[l] ?? l,
-        href: `/c4?view=canvas&level=${l}${diagramParam}`,
-      });
-    }
-    breadcrumb.push({ label: C4_LEVEL_LABELS[level] ?? level });
-  }
+  const breadcrumb = buildC4Breadcrumb(
+    level,
+    parentId,
+    parentName,
+    diagramParam,
+  );
 
   return (
     <div
