@@ -9,12 +9,16 @@ import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 type Props = { item: MarketingPlan; q?: string };
 
+function countItems(arr: unknown[] | undefined | null): number {
+  return arr ? arr.length : 0;
+}
+
 export const MarketingPlanCard: FC<Props> = ({ item, q }) => {
   const isCompleted = MARKETING_PLAN_COMPLETED_STATUSES.has(item.status);
-  const audienceCount = item.targetAudiences?.length ?? 0;
-  const channelCount = item.channels?.length ?? 0;
-  const campaignCount = item.campaigns?.length ?? 0;
-  const goalCount = item.linkedGoals?.length ?? 0;
+  const audienceCount = countItems(item.targetAudiences);
+  const channelCount = countItems(item.channels);
+  const campaignCount = countItems(item.campaigns);
+  const goalCount = countItems(item.linkedGoals);
   const budget = item.budgetTotal != null
     ? `${item.budgetCurrency ?? ""} ${item.budgetTotal.toLocaleString()}`
       .trim()

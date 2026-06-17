@@ -55,6 +55,36 @@ const PositionHistorySection: FC<{ history: PositionHistoryItem[] }> = (
   );
 };
 
+const ContactInfoRow: FC<{ contact: Contact }> = ({ contact }) => {
+  const hasContact = contact.email || contact.phone || contact.role ||
+    contact.company;
+  if (!hasContact) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {contact.email && (
+        <InfoItem label="Email">
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>
+        </InfoItem>
+      )}
+      {contact.phone && (
+        <InfoItem label="Phone">
+          <a href={`tel:${contact.phone}`}>{contact.phone}</a>
+        </InfoItem>
+      )}
+      {contact.role && <InfoItem label="Role">{contact.role}</InfoItem>}
+      {contact.company && (
+        <InfoItem label="Company">
+          <a
+            href={`/companies?q=${encodeURIComponent(contact.company)}`}
+          >
+            {contact.company}
+          </a>
+        </InfoItem>
+      )}
+    </div>
+  );
+};
+
 const NotesSection: FC<{ contact: Contact }> = ({ contact }) => (
   <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
@@ -73,8 +103,6 @@ export const ContactDetailView: FC<
 > = (
   { item: contact, editing = false, ...viewProps },
 ) => {
-  const hasContact = contact.email || contact.phone || contact.role ||
-    contact.company;
   const tags = contact.tags ?? [];
 
   return (
@@ -128,30 +156,7 @@ export const ContactDetailView: FC<
 
         <ArchivedBanner entity={contact} />
 
-        {hasContact && (
-          <div class="detail-section detail-info-row">
-            {contact.email && (
-              <InfoItem label="Email">
-                <a href={`mailto:${contact.email}`}>{contact.email}</a>
-              </InfoItem>
-            )}
-            {contact.phone && (
-              <InfoItem label="Phone">
-                <a href={`tel:${contact.phone}`}>{contact.phone}</a>
-              </InfoItem>
-            )}
-            {contact.role && <InfoItem label="Role">{contact.role}</InfoItem>}
-            {contact.company && (
-              <InfoItem label="Company">
-                <a
-                  href={`/companies?q=${encodeURIComponent(contact.company)}`}
-                >
-                  {contact.company}
-                </a>
-              </InfoItem>
-            )}
-          </div>
-        )}
+        <ContactInfoRow contact={contact} />
 
         {tags.length > 0 && (
           <section class="detail-section">

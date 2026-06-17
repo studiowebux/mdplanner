@@ -34,28 +34,22 @@ type SettingsProps = ViewProps & {
   preferences?: PersonPreferences;
 };
 
-export const SettingsView: FC<SettingsProps> = ({
-  config,
-  preferences,
-  enabledFeatures,
-  ...viewProps
-}) => {
-  const enabled = new Set(enabledFeatures ?? []);
-  const navLinks = buildNavLinks(enabledFeatures ?? []);
-  const allFeatures = Object.entries(ENTITY_TYPE_LABELS).sort(([, a], [, b]) =>
-    a.localeCompare(b)
-  );
-  const enabledList = allFeatures.filter(([key]) => enabled.has(key));
-  const disabledList = allFeatures.filter(([key]) => !enabled.has(key));
-  const activeWorkingDays = new Set(config.workingDays ?? []);
-  const links = config.links ?? [];
-  const navCategories = config.navCategories ?? DEFAULT_NAV_CATEGORIES;
+type FeatureCategoryMaps = {
+  categoryNames: string[];
+  featureToCategory: Record<string, string>;
+  featuresByCategory: Record<string, [string, string][]>;
+  groupOrder: string[];
+  sortedCategoryOptions: string[];
+};
+
+function buildFeatureCategoryMaps(
+  navCategories: Record<string, string[]>,
+  allFeatures: [string, string][],
+): FeatureCategoryMaps {
   const categoryNames = Object.keys(navCategories).sort((a, b) =>
     a.localeCompare(b)
   );
   const featureToCategory: Record<string, string> = {};
-  // Seed from defaults so new features get their intended category,
-  // then overlay with user's saved config (takes precedence).
   for (const [cat, keys] of Object.entries(DEFAULT_NAV_CATEGORIES)) {
     for (const key of keys) featureToCategory[key] = cat;
   }
@@ -77,6 +71,40 @@ export const SettingsView: FC<SettingsProps> = ({
   const sortedCategoryOptions = [...categoryNames].sort((a, b) =>
     a.localeCompare(b)
   );
+  return {
+    categoryNames,
+    featureToCategory,
+    featuresByCategory,
+    groupOrder,
+    sortedCategoryOptions,
+  };
+}
+
+export const SettingsView: FC<SettingsProps> = ({
+  config,
+  preferences,
+  enabledFeatures,
+  ...viewProps
+}) => {
+  const enabled = new Set(enabledFeatures ?? []);
+  const navLinks = buildNavLinks(enabledFeatures ?? []);
+  const allFeatures = Object.entries(ENTITY_TYPE_LABELS).sort(([, a], [, b]) =>
+    a.localeCompare(b)
+  );
+  const enabledList = allFeatures.filter(([key]) => enabled.has(key));
+  const disabledList = allFeatures.filter(([key]) => !enabled.has(key));
+  const activeWorkingDays = new Set(config.workingDays ?? []);
+  const links = config.links ?? [];
+  const navCategories = config.navCategories ?? DEFAULT_NAV_CATEGORIES;
+  // Seed from defaults so new features get their intended category,
+  // then overlay with user's saved config (takes precedence).
+  const {
+    categoryNames,
+    featureToCategory,
+    featuresByCategory,
+    groupOrder,
+    sortedCategoryOptions,
+  } = buildFeatureCategoryMaps(navCategories, allFeatures);
 
   return (
     <MainLayout

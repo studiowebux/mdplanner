@@ -118,6 +118,10 @@ const LIVE_PROPS: ReadonlyArray<[string, (a: PropArgs) => string | null]> = [
 
 const KNOWN_PROPS = new Set(LIVE_PROPS.map(([name]) => name));
 
+function isPropWanted(requestedProps: string[] | null, name: string): boolean {
+  return requestedProps === null || requestedProps.includes(name);
+}
+
 async function buildPropResponse(
   ctx: WebDavContext,
   fsPath: string,
@@ -129,13 +133,11 @@ async function buildPropResponse(
   const disp = isDir && !href.endsWith("/") ? href + "/" : href;
   const tag = await fileEtag(info);
   const dp = ctx.props.get(fsPath);
-  const all = requestedProps === null;
-  const want = (n: string) => all || (requestedProps?.includes(n) ?? false);
   const args: PropArgs = { ctx, fsPath, info, isDir, tag, disp };
 
   const p200: string[] = [];
   for (const [name, build] of LIVE_PROPS) {
-    if (!want(name)) continue;
+    if (!isPropWanted(requestedProps, name)) continue;
     const xml = build(args);
     if (xml !== null) p200.push(xml);
   }
@@ -144,7 +146,7 @@ async function buildPropResponse(
     const ci = key.indexOf(":");
     const dpNs = key.slice(0, ci);
     const local = key.slice(ci + 1);
-    if (all || (requestedProps?.includes(local) ?? false)) {
+    if (isPropWanted(requestedProps, local)) {
       p200.push(`<Z:${local} xmlns:Z="${xe(dpNs)}">${val}</Z:${local}>`);
     }
   }

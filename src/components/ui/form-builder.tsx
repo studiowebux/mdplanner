@@ -432,16 +432,15 @@ const TagsControl: FC<{
   );
 };
 
-/** Renders the type-specific input control for one field (no label wrapper). */
-const FieldControl: FC<{
-  id: string;
-  def: FieldDef;
-  value?: string;
-  displayValue?: string;
-  arrayDisplayRows?: Record<string, string>[];
-}> = ({ id, def, value, displayValue, arrayDisplayRows }) => {
-  const strVal = value ?? "";
-  const parsedRows = parseJson<Record<string, unknown>[]>(value) ?? [];
+function dispatchFieldControl(
+  id: string,
+  def: FieldDef,
+  strVal: string,
+  value: string | undefined,
+  displayValue: string | undefined,
+  parsedRows: Record<string, unknown>[],
+  arrayDisplayRows: Record<string, string>[] | undefined,
+) {
   if (def.type === "text") {
     return (
       <input
@@ -560,6 +559,27 @@ const FieldControl: FC<{
     );
   }
   return null;
+}
+
+/** Renders the type-specific input control for one field (no label wrapper). */
+const FieldControl: FC<{
+  id: string;
+  def: FieldDef;
+  value?: string;
+  displayValue?: string;
+  arrayDisplayRows?: Record<string, string>[];
+}> = ({ id, def, value, displayValue, arrayDisplayRows }) => {
+  const strVal = value ?? "";
+  const parsedRows = parseJson<Record<string, unknown>[]>(value) ?? [];
+  return dispatchFieldControl(
+    id,
+    def,
+    strVal,
+    value,
+    displayValue,
+    parsedRows,
+    arrayDisplayRows,
+  );
 };
 
 /** Renders a complete create/edit form from a FieldDef[]; supports array-table rows, autocomplete, and nested sidenav fields. */
