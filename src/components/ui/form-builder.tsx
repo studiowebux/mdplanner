@@ -159,8 +159,9 @@ const ArrayTableRowField: FC<
   }
 > = ({ section, idx, field, value, displayValue }) => {
   const name = `${section}[${idx}].${field.name}`;
+  const strVal = value ?? "";
   if (field.type === "hidden") {
-    return <input type="hidden" name={name} value={value ?? ""} />;
+    return <input type="hidden" name={name} value={strVal} />;
   }
   return (
     <div class="array-table__field">
@@ -170,7 +171,7 @@ const ArrayTableRowField: FC<
           type="text"
           name={name}
           class="form__input"
-          value={value ?? ""}
+          value={strVal}
           placeholder={field.placeholder}
           autocomplete="do-not-autofill"
         />
@@ -180,7 +181,7 @@ const ArrayTableRowField: FC<
           type="number"
           name={name}
           class="form__input"
-          value={value ?? ""}
+          value={strVal}
           min={field.min}
           max={field.max}
           step="any"
@@ -193,7 +194,7 @@ const ArrayTableRowField: FC<
           inputmode="decimal"
           name={name}
           class="form__input"
-          value={value ?? ""}
+          value={strVal}
           placeholder={field.placeholder ?? "0.00"}
           autocomplete="off"
         />
@@ -203,7 +204,7 @@ const ArrayTableRowField: FC<
           type="date"
           name={name}
           class="form__input"
-          value={value ?? ""}
+          value={strVal}
         />
       )}
       {field.type === "select" && (
@@ -221,7 +222,7 @@ const ArrayTableRowField: FC<
           name={name}
           rows={field.rows ?? 2}
           placeholder={field.placeholder}
-          value={value ?? ""}
+          value={strVal}
         />
       )}
       {field.type === "autocomplete" && (
@@ -439,6 +440,8 @@ const FieldControl: FC<{
   displayValue?: string;
   arrayDisplayRows?: Record<string, string>[];
 }> = ({ id, def, value, displayValue, arrayDisplayRows }) => {
+  const strVal = value ?? "";
+  const parsedRows = parseJson<Record<string, unknown>[]>(value) ?? [];
   if (def.type === "text") {
     return (
       <input
@@ -449,7 +452,7 @@ const FieldControl: FC<{
         required={def.required}
         placeholder={def.placeholder}
         maxlength={def.maxLength}
-        value={value ?? ""}
+        value={strVal}
         autocomplete="do-not-autofill"
       />
     );
@@ -465,7 +468,7 @@ const FieldControl: FC<{
         min={def.min}
         max={def.max}
         step="any"
-        value={value ?? ""}
+        value={strVal}
         autocomplete="off"
       />
     );
@@ -480,7 +483,7 @@ const FieldControl: FC<{
         class="form__input"
         required={def.required}
         placeholder={def.placeholder ?? "0.00"}
-        value={value ?? ""}
+        value={strVal}
         autocomplete="off"
       />
     );
@@ -493,7 +496,7 @@ const FieldControl: FC<{
         name={def.name}
         class="form__input"
         required={def.required}
-        value={value ?? ""}
+        value={strVal}
       />
     );
   }
@@ -508,7 +511,7 @@ const FieldControl: FC<{
         rows={def.rows ?? 4}
         required={def.required}
         maxlength={def.maxLength}
-        value={value ?? ""}
+        value={strVal}
       />
     );
   }
@@ -549,7 +552,7 @@ const FieldControl: FC<{
       <ArrayTable
         section={def.section}
         itemFields={def.itemFields}
-        rows={parseJson<Record<string, unknown>[]>(value) ?? []}
+        rows={parsedRows}
         rowsId={`${id}-rows`}
         addLabel={def.addLabel ?? `Add ${def.label}`}
         rowsDisplayData={arrayDisplayRows}

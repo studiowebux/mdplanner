@@ -22,6 +22,79 @@ import { dueIn } from "../../utils/time.ts";
 // Board card
 // ---------------------------------------------------------------------------
 
+const BoardCardMeta: FC<{
+  task: Task;
+  deadline: string;
+  isOverdue: boolean;
+}> = ({ task, deadline, isOverdue }) => (
+  <div class="task-board__card-meta">
+    {task.project
+      ? (
+        <a
+          class="task-board__card-project"
+          href={`/portfolio/${toKebab(task.project)}`}
+        >
+          {task.project}
+        </a>
+      )
+      : <span class="task-board__card-project badge--neutral">No Project</span>}
+    <span
+      class={`task-board__card-due${
+        isOverdue ? " task-board__card-due--overdue" : ""
+      }`}
+    >
+      {deadline || "no deadline"}
+    </span>
+  </div>
+);
+
+const BoardCardFooter: FC<{
+  task: Task;
+  initials: string;
+  assigneeName: string;
+  childCount: number;
+}> = ({ task, initials, assigneeName, childCount }) => (
+  <div class="task-board__card-footer">
+    <div class="task-board__card-left">
+      {task.priority && (
+        <span class={`badge priority--${task.priority}`}>
+          {TASK_PRIORITY_LABELS[String(task.priority)] ?? `P${task.priority}`}
+        </span>
+      )}
+      {task.milestone && (
+        <a
+          class="badge task-board__card-indicator"
+          href={taskMilestoneByName[task.milestone]
+            ? `/milestones/${taskMilestoneByName[task.milestone]}`
+            : `/milestones?q=${encodeURIComponent(task.milestone)}`}
+          title={task.milestone}
+        >
+          M
+        </a>
+      )}
+      {childCount > 0 && (
+        <span
+          class="badge task-board__card-indicator"
+          title={`${childCount} subtask${childCount !== 1 ? "s" : ""}`}
+        >
+          {childCount}
+        </span>
+      )}
+    </div>
+    {initials
+      ? (
+        <a
+          class="badge task-board__card-avatar"
+          href={`/people/${task.assignee}`}
+          title={assigneeName}
+        >
+          {initials}
+        </a>
+      )
+      : <span class="task-board__card-unassigned">--</span>}
+  </div>
+);
+
 export const BoardCard: FC<{ task: Task }> = ({ task }) => {
   const deadline = task.due_date ? dueIn(task.due_date) : "";
   const isOverdue = deadline.includes("overdue");
@@ -50,71 +123,13 @@ export const BoardCard: FC<{ task: Task }> = ({ task }) => {
       <a class="task-board__card-title" href={`/tasks/${task.id}`}>
         {task.title}
       </a>
-
-      <div class="task-board__card-meta">
-        {task.project
-          ? (
-            <a
-              class="task-board__card-project"
-              href={`/portfolio/${toKebab(task.project)}`}
-            >
-              {task.project}
-            </a>
-          )
-          : (
-            <span class="task-board__card-project badge--neutral">
-              No Project
-            </span>
-          )}
-        <span
-          class={`task-board__card-due${
-            isOverdue ? " task-board__card-due--overdue" : ""
-          }`}
-        >
-          {deadline || "no deadline"}
-        </span>
-      </div>
-
-      <div class="task-board__card-footer">
-        <div class="task-board__card-left">
-          {task.priority && (
-            <span class={`badge priority--${task.priority}`}>
-              {TASK_PRIORITY_LABELS[String(task.priority)] ??
-                `P${task.priority}`}
-            </span>
-          )}
-          {task.milestone && (
-            <a
-              class="badge task-board__card-indicator"
-              href={taskMilestoneByName[task.milestone]
-                ? `/milestones/${taskMilestoneByName[task.milestone]}`
-                : `/milestones?q=${encodeURIComponent(task.milestone)}`}
-              title={task.milestone}
-            >
-              M
-            </a>
-          )}
-          {childCount > 0 && (
-            <span
-              class="badge task-board__card-indicator"
-              title={`${childCount} subtask${childCount !== 1 ? "s" : ""}`}
-            >
-              {childCount}
-            </span>
-          )}
-        </div>
-        {initials
-          ? (
-            <a
-              class="badge task-board__card-avatar"
-              href={`/people/${task.assignee}`}
-              title={assigneeName}
-            >
-              {initials}
-            </a>
-          )
-          : <span class="task-board__card-unassigned">--</span>}
-      </div>
+      <BoardCardMeta task={task} deadline={deadline} isOverdue={isOverdue} />
+      <BoardCardFooter
+        task={task}
+        initials={initials}
+        assigneeName={assigneeName}
+        childCount={childCount}
+      />
     </div>
   );
 };

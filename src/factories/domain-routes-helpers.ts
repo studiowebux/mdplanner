@@ -131,115 +131,125 @@ export function createFilterHelpers<T extends Entity, C, U>(
     return true;
   }
 
+  function filterHideCompleted(items: T[], state: DomainFilterState): T[] {
+    if (!state.hideCompleted || !cfg.hideCompleted) return items;
+    const { field, value, exceptField, exceptValue } = cfg.hideCompleted;
+    const values = Array.isArray(value) ? value : [value];
+    return items.filter((item) => {
+      // Exempt matching items (e.g. the Done section) from the strip — the
+      // view collapses them instead of the filter silently emptying them.
+      if (
+        exceptField &&
+        String(item[exceptField as keyof T] ?? "") === exceptValue
+      ) {
+        return true;
+      }
+      return !values.includes(String(item[field as keyof T] ?? ""));
+    });
+  }
+
+  function filterDynamic(
+    items: T[],
+    state: DomainFilterState,
+    dynamicOpts?: DynamicFilterOptions,
+  ): T[] {
+    if (!cfg.filters) return items;
+    let result = items;
+    for (const f of cfg.filters) {
+      // Computed filters defer to the domain's customFilter — the dropdown
+      // value is still read into state, but applyFilters does not match it
+      // against an entity field.
+      if (f.computed) continue;
+      const val = state[f.name];
+      if (!val || typeof val !== "string") continue;
+      const field = f.field ?? f.name;
+      if (val === "__unassigned__") {
+        // Build set of known valid values (excluding __unassigned__ itself)
+        const opts = dynamicOpts?.[f.name];
+        const validValues = opts
+          ? new Set(
+            opts
+              .map((o) => typeof o === "string" ? o : o.value)
+              .filter((v) => v !== "__unassigned__"),
+          )
+          : null;
+        result = result.filter((item) => {
+          const itemVal = item[field as keyof T];
+          if (itemVal === undefined || itemVal === null || itemVal === "") {
+            return true;
+          }
+          // Also match values not in the known valid set (orphaned refs)
+          return validValues ? !validValues.has(String(itemVal)) : false;
+        });
+      } else {
+        result = result.filter((item) => {
+          const itemVal = item[field as keyof T];
+          if (Array.isArray(itemVal)) {
+            return (itemVal as string[]).some((v) => v === val);
+          }
+          return String(itemVal ?? "") === val;
+        });
+      }
+    }
+    return result;
+  }
+
+  function filterDateRange(items: T[], state: DomainFilterState): T[] {
+    const { field, fromKey, toKey } = dateRange;
+    const from = state[fromKey] as string | undefined;
+    const to = state[toKey] as string | undefined;
+    if (!from && !to) return items;
+    // Compare only the YYYY-MM-DD portion so a full ISO timestamp field
+    // (e.g. createdAt) bounds inclusively against a date input.
+    const dateOf = (item: T) =>
+      String((item as Record<string, unknown>)[field] ?? "").slice(0, 10);
+    let result = items;
+    if (from) result = result.filter((item) => dateOf(item) >= from);
+    if (to) result = result.filter((item) => dateOf(item) <= to);
+    return result;
+  }
+
+  function filterSearch(items: T[], state: DomainFilterState): T[] {
+    if (!state.q) return items;
+    const q = (state.q as string).toLowerCase();
+    if (cfg.searchPredicate) {
+      return items.filter((item) => cfg.searchPredicate!(item, q));
+    }
+    return items.filter((item) => {
+      for (const key of Object.keys(item as Record<string, unknown>)) {
+        const val = (item as Record<string, unknown>)[key];
+        if (typeof val === "string" && val.toLowerCase().includes(q)) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  function filterSort(items: T[], state: DomainFilterState): T[] {
+    if (!state.sort) return items;
+    const key = state.sort as string;
+    const dir = state.order === "desc" ? -1 : 1;
+    return [...items].sort((a, b) => {
+      const av = (a as Record<string, unknown>)[key];
+      const bv = (b as Record<string, unknown>)[key];
+      if (typeof av === "number" && typeof bv === "number") {
+        return (av - bv) * dir;
+      }
+      return String(av ?? "").localeCompare(String(bv ?? "")) * dir;
+    });
+  }
+
   function applyFilters(
     items: T[],
     state: DomainFilterState,
     dynamicOpts?: DynamicFilterOptions,
   ): T[] {
-    let result = items;
-
-    // Hide completed
-    if (state.hideCompleted && cfg.hideCompleted) {
-      const { field, value, exceptField, exceptValue } = cfg.hideCompleted;
-      const values = Array.isArray(value) ? value : [value];
-      result = result.filter((item) => {
-        // Exempt matching items (e.g. the Done section) from the strip — the
-        // view collapses them instead of the filter silently emptying them.
-        if (
-          exceptField &&
-          String(item[exceptField as keyof T] ?? "") === exceptValue
-        ) {
-          return true;
-        }
-        return !values.includes(String(item[field as keyof T] ?? ""));
-      });
-    }
-
-    // Dynamic filters (status, project, etc.)
-    if (cfg.filters) {
-      for (const f of cfg.filters) {
-        // Computed filters defer to the domain's customFilter — the dropdown
-        // value is still read into state, but applyFilters does not match it
-        // against an entity field.
-        if (f.computed) continue;
-        const val = state[f.name];
-        if (val && typeof val === "string") {
-          const field = f.field ?? f.name;
-          if (val === "__unassigned__") {
-            // Build set of known valid values (excluding __unassigned__ itself)
-            const opts = dynamicOpts?.[f.name];
-            const validValues = opts
-              ? new Set(
-                opts
-                  .map((o) => typeof o === "string" ? o : o.value)
-                  .filter((v) => v !== "__unassigned__"),
-              )
-              : null;
-            result = result.filter((item) => {
-              const itemVal = item[field as keyof T];
-              if (itemVal === undefined || itemVal === null || itemVal === "") {
-                return true;
-              }
-              // Also match values not in the known valid set (orphaned refs)
-              return validValues ? !validValues.has(String(itemVal)) : false;
-            });
-          } else {
-            result = result.filter((item) => {
-              const itemVal = item[field as keyof T];
-              if (Array.isArray(itemVal)) {
-                return (itemVal as string[]).some((v) => v === val);
-              }
-              return String(itemVal ?? "") === val;
-            });
-          }
-        }
-      }
-    }
-
-    // Date range filter. Compare only the YYYY-MM-DD portion so a full ISO
-    // timestamp field (e.g. createdAt) bounds inclusively against a date input.
-    {
-      const { field, fromKey, toKey } = dateRange;
-      const from = state[fromKey] as string | undefined;
-      const to = state[toKey] as string | undefined;
-      const dateOf = (item: T) =>
-        String((item as Record<string, unknown>)[field] ?? "").slice(0, 10);
-      if (from) result = result.filter((item) => dateOf(item) >= from);
-      if (to) result = result.filter((item) => dateOf(item) <= to);
-    }
-
-    // Text search
-    if (state.q) {
-      const q = (state.q as string).toLowerCase();
-      if (cfg.searchPredicate) {
-        result = result.filter((item) => cfg.searchPredicate!(item, q));
-      } else {
-        result = result.filter((item) => {
-          for (const key of Object.keys(item as Record<string, unknown>)) {
-            const val = (item as Record<string, unknown>)[key];
-            if (typeof val === "string" && val.toLowerCase().includes(q)) {
-              return true;
-            }
-          }
-          return false;
-        });
-      }
-    }
-
-    // Sort
-    if (state.sort) {
-      const key = state.sort as string;
-      const dir = state.order === "desc" ? -1 : 1;
-      result = [...result].sort((a, b) => {
-        const av = (a as Record<string, unknown>)[key];
-        const bv = (b as Record<string, unknown>)[key];
-        if (typeof av === "number" && typeof bv === "number") {
-          return (av - bv) * dir;
-        }
-        return String(av ?? "").localeCompare(String(bv ?? "")) * dir;
-      });
-    }
-
+    let result = filterHideCompleted(items, state);
+    result = filterDynamic(result, state, dynamicOpts);
+    result = filterDateRange(result, state);
+    result = filterSearch(result, state);
+    result = filterSort(result, state);
     return result;
   }
 

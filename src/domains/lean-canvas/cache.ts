@@ -23,6 +23,14 @@ import { LEAN_CANVAS_SECTIONS } from "../../types/lean-canvas.types.ts";
 
 export const LEAN_CANVAS_TABLE = "lean_canvases";
 
+/** Parse a JSON string-array column, falling back to empty array. */
+function lcArr(
+  row: Record<string, string | number | null>,
+  col: string,
+): string[] {
+  return parseJson<string[]>(row[col]) ?? [];
+}
+
 /** Deserialize a SQLite row to a LeanCanvas. */
 export function rowToLeanCanvas(
   row: Record<string, string | number | null>,
@@ -32,18 +40,18 @@ export function rowToLeanCanvas(
     title: (row.title as string) ?? "",
     project: row.project as string | undefined,
     date: row.date as string | undefined,
-    problem: parseJson<string[]>(row.problem) ?? [],
-    solution: parseJson<string[]>(row.solution) ?? [],
-    uniqueValueProp: parseJson<string[]>(row.unique_value_prop) ?? [],
-    unfairAdvantage: parseJson<string[]>(row.unfair_advantage) ?? [],
-    customerSegments: parseJson<string[]>(row.customer_segments) ?? [],
-    existingAlternatives: parseJson<string[]>(row.existing_alternatives) ?? [],
-    keyMetrics: parseJson<string[]>(row.key_metrics) ?? [],
-    highLevelConcept: parseJson<string[]>(row.high_level_concept) ?? [],
-    channels: parseJson<string[]>(row.channels) ?? [],
-    earlyAdopters: parseJson<string[]>(row.early_adopters) ?? [],
-    costStructure: parseJson<string[]>(row.cost_structure) ?? [],
-    revenueStreams: parseJson<string[]>(row.revenue_streams) ?? [],
+    problem: lcArr(row, "problem"),
+    solution: lcArr(row, "solution"),
+    uniqueValueProp: lcArr(row, "unique_value_prop"),
+    unfairAdvantage: lcArr(row, "unfair_advantage"),
+    customerSegments: lcArr(row, "customer_segments"),
+    existingAlternatives: lcArr(row, "existing_alternatives"),
+    keyMetrics: lcArr(row, "key_metrics"),
+    highLevelConcept: lcArr(row, "high_level_concept"),
+    channels: lcArr(row, "channels"),
+    earlyAdopters: lcArr(row, "early_adopters"),
+    costStructure: lcArr(row, "cost_structure"),
+    revenueStreams: lcArr(row, "revenue_streams"),
     completedSections: (row.completed_sections as number) ?? 0,
     sectionCount: (row.section_count as number) ?? 0,
     completionPct: (row.completion_pct as number) ?? 0,

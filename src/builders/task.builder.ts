@@ -1,7 +1,54 @@
 // Task builder — constructs a flat Task from raw frontmatter + body.
 // Validates and normalizes fields. Keeps parsing logic out of the repository.
 
-import type { ApprovalVerdict, Task } from "../types/task.types.ts";
+import type {
+  ApprovalVerdict,
+  Task,
+  TaskComment,
+  TimeEntry,
+} from "../types/task.types.ts";
+
+function parseTimeEntry(e: unknown): TimeEntry {
+  const entry = e as Record<string, unknown>;
+  return {
+    id: String(entry.id ?? ""),
+    date: String(entry.date ?? ""),
+    hours: Number(entry.hours ?? 0),
+    ...(entry.person != null && { person: String(entry.person) }),
+    ...(entry.description != null && {
+      description: String(entry.description),
+    }),
+  };
+}
+
+function parseApprovalRequest(
+  ar: Record<string, unknown>,
+): Task["approvalRequest"] {
+  return {
+    id: String(ar.id ?? ""),
+    requestedAt: String(ar.requestedAt ?? ""),
+    requestedBy: String(ar.requestedBy ?? ""),
+    summary: String(ar.summary ?? ""),
+    ...(ar.commitHash != null && { commitHash: String(ar.commitHash) }),
+    ...(Array.isArray(ar.artifactUrls) &&
+      { artifactUrls: ar.artifactUrls.map(String) }),
+    ...(ar.verdict != null && typeof ar.verdict === "object" &&
+      { verdict: ar.verdict as ApprovalVerdict }),
+  };
+}
+
+function parseTaskComment(c: unknown): TaskComment {
+  const comment = c as Record<string, unknown>;
+  return {
+    id: String(comment.id ?? ""),
+    timestamp: String(comment.timestamp ?? ""),
+    body: String(comment.body ?? ""),
+    ...(comment.author != null && { author: String(comment.author) }),
+    ...(comment.metadata != null && {
+      metadata: comment.metadata as Record<string, unknown>,
+    }),
+  };
+}
 
 export class TaskBuilder {
   private task: Partial<Task> = {};
@@ -53,50 +100,19 @@ export class TaskBuilder {
     this.strArray(fm, "files");
 
     if (Array.isArray(fm.time_entries)) {
-      this.task.time_entries = fm.time_entries.map((e: unknown) => {
-        const entry = e as Record<string, unknown>;
-        return {
-          id: String(entry.id ?? ""),
-          date: String(entry.date ?? ""),
-          hours: Number(entry.hours ?? 0),
-          ...(entry.person != null && { person: String(entry.person) }),
-          ...(entry.description != null && {
-            description: String(entry.description),
-          }),
-        };
-      });
+      this.task.time_entries = fm.time_entries.map(parseTimeEntry);
     }
 
     if (
       fm.approval_request != null && typeof fm.approval_request === "object"
     ) {
-      const ar = fm.approval_request as Record<string, unknown>;
-      this.task.approvalRequest = {
-        id: String(ar.id ?? ""),
-        requestedAt: String(ar.requestedAt ?? ""),
-        requestedBy: String(ar.requestedBy ?? ""),
-        summary: String(ar.summary ?? ""),
-        ...(ar.commitHash != null && { commitHash: String(ar.commitHash) }),
-        ...(Array.isArray(ar.artifactUrls) &&
-          { artifactUrls: ar.artifactUrls.map(String) }),
-        ...(ar.verdict != null && typeof ar.verdict === "object" &&
-          { verdict: ar.verdict as ApprovalVerdict }),
-      };
+      this.task.approvalRequest = parseApprovalRequest(
+        fm.approval_request as Record<string, unknown>,
+      );
     }
 
     if (Array.isArray(fm.comments)) {
-      this.task.comments = fm.comments.map((c: unknown) => {
-        const comment = c as Record<string, unknown>;
-        return {
-          id: String(comment.id ?? ""),
-          timestamp: String(comment.timestamp ?? ""),
-          body: String(comment.body ?? ""),
-          ...(comment.author != null && { author: String(comment.author) }),
-          ...(comment.metadata != null && {
-            metadata: comment.metadata as Record<string, unknown>,
-          }),
-        };
-      });
+      this.task.comments = fm.comments.map(parseTaskComment);
     }
 
     return this;

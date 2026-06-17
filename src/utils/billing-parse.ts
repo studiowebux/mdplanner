@@ -9,11 +9,8 @@ import { mapArrayFromFm } from "./frontmatter-mapper.ts";
  * Normalize a frontmatter `lineItems` array into typed `LineItem[]`. Nested
  * array item keys arrive snake_case, so `mapArrayFromFm` is applied first.
  */
-export function parseLineItems(fmLineItems: unknown): LineItem[] {
-  const rawItems = Array.isArray(fmLineItems)
-    ? mapArrayFromFm(fmLineItems as unknown[])
-    : [];
-  return rawItems.map((li) => ({
+function parseLineItem(li: Record<string, unknown>): LineItem {
+  return {
     id: String(li.id ?? ""),
     type: String(li.type ?? "service"),
     description: String(li.description ?? ""),
@@ -29,7 +26,14 @@ export function parseLineItems(fmLineItems: unknown): LineItem[] {
     taskId: li.taskId != null ? String(li.taskId) : undefined,
     notes: li.notes != null ? String(li.notes) : undefined,
     amount: Number(li.amount ?? 0),
-  }));
+  };
+}
+
+export function parseLineItems(fmLineItems: unknown): LineItem[] {
+  const rawItems = Array.isArray(fmLineItems)
+    ? mapArrayFromFm(fmLineItems as unknown[])
+    : [];
+  return rawItems.map(parseLineItem);
 }
 
 /**

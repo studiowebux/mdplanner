@@ -13,6 +13,9 @@ import {
 import { BILLING_RATE_BODY_KEYS } from "../domains/billing-rate/constants.ts";
 
 import {
+  fmBool,
+  fmNum,
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -79,16 +82,16 @@ export class BillingRateRepository extends CachedMarkdownRepository<
     return {
       id,
       name,
-      unit: fm.unit != null ? String(fm.unit) as BillingRate["unit"] : "h",
-      rate: fm.rate != null ? Number(fm.rate) : 0,
-      currency: fm.currency != null ? String(fm.currency) : undefined,
-      assignee: fm.assignee != null ? String(fm.assignee) : undefined,
-      isDefault: fm.isDefault != null ? Boolean(fm.isDefault) : undefined,
+      unit: (fmStr(fm, "unit") ?? "h") as BillingRate["unit"],
+      rate: fmNum(fm, "rate") ?? 0,
+      currency: fmStr(fm, "currency"),
+      assignee: fmStr(fm, "assignee"),
+      isDefault: fmBool(fm, "isDefault"),
       notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

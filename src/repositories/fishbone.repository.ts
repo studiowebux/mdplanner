@@ -12,6 +12,7 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { FISHBONE_TABLE, rowToFishbone } from "../domains/fishbone/cache.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -90,13 +91,13 @@ export class FishboneRepository extends CachedMarkdownRepository<
     return {
       id,
       title: title || "Untitled Fishbone",
-      description: fm.description != null ? String(fm.description) : undefined,
-      project: fm.project != null ? String(fm.project) : undefined,
+      description: fmStr(fm, "description"),
+      project: fmStr(fm, "project"),
       causes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

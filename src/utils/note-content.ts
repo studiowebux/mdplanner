@@ -355,6 +355,44 @@ function parseContentBlocks(content: string): NoteParagraph[] {
 // Serialize — { paragraphs, customSections } → markdown
 // ---------------------------------------------------------------------------
 
+function serializeTabsSection(lines: string[], section: CustomSection): void {
+  for (const tab of section.config.tabs ?? []) {
+    lines.push(`### Tab: ${tab.title}`);
+    lines.push(`<!-- tab-id: ${tab.id} -->`);
+    lines.push("");
+    for (const p of tab.content ?? []) serializeBlock(lines, p);
+  }
+}
+
+function serializeTimelineSection(
+  lines: string[],
+  section: CustomSection,
+): void {
+  for (const item of section.config.timeline ?? []) {
+    lines.push(`## ${item.title} (${item.status})`);
+    lines.push(
+      `<!-- item-id: ${item.id}, status: ${item.status}${
+        item.date ? `, date: ${item.date}` : ""
+      } -->`,
+    );
+    lines.push("");
+    for (const p of item.content ?? []) serializeBlock(lines, p);
+  }
+}
+
+function serializeSplitViewSection(
+  lines: string[],
+  section: CustomSection,
+): void {
+  const cols = section.config.splitView?.columns ?? [];
+  cols.forEach((col, idx) => {
+    lines.push(`### Column ${idx + 1}`);
+    lines.push(`<!-- column-index: ${idx} -->`);
+    lines.push("");
+    for (const p of col) serializeBlock(lines, p);
+  });
+}
+
 /** Serialize typed content blocks back to the note's enhanced markdown body. Inverse of parseEnhancedContent. */
 export function serializeEnhancedContent(
   paragraphs: NoteParagraph[],
@@ -388,37 +426,14 @@ export function serializeEnhancedContent(
 
     const section = block.item;
     lines.push(`<!-- Custom Section: ${section.title} -->`);
-    lines.push(
-      `<!-- section-id: ${section.id}, type: ${section.type} -->`,
-    );
+    lines.push(`<!-- section-id: ${section.id}, type: ${section.type} -->`);
     lines.push("");
 
-    if (section.type === "tabs" && section.config.tabs) {
-      for (const tab of section.config.tabs) {
-        lines.push(`### Tab: ${tab.title}`);
-        lines.push(`<!-- tab-id: ${tab.id} -->`);
-        lines.push("");
-        for (const p of tab.content ?? []) serializeBlock(lines, p);
-      }
-    } else if (section.type === "timeline" && section.config.timeline) {
-      for (const item of section.config.timeline) {
-        lines.push(`## ${item.title} (${item.status})`);
-        lines.push(
-          `<!-- item-id: ${item.id}, status: ${item.status}${
-            item.date ? `, date: ${item.date}` : ""
-          } -->`,
-        );
-        lines.push("");
-        for (const p of item.content ?? []) serializeBlock(lines, p);
-      }
-    } else if (section.type === "split-view" && section.config.splitView) {
-      const cols = section.config.splitView.columns ?? [];
-      cols.forEach((col, idx) => {
-        lines.push(`### Column ${idx + 1}`);
-        lines.push(`<!-- column-index: ${idx} -->`);
-        lines.push("");
-        for (const p of col) serializeBlock(lines, p);
-      });
+    if (section.type === "tabs") serializeTabsSection(lines, section);
+    else if (section.type === "timeline") {
+      serializeTimelineSection(lines, section);
+    } else if (section.type === "split-view") {
+      serializeSplitViewSection(lines, section);
     }
 
     lines.push("<!-- End Custom Section -->");

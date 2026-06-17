@@ -11,6 +11,7 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { MEETING_TABLE, rowToMeeting } from "../domains/meeting/cache.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -90,23 +91,21 @@ export class MeetingRepository extends CachedMarkdownRepository<
     return {
       id,
       title,
-      date: fm.date != null
-        ? String(fm.date)
-        : new Date().toISOString().split("T")[0],
+      date: fmStr(fm, "date") ?? new Date().toISOString().split("T")[0],
       attendees: Array.isArray(fm.attendees)
         ? fm.attendees.map(String).filter(Boolean)
         : [],
-      agenda: fm.agenda != null ? String(fm.agenda) : undefined,
+      agenda: fmStr(fm, "agenda"),
       notes,
       actions,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      project: fm.project != null ? String(fm.project) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      project: fmStr(fm, "project"),
       relatedMeetings: Array.isArray(fm.relatedMeetings)
         ? [...new Set(fm.relatedMeetings.map(String).filter(Boolean))]
         : [],
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

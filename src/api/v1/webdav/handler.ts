@@ -166,6 +166,45 @@ export async function createWebDavHandler(
     withWriteLock,
   };
 
+  // ── Method dispatcher ─────────────────────────────────────────────────────
+
+  async function dispatchMethod(
+    method: string,
+    req: Request,
+    fsPath: string,
+    pathname: string,
+    bodyText: string,
+  ): Promise<Response> {
+    switch (method) {
+      case "OPTIONS":
+        return handleOptions();
+      case "HEAD":
+        return handleHead(req, fsPath);
+      case "GET":
+        return handleGet(req, fsPath, pathname);
+      case "PUT":
+        return handlePut(ctx, req, fsPath);
+      case "DELETE":
+        return handleDelete(ctx, req, fsPath);
+      case "MKCOL":
+        return handleMkcol(bodyText, fsPath);
+      case "COPY":
+        return handleCopy(ctx, req, fsPath);
+      case "MOVE":
+        return handleMove(ctx, req, fsPath);
+      case "PROPFIND":
+        return handlePropfind(ctx, req, bodyText, fsPath, pathname);
+      case "PROPPATCH":
+        return handleProppatch(ctx, req, bodyText, fsPath, pathname);
+      case "LOCK":
+        return handleLock(ctx, req, bodyText, fsPath, pathname);
+      case "UNLOCK":
+        return handleUnlock(ctx, req, fsPath);
+      default:
+        return httpErr(405, "Method Not Allowed", { Allow: ALLOWED_METHODS });
+    }
+  }
+
   // ── Main handler ──────────────────────────────────────────────────────────
 
   async function handler(req: Request): Promise<Response> {
@@ -200,36 +239,7 @@ export async function createWebDavHandler(
     const bodyText = needsBody ? await req.text().catch(() => "") : "";
 
     try {
-      switch (method) {
-        case "OPTIONS":
-          return handleOptions();
-        case "HEAD":
-          return handleHead(req, fsPath);
-        case "GET":
-          return handleGet(req, fsPath, url.pathname);
-        case "PUT":
-          return handlePut(ctx, req, fsPath);
-        case "DELETE":
-          return handleDelete(ctx, req, fsPath);
-        case "MKCOL":
-          return handleMkcol(bodyText, fsPath);
-        case "COPY":
-          return handleCopy(ctx, req, fsPath);
-        case "MOVE":
-          return handleMove(ctx, req, fsPath);
-        case "PROPFIND":
-          return handlePropfind(ctx, req, bodyText, fsPath, url.pathname);
-        case "PROPPATCH":
-          return handleProppatch(ctx, req, bodyText, fsPath, url.pathname);
-        case "LOCK":
-          return handleLock(ctx, req, bodyText, fsPath, url.pathname);
-        case "UNLOCK":
-          return handleUnlock(ctx, req, fsPath);
-        default:
-          return httpErr(405, "Method Not Allowed", {
-            Allow: ALLOWED_METHODS,
-          });
-      }
+      return await dispatchMethod(method, req, fsPath, url.pathname, bodyText);
     } catch (e) {
       if (e instanceof HttpError) return httpErr(e.status, e.message);
       log("ERROR", "Unhandled error", {

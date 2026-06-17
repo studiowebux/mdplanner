@@ -13,6 +13,7 @@ import { MINDMAP_TABLE, rowToMindmap } from "../domains/mindmap/cache.ts";
 import { log } from "../singletons/logger.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -86,12 +87,12 @@ export class MindmapRepository extends CachedMarkdownRepository<
       id,
       title: title || "Untitled Mindmap",
       nodes,
-      project: fm.project != null ? String(fm.project) : undefined,
-      notes: fm.notes != null ? String(fm.notes) : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      project: fmStr(fm, "project"),
+      notes: fmStr(fm, "notes"),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
 
     const result = MindmapSchema.safeParse(candidate);

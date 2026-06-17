@@ -220,6 +220,56 @@ export const BillingSection: FC<{
 };
 
 // ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+const CustomerContactInfo: FC<{ customer: Customer }> = ({ customer }) => {
+  if (!customer.email && !customer.phone && !customer.company) return null;
+  return (
+    <div class="detail-section detail-info-row">
+      {customer.email && (
+        <InfoItem label="Email">
+          <a href={`mailto:${customer.email}`}>{customer.email}</a>
+        </InfoItem>
+      )}
+      {customer.phone && (
+        <InfoItem label="Phone">
+          <a href={`tel:${customer.phone}`}>{customer.phone}</a>
+        </InfoItem>
+      )}
+      {customer.company && (
+        <InfoItem label="Company">
+          <a href={`/companies?q=${encodeURIComponent(customer.company)}`}>
+            {customer.company}
+          </a>
+        </InfoItem>
+      )}
+    </div>
+  );
+};
+
+const CustomerAddress: FC<{ customer: Customer }> = ({ customer }) => {
+  const addr = customer.billingAddress;
+  if (
+    !addr ||
+    (!addr.street && !addr.city && !addr.state && !addr.postalCode &&
+      !addr.country)
+  ) return null;
+  return (
+    <section class="detail-section customer-detail__section">
+      <h2 class="section-heading">Billing Address</h2>
+      <address class="customer-detail__address">
+        {addr.street && <span>{addr.street}</span>}
+        <span>
+          {[addr.city, addr.state, addr.postalCode].filter(Boolean).join(", ")}
+        </span>
+        {addr.country && <span>{addr.country}</span>}
+      </address>
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
@@ -233,11 +283,6 @@ export const CustomerDetailView: FC<
 > = (
   { item: customer, quotes, invoices, editing = false, ...viewProps },
 ) => {
-  const addr = customer.billingAddress;
-  const hasContact = customer.email || customer.phone || customer.company;
-  const hasAddress = addr &&
-    (addr.street || addr.city || addr.state || addr.postalCode || addr.country);
-
   return (
     <MainLayout
       title={customer.name}
@@ -284,47 +329,8 @@ export const CustomerDetailView: FC<
         </header>
 
         <ArchivedBanner entity={customer} />
-
-        {/* -- Contact info ----------------------------------------------- */}
-        {hasContact && (
-          <div class="detail-section detail-info-row">
-            {customer.email && (
-              <InfoItem label="Email">
-                <a href={`mailto:${customer.email}`}>{customer.email}</a>
-              </InfoItem>
-            )}
-            {customer.phone && (
-              <InfoItem label="Phone">
-                <a href={`tel:${customer.phone}`}>{customer.phone}</a>
-              </InfoItem>
-            )}
-            {customer.company && (
-              <InfoItem label="Company">
-                <a
-                  href={`/companies?q=${encodeURIComponent(customer.company)}`}
-                >
-                  {customer.company}
-                </a>
-              </InfoItem>
-            )}
-          </div>
-        )}
-
-        {/* -- Billing address -------------------------------------------- */}
-        {hasAddress && (
-          <section class="detail-section customer-detail__section">
-            <h2 class="section-heading">Billing Address</h2>
-            <address class="customer-detail__address">
-              {addr.street && <span>{addr.street}</span>}
-              <span>
-                {[addr.city, addr.state, addr.postalCode]
-                  .filter(Boolean)
-                  .join(", ")}
-              </span>
-              {addr.country && <span>{addr.country}</span>}
-            </address>
-          </section>
-        )}
+        <CustomerContactInfo customer={customer} />
+        <CustomerAddress customer={customer} />
 
         {/* -- Notes ------------------------------------------------------ */}
         {editing
