@@ -14,6 +14,7 @@ import {
 } from "../domains/reflection/cache.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -80,18 +81,18 @@ export class ReflectionRepository extends CachedMarkdownRepository<
       id,
       title: title || "Untitled Reflection",
       period: (fm.period as Reflection["period"]) ?? "weekly",
-      date: fm.date ? String(fm.date) : new Date().toISOString().slice(0, 10),
-      templateId: fm.templateId != null ? String(fm.templateId) : undefined,
+      date: fmStr(fm, "date") ?? new Date().toISOString().slice(0, 10),
+      templateId: fmStr(fm, "templateId"),
       content,
       tags: Array.isArray(fm.tags)
         ? fm.tags.map(String)
         : fm.tags != null
         ? [String(fm.tags)]
         : [],
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

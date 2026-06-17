@@ -11,6 +11,7 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { INVESTOR_TABLE, rowToInvestor } from "../domains/investor/cache.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -69,26 +70,26 @@ export class InvestorRepository extends CachedMarkdownRepository<
 
     return {
       id,
-      name: fm.name ? String(fm.name) : "Untitled Investor",
+      name: fmStr(fm, "name") ?? "Untitled Investor",
       type: (fm.type as Investor["type"]) ?? "vc",
       stage: (fm.stage as Investor["stage"]) ?? "lead",
       status: (fm.status as Investor["status"]) ?? "not_started",
       amountTarget: fm.amountTarget != null
         ? Number(fm.amountTarget)
         : undefined,
-      contact: fm.contact != null ? String(fm.contact) : undefined,
-      introDate: fm.introDate != null ? String(fm.introDate) : undefined,
-      lastContact: fm.lastContact != null ? String(fm.lastContact) : undefined,
+      contact: fmStr(fm, "contact"),
+      introDate: fmStr(fm, "introDate"),
+      lastContact: fmStr(fm, "lastContact"),
       notes,
       tags: Array.isArray(fm.tags)
         ? fm.tags.map(String)
         : fm.tags != null
         ? [String(fm.tags)]
         : [],
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

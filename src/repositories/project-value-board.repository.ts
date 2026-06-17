@@ -16,6 +16,7 @@ import {
 } from "../domains/project-value-board/cache.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -130,14 +131,14 @@ export class ProjectValueBoardRepository extends CachedMarkdownRepository<
     return {
       id,
       title: title || "Untitled Value Board",
-      date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
+      date: fmStr(fm, "date") ?? new Date().toISOString().split("T")[0],
       ...sections,
-      project: fm.project != null ? String(fm.project) : undefined,
-      notes: fm.notes != null ? String(fm.notes) : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      project: fmStr(fm, "project"),
+      notes: fmStr(fm, "notes"),
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 
