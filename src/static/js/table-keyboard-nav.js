@@ -102,9 +102,36 @@
     );
   }
 
+  function buildKeyActions() {
+    var actions = {};
+    actions[KEY_DOWN] = function (spec, rows) {
+      setFocus(spec, focusedIndex < 0 ? 0 : focusedIndex + 1);
+    };
+    actions[KEY_UP] = function (spec, rows) {
+      setFocus(spec, focusedIndex < 0 ? rows.length - 1 : focusedIndex - 1);
+    };
+    actions[KEY_TOP] = function (spec) {
+      setFocus(spec, 0);
+    };
+    actions[KEY_BOTTOM] = function (spec, rows) {
+      setFocus(spec, rows.length - 1);
+    };
+    actions["Enter"] = function (spec, rows) {
+      if (focusedIndex >= 0 && rows[focusedIndex]) {
+        spec.navigate(rows[focusedIndex]);
+      }
+    };
+    return actions;
+  }
+
+  var KEY_ACTIONS = buildKeyActions();
+
   document.addEventListener("keydown", function (e) {
     if (inputFocused()) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    var action = KEY_ACTIONS[e.key];
+    if (!action) return;
 
     var spec = getActiveSpec();
     if (!spec) return;
@@ -112,25 +139,8 @@
     var rows = getRows(spec);
     if (rows.length === 0) return;
 
-    var key = e.key;
-    if (key === KEY_DOWN) {
-      e.preventDefault();
-      setFocus(spec, focusedIndex < 0 ? 0 : focusedIndex + 1);
-    } else if (key === KEY_UP) {
-      e.preventDefault();
-      setFocus(spec, focusedIndex < 0 ? rows.length - 1 : focusedIndex - 1);
-    } else if (key === KEY_TOP) {
-      e.preventDefault();
-      setFocus(spec, 0);
-    } else if (key === KEY_BOTTOM) {
-      e.preventDefault();
-      setFocus(spec, rows.length - 1);
-    } else if (key === "Enter") {
-      if (focusedIndex >= 0 && rows[focusedIndex]) {
-        e.preventDefault();
-        spec.navigate(rows[focusedIndex]);
-      }
-    }
+    e.preventDefault();
+    action(spec, rows);
   });
 
   // Reset when htmx swaps in new row content.
