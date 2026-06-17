@@ -14,6 +14,7 @@ import { BillingTotals } from "./components/billing-totals.tsx";
 import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
+import { PrintBillTo } from "./components/print-bill-to.tsx";
 
 type Props = {
   invoice: Invoice;
@@ -27,7 +28,6 @@ export const InvoicePrintView: FC<Props> = (
   { invoice, displayStatus, billingConfig, customer, nonce },
 ) => {
   const title = `${invoice.number} — ${invoice.title}`;
-  const addr = customer?.billingAddress;
 
   return (
     <html lang="en">
@@ -85,32 +85,7 @@ export const InvoicePrintView: FC<Props> = (
           </header>
 
           {/* Bill-to block */}
-          {customer && (
-            <section class="invoice-print__bill-to">
-              <h2 class="invoice-print__bill-to-heading">Bill To</h2>
-              <address class="invoice-print__bill-to-address">
-                {customer.name && (
-                  <span class="invoice-print__bill-to-name">
-                    {customer.name}
-                  </span>
-                )}
-                {customer.company && customer.company !== customer.name && (
-                  <span>{customer.company}</span>
-                )}
-                {addr?.street && <span>{addr.street}</span>}
-                {(addr?.city || addr?.state || addr?.postalCode) && (
-                  <span>
-                    {[addr.city, addr.state, addr.postalCode]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
-                )}
-                {addr?.country && <span>{addr.country}</span>}
-                {customer.email && <span>{customer.email}</span>}
-                {customer.phone && <span>{customer.phone}</span>}
-              </address>
-            </section>
-          )}
+          <PrintBillTo customer={customer} />
 
           {/* Short description / summary */}
           {invoice.description && (

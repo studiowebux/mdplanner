@@ -15,6 +15,7 @@ import {
 import { ONBOARDING_BODY_KEYS } from "../domains/onboarding/constants.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -66,24 +67,18 @@ export class OnboardingRepository extends CachedMarkdownRepository<
 
     return {
       id,
-      employeeName: fm.employeeName ? String(fm.employeeName) : "",
-      role: fm.role ? String(fm.role) : "",
-      startDate: fm.start_date != null
-        ? String(fm.start_date)
-        : (fm.startDate != null ? String(fm.startDate) : undefined),
-      personId: fm.personId != null
-        ? String(fm.personId)
-        : (fm.person_id != null ? String(fm.person_id) : undefined),
+      employeeName: fmStr(fm, "employeeName") ?? "",
+      role: fmStr(fm, "role") ?? "",
+      startDate: fmStr(fm, "start_date", "startDate"),
+      personId: fmStr(fm, "personId", "person_id"),
       notes: body.trim() || undefined,
       steps: this.parseSteps(fm.steps),
-      createdAt: fm.createdAt
-        ? String(fm.createdAt)
-        : (fm.created_at ? String(fm.created_at) : new Date().toISOString()),
-      updatedAt: fm.updatedAt
-        ? String(fm.updatedAt)
-        : (fm.updated_at ? String(fm.updated_at) : new Date().toISOString()),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt", "created_at") ??
+        new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt", "updated_at") ??
+        new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

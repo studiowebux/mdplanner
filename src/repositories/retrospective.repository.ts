@@ -16,6 +16,8 @@ import {
 import { RETROSPECTIVE_BODY_KEYS } from "../domains/retrospective/constants.ts";
 
 import {
+  fmStr,
+  fmStrArr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -86,20 +88,18 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
     return {
       id,
       title,
-      date: fm.date != null ? String(fm.date) : undefined,
+      date: fmStr(fm, "date"),
       status: (fm.status === "closed" ? "closed" : "open") as
         | "open"
         | "closed",
       continue: sections.continue ?? [],
       stop: sections.stop ?? [],
       start: sections.start ?? [],
-      participants: Array.isArray(fm.participants)
-        ? fm.participants.map(String).filter(Boolean)
-        : [],
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      participants: fmStrArr(fm, "participants")?.filter(Boolean) ?? [],
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

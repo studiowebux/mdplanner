@@ -12,6 +12,7 @@ import { FINANCE_TABLE, rowToFinance } from "../domains/finance/cache.ts";
 import { FINANCE_BODY_KEYS } from "../domains/finance/constants.ts";
 
 import {
+  fmStr,
   resolveEntityId,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -57,7 +58,7 @@ export class FinanceRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = resolveEntityId(filename, fm);
 
-    const typeRaw = fm.type != null ? String(fm.type) : undefined;
+    const typeRaw = fmStr(fm, "type");
     const type: FinanceType =
       typeRaw && (FINANCE_TYPES as readonly string[]).includes(typeRaw)
         ? (typeRaw as FinanceType)
@@ -72,14 +73,14 @@ export class FinanceRepository extends CachedMarkdownRepository<
       title: fm.title ? String(fm.title) : "Untitled Entry",
       type,
       amount: fm.amount != null ? Number(fm.amount) : 0,
-      currency: fm.currency != null ? String(fm.currency) : undefined,
-      date: fm.date != null ? String(fm.date) : undefined,
+      currency: fmStr(fm, "currency"),
+      date: fmStr(fm, "date"),
       description: body.trim() || undefined,
       tags,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

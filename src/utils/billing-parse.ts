@@ -3,7 +3,7 @@
 // notes). Keeps invoice.repository and quote.repository in lockstep.
 
 import type { LineItem } from "../types/billing.types.ts";
-import { mapArrayFromFm } from "./frontmatter-mapper.ts";
+import { fmStr, mapArrayFromFm } from "./frontmatter-mapper.ts";
 
 /**
  * Normalize a frontmatter `lineItems` array into typed `LineItem[]`. Nested
@@ -14,17 +14,17 @@ function parseLineItem(li: Record<string, unknown>): LineItem {
     id: String(li.id ?? ""),
     type: String(li.type ?? "service"),
     description: String(li.description ?? ""),
-    group: li.group != null ? String(li.group) : undefined,
+    group: fmStr(li, "group"),
     quantity: li.quantity != null ? Number(li.quantity) : undefined,
-    unit: li.unit != null ? String(li.unit) as LineItem["unit"] : undefined,
+    unit: fmStr(li, "unit") as LineItem["unit"],
     unitRate: li.unitRate != null ? Number(li.unitRate) : undefined,
     discount: li.discount != null ? Number(li.discount) : undefined,
-    discountType: li.discountType as LineItem["discountType"] ?? undefined,
+    discountType: li.discountType as LineItem["discountType"],
     taxable: li.taxable != null ? Boolean(li.taxable) : undefined,
     optional: li.optional != null ? Boolean(li.optional) : undefined,
-    rateId: li.rateId != null ? String(li.rateId) : undefined,
-    taskId: li.taskId != null ? String(li.taskId) : undefined,
-    notes: li.notes != null ? String(li.notes) : undefined,
+    rateId: fmStr(li, "rateId"),
+    taskId: fmStr(li, "taskId"),
+    notes: fmStr(li, "notes"),
     amount: Number(li.amount ?? 0),
   };
 }

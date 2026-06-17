@@ -84,7 +84,7 @@ export class ContactRepository extends CachedMarkdownRepository<
       notes = bodyText || undefined;
     }
 
-    const typeRaw = fm.type != null ? String(fm.type) : undefined;
+    const typeRaw = fmStr(fm, "type");
     const type = typeRaw && CONTACT_TYPES.includes(typeRaw as ContactType)
       ? (typeRaw as ContactType)
       : undefined;

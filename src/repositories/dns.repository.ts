@@ -10,7 +10,13 @@ import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { DNS_TABLE, rowToDnsDomain } from "../domains/dns/cache.ts";
 import { DNS_BODY_KEYS } from "../domains/dns/constants.ts";
 
-import { stampAuditFields } from "../utils/frontmatter-mapper.ts";
+import {
+  fmBool,
+  fmNum,
+  fmStr,
+  fmStrArr,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
 /** Persists DNS domains as markdown with a SQLite cache mirror; records are managed in the body (add/update/deleteRecord, upsertByDomain). */
 export class DnsRepository extends CachedMarkdownRepository<
   DnsDomain,
@@ -121,15 +127,11 @@ export class DnsRepository extends CachedMarkdownRepository<
     return {
       id,
       domain: String(fm.domain),
-      expiryDate: fm.expiryDate != null ? String(fm.expiryDate) : undefined,
-      autoRenew: typeof fm.autoRenew === "boolean" ? fm.autoRenew : undefined,
-      renewalCostUsd: typeof fm.renewalCostUsd === "number"
-        ? fm.renewalCostUsd
-        : undefined,
-      provider: fm.provider != null ? String(fm.provider) : undefined,
-      nameservers: Array.isArray(fm.nameservers)
-        ? fm.nameservers.map(String)
-        : undefined,
+      expiryDate: fmStr(fm, "expiryDate"),
+      autoRenew: fmBool(fm, "autoRenew"),
+      renewalCostUsd: fmNum(fm, "renewalCostUsd"),
+      provider: fmStr(fm, "provider"),
+      nameservers: fmStrArr(fm, "nameservers"),
       dnsRecords: Array.isArray(fm.dnsRecords)
         ? (fm.dnsRecords as Record<string, unknown>[]).map((r) => ({
           type: String(r.type),
@@ -139,16 +141,14 @@ export class DnsRepository extends CachedMarkdownRepository<
           ...(r.proxied !== undefined ? { proxied: Boolean(r.proxied) } : {}),
         }))
         : undefined,
-      status: fm.status != null ? String(fm.status) : undefined,
-      lastFetchedAt: fm.lastFetchedAt != null
-        ? String(fm.lastFetchedAt)
-        : undefined,
-      project: fm.project != null ? String(fm.project) : undefined,
+      status: fmStr(fm, "status"),
+      lastFetchedAt: fmStr(fm, "lastFetchedAt"),
+      project: fmStr(fm, "project"),
       notes: body.trim() || undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
     };
   }
 

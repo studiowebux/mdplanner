@@ -15,6 +15,7 @@ import { BillingTotals } from "./components/billing-totals.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
+import { PrintBillTo } from "./components/print-bill-to.tsx";
 
 type Props = {
   quote: Quote;
@@ -27,7 +28,6 @@ export const QuotePrintView: FC<Props> = (
   { quote, billingConfig, customer, nonce },
 ) => {
   const title = `${quote.number} — ${quote.title}`;
-  const addr = customer?.billingAddress;
 
   return (
     <html lang="en">
@@ -85,32 +85,7 @@ export const QuotePrintView: FC<Props> = (
           </header>
 
           {/* Bill-to block */}
-          {customer && (
-            <section class="invoice-print__bill-to">
-              <h2 class="invoice-print__bill-to-heading">Bill To</h2>
-              <address class="invoice-print__bill-to-address">
-                {customer.name && (
-                  <span class="invoice-print__bill-to-name">
-                    {customer.name}
-                  </span>
-                )}
-                {customer.company && customer.company !== customer.name && (
-                  <span>{customer.company}</span>
-                )}
-                {addr?.street && <span>{addr.street}</span>}
-                {(addr?.city || addr?.state || addr?.postalCode) && (
-                  <span>
-                    {[addr.city, addr.state, addr.postalCode]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
-                )}
-                {addr?.country && <span>{addr.country}</span>}
-                {customer.email && <span>{customer.email}</span>}
-                {customer.phone && <span>{customer.phone}</span>}
-              </address>
-            </section>
-          )}
+          <PrintBillTo customer={customer} />
 
           {/* Line items */}
           <section class="invoice-print__items">

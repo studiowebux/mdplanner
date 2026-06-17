@@ -78,50 +78,56 @@ function smartTimeBound(goal: Goal): string {
   return "No timeline";
 }
 
-function evaluateSmart(goal: Goal): SmartCriterion[] {
+function evalSpecific(goal: Goal): Pick<SmartCriterion, "status" | "value"> {
   const title = (goal.title ?? "").trim();
-  const description = (goal.description ?? "").trim();
-  const project = (goal.project ?? "").trim();
+  return {
+    status: title.length > 10 ? "met" : "unmet",
+    value: title.length > 0 ? title : "Add a clearer title",
+  };
+}
 
-  const measurableValue = smartMeasurable(goal);
+function evalMeasurable(goal: Goal): Pick<SmartCriterion, "status" | "value"> {
   const isMeasurable = (goal.kpi ?? "").trim().length > 0 ||
     (goal.kpiMetric ?? "").trim().length > 0 ||
     goal.kpiTarget != null || goal.progress != null;
-  const timeBound = smartTimeBound(goal);
+  return {
+    status: isMeasurable ? "met" : "unmet",
+    value: smartMeasurable(goal),
+  };
+}
 
+function evalAchievable(goal: Goal): Pick<SmartCriterion, "status" | "value"> {
+  const description = (goal.description ?? "").trim();
+  return {
+    status: "neutral",
+    value: description.length > 30
+      ? "Rationale provided in description"
+      : "Add rationale to description",
+  };
+}
+
+function evalRelevant(goal: Goal): Pick<SmartCriterion, "status" | "value"> {
+  const project = (goal.project ?? "").trim();
+  return {
+    status: project.length > 0 ? "met" : "unmet",
+    value: project.length > 0 ? project : "No linked project",
+  };
+}
+
+function evalTimeBound(goal: Goal): Pick<SmartCriterion, "status" | "value"> {
+  return {
+    status: goal.startDate && goal.endDate ? "met" : "unmet",
+    value: smartTimeBound(goal),
+  };
+}
+
+function evaluateSmart(goal: Goal): SmartCriterion[] {
   return [
-    {
-      key: "S",
-      name: "Specific",
-      status: title.length > 10 ? "met" : "unmet",
-      value: title.length > 0 ? title : "Add a clearer title",
-    },
-    {
-      key: "M",
-      name: "Measurable",
-      status: isMeasurable ? "met" : "unmet",
-      value: measurableValue,
-    },
-    {
-      key: "A",
-      name: "Achievable",
-      status: "neutral",
-      value: description.length > 30
-        ? "Rationale provided in description"
-        : "Add rationale to description",
-    },
-    {
-      key: "R",
-      name: "Relevant",
-      status: project.length > 0 ? "met" : "unmet",
-      value: project.length > 0 ? project : "No linked project",
-    },
-    {
-      key: "T",
-      name: "Time-bound",
-      status: goal.startDate && goal.endDate ? "met" : "unmet",
-      value: timeBound,
-    },
+    { key: "S", name: "Specific", ...evalSpecific(goal) },
+    { key: "M", name: "Measurable", ...evalMeasurable(goal) },
+    { key: "A", name: "Achievable", ...evalAchievable(goal) },
+    { key: "R", name: "Relevant", ...evalRelevant(goal) },
+    { key: "T", name: "Time-bound", ...evalTimeBound(goal) },
   ];
 }
 
