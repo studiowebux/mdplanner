@@ -921,41 +921,27 @@
     // on the element with sse-connect (<main>). Parse the JSON data payload
     // and move/resize the matching note directly — no flash, no full refresh.
 
-    document.addEventListener("htmx:sseMessage", function (e) {
-      if (!isOnCanvas()) return;
-      if (!e.detail) return;
-
-      // ── sticky-note.content — update text in-place, skip if focused ──
-      if (e.detail.type === "sticky-note.content") {
-        var raw = e.detail.data;
-        if (!raw) return;
-        var cd;
-        try {
-          cd = JSON.parse(raw);
-        } catch (_) {
-          return;
-        }
-        var cNoteEl = document.querySelector(
-          "[data-canvas-note][data-sticky-id='" + cd.id + "']",
-        );
-        if (!cNoteEl) return;
-        var cContent = cNoteEl.querySelector("[data-sticky-content]");
-        if (!cContent) return;
-        // Skip if this note's editor is currently focused — user is typing
-        if (document.activeElement === cContent) return;
-        cContent.textContent = cd.content;
-        return;
-      }
-
-      if (e.detail.type !== "sticky-note.moved") return;
-      var raw = e.detail.data;
-      if (!raw) return;
-      var data;
+    function parseSseData(raw) {
       try {
-        data = JSON.parse(raw);
+        return JSON.parse(raw);
       } catch (_) {
-        return;
+        return null;
       }
+    }
+
+    function handleStickyContent(data) {
+      var noteEl = document.querySelector(
+        "[data-canvas-note][data-sticky-id='" + data.id + "']",
+      );
+      if (!noteEl) return;
+      var contentEl = noteEl.querySelector("[data-sticky-content]");
+      if (!contentEl) return;
+      // Skip if this note's editor is currently focused — user is typing
+      if (document.activeElement === contentEl) return;
+      contentEl.textContent = data.content;
+    }
+
+    function handleStickyMoved(data) {
       var noteEl = document.querySelector(
         "[data-canvas-note][data-sticky-id='" + data.id + "']",
       );
@@ -980,6 +966,25 @@
         noteGeometry[data.id].w = data.width;
         noteGeometry[data.id].h = data.height;
       }
+    }
+
+    var SSE_HANDLERS = {
+      "sticky-note.content": handleStickyContent,
+      "sticky-note.moved": handleStickyMoved,
+    };
+
+    // ── sticky_note.moved — apply geometry in-place, no DOM swap ────────
+    // htmx SSE ext dispatches a CustomEvent named after the SSE event type
+    // on the element with sse-connect (<main>). Parse the JSON data payload
+    // and move/resize the matching note directly — no flash, no full refresh.
+    document.addEventListener("htmx:sseMessage", function (e) {
+      if (!isOnCanvas()) return;
+      if (!e.detail) return;
+      var handler = SSE_HANDLERS[e.detail.type];
+      if (!handler) return;
+      var data = parseSseData(e.detail.data);
+      if (!data) return;
+      handler(data);
     });
 
     // ── Block htmx SSE swap during active gesture ───────────────────────
