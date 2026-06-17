@@ -92,6 +92,45 @@ export interface PropPatchOp {
   value: string;
 }
 
+import { corsHeaders } from "./http.ts";
+import type { Lock } from "./locks.ts";
+
+export function lockXmlResponse(
+  lock: Lock,
+  href: string,
+  _isNew = false,
+): Response {
+  const secs = Math.max(
+    0,
+    Math.floor((lock.timeout - Date.now()) / 1000),
+  );
+  return new Response(
+    `<?xml version="1.0" encoding="utf-8"?>
+<D:prop xmlns:D="DAV:">
+  <D:lockdiscovery>
+    <D:activelock>
+      <D:locktype><D:write/></D:locktype>
+      <D:lockscope><D:${lock.scope}/></D:lockscope>
+      <D:depth>${lock.depth}</D:depth>
+      <D:owner>${xe(lock.owner)}</D:owner>
+      <D:timeout>Second-${secs}</D:timeout>
+      <D:locktoken><D:href>${lock.token}</D:href></D:locktoken>
+      <D:lockroot><D:href>${xe(href)}</D:href></D:lockroot>
+    </D:activelock>
+  </D:lockdiscovery>
+</D:prop>`,
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml;charset=utf-8",
+        "Lock-Token": `<${lock.token}>`,
+        DAV: "1, 2, 3",
+        ...corsHeaders(),
+      },
+    },
+  );
+}
+
 export function parsePropPatch(body: string): PropPatchOp[] {
   const ops: PropPatchOp[] = [];
   const ns: Record<string, string> = {};

@@ -30,16 +30,15 @@ import { copyResource, fsStat } from "./fs-ops.ts";
 import { createLogger } from "./log.ts";
 import { LockStore } from "./locks.ts";
 import { DeadPropStore } from "./props.ts";
+import { handleGet, handleHead } from "./get-helpers.ts";
+import { handlePropfind } from "./propfind.ts";
 import {
   handleCopy,
   handleDelete,
-  handleGet,
-  handleHead,
   handleLock,
   handleMkcol,
   handleMove,
   handleOptions,
-  handlePropfind,
   handleProppatch,
   handlePut,
   handleUnlock,
