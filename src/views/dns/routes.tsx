@@ -11,7 +11,8 @@ import {
   DnsRecordsTable,
 } from "../dns-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
-import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { escapeHeaderUnicode, hxTrigger } from "../../utils/hx-trigger.ts";
+import { log } from "../../singletons/logger.ts";
 import type { DnsRecord } from "../../types/dns.types.ts";
 
 export const dnsRouter = createDomainRoutes(dnsConfig);
@@ -52,17 +53,20 @@ dnsRouter.post("/sync", async (c) => {
     return new Response(null, {
       status: 200,
       headers: {
-        "HX-Trigger": JSON.stringify({
+        "HX-Trigger": escapeHeaderUnicode(JSON.stringify({
           showToast: {
             type: "success",
             message:
               `Synced ${result.synced} domain(s): ${result.created} created, ${result.updated} updated`,
           },
-        }),
+        })),
       },
     });
   } catch (err) {
     const raw = err instanceof Error ? err.message : String(err);
+    // Keep the full error server-side (the Cloudflare response body never
+    // echoes the bearer token, so `raw` is leak-safe to log).
+    log.error("[dns] Cloudflare sync failed:", raw);
     let message: string;
     if (raw.includes("CLOUDFLARE_API_ERROR")) {
       if (raw.includes("403") || /auth/i.test(raw)) {
@@ -75,15 +79,17 @@ dnsRouter.post("/sync", async (c) => {
             "",
           ).trim();
       }
+    } else if (raw.includes("CLOUDFLARE_TOKEN_MISSING")) {
+      message = "Cloudflare token not set — add it in Settings → Project";
     } else {
       message = raw;
     }
     return new Response(null, {
       status: 200,
       headers: {
-        "HX-Trigger": JSON.stringify({
+        "HX-Trigger": escapeHeaderUnicode(JSON.stringify({
           showToast: { type: "error", message },
-        }),
+        })),
       },
     });
   }

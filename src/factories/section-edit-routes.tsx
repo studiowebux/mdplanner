@@ -13,6 +13,7 @@ import type { FC } from "hono/jsx";
 import type { AppContext, AppVariables, ViewProps } from "../types/app.ts";
 import type { DomainService, Entity } from "./domain.types.ts";
 import { viewProps } from "../middleware/view-props.ts";
+import { escapeHeaderUnicode } from "../utils/hx-trigger.ts";
 
 /** Config for a detail page's section-level inline-edit routes (per-section PUT). The service publishes "<ssePrefix>.updated" after each mutation. */
 export interface SectionEditConfig<T extends Entity, C, U> {
@@ -67,7 +68,9 @@ export function registerSectionEditRoutes<T extends Entity, C, U>(
   function toast(c: AppContext, message: string): void {
     c.header(
       "HX-Trigger",
-      JSON.stringify({ showToast: { type: "success", message } }),
+      escapeHeaderUnicode(
+        JSON.stringify({ showToast: { type: "success", message } }),
+      ),
     );
   }
 
