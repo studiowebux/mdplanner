@@ -104,7 +104,8 @@ A quote can only be converted once. The button disappears after conversion; a
 ## 3. Invoices
 
 An invoice bills a customer for an accepted quote. It stores only its own
-metadata — line items and totals are always derived from the linked quote.
+metadata — line items, totals, and the footer (Terms) are always derived from
+the linked quote.
 
 ### Statuses
 
@@ -122,7 +123,9 @@ metadata — line items and totals are always derived from the linked quote.
 - `paid_amount` — running total of payments recorded (auto-updated)
 - `due_date` + `payment_terms` — e.g. `NET 30`, `Due on receipt`
 - `description` — optional short client-visible summary above line items
-- `notes` / `footer` — stored in the markdown body
+- `notes` — internal, stored in the markdown body
+- `footer` (Terms) — derived from the linked quote's footer; set an invoice
+  footer only to override the quote's terms for this invoice
 
 ### To Change Line Items
 

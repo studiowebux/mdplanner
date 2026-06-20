@@ -1,6 +1,7 @@
 // Invoice service — business logic over InvoiceRepository.
-// Invoices derive from a quote: customer, line items, and totals are hydrated
-// from the referenced quote at read time (never stored on the invoice).
+// Invoices derive from a quote: customer, line items, totals, and footer (Terms)
+// are hydrated from the referenced quote at read time (never stored on the
+// invoice — the invoice's own footer, if set, overrides as a per-invoice term).
 
 import type { InvoiceRepository } from "../repositories/invoice.repository.ts";
 import type {
@@ -33,7 +34,7 @@ export class InvoiceService extends BaseService<
   // Quote-derived hydration — the invoice owns no line items or totals.
   // ---------------------------------------------------------------------------
 
-  /** Inject customer, line items, and totals from a (pre-loaded) quote. */
+  /** Inject customer, line items, totals, and footer from a (pre-loaded) quote. */
   private hydrateWith(invoice: Invoice, quote: Quote | undefined): Invoice {
     if (!quote) {
       return {
@@ -50,6 +51,7 @@ export class InvoiceService extends BaseService<
       customerId: quote.customerId,
       projectId: invoice.projectId ?? quote.projectId,
       currency: invoice.currency ?? quote.currency,
+      footer: invoice.footer ?? quote.footer,
       lineItems: quote.lineItems.filter((li) => !li.optional),
       subtotal: quote.subtotal,
       tax: quote.tax,
