@@ -129,7 +129,7 @@ export const InvoicePrintView: FC<Props> = (
           {invoice.footer && (
             <section class="invoice-print__terms">
               <h2 class="invoice-print__terms-heading">Terms and Conditions</h2>
-              <p>{invoice.footer}</p>
+              <p class="invoice-print__terms-text">{invoice.footer}</p>
             </section>
           )}
 
@@ -145,7 +145,7 @@ export const InvoicePrintView: FC<Props> = (
           {/* Export fingerprint: generation date + checksum of the stored md. */}
           <p class="invoice-print__checksum">
             Generated {formatDate(generatedAt)}
-            {checksum && <>· SHA-256 {checksum}</>}
+            {checksum && <>{" · SHA-256 "}{checksum}</>}
           </p>
         </main>
       </body>

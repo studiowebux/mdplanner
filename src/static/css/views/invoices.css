@@ -234,10 +234,16 @@
   white-space: pre-line;
 }
 
-/* Footer / terms */
+/* Fine-print Terms body — intentionally small on the export. */
+.invoice-print__terms .invoice-print__terms-text {
+  font-size: 9px;
+  line-height: var(--line-height-normal);
+}
+
+/* Footer / terms — tight against the Terms block above it. */
 .invoice-print__footer {
   border-top: var(--border-width) solid var(--color-border-default);
-  padding-top: var(--space-md);
+  padding-top: var(--space-xs);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
@@ -248,9 +254,11 @@
   white-space: pre-line;
 }
 
-/* Export fingerprint line — generation date + content checksum. */
+/* Export fingerprint line — generation date + content checksum.
+   Negative top margin pulls it tight under the footer (counteracts the
+   flex column gap between the two). */
 .invoice-print__checksum {
-  margin: 0;
+  margin: calc(-1 * var(--space-sm)) 0 0;
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
@@ -286,5 +294,26 @@
 .invoice-print .markdown-body h3,
 .invoice-print .markdown-body p,
 .invoice-print .markdown-body li {
+  font-size: var(--font-size-sm);
+}
+
+/* Compact the sender (business) block on the export — name slightly smaller,
+   address + tax/registration numbers as fine print. */
+.invoice-print .billing-document-header__company {
+  font-size: var(--font-size-sm);
+}
+
+.invoice-print .billing-document-header__address,
+.invoice-print .billing-document-header__numbers,
+.invoice-print .billing-document-header__number {
+  font-size: 10px;
+}
+
+/* Compact the totals (subtotal/tax/discount) — keep the Total row prominent. */
+.invoice-print .billing-totals__row {
+  font-size: 10px;
+}
+
+.invoice-print .billing-totals__row--total {
   font-size: var(--font-size-sm);
 }
