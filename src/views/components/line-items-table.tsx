@@ -102,7 +102,7 @@ const LineItemRow: FC<{ item: LineItem; showOptional?: boolean }> = ({
   );
 };
 
-function groupSubtotal(items: LineItem[]): number {
+export function groupSubtotal(items: LineItem[]): number {
   return items
     .filter((i) => i.type !== "text" && !i.optional)
     .reduce((sum, i) => sum + (i.amount ?? 0), 0);

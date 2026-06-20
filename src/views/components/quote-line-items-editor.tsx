@@ -9,6 +9,7 @@ import type { LineItem } from "../../types/billing.types.ts";
 import { LINE_ITEM_TYPES } from "../../types/billing.types.ts";
 import { formatCurrency } from "../../utils/format.ts";
 import { BillingTotals } from "./billing-totals.tsx";
+import { groupSubtotal } from "./line-items-table.tsx";
 
 /** Fields the inline editor allows editing. Unit/discount stay in sidenav. */
 export const EDITABLE_LINE_ITEM_FIELDS = [
@@ -336,6 +337,8 @@ function groupByIndex(
 /** Full editable line-items section — re-rendered on every add/remove. */
 export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
   const groups = groupByIndex(quote.lineItems);
+  const showGroupSubtotals = groups.length > 1 &&
+    groups.some(({ group }) => group !== null);
   const distinctGroups = [
     ...new Set(
       quote.lineItems.map((li) => li.group).filter((g): g is string => !!g),
@@ -400,6 +403,21 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
                     distinctTypes={distinctTypes}
                   />
                 ))}
+                {showGroupSubtotals && group && (
+                  <tr class="line-items-table__group-subtotal">
+                    <td
+                      colSpan={5}
+                      class="line-items-table__group-subtotal-label"
+                    >
+                      {group} subtotal
+                    </td>
+                    <td class="line-items-table__amount line-items-table__group-subtotal-amount">
+                      {formatCurrency(groupSubtotal(rows.map((r) => r.item))) ||
+                        "$0"}
+                    </td>
+                    <td class="qli-cell qli-cell--actions" />
+                  </tr>
+                )}
               </>
             ))}
           </tbody>
