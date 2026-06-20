@@ -70,6 +70,14 @@ export const InvoicePrintView: FC<Props> = (
                     </dd>
                   </div>
                 )}
+                {invoice.paymentTerms && (
+                  <div class="invoice-print__meta-row">
+                    <dt class="invoice-print__meta-label">Terms</dt>
+                    <dd class="invoice-print__meta-value">
+                      {invoice.paymentTerms}
+                    </dd>
+                  </div>
+                )}
                 <div class="invoice-print__meta-row">
                   <dt class="invoice-print__meta-label">Status</dt>
                   <dd class="invoice-print__meta-value">

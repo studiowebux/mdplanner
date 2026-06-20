@@ -224,3 +224,24 @@
   /* Preserve author line breaks in plain-text terms/footer. */
   white-space: pre-line;
 }
+
+/* Keep notes/markdown typography aligned with the compact print scale so the
+   exported PDF never shows oversized headings — markdown h1 otherwise falls
+   back to the browser default (~2em) and dwarfs the rest of the document. */
+.invoice-print .section-heading {
+  font-size: var(--font-size-sm);
+}
+
+.invoice-print .markdown-body h1 {
+  font-size: var(--font-size-base);
+}
+
+.invoice-print .markdown-body h2 {
+  font-size: var(--font-size-sm);
+}
+
+.invoice-print .markdown-body h3,
+.invoice-print .markdown-body p,
+.invoice-print .markdown-body li {
+  font-size: var(--font-size-sm);
+}

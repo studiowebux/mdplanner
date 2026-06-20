@@ -645,6 +645,13 @@ a.badge:hover {
    Markdown content — restores heading/list styles inside rendered markdown
    ------------------------------------------------------------------------- */
 
+.markdown-body h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+
 .markdown-body h2 {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
