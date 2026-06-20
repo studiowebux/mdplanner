@@ -82,6 +82,8 @@ const InvoiceHeader: FC<
           type="button"
           hx-post={`/invoices/${invoice.id}/send`}
           hx-confirm="Send this invoice?"
+          data-confirm-title="Send Invoice"
+          data-confirm-label="Send"
           hx-swap="none"
         >
           Send

@@ -49,6 +49,8 @@ function vacationActionBtns(
             hx-post={`/vacation/${row.id}/approve`}
             hx-swap="none"
             hx-confirm="Approve this request?"
+            data-confirm-title="Approve Request"
+            data-confirm-label="Approve"
           >
             Approve
           </button>
@@ -58,6 +60,8 @@ function vacationActionBtns(
             hx-post={`/vacation/${row.id}/reject`}
             hx-swap="none"
             hx-confirm="Reject this request?"
+            data-confirm-title="Reject Request"
+            data-confirm-label="Reject"
           >
             Reject
           </button>
