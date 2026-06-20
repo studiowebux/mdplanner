@@ -228,8 +228,19 @@
 /* Keep notes/markdown typography aligned with the compact print scale so the
    exported PDF never shows oversized headings — markdown h1 otherwise falls
    back to the browser default (~2em) and dwarfs the rest of the document. */
+/* The Notes block reuses the screen `.detail-section` card (background, border,
+   padding) — strip that chrome so it renders flat like the rest of the export
+   instead of a boxed, over-padded panel in the PDF. */
+.invoice-print .detail-section {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
 .invoice-print .section-heading {
   font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-xs) 0;
 }
 
 .invoice-print .markdown-body h1 {
