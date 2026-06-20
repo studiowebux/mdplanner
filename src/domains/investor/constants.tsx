@@ -175,7 +175,7 @@ export const INVESTOR_FORM_FIELDS: FieldDef[] = [
     })),
   },
   {
-    type: "number",
+    type: "money",
     name: "amountTarget",
     label: "Target Amount ($)",
   },

@@ -18,6 +18,24 @@ Deno.test("parseMoney - strips currency symbols and thousands separators", () =>
   assertEquals(parseMoney(" $ 1,000 "), 1000);
 });
 
+Deno.test("parseMoney - comma decimal separator", () => {
+  assertEquals(parseMoney("125,50"), 125.5);
+  assertEquals(parseMoney("0,99"), 0.99);
+  assertEquals(parseMoney("1,2"), 1.2);
+});
+
+Deno.test("parseMoney - mixed dot/comma resolves rightmost as decimal", () => {
+  assertEquals(parseMoney("1,234.56"), 1234.56);
+  assertEquals(parseMoney("1.234,56"), 1234.56);
+  assertEquals(parseMoney("1.234.567,89"), 1234567.89);
+});
+
+Deno.test("parseMoney - comma-only thousands stay integer", () => {
+  assertEquals(parseMoney("1,234"), 1234);
+  assertEquals(parseMoney("1,234,567"), 1234567);
+  assertEquals(parseMoney("$1,234.50"), 1234.5);
+});
+
 Deno.test("parseMoney - empty and non-numeric return undefined", () => {
   assertEquals(parseMoney(""), undefined);
   assertEquals(parseMoney("   "), undefined);

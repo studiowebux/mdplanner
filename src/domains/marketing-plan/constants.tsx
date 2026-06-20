@@ -119,7 +119,7 @@ export const MKTPLAN_FORM_FIELDS: FieldDef[] = [
     options: MKTPLAN_STATUS_OPTIONS,
   },
   { type: "textarea", name: "description", label: "Description", rows: 3 },
-  { type: "number", name: "budgetTotal", label: "Total budget" },
+  { type: "money", name: "budgetTotal", label: "Total budget" },
   {
     type: "text",
     name: "budgetCurrency",
@@ -179,7 +179,7 @@ export const MKTPLAN_FORM_FIELDS: FieldDef[] = [
         label: "Name",
         placeholder: "e.g. Social Media",
       },
-      { type: "number", name: "budget", label: "Budget" },
+      { type: "money", name: "budget", label: "Budget" },
       {
         type: "select",
         name: "status",
@@ -203,7 +203,7 @@ export const MKTPLAN_FORM_FIELDS: FieldDef[] = [
         label: "Channel",
         placeholder: "e.g. Social Media",
       },
-      { type: "number", name: "budget", label: "Budget" },
+      { type: "money", name: "budget", label: "Budget" },
       { type: "date", name: "startDate", label: "Start" },
       { type: "date", name: "endDate", label: "End" },
       {

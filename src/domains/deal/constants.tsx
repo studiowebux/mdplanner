@@ -97,10 +97,9 @@ export const DEAL_FORM_FIELDS: FieldDef[] = [
     options: DEAL_STAGE_OPTIONS,
   },
   {
-    type: "number",
+    type: "money",
     name: "value",
     label: "Value",
-    min: 0,
   },
   {
     type: "text",

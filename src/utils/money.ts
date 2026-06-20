@@ -6,10 +6,18 @@ import { formatCurrency } from "./format.ts";
 
 /**
  * Parse a user/string money value into a decimal number. Decimal-safe — never
- * rounds. Strips currency symbols, whitespace, and thousands separators, then
- * parses with the dot as the decimal separator (app number inputs are
- * dot-decimal). Returns `undefined` for empty or non-numeric input so callers
- * decide the fallback (0, keep-existing, etc.).
+ * rounds. Strips currency symbols and whitespace, then detects the decimal
+ * separator so both dot ("125.50") and comma ("125,50") inputs parse correctly.
+ * Returns `undefined` for empty or non-numeric input so callers decide the
+ * fallback (0, keep-existing, etc.).
+ *
+ * Separator heuristic on the digit/separator string:
+ * - Both `.` and `,` present → the rightmost is the decimal point, the other is
+ *   the thousands separator ("1,234.56" and "1.234,56" both → 1234.56).
+ * - Only `,` present → thousands when a single comma groups exactly 3 trailing
+ *   digits ("1,234" → 1234) or when there are several commas ("1,234,567"),
+ *   otherwise the comma is a decimal point ("125,50" → 125.5).
+ * - Only `.` (or no separator) → dot is the decimal point.
  */
 export function parseMoney(
   input: string | number | null | undefined,
@@ -18,9 +26,29 @@ export function parseMoney(
   if (typeof input === "number") {
     return Number.isFinite(input) ? input : undefined;
   }
-  const cleaned = input.trim().replace(/[^\d.\-]/g, "");
-  if (cleaned === "" || cleaned === "-" || cleaned === ".") return undefined;
-  const n = Number(cleaned);
+  const negative = input.includes("-");
+  const raw = input.replace(/[^\d.,]/g, "");
+  if (raw === "") return undefined;
+
+  const lastDot = raw.lastIndexOf(".");
+  const lastComma = raw.lastIndexOf(",");
+  let normalized: string;
+  if (lastDot >= 0 && lastComma >= 0) {
+    const decimalSep = lastDot > lastComma ? "." : ",";
+    const thousandsSep = decimalSep === "." ? "," : ".";
+    normalized = raw.split(thousandsSep).join("").replace(decimalSep, ".");
+  } else if (lastComma >= 0) {
+    const commaCount = raw.length - raw.replaceAll(",", "").length;
+    const digitsAfter = raw.length - lastComma - 1;
+    normalized = commaCount > 1 || (commaCount === 1 && digitsAfter === 3)
+      ? raw.replaceAll(",", "")
+      : raw.replaceAll(",", ".");
+  } else {
+    normalized = raw;
+  }
+
+  if (normalized === "" || normalized === ".") return undefined;
+  const n = Number(normalized) * (negative ? -1 : 1);
   return Number.isFinite(n) ? n : undefined;
 }
 
