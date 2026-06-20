@@ -213,3 +213,10 @@
   font-size: var(--billing-doc-header-address-size);
   color: var(--billing-doc-header-address-color);
 }
+
+/* Terms / footer text is authored with manual line breaks — preserve newlines
+   (and wrap long lines) instead of collapsing all whitespace into one line. */
+.quote-detail__footer p,
+.invoice-detail__footer p {
+  white-space: pre-line;
+}

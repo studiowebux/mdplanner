@@ -7,6 +7,7 @@ import {
   getCustomerService,
   getInvoiceService,
   getProjectService,
+  getQuoteService,
 } from "../../singletons/services.ts";
 import { InvoiceDetailView } from "../invoice-detail.tsx";
 import { InvoicePrintView } from "../invoice-print.tsx";
@@ -23,9 +24,12 @@ async function renderDetail(c: AppContext, id: string) {
     getProjectService().getConfig(),
   ]);
   if (!invoice) return c.notFound();
-  const customer = invoice.customerId
-    ? await getCustomerService().getById(invoice.customerId)
-    : null;
+  const [customer, quote] = await Promise.all([
+    invoice.customerId
+      ? getCustomerService().getById(invoice.customerId)
+      : null,
+    invoice.quoteId ? getQuoteService().getById(invoice.quoteId) : null,
+  ]);
   const editing = c.req.query("editing") === "true";
   return c.html(
     <InvoiceDetailView
@@ -34,6 +38,7 @@ async function renderDetail(c: AppContext, id: string) {
       displayStatus={service.displayStatus(invoice)}
       billingConfig={billingConfig}
       customerName={customer?.name}
+      quoteNumber={quote?.number}
       editing={editing}
     />,
   );

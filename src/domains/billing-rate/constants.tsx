@@ -2,7 +2,7 @@ import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { BillingRate } from "../../types/billing-rate.types.ts";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
-import { formatCurrency } from "../../utils/format.ts";
+import { formatMoney } from "../../utils/money.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 
 export const UNIT_LABELS: Record<string, string> = {
@@ -15,7 +15,7 @@ export const UNIT_LABELS: Record<string, string> = {
 
 /** Format a rate with its unit (e.g. "$150.00/h"). Uses project locale/currency. */
 export function formatRate(rate: number, unit: string): string {
-  const formatted = formatCurrency(rate) || "$0";
+  const formatted = formatMoney(rate) || "$0";
   return unit === "fixed" ? formatted : `${formatted}/${unit}`;
 }
 

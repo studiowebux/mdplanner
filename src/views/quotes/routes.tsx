@@ -46,6 +46,9 @@ async function renderDetail(c: AppContext, id: string) {
     service.getRevisions(id),
   ]);
   if (!quote) return c.notFound();
+  const customer = quote.customerId
+    ? await getCustomerService().getById(quote.customerId)
+    : null;
   const editing = c.req.query("editing") === "true";
   return c.html(
     <QuoteDetailView
@@ -53,6 +56,7 @@ async function renderDetail(c: AppContext, id: string) {
       item={quote}
       billingConfig={billingConfig}
       revisions={revisions}
+      customerName={customer?.name}
       editing={editing}
     />,
   );

@@ -469,16 +469,10 @@
   gap: var(--space-xs);
   flex-shrink: 0;
   width: var(--task-actions-w);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.task-list__row:hover .task-list__row-actions {
-  opacity: 1;
 }
 
 /* Actions overflow menu — buttons inline on desktop, collapsed to a ⋮ menu at
-   <=1100px. <details> is the CSP-safe disclosure pattern (no JS), matching
+   <=1000px. <details> is the CSP-safe disclosure pattern (no JS), matching
    column-toggle/section. Desktop: display:contents dissolves the wrapper so the
    button list flows inline exactly as before; the ⋮ trigger is hidden. */
 .task-list__actions {
@@ -1417,17 +1411,16 @@ a.task-board__card-avatar:hover {
    row. Keep only the Project meta beside the title, and collapse the (otherwise
    18rem) Actions column into a ⋮ overflow menu so the title gets real width.
    Header + data cells share [data-col], so each column hides as a whole and
-   stays aligned. 1100px is a sanctioned deviation — see shell.css CANONICAL
-   BREAKPOINTS. */
-/* Manual column selector is moot ≤1100px: the responsive bands force-hide
+   stays aligned. */
+/* Manual column selector is moot ≤1000px: the responsive bands force-hide
    meta columns, so toggling them does nothing. Hide the control. */
-@media (max-width: 1100px) {
+@media (max-width: 1000px) {
   .column-toggle {
     display: none;
   }
 }
 
-@media (min-width: 769px) and (max-width: 1100px) {
+@media (min-width: 769px) and (max-width: 1000px) {
   .task-list__row [data-col="assignee"],
   .task-list__row [data-col="milestone"],
   .task-list__row [data-col="due"],

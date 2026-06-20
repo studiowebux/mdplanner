@@ -2,10 +2,22 @@
 
 (function () {
   var COLLAPSE_KEY = "sidebarGroups";
+  var SCROLL_KEY = "sidebarScroll";
 
   function init() {
     var sidebar = document.getElementById("app-sidebar");
     if (!sidebar) return;
+
+    // -- Scroll position persistence (navigation is full page loads, so the
+    //    nav's scrollTop resets to 0 on every page; restore + track it) --
+    var nav = document.getElementById("sidebar-content");
+    if (nav) {
+      var savedScroll = parseInt(sessionStorage.getItem(SCROLL_KEY) || "", 10);
+      if (!isNaN(savedScroll)) nav.scrollTop = savedScroll;
+      nav.addEventListener("scroll", function () {
+        sessionStorage.setItem(SCROLL_KEY, String(nav.scrollTop));
+      });
+    }
 
     // -- Filter --
     var filter = document.getElementById("sidebar-filter");

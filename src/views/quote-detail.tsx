@@ -198,10 +198,14 @@ const QuoteHeader: FC<{ quote: Quote; editing: boolean }> = (
 // ---------------------------------------------------------------------------
 
 /** Customer / currency / expiry / revision info row. */
-const QuoteInfoRow: FC<{ quote: Quote }> = ({ quote }) => (
+const QuoteInfoRow: FC<{ quote: Quote; customerName?: string }> = (
+  { quote, customerName },
+) => (
   <div class="detail-section detail-info-row">
     <InfoItem label="Customer">
-      <a href={`/customers/${quote.customerId}`}>{quote.customerId}</a>
+      <a href={`/customers/${quote.customerId}`}>
+        {customerName ?? quote.customerId}
+      </a>
     </InfoItem>
     {quote.currency && <InfoItem label="Currency">{quote.currency}</InfoItem>}
     {quote.expiresAt && <InfoItem label="Expires">{quote.expiresAt}</InfoItem>}
@@ -378,10 +382,18 @@ export const QuoteDetailView: FC<
     item: Quote;
     billingConfig: ProjectConfig;
     revisions: QuoteRevision[];
+    customerName?: string;
     editing?: boolean;
   }
 > = (
-  { item: quote, billingConfig, revisions, editing = false, ...viewProps },
+  {
+    item: quote,
+    billingConfig,
+    revisions,
+    customerName,
+    editing = false,
+    ...viewProps
+  },
 ) => (
   <MainLayout
     title={`${quote.number} — ${quote.title}`}
@@ -411,7 +423,7 @@ export const QuoteDetailView: FC<
       <BillingDocumentHeader config={billingConfig} />
       <QuoteHeader quote={quote} editing={editing} />
       <ArchivedBanner entity={quote} />
-      <QuoteInfoRow quote={quote} />
+      <QuoteInfoRow quote={quote} customerName={customerName} />
       <QuoteLineItems quote={quote} />
       <PaymentScheduleSection quote={quote} />
       <FooterSection

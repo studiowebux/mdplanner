@@ -34,6 +34,12 @@ const UPDATE_CONFIG_KEYS = [
   "pipelinesPerPage",
   "tasksPerSection",
   "cerveauDir",
+  "billingCompany",
+  "billingAddress",
+  "billingLogoUrl",
+  "billingDefaultFooter",
+  "billingTaxNumber",
+  "billingBusinessNumber",
 ] as const satisfies readonly (keyof UpdateProjectConfig)[];
 
 /** Project configuration service (no entity repository): reads/updates project config — features, schedule, tags, links, section order, nav categories, KPI metrics, milestone statuses. */
