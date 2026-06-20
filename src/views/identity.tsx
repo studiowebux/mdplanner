@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { APP_NAME } from "../constants/mod.ts";
+import { asset } from "../utils/asset.ts";
 import type { Person } from "../types/person.types.ts";
 
 type Props = {
@@ -14,8 +15,8 @@ export const IdentityView: FC<Props> = ({ people }) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{`Who are you? — ${APP_NAME}`}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="stylesheet" href="/css/index.css" />
-        <link rel="stylesheet" href="/css/views/identity.css" />
+        <link rel="stylesheet" href={asset("/css/index.css")} />
+        <link rel="stylesheet" href={asset("/css/views/identity.css")} />
       </head>
       <body class="identity-page">
         <div class="identity-card">

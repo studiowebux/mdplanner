@@ -13,6 +13,7 @@ import { InvoicePrintView } from "../../src/views/invoice-print.tsx";
 import type { Invoice } from "../../src/types/invoice.types.ts";
 import type { Customer } from "../../src/types/customer.types.ts";
 import type { ProjectConfig } from "../../src/types/project.types.ts";
+import { APP_VERSION } from "../../src/constants/mod.ts";
 
 const invoice = {
   id: "invoice_test",
@@ -72,6 +73,14 @@ Deno.test("InvoicePrintView renders the payment terms in the export", () => {
   assert(html.includes("INV-2026-009"), "must show the invoice number");
   assert(html.includes(">Terms<"), "must render a Terms meta label");
   assert(html.includes("NET 30"), "must render the payment terms value");
+});
+
+Deno.test("InvoicePrintView version-stamps its stylesheets (cache busting)", () => {
+  const html = render();
+  assert(
+    html.includes(`/css/views/invoices.css?v=${APP_VERSION}`),
+    "print stylesheet must carry the app-version cache-busting query",
+  );
 });
 
 Deno.test("InvoicePrintView renders the footer under Terms and Conditions", () => {

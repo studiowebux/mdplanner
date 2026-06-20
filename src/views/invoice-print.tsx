@@ -15,6 +15,7 @@ import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 import { PrintBillTo } from "./components/print-bill-to.tsx";
+import { asset } from "../utils/asset.ts";
 
 type Props = {
   invoice: Invoice;
@@ -34,11 +35,11 @@ export const InvoicePrintView: FC<Props> = (
       <head>
         <meta charset="UTF-8" />
         <title>{title}</title>
-        <link rel="stylesheet" href="/css/index.css" />
-        <link rel="stylesheet" href="/css/components.css" />
-        <link rel="stylesheet" href="/css/views/invoices.css" />
-        <link rel="stylesheet" href="/css/views/billing.css" />
-        <script src="/js/billing-print.js" nonce={nonce} />
+        <link rel="stylesheet" href={asset("/css/index.css")} />
+        <link rel="stylesheet" href={asset("/css/components.css")} />
+        <link rel="stylesheet" href={asset("/css/views/invoices.css")} />
+        <link rel="stylesheet" href={asset("/css/views/billing.css")} />
+        <script src={asset("/js/billing-print.js")} nonce={nonce} />
       </head>
       <body>
         <main class="invoice-print">
