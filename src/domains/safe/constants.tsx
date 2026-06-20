@@ -78,13 +78,13 @@ export const SAFE_FORM_FIELDS: FieldDef[] = [
     maxLength: 200,
   },
   {
-    type: "number",
+    type: "money",
     name: "amount",
     label: "Amount (USD)",
     required: true,
   },
   {
-    type: "number",
+    type: "money",
     name: "valuation_cap",
     label: "Valuation Cap (USD)",
   },
