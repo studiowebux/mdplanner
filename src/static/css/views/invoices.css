@@ -76,6 +76,14 @@
    Print view — /invoices/:id/print IS the print page, no @media print needed
 --------------------------------------------------------------------------- */
 
+/* Letter page with modest margins so the export frames itself (literals — Safari
+   ignores var() inside @page). The page margin replaces the on-screen padding at
+   print time, so a typical invoice fits on a single page instead of spilling. */
+@page {
+  size: letter;
+  margin: 0.5in;
+}
+
 .invoice-print {
   max-width: var(--invoice-print-max-w);
   margin: 0 auto;
@@ -85,6 +93,21 @@
   gap: var(--invoice-print-section-gap);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
+}
+
+/* At print time the @page margin provides the frame — drop the element padding
+   so it does not stack on top of the page margin (doubled whitespace was pushing
+   content onto a second page). */
+@media print {
+  .invoice-print {
+    padding: 0;
+    gap: var(--space-md);
+    max-width: none;
+  }
+
+  .invoice-print__header {
+    padding-bottom: var(--space-md);
+  }
 }
 
 /* 2-col header: sender info LEFT, invoice meta RIGHT */
@@ -223,6 +246,15 @@
   margin: 0;
   /* Preserve author line breaks in plain-text terms/footer. */
   white-space: pre-line;
+}
+
+/* Export fingerprint line — generation date + content checksum. */
+.invoice-print__checksum {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  word-break: break-all;
 }
 
 /* Keep notes/markdown typography aligned with the compact print scale so the

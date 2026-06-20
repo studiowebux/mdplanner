@@ -90,6 +90,11 @@ export class InvoiceService extends BaseService<
     return invoice ? this.hydrate(invoice) : null;
   }
 
+  /** Raw stored markdown for an invoice (the local-state content to checksum). */
+  getRawMarkdown(id: string): Promise<string | null> {
+    return this.invoiceRepo.findRawById(id);
+  }
+
   override async getByName(name: string): Promise<Invoice | null> {
     const invoice = await super.getByName(name);
     return invoice ? this.hydrate(invoice) : null;

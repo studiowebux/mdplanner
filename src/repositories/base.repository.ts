@@ -182,6 +182,13 @@ export abstract class BaseMarkdownRepository<
     return resolved?.item ?? null;
   }
 
+  /** Raw markdown file content for an id (the on-disk local state), or null. */
+  async findRawById(id: string): Promise<string | null> {
+    const resolved = await this.resolveFile(id);
+    if (!resolved) return null;
+    return Deno.readTextFile(resolved.filePath);
+  }
+
   async findByName(name: string): Promise<T | null> {
     const all = await this.findAll();
     const field = this.config.nameField as keyof T;

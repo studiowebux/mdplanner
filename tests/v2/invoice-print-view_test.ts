@@ -63,6 +63,8 @@ function render(): string {
       displayStatus: "sent",
       billingConfig,
       customer,
+      checksum: "a".repeat(64),
+      generatedAt: "2026-06-20T00:00:00.000Z",
       nonce: "test-nonce",
     }),
   );
@@ -92,5 +94,14 @@ Deno.test("InvoicePrintView renders the footer under Terms and Conditions", () =
   assert(
     html.includes("Payment due within 30 days of receipt."),
     "must render the footer text",
+  );
+});
+
+Deno.test("InvoicePrintView stamps the generation date and content checksum", () => {
+  const html = render();
+  assert(html.includes("Generated"), "must show the generation date label");
+  assert(
+    html.includes(`SHA-256 ${"a".repeat(64)}`),
+    "must render the content checksum tag",
   );
 });

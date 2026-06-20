@@ -132,6 +132,19 @@ the linked quote.
 Edit the **quote**, not the invoice. Invoice totals update automatically on the
 next read.
 
+### Printing / PDF Export
+
+Invoice detail → **Print** opens `/invoices/:id/print`, a Letter-sized export
+that auto-fires the print dialog. The layout is tuned so a typical invoice fits
+on a single page. The export footer carries a fingerprint line:
+
+```
+Generated <date> · SHA-256 <hash>
+```
+
+The SHA-256 is computed over the invoice's stored markdown file, so the printed
+checksum tracks the local state — re-exporting after any edit yields a new hash.
+
 ---
 
 ## 4. Payments

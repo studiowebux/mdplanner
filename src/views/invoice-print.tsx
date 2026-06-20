@@ -22,11 +22,21 @@ type Props = {
   displayStatus: string;
   billingConfig: ProjectConfig;
   customer: Customer | null;
+  checksum?: string | null;
+  generatedAt: string;
   nonce?: string;
 };
 
 export const InvoicePrintView: FC<Props> = (
-  { invoice, displayStatus, billingConfig, customer, nonce },
+  {
+    invoice,
+    displayStatus,
+    billingConfig,
+    customer,
+    checksum,
+    generatedAt,
+    nonce,
+  },
 ) => {
   const title = `${invoice.number} — ${invoice.title}`;
 
@@ -131,6 +141,12 @@ export const InvoicePrintView: FC<Props> = (
               <p>{billingConfig.billingDefaultFooter}</p>
             </footer>
           )}
+
+          {/* Export fingerprint: generation date + checksum of the stored md. */}
+          <p class="invoice-print__checksum">
+            Generated {formatDate(generatedAt)}
+            {checksum && <>· SHA-256 {checksum}</>}
+          </p>
         </main>
       </body>
     </html>

@@ -13,6 +13,7 @@ import { InvoiceDetailView } from "../invoice-detail.tsx";
 import { InvoicePrintView } from "../invoice-print.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { sha256Hex } from "../../utils/checksum.ts";
 
 export const invoicesRouter = createDomainRoutes(invoiceConfig);
 
@@ -119,12 +120,19 @@ invoicesRouter.get("/:id/print", async (c) => {
     ? await getCustomerService().getById(invoice.customerId)
     : null;
 
+  // Checksum the on-disk markdown so the exported PDF carries a fingerprint
+  // that tracks the local invoice state, alongside the generation date.
+  const raw = await service.getRawMarkdown(id);
+  const checksum = raw ? await sha256Hex(raw) : null;
+
   return c.html(
     <InvoicePrintView
       invoice={invoice}
       displayStatus={service.displayStatus(invoice)}
       billingConfig={billingConfig}
       customer={customer ?? null}
+      checksum={checksum}
+      generatedAt={new Date().toISOString()}
       nonce={c.get("nonce")}
     />,
   );
