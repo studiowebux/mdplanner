@@ -13,6 +13,7 @@ import { HabitCompletionLog } from "./components/habit-completion-log.tsx";
 import { HabitCard } from "../components/habit-card.tsx";
 import type { Habit } from "../../types/habit.types.ts";
 import { resolveUserScope } from "../../utils/actor.ts";
+import { currentMonthDays, todayKey } from "../../domains/habit/dates.ts";
 
 export const habitRouter = createDomainRoutes(habitConfig);
 
@@ -32,26 +33,13 @@ habitRouter.get("/heatmap", async (c) => {
   );
 });
 
-/** Current-month day cells for the heatmap row. */
-function currentMonthDays(): { date: string; day: number }[] {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const mm = String(month + 1).padStart(2, "0");
-  return Array.from({ length: daysInMonth }, (_, i) => {
-    const d = i + 1;
-    return { date: `${year}-${mm}-${String(d).padStart(2, "0")}`, day: d };
-  });
-}
-
 /**
  * htmx fragment for a habit mutation: swaps the heatmap row and OOB-swaps the
  * detail-page stats + completion log so the UI stays fresh without a reload.
  * The HabitCard OOB keeps the list/tracker grid in sync.
  */
 function habitFragment(habit: Habit): string {
-  const today = new Date().toLocaleDateString("en-CA");
+  const today = todayKey();
   return renderToString(
     <>
       <HabitHeatmapRow habit={habit} days={currentMonthDays()} today={today} />

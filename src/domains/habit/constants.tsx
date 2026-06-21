@@ -7,6 +7,7 @@ import {
 } from "../../types/habit.types.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
+import { currentMonthDays, todayKey } from "./dates.ts";
 
 // ---------------------------------------------------------------------------
 // Frequency badge variants
@@ -183,10 +184,7 @@ export function computeThisMonth(
   completedDates: CompletionEntry[],
   targetPerPeriod = 1,
 ): number {
-  const now = new Date();
-  const ym = `${now.getFullYear()}-${
-    String(now.getMonth() + 1).padStart(2, "0")
-  }`;
+  const ym = todayKey().slice(0, 7);
   const done = doneDates(
     completedDates.filter((e) => e.date.startsWith(ym)),
     targetPerPeriod,
@@ -204,7 +202,7 @@ export function isDoneToday(
   completedDates: CompletionEntry[],
   targetPerPeriod = 1,
 ): boolean {
-  const today = new Date().toLocaleDateString("en-CA");
+  const today = todayKey();
   return countForDate(completedDates, today) >= targetPerPeriod;
 }
 
@@ -316,14 +314,11 @@ export const HABIT_FORM_FIELDS: FieldDef[] = [
 // ---------------------------------------------------------------------------
 
 export function periodDenominator(frequency: Habit["frequency"]): number {
-  const now = new Date();
   if (frequency === "daily") {
-    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return currentMonthDays().length;
   }
   if (frequency === "weekly") {
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      .getDate();
-    return Math.ceil(daysInMonth / 7);
+    return Math.ceil(currentMonthDays().length / 7);
   }
   return 1;
 }

@@ -94,10 +94,8 @@ Deno.test("computeLongestStreak - daily multi-count counts only fully-done days"
 });
 
 Deno.test("computeThisMonth - counts only days meeting target within current month", () => {
-  const now = new Date();
-  const ym = `${now.getFullYear()}-${
-    String(now.getMonth() + 1).padStart(2, "0")
-  }`;
+  // UTC year-month — matches computeThisMonth's todayKey().slice(0, 7).
+  const ym = new Date().toISOString().slice(0, 7);
   const dates = entries([
     `${ym}-01`,
     `${ym}-01`,
@@ -108,7 +106,8 @@ Deno.test("computeThisMonth - counts only days meeting target within current mon
 });
 
 Deno.test("isDoneToday - true only when today's count meets target", () => {
-  const today = new Date().toLocaleDateString("en-CA");
+  // UTC key — matches isDoneToday's todayKey() (host-timezone-independent).
+  const today = new Date().toISOString().slice(0, 10);
   const partial = entries([today]);
   const full = entries([today, today, today]);
   assertEquals(isDoneToday(partial, 3), false);

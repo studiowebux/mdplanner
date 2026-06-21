@@ -4,6 +4,7 @@
 import type { FC } from "hono/jsx";
 import type { CompletionEntry, Habit } from "../../../types/habit.types.ts";
 import { FormTextarea } from "../../../components/ui/form-textarea.tsx";
+import { currentMonthDays, todayKey } from "../../../domains/habit/dates.ts";
 
 const MONTH_NAMES = [
   "January",
@@ -19,22 +20,6 @@ const MONTH_NAMES = [
   "November",
   "December",
 ];
-
-function currentMonthDays(): { date: string; day: number }[] {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const mm = String(month + 1).padStart(2, "0");
-  return Array.from({ length: daysInMonth }, (_, i) => {
-    const d = i + 1;
-    return { date: `${year}-${mm}-${String(d).padStart(2, "0")}`, day: d };
-  });
-}
-
-function todayStr(): string {
-  return new Date().toLocaleDateString("en-CA");
-}
 
 function countFor(completedDates: CompletionEntry[], date: string): number {
   return completedDates.filter((e) => e.date === date).length;
@@ -118,7 +103,7 @@ export const HabitHeatmapRow: FC<{
 
 export const HabitHeatmap: FC<{ habits: Habit[] }> = ({ habits }) => {
   const days = currentMonthDays();
-  const today = todayStr();
+  const today = todayKey();
   const now = new Date();
   const monthLabel = `${
     MONTH_NAMES[now.getUTCMonth()]

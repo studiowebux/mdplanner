@@ -17,6 +17,7 @@ import type {
 } from "../types/habit.types.ts";
 import type { UserScope } from "../utils/actor.ts";
 import { ciIncludes } from "../utils/string.ts";
+import { todayKey } from "../domains/habit/dates.ts";
 import { BaseService } from "./base.service.ts";
 
 /** Habit service: CRUD plus per-user completion tracking (markComplete/unmarkComplete/toggleDate/checkToday); filters by frequency, tag, and text query (q). */
@@ -164,7 +165,7 @@ export class HabitService extends BaseService<
   ): Promise<Habit | null> {
     const habit = await this.habitRepo.findById(id);
     if (!habit) return null;
-    const today = new Date().toLocaleDateString("en-CA");
+    const today = todayKey();
     const existing = habit.completedDates.find((e) =>
       e.date === today && this.ownedBy(e, scope)
     );
