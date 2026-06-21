@@ -263,8 +263,26 @@
         '<button type="button" class="btn btn--tertiary btn--sm" data-action="move-section-down">Down</button>' +
         '<button type="button" class="btn btn--danger btn--sm" data-action="delete-section">Del</button>';
 
-      var title = qs(".note-detail__section-title", section);
-      if (title) title.after(sectionControls);
+      // Saved sections render their heading as <h3 class="section-heading">
+      // (note-blocks.tsx); newly-added ones use note-editor__section-title-input
+      // (createSectionShell). Converge them: replace the static heading with the
+      // same editable title input so a saved section can be renamed, then anchor
+      // the move/delete controls after it. The body-level input listener marks
+      // the editor dirty, matching createSectionShell. The previous selector
+      // (.note-detail__section-title) matched nothing, so saved sections had no
+      // editable title and no controls — frozen after the first save.
+      var heading = qs(".section-heading", section);
+      var titleInput = document.createElement("input");
+      titleInput.type = "text";
+      titleInput.className = "note-editor__section-title-input";
+      titleInput.value = section.dataset.sectionTitle ||
+        (heading ? heading.textContent : "");
+      titleInput.addEventListener("input", function () {
+        section.dataset.sectionTitle = this.value;
+      });
+      if (heading) heading.replaceWith(titleInput);
+      else section.insertBefore(titleInput, section.firstChild);
+      titleInput.after(sectionControls);
 
       // Tabs rebuild into stacked editable items (title input + raw textarea);
       // timeline/split merge their sub-blocks into one raw markdown textarea per
