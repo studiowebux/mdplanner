@@ -46,6 +46,35 @@ const InlineEditSection: FC<{
 };
 
 // ---------------------------------------------------------------------------
+// Issue-state notice — makes the quote→invoice model legible. A draft is a live
+// preview of the quote that freezes on Send; an issued invoice is an immutable
+// snapshot. Exported for render tests.
+// ---------------------------------------------------------------------------
+
+export const InvoiceIssueNotice: FC<
+  { invoice: Invoice; quoteNumber?: string }
+> = ({ invoice, quoteNumber }) => {
+  const quoteLabel = quoteNumber ?? "its quote";
+  if (invoice.frozenAt) {
+    return (
+      <div class="invoice-detail__issue-notice invoice-detail__issue-notice--frozen">
+        <strong>Issued {formatDate(invoice.frozenAt)}.</strong>{" "}
+        This invoice is a frozen snapshot of{" "}
+        {quoteLabel}. Later edits to the quote will not change it.
+      </div>
+    );
+  }
+  return (
+    <div class="invoice-detail__issue-notice invoice-detail__issue-notice--draft">
+      <strong>Draft &mdash; not yet issued.</strong>{" "}
+      Line items and totals are a live preview of{" "}
+      {quoteLabel}. Click &ldquo;Send&rdquo; to issue this invoice and freeze
+      the snapshot.
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Co-located sections — each owns its own conditional rendering.
 // ---------------------------------------------------------------------------
 
@@ -246,6 +275,8 @@ export const InvoiceDetailView: FC<
         />
 
         <ArchivedBanner entity={invoice} />
+
+        <InvoiceIssueNotice invoice={invoice} quoteNumber={quoteNumber} />
 
         <InvoiceInfoRow
           invoice={invoice}

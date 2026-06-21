@@ -57,6 +57,26 @@
   color: var(--color-warning);
 }
 
+/* Issue-state notice — explains the quote->invoice snapshot model inline. */
+.invoice-detail__issue-notice {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 3px var(--border-style) var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.invoice-detail__issue-notice--draft {
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+}
+
+.invoice-detail__issue-notice--frozen {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+}
+
 .invoice-detail__footer {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
