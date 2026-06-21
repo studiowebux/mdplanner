@@ -19,6 +19,8 @@ Deno.test("updateConfig persists all billing fields across a read round-trip", a
     await getProjectService().updateConfig({
       billingCompany: "Studio Webux Inc.",
       billingAddress: "123 Main St\nMontreal, QC",
+      billingEmail: "billing@studiowebux.com",
+      billingPhone: "+1 514-555-0100",
       billingLogoUrl: "https://example.com/logo.png",
       billingDefaultFooter: "Thank you for your business.",
       billingTaxNumber: "TX-12345",
@@ -28,6 +30,8 @@ Deno.test("updateConfig persists all billing fields across a read round-trip", a
     const config = await getProjectService().getConfig();
     assertEquals(config.billingCompany, "Studio Webux Inc.");
     assertEquals(config.billingAddress, "123 Main St\nMontreal, QC");
+    assertEquals(config.billingEmail, "billing@studiowebux.com");
+    assertEquals(config.billingPhone, "+1 514-555-0100");
     assertEquals(config.billingLogoUrl, "https://example.com/logo.png");
     assertEquals(config.billingDefaultFooter, "Thank you for your business.");
     assertEquals(config.billingTaxNumber, "TX-12345");

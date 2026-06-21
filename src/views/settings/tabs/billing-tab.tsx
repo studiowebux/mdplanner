@@ -47,6 +47,40 @@ export const BillingTab: FC<BillingTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label class="settings-field__label" for="cfg-billing-email">
+          Contact email
+        </label>
+        <input
+          type="text"
+          id="cfg-billing-email"
+          name="billingEmail"
+          value={config.billingEmail ?? ""}
+          placeholder="billing@example.com"
+          class="settings-field__input"
+        />
+        <span class="settings-field__hint">
+          Shown on quotes and invoices.
+        </span>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-field__label" for="cfg-billing-phone">
+          Contact phone
+        </label>
+        <input
+          type="text"
+          id="cfg-billing-phone"
+          name="billingPhone"
+          value={config.billingPhone ?? ""}
+          placeholder="+1 514-555-0100"
+          class="settings-field__input"
+        />
+        <span class="settings-field__hint">
+          Shown on quotes and invoices.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label class="settings-field__label" for="cfg-billing-logo">
           Logo URL
         </label>

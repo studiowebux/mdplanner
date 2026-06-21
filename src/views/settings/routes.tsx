@@ -248,6 +248,8 @@ settingsViewRouter.post("/billing", async (c) => {
   await getProjectService().updateConfig({
     billingCompany: body.billingCompany ? String(body.billingCompany) : "",
     billingAddress: body.billingAddress ? String(body.billingAddress) : "",
+    billingEmail: body.billingEmail ? String(body.billingEmail) : "",
+    billingPhone: body.billingPhone ? String(body.billingPhone) : "",
     billingLogoUrl: body.billingLogoUrl ? String(body.billingLogoUrl) : "",
     billingDefaultFooter: body.billingDefaultFooter
       ? String(body.billingDefaultFooter)

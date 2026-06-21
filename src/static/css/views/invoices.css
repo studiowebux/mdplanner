@@ -325,7 +325,9 @@
 
 .invoice-print .billing-document-header__address,
 .invoice-print .billing-document-header__numbers,
-.invoice-print .billing-document-header__number {
+.invoice-print .billing-document-header__number,
+.invoice-print .billing-document-header__contact,
+.invoice-print .billing-document-header__contact-item {
   font-size: 10px;
 }
 

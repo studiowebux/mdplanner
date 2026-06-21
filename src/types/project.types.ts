@@ -147,6 +147,14 @@ export const ProjectConfigSchema = z.object({
     description: "Company address shown on quotes and invoices (multiline)",
     example: "123 Main St\nMontréal, QC H1A 1A1",
   }),
+  billingEmail: z.string().optional().openapi({
+    description: "Seller contact email shown on quotes and invoices",
+    example: "billing@acme.com",
+  }),
+  billingPhone: z.string().optional().openapi({
+    description: "Seller contact phone shown on quotes and invoices",
+    example: "+1 514-555-0100",
+  }),
   billingLogoUrl: z.string().optional().openapi({
     description: "Logo URL shown on quotes and invoices",
     example: "https://example.com/logo.png",
@@ -283,6 +291,8 @@ export const FrontmatterProjectSchema = z.object({
   last_updated: z.string().optional(),
   billing_company: z.string().optional(),
   billing_address: z.string().optional(),
+  billing_email: z.string().optional(),
+  billing_phone: z.string().optional(),
   billing_logo_url: z.string().optional(),
   billing_default_footer: z.string().optional(),
   billing_tax_number: z.string().optional(),
@@ -349,6 +359,8 @@ export const FrontmatterProjectSchema = z.object({
       lastUpdated: fm.last_updated,
       billingCompany: fm.billing_company,
       billingAddress: fm.billing_address,
+      billingEmail: fm.billing_email,
+      billingPhone: fm.billing_phone,
       billingLogoUrl: fm.billing_logo_url,
       billingDefaultFooter: fm.billing_default_footer,
       billingTaxNumber: fm.billing_tax_number,

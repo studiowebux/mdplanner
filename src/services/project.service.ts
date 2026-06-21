@@ -36,6 +36,8 @@ const UPDATE_CONFIG_KEYS = [
   "cerveauDir",
   "billingCompany",
   "billingAddress",
+  "billingEmail",
+  "billingPhone",
   "billingLogoUrl",
   "billingDefaultFooter",
   "billingTaxNumber",

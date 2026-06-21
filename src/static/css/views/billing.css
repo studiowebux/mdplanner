@@ -202,14 +202,16 @@
   font-style: normal;
 }
 
-.billing-document-header__numbers {
+.billing-document-header__numbers,
+.billing-document-header__contact {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
   margin-top: var(--space-xs);
 }
 
-.billing-document-header__number {
+.billing-document-header__number,
+.billing-document-header__contact-item {
   font-size: var(--billing-doc-header-address-size);
   color: var(--billing-doc-header-address-color);
 }
