@@ -1535,12 +1535,29 @@ a.badge:hover {
 .sidenav__body .form__actions {
   position: sticky;
   bottom: 0;
+  gap: var(--space-sm);
+  align-items: center;
   background: var(--color-bg-primary);
   border-top: var(--border-width) var(--border-style)
     var(--color-border-default);
   margin: var(--space-md) calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg));
   padding: var(--space-sm) var(--space-lg);
   z-index: var(--z-sticky);
+}
+
+/* Save is the dominant action: it fills the bar and reads heavier, so it
+   clearly wins over Cancel (and the red Archive on the detail page behind
+   it). Keep Cancel compact on the right. Sidenav-scoped — base form actions
+   and settings forms are unaffected. */
+.sidenav__body .form__actions .btn--primary {
+  flex: 1;
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+}
+
+.sidenav__body .form__actions .btn--secondary {
+  flex: 0 0 auto;
 }
 
 /* Dirty cues — amber tint on the header and the sticky save bar so the
