@@ -242,6 +242,9 @@ export class SearchEngine {
   ): SearchResult[] {
     const { fts, table } = entity;
     if (!fts) return [];
+    // All-punctuation queries reduce to an empty MATCH expression after
+    // escapeQuery strips non-indexable tokens — FTS5 errors on `MATCH ""`.
+    if (!query) return [];
 
     const hasProjectCol = entity.schema.includes("project TEXT");
     const hasArchivedCol = entity.schema.includes("archived INTEGER");
@@ -291,7 +294,11 @@ export class SearchEngine {
       .replace(/[\\]/g, "\\\\")
       .replace(/["]/g, '""')
       .split(/\s+/)
-      .filter((term) => term.length > 0)
+      // Drop punctuation-only tokens (e.g. "&", lone "-"). The FTS5 tokenizer
+      // strips them to nothing, but as mandatory AND prefix terms they match
+      // zero rows and zero out the whole query — so "API & Webhooks" returns
+      // no results. Keep only tokens carrying an indexable letter or digit.
+      .filter((term) => /[\p{L}\p{N}]/u.test(term))
       .map((term) => `"${term}"*`)
       .join(" AND ");
   }
