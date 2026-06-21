@@ -603,9 +603,9 @@ Deno.test("InvoiceRepository - quoteId round-trips through frontmatter", async (
   }
 });
 
-// === manual fixture parse: stored computed fields are ignored (derived, not read) ===
+// === manual fixture parse: a frozen invoice persists & reads its quote snapshot ===
 
-Deno.test("InvoiceRepository - parse ignores stored line items / totals (derived, not persisted)", async () => {
+Deno.test("InvoiceRepository - parse reads the stored quote snapshot of a frozen invoice", async () => {
   const { repo, dir } = await setup();
   try {
     await Deno.mkdir(join(dir, "billing/invoices"), { recursive: true });
@@ -623,7 +623,8 @@ Deno.test("InvoiceRepository - parse ignores stored line items / totals (derived
         "due_date: 2026-12-31",
         "payment_terms: NET 30",
         "paid_amount: 0",
-        // Legacy stored computed fields — must be ignored on parse.
+        // Frozen snapshot — persisted to frontmatter, read back on parse.
+        "frozen_at: 2026-01-02T00:00:00.000Z",
         "subtotal: 1000",
         "tax: 150",
         "total: 1150",
@@ -631,7 +632,8 @@ Deno.test("InvoiceRepository - parse ignores stored line items / totals (derived
         "  - id: li_1",
         "    type: service",
         "    description: Hours",
-        "    amount: 1000",
+        "    quantity: 10",
+        "    unit_rate: 100",
         "created_at: 2026-01-01T00:00:00.000Z",
         "updated_at: 2026-01-02T00:00:00.000Z",
         "---",
@@ -651,11 +653,13 @@ Deno.test("InvoiceRepository - parse ignores stored line items / totals (derived
     assertEquals(fetched!.status, "sent");
     assertEquals(fetched!.dueDate, "2026-12-31");
     assertEquals(fetched!.paymentTerms, "NET 30");
-    // Derived fields are NOT read from invoice frontmatter.
-    assertEquals(fetched!.customerId, "");
-    assertEquals(fetched!.lineItems, []);
-    assertEquals(fetched!.subtotal, 0);
-    assertEquals(fetched!.total, 0);
+    // Frozen snapshot fields ARE read from invoice frontmatter.
+    assertEquals(fetched!.frozenAt, "2026-01-02T00:00:00.000Z");
+    assertEquals(fetched!.customerId, "customer_manual");
+    assertEquals(fetched!.lineItems.length, 1);
+    assertEquals(fetched!.lineItems[0].id, "li_1");
+    assertEquals(fetched!.subtotal, 1000);
+    assertEquals(fetched!.total, 1150);
     assertEquals(fetched!.notes, "Hand-written notes.");
   } finally {
     await cleanup(dir);

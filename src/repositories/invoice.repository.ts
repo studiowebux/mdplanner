@@ -5,7 +5,8 @@ import type {
   Invoice,
   UpdateInvoice,
 } from "../types/invoice.types.ts";
-import { parseBillingBody } from "../utils/billing-parse.ts";
+import { parseBillingBody, parseLineItems } from "../utils/billing-parse.ts";
+import type { LineItem } from "../types/billing.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { INVOICE_TABLE, rowToInvoice } from "../domains/invoice/cache.ts";
 import { INVOICE_BODY_KEYS } from "../domains/invoice/constants.ts";
@@ -48,7 +49,9 @@ export class InvoiceRepository extends CachedMarkdownRepository<
       number: "",
       title: data.title ?? "",
       status: data.status ?? "draft",
-      // Derived from the referenced quote at read time — never stored.
+      // A new invoice starts as a draft: no frozen snapshot, so customer/line
+      // items/totals are derived live from the quote until it is issued.
+      frozenAt: undefined,
       customerId: "",
       lineItems: [],
       subtotal: 0,
@@ -68,11 +71,13 @@ export class InvoiceRepository extends CachedMarkdownRepository<
 
     const { title, notes } = parseBillingBody(fm.title, body);
 
+    // Frozen invoices persist their quote snapshot to frontmatter; drafts carry
+    // empty snapshot fields and have them derived from the quote on read
+    // (InvoiceService.hydrate). Either way we read whatever is stored.
     return {
       id,
       number: fmStr(fm, "number") ?? "",
-      // Derived from the referenced quote at read time (InvoiceService.hydrate).
-      customerId: "",
+      customerId: fmStr(fm, "customerId") ?? "",
       quoteId: fmStr(fm, "quoteId") ?? "",
       projectId: fmStr(fm, "projectId"),
       title,
@@ -80,15 +85,16 @@ export class InvoiceRepository extends CachedMarkdownRepository<
       currency: fmStr(fm, "currency"),
       dueDate: fmStr(fm, "dueDate"),
       paymentTerms: fmStr(fm, "paymentTerms"),
-      lineItems: [],
-      subtotal: 0,
-      tax: undefined,
-      taxRate: undefined,
-      total: 0,
+      lineItems: parseLineItems(fm.lineItems),
+      subtotal: fmNum(fm, "subtotal") ?? 0,
+      tax: fmNum(fm, "tax"),
+      taxRate: fmNum(fm, "taxRate"),
+      total: fmNum(fm, "total") ?? 0,
       paidAmount: fmNum(fm, "paidAmount") ?? 0,
       description: fmStr(fm, "description"),
       notes,
       footer: fmStr(fm, "footer"),
+      frozenAt: fmStr(fm, "frozenAt"),
       createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
       updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
       sentAt: fmStr(fm, "sentAt"),
@@ -99,8 +105,17 @@ export class InvoiceRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Invoice): string {
+    // Per-line `amount` is derived (computeLineAmount) — strip it so it is never
+    // persisted, mirroring the quote repository. Drafts persist empty snapshot
+    // fields; issued (frozen) invoices persist the captured quote snapshot.
+    const persisted: Invoice = {
+      ...item,
+      lineItems: item.lineItems.map(({ amount: _amount, ...li }) =>
+        li as LineItem
+      ),
+    };
     return this.serializeStandard(
-      item,
+      persisted,
       INVOICE_BODY_KEYS,
       this.buildBody(item),
     );

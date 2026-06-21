@@ -58,20 +58,22 @@ invoicesRouter.post("/:id/send", async (c) => {
       },
     });
   }
+  // Derive a due date from the payment terms if one wasn't set, then issue the
+  // invoice — issue() freezes the quote snapshot and marks it sent (status,
+  // sentAt, frozenAt). The due-date update must land before the freeze.
   const now = new Date().toISOString();
-  const updates: Record<string, unknown> = { status: "sent", sentAt: now };
   if (!invoice.dueDate && invoice.paymentTerms) {
     const match = invoice.paymentTerms.match(/NET\s+(\d+)/i);
     if (match) {
       const days = parseInt(match[1], 10);
       const due = new Date();
       due.setDate(due.getDate() + days);
-      updates.dueDate = due.toISOString().slice(0, 10);
+      await service.update(id, { dueDate: due.toISOString().slice(0, 10) });
     } else if (invoice.paymentTerms.toLowerCase().includes("due on receipt")) {
-      updates.dueDate = now.slice(0, 10);
+      await service.update(id, { dueDate: now.slice(0, 10) });
     }
   }
-  await service.update(id, updates);
+  await service.issue(id);
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/invoices/${id}` },

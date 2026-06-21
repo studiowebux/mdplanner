@@ -1,8 +1,10 @@
 /**
- * Invoices DERIVE the quote's `footer` (rendered under the "Terms" heading) at
- * read time — same as customer/line-items/totals. It is never copied/stored, so
- * later edits to the quote's terms show up live on the invoice. The invoice's
- * own footer, if set, overrides as a per-invoice term.
+ * DRAFT invoices DERIVE the quote's `footer` (rendered under the "Terms"
+ * heading) at read time — same as customer/line-items/totals — so later edits to
+ * the quote's terms show up live until the invoice is issued. The invoice's own
+ * footer, if set, overrides as a per-invoice term. (Once issued/frozen the
+ * footer is part of the immutable snapshot — see invoice-snapshot_test.ts.)
+ * These cases all operate on un-issued drafts.
  */
 
 import { assertEquals } from "@std/assert";

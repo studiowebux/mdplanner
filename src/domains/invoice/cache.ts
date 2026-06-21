@@ -48,6 +48,7 @@ export function rowToInvoice(
     footer: row.footer as string | undefined,
     sentAt: row.sent_at as string | undefined,
     paidAt: row.paid_at as string | undefined,
+    frozenAt: row.frozen_at as string | undefined,
     ...archiveFieldsFromRow(row),
     ...auditFieldsFromRow(row),
   };
@@ -78,6 +79,7 @@ const INVOICE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${INVOICE_TABLE} (
   updated_at TEXT,
   sent_at TEXT,
   paid_at TEXT,
+  frozen_at TEXT,
   created_by TEXT,
   updated_by TEXT,
   synced_at TEXT
@@ -92,10 +94,10 @@ function insertInvoiceRow(
     `INSERT OR REPLACE INTO ${INVOICE_TABLE} (id, number, customer_id, quote_id,
        project_id, title, status, currency, due_date, payment_terms, line_items,
        subtotal, tax, tax_rate, total, paid_amount, description, notes, footer,
-       sent_at, paid_at,
+       sent_at, paid_at, frozen_at,
        ${archiveCols()},
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(inv.id),
       val(inv.number),
@@ -118,6 +120,7 @@ function insertInvoiceRow(
       val(inv.footer),
       val(inv.sentAt),
       val(inv.paidAt),
+      val(inv.frozenAt),
       ...archiveVals(inv),
       ...auditVals(inv),
       syncedAt ?? new Date().toISOString(),
@@ -135,6 +138,7 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
       "ALTER TABLE invoices ADD COLUMN project_id TEXT",
       ...archiveMigrations(INVOICE_TABLE),
       "ALTER TABLE invoices ADD COLUMN description TEXT",
+      "ALTER TABLE invoices ADD COLUMN frozen_at TEXT",
     ],
     fts: {
       type: "invoice",

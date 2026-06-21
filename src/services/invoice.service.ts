@@ -1,7 +1,9 @@
 // Invoice service — business logic over InvoiceRepository.
-// Invoices derive from a quote: customer, line items, totals, and footer (Terms)
-// are hydrated from the referenced quote at read time (never stored on the
-// invoice — the invoice's own footer, if set, overrides as a per-invoice term).
+// Invoice = a frozen snapshot of its quote at issue (decision note_1782013833761):
+//   - DRAFT (frozenAt null): customer, line items, totals, and footer are derived
+//     live from the referenced quote at read time (a preview of the quote).
+//   - ISSUED (frozenAt set, on Send): the quote snapshot is persisted on the
+//     invoice and is immutable — later quote edits never change it.
 
 import type { InvoiceRepository } from "../repositories/invoice.repository.ts";
 import type {
@@ -13,7 +15,7 @@ import type {
 import type { Quote } from "../types/quote.types.ts";
 import type { QuoteService } from "./quote.service.ts";
 import { ciIncludes } from "../utils/string.ts";
-import { round2 } from "../utils/billing.ts";
+import { computeLineAmount, round2 } from "../utils/billing.ts";
 import { BaseService } from "./base.service.ts";
 
 /** Invoice service: derives customer/line-items/totals from the referenced quote (hydrate), overdue/display-status derivation (isOverdue/displayStatus), and paid-amount sync (updatePaidAmount); filters by customerId, status, and text query (q). */
@@ -31,11 +33,28 @@ export class InvoiceService extends BaseService<
   }
 
   // ---------------------------------------------------------------------------
-  // Quote-derived hydration — the invoice owns no line items or totals.
+  // Hydration — issued invoices use their own frozen snapshot; drafts derive
+  // their content live from the referenced quote.
   // ---------------------------------------------------------------------------
 
-  /** Inject customer, line items, totals, and footer from a (pre-loaded) quote. */
+  /** Recompute per-line amounts (stripped on serialize) for a frozen snapshot. */
+  private withLineAmounts(invoice: Invoice): Invoice {
+    return {
+      ...invoice,
+      lineItems: invoice.lineItems.map((li) => ({
+        ...li,
+        amount: computeLineAmount(li),
+      })),
+    };
+  }
+
+  /**
+   * For a frozen invoice, return its stored snapshot as-is (amounts recomputed).
+   * For a draft, inject customer, line items, totals, and footer from the
+   * (pre-loaded) quote.
+   */
   private hydrateWith(invoice: Invoice, quote: Quote | undefined): Invoice {
+    if (invoice.frozenAt) return this.withLineAmounts(invoice);
     if (!quote) {
       return {
         ...invoice,
@@ -60,8 +79,9 @@ export class InvoiceService extends BaseService<
     };
   }
 
-  /** Hydrate a single invoice from its referenced quote. */
+  /** Hydrate a single invoice (frozen snapshot, or live from its quote). */
   private async hydrate(invoice: Invoice): Promise<Invoice> {
+    if (invoice.frozenAt) return this.withLineAmounts(invoice);
     const quote = invoice.quoteId
       ? await this.quoteService.getById(invoice.quoteId) ?? undefined
       : undefined;
@@ -194,5 +214,40 @@ export class InvoiceService extends BaseService<
     const number = created.number || await this.generateNumber();
     await this.invoiceRepo.update(created.id, { number } as UpdateInvoice);
     return await this.getById(created.id) ?? created;
+  }
+
+  /**
+   * Issue a draft invoice: capture an immutable snapshot of the referenced
+   * quote (customer, line items, totals, currency, footer) onto the invoice,
+   * mark it `sent`, and stamp `frozenAt`/`sentAt`. After this, later quote
+   * edits no longer affect the invoice. Idempotent — re-issuing returns the
+   * already-frozen invoice unchanged.
+   */
+  async issue(invoiceId: string): Promise<Invoice | null> {
+    const stored = await super.getById(invoiceId);
+    if (!stored) return null;
+    if (stored.frozenAt) return this.getById(invoiceId);
+
+    const quote = stored.quoteId
+      ? await this.quoteService.getById(stored.quoteId)
+      : null;
+    if (!quote) throw new Error(`Quote '${stored.quoteId}' not found`);
+
+    const now = new Date().toISOString();
+    const snapshot: Record<string, unknown> = {
+      customerId: quote.customerId,
+      currency: stored.currency ?? quote.currency,
+      footer: stored.footer ?? quote.footer,
+      lineItems: quote.lineItems.filter((li) => !li.optional),
+      subtotal: quote.subtotal,
+      tax: quote.tax,
+      taxRate: quote.taxRate,
+      total: quote.total,
+      status: "sent",
+      sentAt: now,
+      frozenAt: now,
+    };
+    await this.invoiceRepo.update(invoiceId, snapshot as UpdateInvoice);
+    return this.getById(invoiceId);
   }
 }

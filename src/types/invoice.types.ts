@@ -109,6 +109,12 @@ export const InvoiceSchema = z.object({
   paidAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when invoice was fully paid",
   }),
+  frozenAt: z.string().nullable().optional().openapi({
+    description:
+      "ISO timestamp when the invoice was issued and its quote snapshot " +
+      "frozen. Null = draft (still derives from the quote live); set = " +
+      "immutable snapshot (system-set on issue/send).",
+  }),
 }).merge(AuditFieldsSchema).merge(ArchiveFieldsSchema).openapi("Invoice");
 
 export type Invoice = z.infer<typeof InvoiceSchema>;
