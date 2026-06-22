@@ -97,11 +97,12 @@ export const PAYMENT_TABLE_COLUMNS: ColumnDef[] = [
 
 export const PAYMENT_FORM_FIELDS: FieldDef[] = [
   {
-    type: "text",
+    type: "autocomplete",
     name: "invoiceId",
-    label: "Invoice ID",
+    label: "Invoice",
+    source: "invoices-by-id",
     required: true,
-    placeholder: "invoice_...",
+    placeholder: "Search invoices… (number, title, customer)",
   },
   {
     type: "money",

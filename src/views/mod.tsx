@@ -86,6 +86,7 @@ import {
   getCustomerService,
   getGoalService,
   getIdeaService,
+  getInvoiceService,
   getMeetingService,
   getMilestoneService,
   getPeopleService,
@@ -309,6 +310,35 @@ registerAutocompleteSource("quotes-by-id", {
   list: () => quoteAutocompleteOptions(),
   search: async (q) =>
     (await quoteAutocompleteOptions()).filter((o) => foldIncludes(o.label, q)),
+  displayKey: "label",
+  valueKey: "id",
+});
+
+// Payment → invoice reference. Lists every invoice (label number — title —
+// customer); the stored value is the invoice id. Lets payment recording link to
+// an invoice without pasting a raw id (focus shows all; no second tab needed).
+async function invoiceAutocompleteOptions(): Promise<
+  Array<{ id: string; label: string }>
+> {
+  const [invoices, customers] = await Promise.all([
+    getInvoiceService().list(),
+    getCustomerService().list(),
+  ]);
+  const customerName = new Map(customers.map((c) => [c.id, c.name]));
+  return invoices.map((inv) => ({
+    id: inv.id,
+    label: `${inv.number} — ${inv.title} (${
+      customerName.get(inv.customerId) ?? inv.customerId
+    })`,
+  }));
+}
+
+registerAutocompleteSource("invoices-by-id", {
+  list: () => invoiceAutocompleteOptions(),
+  search: async (q) =>
+    (await invoiceAutocompleteOptions()).filter((o) =>
+      foldIncludes(o.label, q)
+    ),
   displayKey: "label",
   valueKey: "id",
 });

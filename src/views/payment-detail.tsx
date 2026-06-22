@@ -34,9 +34,9 @@ const NotesSection: FC<{ payment: Payment }> = ({ payment }) => (
 // ---------------------------------------------------------------------------
 
 export const PaymentDetailView: FC<
-  ViewProps & { item: Payment; editing?: boolean }
+  ViewProps & { item: Payment; invoiceNumber?: string; editing?: boolean }
 > = (
-  { item: payment, editing = false, ...viewProps },
+  { item: payment, invoiceNumber, editing = false, ...viewProps },
 ) => {
   return (
     <MainLayout
@@ -99,7 +99,7 @@ export const PaymentDetailView: FC<
           <InfoItem label="Date">{payment.date}</InfoItem>
           <InfoItem label="Invoice">
             <a href={`/invoices/${payment.invoiceId}`}>
-              {payment.invoiceId}
+              {invoiceNumber ?? payment.invoiceId}
             </a>
           </InfoItem>
           {payment.method && (

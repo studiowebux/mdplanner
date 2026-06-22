@@ -74,6 +74,18 @@ export const paymentConfig: DomainConfig<
     }) as Partial<UpdatePayment>;
   },
 
+  // Edit form: show the invoice's label in the autocomplete search box while the
+  // hidden value stays the invoice id.
+  resolveFormValues: async (values) => {
+    if (!values.invoiceId) return values;
+    const invoice = await getInvoiceService().getById(values.invoiceId);
+    if (!invoice) return values;
+    return {
+      ...values,
+      invoiceId: `${invoice.number} — ${invoice.title}`,
+    };
+  },
+
   extractFilterOptions: async () => {
     const invoices = await getInvoiceService().list();
     _invoiceNames = new Map(

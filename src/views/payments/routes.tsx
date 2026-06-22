@@ -3,7 +3,10 @@
 import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { paymentConfig } from "../../domains/payment/config.tsx";
-import { getPaymentService } from "../../singletons/services.ts";
+import {
+  getInvoiceService,
+  getPaymentService,
+} from "../../singletons/services.ts";
 import { PaymentDetailView } from "../payment-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 
@@ -13,11 +16,15 @@ export const paymentsRouter = createDomainRoutes(paymentConfig);
 async function renderDetail(c: AppContext, id: string) {
   const payment = await getPaymentService().getById(id);
   if (!payment) return c.notFound();
+  const invoice = payment.invoiceId
+    ? await getInvoiceService().getById(payment.invoiceId)
+    : null;
   const editing = c.req.query("editing") === "true";
   return c.html(
     <PaymentDetailView
       {...viewProps(c, "/payments")}
       item={payment}
+      invoiceNumber={invoice?.number}
       editing={editing}
     />,
   );
