@@ -64,6 +64,19 @@ export const InvoiceIssueNotice: FC<
       </div>
     );
   }
+  // Non-draft without a freeze stamp = issued before the snapshot model existed
+  // (legacy data). It still derives live from the quote, so don't claim a frozen
+  // snapshot — but it is NOT a draft, so never show the "not yet issued" notice.
+  if (invoice.status !== "draft") {
+    return (
+      <div class="invoice-detail__issue-notice invoice-detail__issue-notice--issued">
+        <strong>
+          Issued{invoice.sentAt ? ` ${formatDate(invoice.sentAt)}` : ""}.
+        </strong>{" "}
+        Line items and totals reflect {quoteLabel}.
+      </div>
+    );
+  }
   return (
     <div class="invoice-detail__issue-notice invoice-detail__issue-notice--draft">
       <strong>Draft &mdash; not yet issued.</strong>{" "}

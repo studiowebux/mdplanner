@@ -77,6 +77,11 @@
   border-left-color: var(--color-success);
 }
 
+.invoice-detail__issue-notice--issued {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+}
+
 .invoice-detail__footer {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);

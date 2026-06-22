@@ -36,6 +36,32 @@ Deno.test("invoice detail shows a draft preview notice before issue", async () =
   }
 });
 
+Deno.test("invoice detail does NOT show the draft notice for a sent invoice without a freeze stamp", async () => {
+  // Legacy/pre-snapshot data: status sent but no frozenAt. Must read as issued,
+  // never "Draft — not yet issued".
+  const dir = await Deno.makeTempDir({ prefix: "mdplanner-invoice-notice-" });
+  initServices(dir, { cache: false });
+  try {
+    const quote = await getQuoteService().create({
+      customerId: "cust_a",
+      title: "Build",
+      lineItems: [],
+    });
+    const invoice = await getInvoiceService().create({ quoteId: quote.id });
+    await getInvoiceService().update(invoice.id, { status: "sent" });
+
+    const res = await invoicesRouter.request(`http://localhost/${invoice.id}`);
+    assertEquals(res.status, 200);
+    const html = await res.text();
+
+    assertStringIncludes(html, "invoice-detail__issue-notice--issued");
+    assertEquals(html.includes("not yet issued"), false);
+    assertEquals(html.includes("issue-notice--draft"), false);
+  } finally {
+    await Deno.remove(dir, { recursive: true });
+  }
+});
+
 Deno.test("invoice detail shows a frozen-snapshot notice after issue", async () => {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-invoice-notice-" });
   initServices(dir, { cache: false });
