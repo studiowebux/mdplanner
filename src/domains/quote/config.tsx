@@ -9,6 +9,7 @@ import type {
 import { QUOTE_STATUSES } from "../../types/quote.types.ts";
 import {
   getCustomerService,
+  getPortfolioService,
   getQuoteService,
 } from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
@@ -80,6 +81,15 @@ export const quoteConfig: DomainConfig<Quote, CreateQuote, UpdateQuote> = {
   },
 
   getService: () => getQuoteService(),
+
+  // Edit form: show the portfolio project's name in the autocomplete search box
+  // while the hidden value stays the portfolio item id.
+  resolveFormValues: async (values) => {
+    if (!values.portfolioItemId) return values;
+    const item = await getPortfolioService().getById(values.portfolioItemId);
+    if (!item) return values;
+    return { ...values, portfolioItemId: item.name };
+  },
 
   extractFilterOptions: async () => {
     const customers = await getCustomerService().list();

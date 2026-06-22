@@ -33,6 +33,12 @@ postalCode, country).
 A quote is a proposal sent to a customer. It holds all line-item and pricing
 data. Invoices derive from quotes — you never re-enter line items on the invoice.
 
+A quote can optionally be linked to a **portfolio project** (`portfolioItemId`,
+set via the Portfolio Project autocomplete on the quote form). The linked
+project's detail page then shows a **Billing** reconciliation — quoted →
+invoiced → paid → outstanding — derived from its quotes and their invoices
+(currency-aware, same numbers as the customer Billing summary).
+
 ### Statuses
 
 | Status | Meaning |

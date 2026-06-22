@@ -9,8 +9,10 @@ import {
   getDnsService,
   getGitHubService,
   getGoalService,
+  getInvoiceService,
   getPortfolioService,
   getProjectService,
+  getQuoteService,
 } from "../../singletons/services.ts";
 import { buildTeamPersonById } from "../../domains/portfolio/owners.ts";
 import {
@@ -376,6 +378,16 @@ async function renderDetail(c: AppContext, id: string) {
   const personById = await buildTeamPersonById(item.team ?? []);
   const editing = c.req.query("editing") === "true";
 
+  // Billing linked to this portfolio item: quotes carry portfolioItemId, and
+  // invoices link through their quote. Feeds the reconciliation section.
+  const [allQuotes, allInvoices] = await Promise.all([
+    getQuoteService().list(),
+    getInvoiceService().list(),
+  ]);
+  const quotes = allQuotes.filter((q) => q.portfolioItemId === item.id);
+  const quoteIds = new Set(quotes.map((q) => q.id));
+  const invoices = allInvoices.filter((i) => quoteIds.has(i.quoteId));
+
   return c.html(
     <PortfolioDetailView
       {...viewProps(c, "/portfolio")}
@@ -385,6 +397,8 @@ async function renderDetail(c: AppContext, id: string) {
       customer={customer ?? null}
       clientCustomer={clientCustomer ?? null}
       dnsDomains={dnsDomains}
+      quotes={quotes}
+      invoices={invoices}
       editing={editing}
     />,
   );

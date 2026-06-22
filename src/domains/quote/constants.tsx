@@ -100,6 +100,13 @@ export const QUOTE_FORM_FIELDS: FieldDef[] = [
     placeholder: "customer_...",
   },
   {
+    type: "autocomplete",
+    name: "portfolioItemId",
+    label: "Portfolio Project",
+    source: "portfolio-by-id",
+    placeholder: "Link to a portfolio project (optional)",
+  },
+  {
     type: "select",
     name: "status",
     label: "Status",

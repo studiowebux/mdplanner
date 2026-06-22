@@ -92,6 +92,7 @@ export class QuoteRepository extends CachedMarkdownRepository<
       number: fmStr(fm, "number") ?? "",
       customerId: fmStr(fm, "customerId") ?? "",
       projectId: fmStr(fm, "projectId"),
+      portfolioItemId: fmStr(fm, "portfolioItemId"),
       title,
       status: (fm.status as Quote["status"]) ?? "draft",
       currency: fmStr(fm, "currency"),

@@ -31,6 +31,7 @@ export function rowToQuote(row: Record<string, string | number | null>): Quote {
     number: (row.number as string) ?? "",
     customerId: (row.customer_id as string) ?? "",
     projectId: row.project_id as string | undefined,
+    portfolioItemId: row.portfolio_item_id as string | undefined,
     title: (row.title as string) ?? "",
     status: (row.status as Quote["status"]) ?? "draft",
     currency: row.currency as string | undefined,
@@ -57,6 +58,7 @@ const QUOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${QUOTE_TABLE} (
   number TEXT,
   customer_id TEXT,
   project_id TEXT,
+  portfolio_item_id TEXT,
   title TEXT NOT NULL,
   status TEXT,
   currency TEXT,
@@ -84,16 +86,17 @@ function insertQuoteRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${QUOTE_TABLE} (id, number, customer_id, project_id,
-       title, status, currency, expires_at, line_items, payment_schedule,
-       subtotal, tax, tax_rate, total, notes, footer, revision,
+       portfolio_item_id, title, status, currency, expires_at, line_items,
+       payment_schedule, subtotal, tax, tax_rate, total, notes, footer, revision,
        converted_to_invoice, sent_at, accepted_at,
        ${archiveCols()}, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(q.id),
       val(q.number),
       val(q.customerId),
       val(q.projectId),
+      val(q.portfolioItemId),
       val(q.title),
       val(q.status),
       val(q.currency),
@@ -126,6 +129,7 @@ export function registerQuoteEntity(repo: QuoteRepository): void {
       "ALTER TABLE quotes ADD COLUMN line_items TEXT",
       "ALTER TABLE quotes ADD COLUMN payment_schedule TEXT",
       "ALTER TABLE quotes ADD COLUMN project_id TEXT",
+      "ALTER TABLE quotes ADD COLUMN portfolio_item_id TEXT",
       ...archiveMigrations(QUOTE_TABLE),
     ],
     fts: {

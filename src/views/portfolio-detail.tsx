@@ -4,8 +4,12 @@ import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { Goal } from "../types/goal.types.ts";
 import type { Customer } from "../types/customer.types.ts";
 import type { DnsDomain } from "../types/dns.types.ts";
+import type { Quote } from "../types/quote.types.ts";
+import type { Invoice } from "../types/invoice.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
+import { reconcileBilling } from "../utils/billing-reconciliation.ts";
+import { MoneyStatValue } from "./components/money-stat-value.tsx";
 import { formatDate } from "../utils/time.ts";
 import { GitHubSection } from "./github.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -33,6 +37,8 @@ type Props = ViewProps & {
   customer?: Customer | null;
   clientCustomer?: Customer | null;
   dnsDomains?: DnsDomain[];
+  quotes?: Quote[];
+  invoices?: Invoice[];
   editing?: boolean;
 };
 
@@ -246,6 +252,55 @@ const FinancialsSection: FC<{ item: PortfolioItem }> = ({ item }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+/**
+ * Billing reconciliation for this portfolio project: quoted → invoiced → paid →
+ * outstanding, derived by the shared reconcileBilling helper (currency-aware)
+ * from the linked quotes/invoices. Hidden when nothing is linked.
+ */
+const BillingReconciliationSection: FC<
+  { quotes: Quote[]; invoices: Invoice[] }
+> = ({ quotes, invoices }) => {
+  if (quotes.length === 0 && invoices.length === 0) return null;
+  const { quoted, invoiced, paid, outstanding } = reconcileBilling(
+    quotes,
+    invoices,
+  );
+  const hasOutstanding = outstanding.subtotals.some((s) => s.amount > 0);
+  return (
+    <section class="detail-section portfolio-detail__section">
+      <h2 class="section-heading">Billing</h2>
+      <div class="portfolio-detail__financials">
+        <div class="portfolio-detail__financial-card">
+          <div class="portfolio-detail__financial-label">Quoted</div>
+          <div class="portfolio-detail__financial-value">
+            <MoneyStatValue totals={quoted} />
+          </div>
+        </div>
+        <div class="portfolio-detail__financial-card">
+          <div class="portfolio-detail__financial-label">Invoiced</div>
+          <div class="portfolio-detail__financial-value">
+            <MoneyStatValue totals={invoiced} />
+          </div>
+        </div>
+        <div class="portfolio-detail__financial-card">
+          <div class="portfolio-detail__financial-label">Paid</div>
+          <div class="portfolio-detail__financial-value">
+            <MoneyStatValue totals={paid} />
+          </div>
+        </div>
+        {hasOutstanding && (
+          <div class="portfolio-detail__financial-card">
+            <div class="portfolio-detail__financial-label">Outstanding</div>
+            <div class="portfolio-detail__financial-value portfolio-detail__financial-value--loss">
+              <MoneyStatValue totals={outstanding} />
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
@@ -467,6 +522,8 @@ export const PortfolioDetailView: FC<Props> = (
     customer = null,
     clientCustomer = null,
     dnsDomains = [],
+    quotes = [],
+    invoices = [],
     editing = false,
     ...viewProps
   },
@@ -513,6 +570,7 @@ export const PortfolioDetailView: FC<Props> = (
       />
       <ExtraInfoRow item={item} customer={customer} />
       <FinancialsSection item={item} />
+      <BillingReconciliationSection quotes={quotes} invoices={invoices} />
       <DescriptionBlock item={item} editing={editing} />
       <TechStackSection item={item} />
       <TeamSection item={item} personById={personById} />
