@@ -92,6 +92,10 @@ payment_schedule:
 
 Each entry can use `percent` or a fixed `amount`.
 
+Once the quote is invoiced and payments are recorded, each milestone shows its
+**paid / partial / due** state — the invoice's actual paid amount is allocated
+across milestones as a waterfall (earlier milestones fill first).
+
 ### Revision History
 
 When a quote is re-sent, the previous totals are snapshotted as a revision

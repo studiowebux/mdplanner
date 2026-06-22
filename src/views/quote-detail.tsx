@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import type { ProjectConfig } from "../types/project.types.ts";
 import { formatDate } from "../utils/time.ts";
 import { formatCurrency } from "../utils/format.ts";
+import { allocateSchedule } from "../utils/billing.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -15,12 +16,21 @@ import { LineItemsTable } from "./components/line-items-table.tsx";
 import { BillingTotals } from "./components/billing-totals.tsx";
 import { QuoteLineItemsSection } from "./components/quote-line-items-editor.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
-import { badgeClass } from "../components/ui/status-badge.tsx";
+import {
+  badgeClass,
+  type BadgeVariant,
+} from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
+
+const SCHEDULE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  paid: "success",
+  partial: "warning",
+  due: "neutral",
+};
 
 // ---------------------------------------------------------------------------
 // Shared inline-editable section for `notes` and `footer`.
@@ -230,41 +240,63 @@ const QuoteLineItems: FC<{ quote: Quote }> = ({ quote }) =>
       </section>
     );
 
-/** Payment schedule table — hidden when no schedule is set. */
-const PaymentScheduleSection: FC<{ quote: Quote }> = ({ quote }) => {
-  if (!quote.paymentSchedule || quote.paymentSchedule.length === 0) return null;
-  return (
-    <section class="detail-section">
-      <h2 class="section-heading">Payment Schedule</h2>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th scope="col">Description</th>
-            <th scope="col">%</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Due</th>
-          </tr>
-        </thead>
-        <tbody>
-          {quote.paymentSchedule.map((ps) => {
-            const amt = ps.amount ??
-              (ps.percent != null
-                ? Math.round(quote.total * ps.percent / 100 * 100) / 100
-                : null);
-            return (
-              <tr>
-                <td>{ps.description}</td>
-                <td>{ps.percent != null ? `${ps.percent}%` : ""}</td>
-                <td>{amt != null ? formatCurrency(amt) : ""}</td>
-                <td>{ps.dueDate ?? ""}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </section>
-  );
-};
+/** Payment schedule table — hidden when no schedule is set. Once the quote is
+ * invoiced, each milestone shows its paid/due state (waterfall allocation of the
+ * invoice's actual payments). */
+const PaymentScheduleSection: FC<{ quote: Quote; invoicePaidAmount: number }> =
+  (
+    { quote, invoicePaidAmount },
+  ) => {
+    if (!quote.paymentSchedule || quote.paymentSchedule.length === 0) {
+      return null;
+    }
+    const rows = allocateSchedule(
+      quote.paymentSchedule,
+      quote.total,
+      invoicePaidAmount,
+    );
+    const showPaid = invoicePaidAmount > 0;
+    return (
+      <section class="detail-section">
+        <h2 class="section-heading">Payment Schedule</h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Description</th>
+              <th scope="col">%</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Due</th>
+              {showPaid && <th scope="col">Paid</th>}
+              {showPaid && <th scope="col">Status</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {quote.paymentSchedule.map((ps, i) => {
+              const row = rows[i];
+              return (
+                <tr>
+                  <td>{ps.description}</td>
+                  <td>{ps.percent != null ? `${ps.percent}%` : ""}</td>
+                  <td>{row.amount ? formatCurrency(row.amount) : ""}</td>
+                  <td>{ps.dueDate ?? ""}</td>
+                  {showPaid && <td>{formatCurrency(row.paid) || "$0"}</td>}
+                  {showPaid && (
+                    <td>
+                      <span
+                        class={badgeClass(SCHEDULE_STATUS_VARIANTS, row.status)}
+                      >
+                        {row.status}
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+    );
+  };
 
 /** Terms/footer — editable, configured default, or hidden. */
 const FooterSection: FC<{
@@ -383,6 +415,7 @@ export const QuoteDetailView: FC<
     billingConfig: ProjectConfig;
     revisions: QuoteRevision[];
     customerName?: string;
+    invoicePaidAmount?: number;
     editing?: boolean;
   }
 > = (
@@ -391,6 +424,7 @@ export const QuoteDetailView: FC<
     billingConfig,
     revisions,
     customerName,
+    invoicePaidAmount = 0,
     editing = false,
     ...viewProps
   },
@@ -425,7 +459,10 @@ export const QuoteDetailView: FC<
       <ArchivedBanner entity={quote} />
       <QuoteInfoRow quote={quote} customerName={customerName} />
       <QuoteLineItems quote={quote} />
-      <PaymentScheduleSection quote={quote} />
+      <PaymentScheduleSection
+        quote={quote}
+        invoicePaidAmount={invoicePaidAmount}
+      />
       <FooterSection
         quote={quote}
         billingConfig={billingConfig}
