@@ -9,18 +9,80 @@ import type {
   ListFinanceOptions,
   UpdateFinance,
 } from "../types/finance.types.ts";
+import type { PaymentService } from "./payment.service.ts";
+import type { InvoiceService } from "./invoice.service.ts";
+import type { CustomerService } from "./customer.service.ts";
 import { ciIncludes } from "../utils/string.ts";
 import { BaseService } from "./base.service.ts";
 
-/** Finance CRUD service: getSummary aggregates totals; filters by type, tag, date range (from/to), and text query (q). */
+/** Prefix that marks a Finance row as a read-only billing-income projection of a
+ * payment (see buildBillingIncome). Payments already use this id prefix. */
+export const BILLING_INCOME_ID_PREFIX = "payment_";
+
+/** Finance CRUD service: getSummary aggregates totals; filters by type, tag, date range (from/to), and text query (q). Billing income (recorded payments) is projected read-time into list()/getSummary as read-only income rows — never persisted, no double entry. */
 export class FinanceService extends BaseService<
   Finance,
   CreateFinance,
   UpdateFinance,
   ListFinanceOptions
 > {
-  constructor(financeRepo: FinanceRepository) {
+  constructor(
+    financeRepo: FinanceRepository,
+    private paymentService: PaymentService,
+    private invoiceService: InvoiceService,
+    private customerService: CustomerService,
+  ) {
     super(financeRepo);
+  }
+
+  /**
+   * Project recorded payments into read-only "income" Finance rows (read-time;
+   * never persisted — payments stay the source of truth, no double bookkeeping).
+   * Identified downstream by the `payment_` id prefix so the UI renders them
+   * read-only and links to the payment instead of a finance detail.
+   */
+  private async buildBillingIncome(): Promise<Finance[]> {
+    const [payments, invoices, customers] = await Promise.all([
+      this.paymentService.list(),
+      this.invoiceService.list(),
+      this.customerService.list(),
+    ]);
+    const invoiceById = new Map(invoices.map((i) => [i.id, i]));
+    const customerName = new Map(customers.map((c) => [c.id, c.name]));
+    return payments.map((p) => {
+      const inv = invoiceById.get(p.invoiceId);
+      const who = inv ? customerName.get(inv.customerId) ?? "" : "";
+      const label = inv
+        ? `Payment — ${inv.number}${who ? ` (${who})` : ""}`
+        : `Payment — ${p.invoiceId}`;
+      return {
+        id: p.id,
+        title: label,
+        type: "income",
+        amount: p.amount,
+        currency: inv?.currency,
+        date: p.date,
+        description: p.notes,
+        tags: ["payment"],
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+        archived: false,
+      } satisfies Finance;
+    });
+  }
+
+  /**
+   * Manual finance entries + read-time billing income (payments). The same
+   * domain filters apply to both, so the table, summary banner, chart, and
+   * by-tag views all see one consistent set.
+   */
+  override async list(options?: ListFinanceOptions): Promise<Finance[]> {
+    const [manual, income] = await Promise.all([
+      super.list(options),
+      this.buildBillingIncome(),
+    ]);
+    const filtered = options ? this.applyFilters(income, options) : income;
+    return [...manual, ...filtered];
   }
 
   protected applyFilters(

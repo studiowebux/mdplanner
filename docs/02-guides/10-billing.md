@@ -152,6 +152,9 @@ checksum tracks the local state — re-exporting after any edit yields a new has
 Record money received against an invoice. Multiple partial payments are
 supported — `paid_amount` on the invoice is the sum of all linked payments.
 
+In the UI the invoice field is an **autocomplete**: focus it to see every
+invoice (number · title · customer) and pick one — no need to paste a raw id.
+
 **UI:** Invoice detail → Add Payment
 
 **MCP:** `create_payment`
@@ -164,7 +167,14 @@ date: 2026-02-18
 reference: EFT-2026-0218
 ```
 
-When the sum of payments equals the invoice total, mark the invoice `paid`.
+Invoice status is **derived**, not set by hand: sending issues the invoice, and
+when recorded payments cover the total it flips to `paid` automatically (and back
+to `sent` if a payment is later removed). There is no manual status field.
+
+Recorded payments also appear in **Finance** as read-only **income** entries
+(tagged `payment`), aggregated read-time — they are never duplicated on disk and
+always reconcile with the invoice. Edit or delete them from the payment itself,
+not from Finance.
 
 ---
 

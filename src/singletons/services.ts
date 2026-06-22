@@ -294,7 +294,8 @@ export function initServices(
   const investorRepo = new InvestorRepository(projectDir);
   _set(_svc, "investor", new InvestorService(investorRepo));
   const customerRepo = new CustomerRepository(projectDir);
-  _set(_svc, "customer", new CustomerService(customerRepo));
+  const customerService = new CustomerService(customerRepo);
+  _set(_svc, "customer", customerService);
   const contactRepo = new ContactRepository(projectDir);
   _set(_svc, "contact", new ContactService(contactRepo));
   const dealRepo = new DealRepository(projectDir);
@@ -320,7 +321,6 @@ export function initServices(
     new OnboardingTemplateService(onboardingTemplateRepo),
   );
   const financeRepo = new FinanceRepository(projectDir);
-  _set(_svc, "finance", new FinanceService(financeRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
   _set(_svc, "billingRate", new BillingRateService(billingRateRepo));
   const quoteRepo = new QuoteRepository(projectDir);
@@ -330,7 +330,20 @@ export function initServices(
   const invoiceService = new InvoiceService(invoiceRepo, quoteService);
   _set(_svc, "invoice", invoiceService);
   const paymentRepo = new PaymentRepository(projectDir);
-  _set(_svc, "payment", new PaymentService(paymentRepo, invoiceService));
+  const paymentService = new PaymentService(paymentRepo, invoiceService);
+  _set(_svc, "payment", paymentService);
+  // Finance aggregates billing income (payments) read-time, so it depends on
+  // payment/invoice/customer — constructed here, after them.
+  _set(
+    _svc,
+    "finance",
+    new FinanceService(
+      financeRepo,
+      paymentService,
+      invoiceService,
+      customerService,
+    ),
+  );
   const brainstormRepo = new BrainstormRepository(projectDir);
   _set(_svc, "brainstorm", new BrainstormService(brainstormRepo));
   const brainstormTemplateRepo = new BrainstormTemplateRepository(projectDir);

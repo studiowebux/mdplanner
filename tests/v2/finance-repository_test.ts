@@ -15,14 +15,22 @@ import { assertEquals, assertExists, assertStrictEquals } from "@std/assert";
 import { join } from "@std/path";
 import { FinanceRepository } from "../../src/repositories/finance.repository.ts";
 import { FinanceService } from "../../src/services/finance.service.ts";
+import {
+  getFinanceService,
+  initServices,
+} from "../../src/singletons/services.ts";
 import type { Finance } from "../../src/types/finance.types.ts";
 
 async function setup(): Promise<
   { repo: FinanceRepository; service: FinanceService; dir: string }
 > {
   const dir = await Deno.makeTempDir({ prefix: "mdplanner-finance-test-" });
+  // FinanceService now projects billing income from payments read-time, so it
+  // needs the wired services. No payments here -> projection is empty and these
+  // CRUD/filter assertions are unaffected. Keep a direct repo for low-level ops.
+  initServices(dir, { cache: false });
   const repo = new FinanceRepository(dir);
-  const service = new FinanceService(repo);
+  const service = getFinanceService();
   return { repo, service, dir };
 }
 

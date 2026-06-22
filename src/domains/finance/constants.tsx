@@ -14,7 +14,10 @@ import { Highlight } from "../../utils/highlight.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { formatDate } from "../../utils/time.ts";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
-import { FinanceService } from "../../services/finance.service.ts";
+import {
+  BILLING_INCOME_ID_PREFIX,
+  FinanceService,
+} from "../../services/finance.service.ts";
 
 export const FINANCE_TYPE_OPTIONS = FINANCE_TYPES.map((t) => ({
   value: t,
@@ -36,7 +39,7 @@ export const FINANCE_TABLE_COLUMNS: ColumnDef[] = [
     label: "Title",
     sortable: true,
     render: (v, row) => (
-      <a href={`/finances/${row.id}`}>
+      <a href={String(row._href ?? `/finances/${row.id}`)}>
         <Highlight text={String(v)} q={row._q as string} />
       </a>
     ),
@@ -67,7 +70,12 @@ export const FINANCE_TABLE_COLUMNS: ColumnDef[] = [
     label: "Running Balance",
     sortable: false,
   },
-  { key: "_actions", label: "", render: actionBtns },
+  {
+    key: "_actions",
+    label: "",
+    // Billing-income rows are read-only projections of a payment — no edit/delete.
+    render: (v, row) => (row._readonly ? "" : actionBtns(v, row)),
+  },
 ];
 
 export const FINANCE_FORM_FIELDS: FieldDef[] = [
@@ -110,6 +118,7 @@ export const FINANCE_FORM_FIELDS: FieldDef[] = [
 ];
 
 export function financeToRow(f: Finance): Record<string, unknown> {
+  const isBillingIncome = f.id.startsWith(BILLING_INCOME_ID_PREFIX);
   return {
     id: f.id,
     title: f.title,
@@ -119,6 +128,10 @@ export function financeToRow(f: Finance): Record<string, unknown> {
     date: f.date ?? "",
     runningBalance: "",
     updated: f.updatedAt,
+    // Billing income is a read-only projection of a payment: link to the
+    // payment and suppress edit/delete actions.
+    _readonly: isBillingIncome,
+    _href: isBillingIncome ? `/payments/${f.id}` : undefined,
   };
 }
 
