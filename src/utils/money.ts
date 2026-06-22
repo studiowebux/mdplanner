@@ -60,3 +60,37 @@ export function parseMoney(
 export function formatMoney(n: number | undefined | null): string {
   return formatCurrency(n, { decimals: 2 });
 }
+
+export type CurrencySubtotal = { currency: string; amount: number };
+
+/**
+ * Group monetary amounts by their currency code (missing/blank → `fallback`).
+ * Returns subtotals sorted by code plus a `mixed` flag set when more than one
+ * distinct currency is present. Callers MUST NOT render a single blended total
+ * when `mixed` is true — `formatCurrency` renders every value in the one
+ * configured project currency, so summing across currencies is silently wrong.
+ */
+export function sumByCurrency(
+  items: Array<{ amount: number; currency?: string | null }>,
+  fallback = "",
+): { subtotals: CurrencySubtotal[]; mixed: boolean } {
+  const map = new Map<string, number>();
+  for (const it of items) {
+    const currency = (it.currency ?? "").trim() || fallback;
+    map.set(currency, (map.get(currency) ?? 0) + it.amount);
+  }
+  const subtotals = [...map.entries()]
+    .map(([currency, amount]) => ({ currency, amount }))
+    .sort((a, b) => a.currency.localeCompare(b.currency));
+  return { subtotals, mixed: subtotals.length > 1 };
+}
+
+/**
+ * Format a per-currency subtotal. With no explicit code it falls back to the
+ * project-currency formatter; with a code it shows an unambiguous `1234.00 USD`
+ * (formatCurrency can't switch currency, so the code is shown explicitly).
+ */
+export function formatCurrencySubtotal(sub: CurrencySubtotal): string {
+  if (!sub.currency) return formatMoney(sub.amount);
+  return `${sub.amount.toFixed(2)} ${sub.currency}`;
+}

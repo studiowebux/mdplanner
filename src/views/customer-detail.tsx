@@ -7,6 +7,8 @@ import type { Quote } from "../types/quote.types.ts";
 import type { Invoice } from "../types/invoice.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
+import { sumByCurrency } from "../utils/money.ts";
+import { MoneyStatValue } from "./components/money-stat-value.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
@@ -44,10 +46,22 @@ export const BillingSection: FC<{
   quotes: Quote[];
   invoices: InvoiceWithDisplay[];
 }> = ({ customerId, quotes, invoices }) => {
-  const totalQuoted = quotes.reduce((sum, q) => sum + q.total, 0);
-  const totalInvoiced = invoices.reduce((sum, i) => sum + i.total, 0);
-  const totalPaid = invoices.reduce((sum, i) => sum + i.paidAmount, 0);
-  const outstanding = totalInvoiced - totalPaid;
+  const quotedTotals = sumByCurrency(
+    quotes.map((q) => ({ amount: q.total, currency: q.currency })),
+  );
+  const invoicedTotals = sumByCurrency(
+    invoices.map((i) => ({ amount: i.total, currency: i.currency })),
+  );
+  const paidTotals = sumByCurrency(
+    invoices.map((i) => ({ amount: i.paidAmount, currency: i.currency })),
+  );
+  const outstandingTotals = sumByCurrency(
+    invoices.map((i) => ({
+      amount: i.total - i.paidAmount,
+      currency: i.currency,
+    })),
+  );
+  const hasOutstanding = outstandingTotals.subtotals.some((s) => s.amount > 0);
 
   const recentQuotes = quotes.slice(0, CUSTOMER_BILLING_MAX_ROWS);
   const recentInvoices = invoices.slice(0, CUSTOMER_BILLING_MAX_ROWS);
@@ -62,26 +76,26 @@ export const BillingSection: FC<{
         <div class="customer-detail__stat">
           <span class="customer-detail__stat-label">Quoted</span>
           <span class="customer-detail__stat-value">
-            {formatCurrency(totalQuoted) || "$0"}
+            <MoneyStatValue totals={quotedTotals} />
           </span>
         </div>
         <div class="customer-detail__stat">
           <span class="customer-detail__stat-label">Invoiced</span>
           <span class="customer-detail__stat-value">
-            {formatCurrency(totalInvoiced) || "$0"}
+            <MoneyStatValue totals={invoicedTotals} />
           </span>
         </div>
         <div class="customer-detail__stat">
           <span class="customer-detail__stat-label">Paid</span>
           <span class="customer-detail__stat-value customer-detail__stat-value--paid">
-            {formatCurrency(totalPaid) || "$0"}
+            <MoneyStatValue totals={paidTotals} />
           </span>
         </div>
-        {outstanding > 0 && (
+        {hasOutstanding && (
           <div class="customer-detail__stat">
             <span class="customer-detail__stat-label">Outstanding</span>
             <span class="customer-detail__stat-value customer-detail__stat-value--due">
-              {formatCurrency(outstanding) || "$0"}
+              <MoneyStatValue totals={outstandingTotals} />
             </span>
           </div>
         )}

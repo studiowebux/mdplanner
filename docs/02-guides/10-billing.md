@@ -176,6 +176,11 @@ Recorded payments also appear in **Finance** as read-only **income** entries
 always reconcile with the invoice. Edit or delete them from the payment itself,
 not from Finance.
 
+**Multi-currency:** rollups (the customer Billing summary and the Finance
+income/expense/balance tiles) group by currency. When a set spans more than one
+currency they show a per-currency breakdown instead of a single blended total,
+so amounts are never summed across currencies.
+
 ---
 
 ## 5. Billing Rates

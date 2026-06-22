@@ -2556,3 +2556,15 @@ div.load-more-sentinel {
     background-position: 100% 0;
   }
 }
+
+/* Mixed-currency money rollup: stacked per-currency subtotals (no blended sum). */
+.money-mixed {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.money-mixed__line {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}

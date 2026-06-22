@@ -11,6 +11,7 @@ import { FINANCE_TYPES } from "../../types/finance.types.ts";
 import { getFinanceService } from "../../singletons/services.ts";
 import { FinanceService } from "../../services/finance.service.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
+import { sumByCurrency } from "../../utils/money.ts";
 import {
   FINANCE_FORM_FIELDS,
   FINANCE_TABLE_COLUMNS,
@@ -105,7 +106,26 @@ export const financeConfig: DomainConfig<
       balance: totalIncome - totalExpense,
       byTag: FinanceService.aggregateByTag(filtered),
     };
-    return <FinanceSummaryBanner summary={summary} />;
+    // Currency-aware: don't present a single blended total when entries span
+    // more than one currency (formatCurrency renders one project currency).
+    const income = filtered.filter((f) => f.type === "income");
+    const expense = filtered.filter((f) => f.type === "expense");
+    const incomeTotals = sumByCurrency(income);
+    const expenseTotals = sumByCurrency(expense);
+    const balanceTotals = sumByCurrency(
+      filtered.map((f) => ({
+        amount: f.type === "income" ? f.amount : -f.amount,
+        currency: f.currency,
+      })),
+    );
+    return (
+      <FinanceSummaryBanner
+        summary={summary}
+        incomeTotals={incomeTotals}
+        expenseTotals={expenseTotals}
+        balanceTotals={balanceTotals}
+      />
+    );
   },
 
   searchPredicate: createSearchPredicate<Finance>([
