@@ -9,6 +9,7 @@ import type {
   QuoteRevision,
   UpdateQuote,
 } from "../types/quote.types.ts";
+import type { LineItem } from "../types/billing.types.ts";
 import { ciIncludes } from "../utils/string.ts";
 import { computeLineAmount, round2 } from "../utils/billing.ts";
 import { BaseService } from "./base.service.ts";
@@ -205,6 +206,35 @@ export class QuoteService extends BaseService<
         quantity: undefined,
         unit: undefined,
         unitRate: undefined,
+        amount: 0,
+      },
+    ];
+    return this.update(quote.id, { lineItems });
+  }
+
+  /**
+   * Append a pre-built line item (e.g. billed time = hours × rate) and recalc
+   * totals. Used by the "Add time" action; the caller resolves the task time
+   * entries and billing rate.
+   */
+  addLineItemRow(
+    quote: Quote,
+    row: {
+      description: string;
+      quantity?: number;
+      unit?: LineItem["unit"];
+      unitRate?: number;
+    },
+  ): Promise<Quote | null> {
+    const lineItems = [
+      ...quote.lineItems.map((li) => ({ ...li })),
+      {
+        id: `li_${crypto.randomUUID().slice(0, 8)}`,
+        type: "service" as const,
+        description: row.description,
+        quantity: row.quantity,
+        unit: row.unit,
+        unitRate: row.unitRate,
         amount: 0,
       },
     ];

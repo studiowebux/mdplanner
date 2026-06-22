@@ -33,6 +33,11 @@ postalCode, country).
 A quote is a proposal sent to a customer. It holds all line-item and pricing
 data. Invoices derive from quotes — you never re-enter line items on the invoice.
 
+On a **draft** quote, the line-item editor has an **Add time** action: pick a
+task and a billing rate (and an optional date range) to turn that task's tracked
+time entries into a single billed line item (quantity = total hours, unit price =
+the rate). Time stays on the task; this just bills it.
+
 A quote can optionally be linked to a **portfolio project** (`portfolioItemId`,
 set via the Portfolio Project autocomplete on the quote form). The linked
 project's detail page then shows a **Billing** reconciliation — quoted →

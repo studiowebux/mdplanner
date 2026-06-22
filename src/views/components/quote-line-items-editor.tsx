@@ -10,6 +10,7 @@ import { LINE_ITEM_TYPES } from "../../types/billing.types.ts";
 import { formatCurrency } from "../../utils/format.ts";
 import { BillingTotals } from "./billing-totals.tsx";
 import { groupSubtotal } from "./line-items-table.tsx";
+import { AutocompleteWidget } from "../../components/ui/autocomplete-widget.tsx";
 
 /** Fields the inline editor allows editing. Unit/discount stay in sidenav. */
 export const EDITABLE_LINE_ITEM_FIELDS = [
@@ -335,6 +336,48 @@ function groupByIndex(
 }
 
 /** Full editable line-items section — re-rendered on every add/remove. */
+/**
+ * "Add time" popover: pick a task + billing rate (+ optional date range) and
+ * POST to /quotes/:id/add-time, which turns the task's time entries into a
+ * billed line item (qty = hours, unitRate = rate). htmx-only.
+ */
+const AddTimeForm: FC<{ quote: Quote }> = ({ quote }) => {
+  const fieldsId = `qli-add-time-${quote.id}`;
+  return (
+    <details class="qli-add-time">
+      <summary class="btn btn--secondary btn--sm">+ Add time</summary>
+      <div class="qli-add-time__fields" id={fieldsId}>
+        <AutocompleteWidget
+          id={`${fieldsId}-task`}
+          name="taskId"
+          source="tasks"
+          placeholder="Task…"
+          required
+        />
+        <AutocompleteWidget
+          id={`${fieldsId}-rate`}
+          name="billingRateId"
+          source="billing-rates"
+          placeholder="Billing rate…"
+          required
+        />
+        <input type="date" name="from" class="form__input" aria-label="From" />
+        <input type="date" name="to" class="form__input" aria-label="To" />
+        <button
+          type="button"
+          class="btn btn--primary btn--sm"
+          hx-post={`/quotes/${quote.id}/add-time`}
+          hx-include={`#${fieldsId} input`}
+          hx-target="#quote-line-items-section"
+          hx-swap="outerHTML"
+        >
+          Add as line item
+        </button>
+      </div>
+    </details>
+  );
+};
+
 export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
   const groups = groupByIndex(quote.lineItems);
   const showGroupSubtotals = groups.length > 1 &&
@@ -423,15 +466,18 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
           </tbody>
         </table>
       </div>
-      <button
-        type="button"
-        class="btn btn--secondary btn--sm qli-add"
-        hx-post={`/quotes/${quote.id}/line-items`}
-        hx-target="#quote-line-items-section"
-        hx-swap="outerHTML"
-      >
-        + Add row
-      </button>
+      <div class="qli-actions">
+        <button
+          type="button"
+          class="btn btn--secondary btn--sm qli-add"
+          hx-post={`/quotes/${quote.id}/line-items`}
+          hx-target="#quote-line-items-section"
+          hx-swap="outerHTML"
+        >
+          + Add row
+        </button>
+        <AddTimeForm quote={quote} />
+      </div>
       <QuoteTotals quote={quote} />
     </section>
   );

@@ -4,15 +4,18 @@ import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { quoteConfig } from "../../domains/quote/config.tsx";
 import {
+  getBillingRateService,
   getCustomerService,
   getInvoiceService,
   getProjectService,
   getQuoteService,
+  getTaskService,
 } from "../../singletons/services.ts";
 import { QuoteDetailView } from "../quote-detail.tsx";
 import { QuotePrintView } from "../quote-print.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { round2 } from "../../utils/billing.ts";
 import {
   EDITABLE_LINE_ITEM_FIELDS,
   type EditableLineItemField,
@@ -372,6 +375,62 @@ quotesRouter.post("/:id/line-items", async (c) => {
   if (!quote) return c.notFound();
   if (quote.status !== "draft") return notDraftResponse();
   const updated = await service.addLineItem(quote);
+  if (!updated) return c.notFound();
+  return c.html(<QuoteLineItemsSection quote={updated} />);
+});
+
+// POST /:id/add-time — turn a task's time entries (in an optional date range)
+// into a single billed line item: quantity = total hours, unitRate = the chosen
+// billing rate. Re-renders the section.
+quotesRouter.post("/:id/add-time", async (c) => {
+  const id = c.req.param("id");
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.notFound();
+  if (quote.status !== "draft") return notDraftResponse();
+
+  const body = await c.req.parseBody();
+  const taskId = String(body.taskId ?? "");
+  const rateId = String(body.billingRateId ?? "");
+  const from = String(body.from ?? "");
+  const to = String(body.to ?? "");
+
+  const [task, rate] = await Promise.all([
+    taskId ? getTaskService().getById(taskId) : Promise.resolve(null),
+    rateId ? getBillingRateService().getById(rateId) : Promise.resolve(null),
+  ]);
+  if (!task || !rate) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger("error", "Pick a task and a billing rate"),
+      },
+    });
+  }
+
+  const entries = (task.time_entries ?? []).filter((e) =>
+    (!from || e.date >= from) && (!to || e.date <= to)
+  );
+  const hours = round2(entries.reduce((sum, e) => sum + e.hours, 0));
+  if (hours <= 0) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger(
+          "error",
+          "No time entries for that task in the selected range",
+        ),
+      },
+    });
+  }
+
+  const range = from || to ? ` (${from || "…"} → ${to || "…"})` : "";
+  const updated = await service.addLineItemRow(quote, {
+    description: `${task.title} — time${range}`,
+    quantity: hours,
+    unit: rate.unit,
+    unitRate: rate.rate,
+  });
   if (!updated) return c.notFound();
   return c.html(<QuoteLineItemsSection quote={updated} />);
 });

@@ -141,3 +141,26 @@ details[open] .quote-detail__revisions-summary::before {
 .qli-add {
   margin-top: var(--space-sm);
 }
+
+.qli-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.qli-add-time__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.qli-add-time__fields .form__autocomplete {
+  min-width: 12rem;
+}
