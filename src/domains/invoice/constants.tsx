@@ -1,7 +1,6 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Invoice } from "../../types/invoice.types.ts";
-import { INVOICE_STATUSES } from "../../types/invoice.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
@@ -19,15 +18,6 @@ export const INVOICE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   overdue: "error",
   cancelled: "neutral",
 };
-
-// ---------------------------------------------------------------------------
-// Status options (derived from const array)
-// ---------------------------------------------------------------------------
-
-export const INVOICE_STATUS_OPTIONS = INVOICE_STATUSES.map((s) => ({
-  value: s,
-  label: s.charAt(0).toUpperCase() + s.slice(1),
-}));
 
 // ---------------------------------------------------------------------------
 // Payment terms
@@ -124,12 +114,6 @@ export const INVOICE_FORM_FIELDS: FieldDef[] = [
     label: "Title",
     placeholder: "Defaults to the quote title",
     maxLength: 200,
-  },
-  {
-    type: "select",
-    name: "status",
-    label: "Status",
-    options: INVOICE_STATUS_OPTIONS,
   },
   {
     type: "text",
