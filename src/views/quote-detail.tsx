@@ -72,7 +72,9 @@ const QuoteActions: FC<{ quote: Quote; editing: boolean }> = (
       formContainerId="quotes-form-container"
       archived={quote.archived === true}
     >
-      <EditModeToggle href={`/quotes/${quote.id}`} editing={editing} />
+      {quote.status === "draft" && (
+        <EditModeToggle href={`/quotes/${quote.id}`} editing={editing} />
+      )}
     </DetailActions>
     {quote.status === "draft" && (
       <button
@@ -183,6 +185,17 @@ const QuoteActions: FC<{ quote: Quote; editing: boolean }> = (
     </a>
   </div>
 );
+
+/** Locked banner for non-draft quotes — editing is closed once submitted. */
+const QuoteLockNotice: FC<{ quote: Quote }> = ({ quote }) => {
+  if (quote.status === "draft") return null;
+  return (
+    <div class="quote-detail__lock-notice">
+      <strong>🔒 {quote.status} — locked.</strong>{" "}
+      This quote can no longer be edited. Revise it to make changes.
+    </div>
+  );
+};
 
 /** Title row + status badge + actions. */
 const QuoteHeader: FC<{ quote: Quote; editing: boolean }> = (
@@ -456,6 +469,7 @@ export const QuoteDetailView: FC<
 
       <BillingDocumentHeader config={billingConfig} />
       <QuoteHeader quote={quote} editing={editing} />
+      <QuoteLockNotice quote={quote} />
       <ArchivedBanner entity={quote} />
       <QuoteInfoRow quote={quote} customerName={customerName} />
       <QuoteLineItems quote={quote} />

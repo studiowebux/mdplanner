@@ -11,6 +11,18 @@
   gap: var(--space-sm);
 }
 
+/* Locked banner — non-draft quotes are immutable until revised. */
+.quote-detail__lock-notice {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 3px var(--border-style) var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+}
+
 .quote-detail__title-sep {
   color: var(--color-text-muted);
 }

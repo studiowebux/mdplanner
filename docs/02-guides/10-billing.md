@@ -86,6 +86,14 @@ shows an explicit **✓ Save** and **✕ Cancel** — there is no autosave. Pres
 previous one to its saved value, so an in-progress edit is never silently lost.
 Reorder rows with the **↑/↓** buttons. Non-draft quotes are read-only.
 
+#### Locked once submitted
+
+The moment a quote leaves `draft` it is **locked**: the detail page drops the
+**Edit Mode** toggle and shows a lock banner (`🔒 <status> — locked`). Title,
+terms, notes, and line items can no longer be changed in place. To make changes,
+revise the quote (clones it to a new editable draft) — the original stays
+immutable so any invoice already created from it is unaffected.
+
 ### Totals (derived, never stored)
 
 `subtotal`, `tax`, and `total` are recomputed from line items on every read.
@@ -160,7 +168,9 @@ the linked quote.
 ### To Change Line Items
 
 Edit the **quote**, not the invoice. Invoice totals update automatically on the
-next read.
+next read. An invoice has no in-place Edit Mode — its billing content derives
+from the quote. The invoice's own fields (`description`, `notes`, `footer`) are
+edited through the standard **Edit** form on the invoice detail page.
 
 ### Printing / PDF Export
 

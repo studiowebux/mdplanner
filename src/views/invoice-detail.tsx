@@ -18,32 +18,6 @@ import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
-import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
-import { InlineEditable } from "./components/inline-editable.tsx";
-
-// ---------------------------------------------------------------------------
-// Shared inline-editable section for `notes` and `footer`.
-// ---------------------------------------------------------------------------
-
-const InlineEditSection: FC<{
-  invoice: Invoice;
-  field: "description" | "notes" | "footer";
-  title: string;
-}> = ({ invoice, field, title }) => {
-  const value = (invoice[field] ?? "") as string;
-  return (
-    <section class="detail-section">
-      <h2 class="section-heading">{title}</h2>
-      <InlineEditable
-        fieldId={`invoice-${field}`}
-        name={field}
-        value={value}
-        hxPut={`/invoices/${invoice.id}/${field}?editing=true`}
-        rootId="invoice-detail-root"
-      />
-    </section>
-  );
-};
 
 // ---------------------------------------------------------------------------
 // Issue-state notice — makes the quote→invoice model legible. A draft is a live
@@ -92,8 +66,8 @@ export const InvoiceIssueNotice: FC<
 // ---------------------------------------------------------------------------
 
 const InvoiceHeader: FC<
-  { invoice: Invoice; displayStatus: string; editing: boolean }
-> = ({ invoice, displayStatus, editing }) => (
+  { invoice: Invoice; displayStatus: string }
+> = ({ invoice, displayStatus }) => (
   <header class="detail-section detail-header invoice-detail__header">
     <div class="detail-title-row invoice-detail__title-row">
       <h1 class="detail-title invoice-detail__title">
@@ -112,12 +86,7 @@ const InvoiceHeader: FC<
         title={invoice.title}
         formContainerId="invoices-form-container"
         archived={invoice.archived === true}
-      >
-        <EditModeToggle
-          href={`/invoices/${invoice.id}`}
-          editing={editing}
-        />
-      </DetailActions>
+      />
       {invoice.status === "draft" && (
         <button
           class="btn btn--primary btn--sm"
@@ -205,11 +174,8 @@ const InvoiceBalance: FC<{ invoice: Invoice }> = ({ invoice }) => {
 };
 
 const InvoiceFooter: FC<
-  { invoice: Invoice; billingConfig: ProjectConfig; editing: boolean }
-> = ({ invoice, billingConfig, editing }) => {
-  if (editing) {
-    return <InlineEditSection invoice={invoice} field="footer" title="Terms" />;
-  }
+  { invoice: Invoice; billingConfig: ProjectConfig }
+> = ({ invoice, billingConfig }) => {
   if (!(invoice.footer || billingConfig.billingDefaultFooter)) return null;
   return (
     <section class="detail-section invoice-detail__footer">
@@ -240,7 +206,6 @@ export const InvoiceDetailView: FC<
     billingConfig: ProjectConfig;
     customerName?: string;
     quoteNumber?: string;
-    editing?: boolean;
   }
 > = (
   {
@@ -249,7 +214,6 @@ export const InvoiceDetailView: FC<
     billingConfig,
     customerName,
     quoteNumber,
-    editing = false,
     ...viewProps
   },
 ) => {
@@ -258,18 +222,15 @@ export const InvoiceDetailView: FC<
       title={`${invoice.number} — ${invoice.title}`}
       {...viewProps}
       styles={["/css/views/invoices.css", "/css/views/billing.css"]}
-      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/invoices/" + invoice.id + (editing ? "?editing=true" : "")}
+        getUrl={"/invoices/" + invoice.id}
         trigger="sse:invoice.updated"
         targetId="invoice-detail-root"
       />
       <main
         id="invoice-detail-root"
-        class={`detail-view invoice-detail${
-          editing ? " invoice-detail--editing" : ""
-        }`}
+        class="detail-view invoice-detail"
       >
         <Breadcrumb
           items={[
@@ -284,7 +245,6 @@ export const InvoiceDetailView: FC<
         <InvoiceHeader
           invoice={invoice}
           displayStatus={displayStatus}
-          editing={editing}
         />
 
         <ArchivedBanner entity={invoice} />
@@ -297,20 +257,12 @@ export const InvoiceDetailView: FC<
           quoteNumber={quoteNumber}
         />
 
-        {editing
-          ? (
-            <InlineEditSection
-              invoice={invoice}
-              field="description"
-              title="Description"
-            />
-          )
-          : invoice.description && (
-            <section class="detail-section">
-              <h2 class="section-heading">Description</h2>
-              <p class="detail-description">{invoice.description}</p>
-            </section>
-          )}
+        {invoice.description && (
+          <section class="detail-section">
+            <h2 class="section-heading">Description</h2>
+            <p class="detail-description">{invoice.description}</p>
+          </section>
+        )}
 
         <InvoiceBalance invoice={invoice} />
 
@@ -329,12 +281,9 @@ export const InvoiceDetailView: FC<
         <InvoiceFooter
           invoice={invoice}
           billingConfig={billingConfig}
-          editing={editing}
         />
 
-        {editing
-          ? <InlineEditSection invoice={invoice} field="notes" title="Notes" />
-          : <MarkdownSection title="Notes" markdown={invoice.notes} />}
+        <MarkdownSection title="Notes" markdown={invoice.notes} />
 
         <InvoiceMetaRow invoice={invoice} />
 

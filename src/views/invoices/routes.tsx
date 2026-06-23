@@ -17,7 +17,7 @@ import { sha256Hex } from "../../utils/checksum.ts";
 
 export const invoicesRouter = createDomainRoutes(invoiceConfig);
 
-/** Render the detail page; `?editing=true` enables in-place notes/footer editing. */
+/** Render the invoice detail page. Editing is via the standard Edit form. */
 async function renderDetail(c: AppContext, id: string) {
   const service = getInvoiceService();
   const [invoice, billingConfig] = await Promise.all([
@@ -31,7 +31,6 @@ async function renderDetail(c: AppContext, id: string) {
       : null,
     invoice.quoteId ? getQuoteService().getById(invoice.quoteId) : null,
   ]);
-  const editing = c.req.query("editing") === "true";
   return c.html(
     <InvoiceDetailView
       {...viewProps(c, "/invoices")}
@@ -40,7 +39,6 @@ async function renderDetail(c: AppContext, id: string) {
       billingConfig={billingConfig}
       customerName={customer?.name}
       quoteNumber={quote?.number}
-      editing={editing}
     />,
   );
 }
@@ -81,33 +79,6 @@ invoicesRouter.post("/:id/send", async (c) => {
 });
 
 invoicesRouter.get("/:id", (c) => renderDetail(c, c.req.param("id")));
-
-// In-place description save (Edit Mode).
-invoicesRouter.put("/:id/description", async (c) => {
-  const id = c.req.param("id")!;
-  const body = await c.req.parseBody();
-  const description = String(body.description ?? "").trim() || undefined;
-  await getInvoiceService().update(id, { description });
-  return renderDetail(c, id);
-});
-
-// In-place notes save (Edit Mode). Factory provides edit/delete routes.
-invoicesRouter.put("/:id/notes", async (c) => {
-  const id = c.req.param("id")!;
-  const body = await c.req.parseBody();
-  const notes = String(body.notes ?? "").trim() || undefined;
-  await getInvoiceService().update(id, { notes });
-  return renderDetail(c, id);
-});
-
-// In-place footer (Terms) save (Edit Mode).
-invoicesRouter.put("/:id/footer", async (c) => {
-  const id = c.req.param("id")!;
-  const body = await c.req.parseBody();
-  const footer = String(body.footer ?? "").trim() || undefined;
-  await getInvoiceService().update(id, { footer });
-  return renderDetail(c, id);
-});
 
 invoicesRouter.get("/:id/print", async (c) => {
   const id = c.req.param("id")!;
