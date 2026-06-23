@@ -1,19 +1,16 @@
 /**
  * Portfolio external status badges (CI/CD/pipeline shields images).
- * Covers the markdown parser round-trip and the ExternalBadges renderer:
- *  - linked badge `[![alt](img)](link)` → {alt, imageUrl, linkUrl}
- *  - bare badge `![alt](img)` → {alt, imageUrl}
- *  - malformed lines are skipped, not thrown
+ * Covers the array-table form parse (badges field) and the ExternalBadges
+ * renderer:
+ *  - array-table rows → PortfolioBadge[] {imageUrl, linkUrl?, alt?}
+ *  - empty per-row fields are dropped (bare image keeps only imageUrl)
  *  - renderer emits <img src> and wraps in <a href> only when linkUrl is set
  */
 
 import { assert, assertEquals } from "@std/assert";
-import {
-  badgesToMarkdown,
-  parseBadgeMarkdown,
-} from "../../src/utils/portfolio-badge.ts";
+import { portfolioConfig } from "../../src/domains/portfolio/config.tsx";
 import { ExternalBadges } from "../../src/components/ui/status-badge.tsx";
-import type { PortfolioBadge } from "../../src/types/portfolio.types.ts";
+import type { PortfolioItem } from "../../src/types/portfolio.types.ts";
 
 async function render(
   node: ReturnType<typeof ExternalBadges>,
@@ -22,40 +19,35 @@ async function render(
   return String(await node.toString());
 }
 
-Deno.test("parseBadgeMarkdown parses a linked badge", () => {
-  const badges = parseBadgeMarkdown(
-    "[![status-badge](https://example.com/api/badges/9/status.svg)](https://example.com/repos/9)",
-  );
-  assertEquals(badges, [{
-    alt: "status-badge",
-    imageUrl: "https://example.com/api/badges/9/status.svg",
-    linkUrl: "https://example.com/repos/9",
-  }]);
+Deno.test("parseCreate parses array-table badge rows into PortfolioBadge[]", () => {
+  const parsed = portfolioConfig.parseCreate({
+    name: "Acme",
+    "portfolio_badges[0].imageUrl":
+      "https://example.com/api/badges/9/status.svg",
+    "portfolio_badges[0].linkUrl": "https://example.com/repos/9",
+    "portfolio_badges[0].alt": "status-badge",
+    "portfolio_badges[1].imageUrl": "https://img.shields.io/badge/x.svg",
+  }) as PortfolioItem;
+
+  assertEquals(parsed.badges, [
+    {
+      imageUrl: "https://example.com/api/badges/9/status.svg",
+      linkUrl: "https://example.com/repos/9",
+      alt: "status-badge",
+    },
+    { imageUrl: "https://img.shields.io/badge/x.svg" },
+  ]);
 });
 
-Deno.test("parseBadgeMarkdown parses a bare image badge", () => {
-  const badges = parseBadgeMarkdown(
-    "![build](https://img.shields.io/badge/x.svg)",
-  );
-  assertEquals(badges, [{
-    alt: "build",
-    imageUrl: "https://img.shields.io/badge/x.svg",
-  }]);
-});
+Deno.test("parseCreate drops a completely empty badge row", () => {
+  const parsed = portfolioConfig.parseCreate({
+    name: "Acme",
+    "portfolio_badges[0].imageUrl": "",
+    "portfolio_badges[0].linkUrl": "",
+    "portfolio_badges[0].alt": "",
+  }) as PortfolioItem;
 
-Deno.test("parseBadgeMarkdown skips malformed/blank lines", () => {
-  const badges = parseBadgeMarkdown(
-    "not a badge\n\n![ok](https://x/y.svg)\n](broken",
-  );
-  assertEquals(badges, [{ alt: "ok", imageUrl: "https://x/y.svg" }]);
-});
-
-Deno.test("badgesToMarkdown round-trips through parseBadgeMarkdown", () => {
-  const badges: PortfolioBadge[] = [
-    { alt: "a", imageUrl: "https://x/a.svg", linkUrl: "https://x/repo" },
-    { alt: "b", imageUrl: "https://x/b.svg" },
-  ];
-  assertEquals(parseBadgeMarkdown(badgesToMarkdown(badges)), badges);
+  assertEquals(parsed.badges, []);
 });
 
 Deno.test("ExternalBadges renders an image wrapped in a link", async () => {

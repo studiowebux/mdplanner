@@ -252,8 +252,8 @@ Project description.
 Status values: `active`, `completed`, `on-hold`, `cancelled`.
 
 `badges` holds external status badges (CI/CD/pipeline/git shields images),
-each `{ imageUrl, linkUrl?, alt? }`. In the UI they are entered as markdown
-image-links (one per line, e.g. `[![alt](img)](link)`) and rendered as the
+each `{ imageUrl, linkUrl?, alt? }`. In the UI they are entered through a
+multi-row table (Image URL / Link URL / Alt text per row) and rendered as the
 clickable badge image on the portfolio card and detail page.
 
 ## Capacity Plans

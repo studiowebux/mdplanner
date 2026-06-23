@@ -14,10 +14,6 @@ import { PORTFOLIO_TABLE_COLUMNS, portfolioToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 import { buildTeamPersonById } from "./owners.ts";
-import {
-  badgesToMarkdown,
-  parseBadgeMarkdown,
-} from "../../utils/portfolio-badge.ts";
 
 export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
@@ -100,20 +96,18 @@ export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
     placeholder: "Search goals...",
   },
   {
-    type: "textarea",
+    type: "array-table",
     name: "badges",
-    label: "Status badges (markdown, one per line)",
-    rows: 3,
+    label: "Status badge",
+    section: "portfolio_badges",
+    addLabel: "Add badge",
+    itemFields: [
+      { type: "text", name: "imageUrl", label: "Image URL" },
+      { type: "text", name: "linkUrl", label: "Link URL" },
+      { type: "text", name: "alt", label: "Alt text" },
+    ],
   },
 ];
-
-/** Convert the "badges" textarea (markdown, one per line) into the structured
- * PortfolioBadge[] the entity stores. Mutates the parsed body in place. */
-function coerceBadges(body: Record<string, unknown>): void {
-  if (typeof body.badges === "string") {
-    body.badges = parseBadgeMarkdown(body.badges);
-  }
-}
 
 export const portfolioConfig: DomainConfig<
   PortfolioItem,
@@ -160,22 +154,13 @@ export const portfolioConfig: DomainConfig<
 
   Card: ({ item, q }) => <PortfolioCard item={item} q={q} />,
 
-  parseCreate: (body) => {
-    const parsed = parseFormBody(PORTFOLIO_FORM_FIELDS, body) as Record<
-      string,
-      unknown
-    >;
-    coerceBadges(parsed);
-    return parsed as CreatePortfolioItem;
-  },
+  parseCreate: (body) =>
+    parseFormBody(PORTFOLIO_FORM_FIELDS, body) as CreatePortfolioItem,
 
-  parseUpdate: (body) => {
-    const parsed = parseFormBody(PORTFOLIO_FORM_FIELDS, body, {
+  parseUpdate: (body) =>
+    parseFormBody(PORTFOLIO_FORM_FIELDS, body, {
       clearEmpty: true,
-    }) as Record<string, unknown>;
-    coerceBadges(parsed);
-    return parsed as Partial<UpdatePortfolioItem>;
-  },
+    }) as Partial<UpdatePortfolioItem>,
 
   // Resolve person IDs to names for the team[] array-table autocomplete.
   // Unresolved IDs produce an empty search input — user re-picks.
@@ -187,12 +172,6 @@ export const portfolioConfig: DomainConfig<
       })),
     };
   },
-
-  // Reshape stored badges[] back into markdown (one per line) for the
-  // "badges" textarea on the edit form. Keeps the entity shape unchanged.
-  formValueOverrides: (item) => ({
-    badges: badgesToMarkdown(item.badges ?? []),
-  }),
 
   getService: () => getPortfolioService(),
 
