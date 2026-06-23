@@ -238,6 +238,10 @@ endDate: 2026-06-30
 budget: 150000
 spent: 45000
 team: [person_alice, person_bob]
+badges:
+  - imageUrl: https://img.shields.io/badge/build-passing-green.svg
+    linkUrl: https://example.com/repo
+    alt: build status
 ---
 
 # Project Alpha
@@ -246,6 +250,11 @@ Project description.
 ```
 
 Status values: `active`, `completed`, `on-hold`, `cancelled`.
+
+`badges` holds external status badges (CI/CD/pipeline/git shields images),
+each `{ imageUrl, linkUrl?, alt? }`. In the UI they are entered as markdown
+image-links (one per line, e.g. `[![alt](img)](link)`) and rendered as the
+clickable badge image on the portfolio card and detail page.
 
 ## Capacity Plans
 

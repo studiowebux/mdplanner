@@ -67,6 +67,21 @@ export const PortfolioUrlSchema = z.object({
   }),
 }).openapi("PortfolioUrl");
 
+export const PortfolioBadgeSchema = z.object({
+  imageUrl: z.string().openapi({
+    description: "Badge image URL (shields/CI status SVG or PNG)",
+    example: "https://img.shields.io/badge/build-passing-green.svg",
+  }),
+  linkUrl: z.string().nullable().optional().openapi({
+    description: "Optional URL the badge links to when clicked",
+    example: "https://example.com/repo",
+  }),
+  alt: z.string().nullable().optional().openapi({
+    description: "Alt text for the badge image",
+    example: "status-badge",
+  }),
+}).openapi("PortfolioBadge");
+
 export const PortfolioStatusUpdateSchema = z.object({
   id: z.string().openapi({
     description: "Status update identifier",
@@ -162,6 +177,9 @@ export const PortfolioItemSchema = z.object({
   urls: z.array(PortfolioUrlSchema).nullable().optional().openapi({
     description: "External links (docs, repo, demo, etc.)",
   }),
+  badges: z.array(PortfolioBadgeSchema).nullable().optional().openapi({
+    description: "External status badges (CI/CD/pipeline/git shields images)",
+  }),
   statusUpdates: z.array(PortfolioStatusUpdateSchema).nullable().optional()
     .openapi({
       description: "Chronological status updates",
@@ -183,6 +201,7 @@ export const PortfolioItemSchema = z.object({
 export type PortfolioItem = z.infer<typeof PortfolioItemSchema>;
 export type PortfolioKpi = z.infer<typeof PortfolioKpiSchema>;
 export type PortfolioUrl = z.infer<typeof PortfolioUrlSchema>;
+export type PortfolioBadge = z.infer<typeof PortfolioBadgeSchema>;
 export type PortfolioStatusUpdate = z.infer<typeof PortfolioStatusUpdateSchema>;
 
 export const PortfolioSummarySchema = z.object({

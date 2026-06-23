@@ -98,6 +98,8 @@ function applyPortfolioJson(
   if (kpis) item.kpis = kpis;
   const urls = parseJson<PortfolioItem["urls"]>(row.urls);
   if (urls) item.urls = urls;
+  const badges = parseJson<PortfolioItem["badges"]>(row.badges);
+  if (badges) item.badges = badges;
   const statusUpdates = parseJson<PortfolioItem["statusUpdates"]>(
     row.status_updates,
   );
@@ -114,9 +116,9 @@ export function insertPortfolioRow(
     `INSERT OR REPLACE INTO ${PORTFOLIO_TABLE} (id, name, category, status,
        description, client, revenue, expenses, progress, start_date, end_date,
        team, tech_stack, logo, license, github_repo, billing_customer_id,
-       brain_managed, linked_goals, kpis, urls, status_updates,
+       brain_managed, linked_goals, kpis, urls, badges, status_updates,
        ${archiveCols()}, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -139,6 +141,7 @@ export function insertPortfolioRow(
       json(p.linkedGoals),
       json(p.kpis),
       json(p.urls),
+      json(p.badges),
       json(p.statusUpdates),
       ...archiveVals(p),
       ...auditVals(p),
@@ -155,6 +158,7 @@ export function registerPortfolioEntity(repo: PortfolioRepository): void {
     migrations: [
       "ALTER TABLE portfolio ADD COLUMN github_repo TEXT",
       "ALTER TABLE portfolio ADD COLUMN billing_customer_id TEXT",
+      "ALTER TABLE portfolio ADD COLUMN badges TEXT",
       ...archiveMigrations(PORTFOLIO_TABLE),
     ],
     fts: {

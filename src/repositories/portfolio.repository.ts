@@ -50,6 +50,7 @@ const PORTFOLIO_SER_FIELDS:
     ["linkedGoals", "array"],
     ["kpis", "array"],
     ["urls", "array"],
+    ["badges", "array"],
     ["statusUpdates", "array"],
     ["createdAt", "truthy"],
     ["updatedAt", "truthy"],
@@ -446,6 +447,9 @@ export class PortfolioRepository {
       linkedGoals: fmStrArr(fm, "linked_goals", "linkedGoals"),
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
+      badges: Array.isArray(fm.badges)
+        ? (fm.badges as PortfolioItem["badges"])
+        : undefined,
       statusUpdates: Array.isArray(statusUpdates)
         ? (statusUpdates as PortfolioStatusUpdate[])
         : undefined,

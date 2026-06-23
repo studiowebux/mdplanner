@@ -40,6 +40,27 @@
   gap: var(--space-xs);
 }
 
+/* External status badges (CI/CD/pipeline shields images) */
+
+.external-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.external-badges__img {
+  display: block;
+  height: var(--external-badge-height);
+  width: auto;
+}
+
+.portfolio-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
 /* Detail view */
 
 .portfolio-detail__header {

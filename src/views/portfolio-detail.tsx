@@ -21,7 +21,7 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
 import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
-import { badgeClass } from "../components/ui/status-badge.tsx";
+import { badgeClass, ExternalBadges } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
@@ -158,6 +158,7 @@ const HeaderSection: FC<{
           {item.status}
         </span>
       </div>
+      <ExternalBadges badges={item.badges} />
       <DetailActions
         entity="portfolio"
         id={item.id}

@@ -309,6 +309,7 @@
   --badge-padding: var(--space-xs) var(--space-sm);
   --badge-font-weight: 500;
   --filter-badge-size: 1.25rem;
+  --external-badge-height: 1.25rem;
 
   /* Progress bar */
   --progress-bar-height: 6px;

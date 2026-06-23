@@ -26,6 +26,7 @@ export const PORTFOLIO_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PORTFOLIO_TABLE} (
   linked_goals TEXT,
   kpis TEXT,
   urls TEXT,
+  badges TEXT,
   status_updates TEXT,
   ${ARCHIVE_COLS_DDL},
   created_at TEXT,

@@ -5,7 +5,10 @@ import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 import { PORTFOLIO_STATUS_VARIANTS } from "../../domains/portfolio/constants.tsx";
-import { badgeClass } from "../../components/ui/status-badge.tsx";
+import {
+  badgeClass,
+  ExternalBadges,
+} from "../../components/ui/status-badge.tsx";
 
 type Props = { item: PortfolioItem; q?: string };
 
@@ -70,6 +73,12 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
               +{item.techStack.length - 4}
             </span>
           )}
+        </div>
+      )}
+
+      {item.badges && item.badges.length > 0 && (
+        <div class="portfolio-card__badges">
+          <ExternalBadges badges={item.badges} />
         </div>
       )}
 
