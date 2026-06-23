@@ -741,6 +741,46 @@ Deno.test("QuoteService.removeLineItem drops one item by index and recomputes to
   }
 });
 
+// === inline edit — moveLineItem ===
+
+Deno.test("QuoteService.moveLineItem swaps adjacent rows and no-ops at bounds", async () => {
+  const { service, dir } = await setup();
+  try {
+    const q = await service.create({
+      customerId: "c1",
+      title: "Move",
+      lineItems: [
+        line({ id: "li_a", description: "A" }),
+        line({ id: "li_b", description: "B" }),
+        line({ id: "li_c", description: "C" }),
+      ],
+    });
+    assertEquals(q.lineItems.map((li) => li.id), ["li_a", "li_b", "li_c"]);
+
+    // Move middle row up → [b, a, c].
+    const up = await service.moveLineItem(q, 1, "up");
+    assertExists(up);
+    assertEquals(up!.lineItems.map((li) => li.id), ["li_b", "li_a", "li_c"]);
+
+    // Move that same row (now index 0) back down → [a, b, c].
+    const down = await service.moveLineItem(up!, 0, "down");
+    assertExists(down);
+    assertEquals(down!.lineItems.map((li) => li.id), ["li_a", "li_b", "li_c"]);
+
+    // Bounds no-op: first row up, last row down — order unchanged.
+    const topUp = await service.moveLineItem(down!, 0, "up");
+    assertEquals(topUp!.lineItems.map((li) => li.id), ["li_a", "li_b", "li_c"]);
+    const botDown = await service.moveLineItem(down!, 2, "down");
+    assertEquals(botDown!.lineItems.map((li) => li.id), [
+      "li_a",
+      "li_b",
+      "li_c",
+    ]);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
 // === sendQuote — snapshot + transition + revision increment ===
 
 Deno.test("QuoteService.sendQuote appends a revision snapshot and transitions to sent + bumps revision", async () => {
