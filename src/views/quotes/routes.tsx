@@ -24,6 +24,7 @@ import {
   LineItemAmountCell,
   lineItemFieldValue,
   LineItemReadCell,
+  LineItemTypeReadCell,
   QuoteLineItemsSection,
   QuoteTotals,
 } from "../components/quote-line-items-editor.tsx";
@@ -341,6 +342,28 @@ quotesRouter.get("/:id/line-items/:idx/edit", async (c) => {
       field={field}
       value={lineItemFieldValue(item, field)}
     />,
+  );
+});
+
+// GET /:id/line-items/:idx/cell?field=… — restore a read cell (Cancel/Escape).
+// Returns the unchanged read cell so an open editing input can be discarded
+// without committing.
+quotesRouter.get("/:id/line-items/:idx/cell", async (c) => {
+  const id = c.req.param("id");
+  const idx = Number(c.req.param("idx"));
+  const field = c.req.query("field");
+  if (!validField(field)) return c.notFound();
+  const quote = await getQuoteService().getById(id);
+  if (!quote || quote.status !== "draft") return c.notFound();
+  const item = quote.lineItems[idx];
+  if (!item) return c.notFound();
+  if (field === "type") {
+    return c.html(
+      <LineItemTypeReadCell quoteId={id} index={idx} item={item} />,
+    );
+  }
+  return c.html(
+    <LineItemReadCell quoteId={id} index={idx} field={field} item={item} />,
   );
 });
 

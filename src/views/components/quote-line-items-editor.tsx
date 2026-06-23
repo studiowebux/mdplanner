@@ -68,6 +68,37 @@ const ReadCell: FC<{
   </td>
 );
 
+/** Save (✓) + Cancel (✕) controls shared by every editing cell. Both are
+ * always visible; ✕ re-GETs the read cell (original value) for this field. */
+const EditCellControls: FC<{
+  quoteId: string;
+  index: number;
+  field: EditableLineItemField;
+  inputId: string;
+}> = ({ quoteId, index, field, inputId }) => (
+  <>
+    <button
+      type="button"
+      class="qli-edit__btn btn btn--primary btn--sm"
+      data-qli-save-for={inputId}
+      aria-label="Save"
+    >
+      ✓
+    </button>
+    <button
+      type="button"
+      class="qli-edit__btn btn btn--ghost btn--sm"
+      data-qli-cancel-for={inputId}
+      aria-label="Cancel"
+      hx-get={`/quotes/${quoteId}/line-items/${index}/cell?field=${field}`}
+      hx-target="closest td"
+      hx-swap="outerHTML"
+    >
+      ✕
+    </button>
+  </>
+);
+
 /** Editing input cell — returned by the GET edit route. */
 export const EditCell: FC<{
   quoteId: string;
@@ -77,36 +108,36 @@ export const EditCell: FC<{
 }> = ({ quoteId, index, field, value }) => {
   const numeric = field !== "description" && field !== "group";
   const isGroup = field === "group";
+  const inputId = `qli-${index}-${field}`;
   const postUrl = `/quotes/${quoteId}/line-items/${index}?field=${field}`;
   // Group saves re-render the whole section (grouping reshuffles rows).
   const hxTarget = isGroup ? "#quote-line-items-section" : "closest td";
-  const hxSwap = isGroup ? "outerHTML" : "outerHTML";
   return (
     <td class="qli-cell qli-cell--editing">
-      <input
-        id={`qli-${index}-${field}`}
-        class="qli-input"
-        type="text"
-        inputmode={numeric ? "decimal" : undefined}
-        list={isGroup ? `qli-groups-${quoteId}` : undefined}
-        name="value"
-        value={value}
-        autofocus
-        autocomplete="off"
-        data-quadrant-edit={postUrl}
-        hx-post={postUrl}
-        hx-target={hxTarget}
-        hx-swap={hxSwap}
-        hx-trigger="quadrant-save"
-      />
-      <button
-        type="button"
-        class="quadrant-card__save btn btn--primary btn--sm is-hidden"
-        data-quadrant-save-for={`qli-${index}-${field}`}
-        aria-label="Save"
-      >
-        ✓
-      </button>
+      <div class="qli-edit">
+        <input
+          id={inputId}
+          class="qli-input"
+          type="text"
+          inputmode={numeric ? "decimal" : undefined}
+          list={isGroup ? `qli-groups-${quoteId}` : undefined}
+          name="value"
+          value={value}
+          autofocus
+          autocomplete="off"
+          data-qli-edit
+          hx-post={postUrl}
+          hx-target={hxTarget}
+          hx-swap="outerHTML"
+          hx-trigger="qli-save"
+        />
+        <EditCellControls
+          quoteId={quoteId}
+          index={index}
+          field={field}
+          inputId={inputId}
+        />
+      </div>
     </td>
   );
 };
@@ -120,37 +151,38 @@ export const EditTypeCell: FC<{
 }> = ({ quoteId, index, value, distinctTypes }) => {
   const postUrl = `/quotes/${quoteId}/line-items/${index}?field=type`;
   const listId = `qli-types-${quoteId}`;
+  const inputId = `qli-${index}-type`;
   return (
     <td class="qli-cell qli-cell--editing qli-cell--type">
-      <input
-        id={`qli-${index}-type`}
-        class="qli-input qli-input--type"
-        type="text"
-        list={listId}
-        name="value"
-        value={value}
-        autofocus
-        autocomplete="off"
-        data-quadrant-edit={postUrl}
-        hx-post={postUrl}
-        hx-target="#quote-line-items-section"
-        hx-swap="outerHTML"
-        hx-trigger="quadrant-save"
-      />
-      <datalist id={listId}>
-        {LINE_ITEM_TYPES.map((t) => <option key={t} value={t} />)}
-        {distinctTypes
-          .filter((t) => !(LINE_ITEM_TYPES as readonly string[]).includes(t))
-          .map((t) => <option key={t} value={t} />)}
-      </datalist>
-      <button
-        type="button"
-        class="quadrant-card__save btn btn--primary btn--sm is-hidden"
-        data-quadrant-save-for={`qli-${index}-type`}
-        aria-label="Save"
-      >
-        ✓
-      </button>
+      <div class="qli-edit">
+        <input
+          id={inputId}
+          class="qli-input qli-input--type"
+          type="text"
+          list={listId}
+          name="value"
+          value={value}
+          autofocus
+          autocomplete="off"
+          data-qli-edit
+          hx-post={postUrl}
+          hx-target="#quote-line-items-section"
+          hx-swap="outerHTML"
+          hx-trigger="qli-save"
+        />
+        <datalist id={listId}>
+          {LINE_ITEM_TYPES.map((t) => <option key={t} value={t} />)}
+          {distinctTypes
+            .filter((t) => !(LINE_ITEM_TYPES as readonly string[]).includes(t))
+            .map((t) => <option key={t} value={t} />)}
+        </datalist>
+        <EditCellControls
+          quoteId={quoteId}
+          index={index}
+          field="type"
+          inputId={inputId}
+        />
+      </div>
     </td>
   );
 };
@@ -169,6 +201,26 @@ export const LineItemReadCell: FC<{
     value={lineItemFieldValue(item, field)}
     align={field === "description" ? undefined : "right"}
   />
+);
+
+/** Read cell for the type field — badge that opens the type editor on click.
+ * Returned by the cancel route and rendered in each row. */
+export const LineItemTypeReadCell: FC<{
+  quoteId: string;
+  index: number;
+  item: LineItem;
+}> = ({ quoteId, index, item }) => (
+  <td
+    class="qli-cell qli-cell--type"
+    hx-get={`/quotes/${quoteId}/line-items/${index}/edit?field=type`}
+    hx-target="this"
+    hx-swap="outerHTML"
+    title="Click to change type"
+  >
+    <span class="badge badge--sm">
+      {TYPE_LABEL[item.type] ?? item.type}
+    </span>
+  </td>
 );
 
 /** Computed amount cell. `oob` emits it as an out-of-band swap target. */
@@ -209,26 +261,15 @@ const EditableRow: FC<{
   index: number;
   item: LineItem;
   total: number;
-  distinctTypes: string[];
 }> = (
-  { quoteId, index, item, total, distinctTypes },
+  { quoteId, index, item, total },
 ) => {
   const isText = item.type === "text";
   const isFirst = index === 0;
   const isLast = index === total - 1;
   return (
     <tr class="qli-row">
-      <td
-        class="qli-cell qli-cell--type"
-        hx-get={`/quotes/${quoteId}/line-items/${index}/edit?field=type`}
-        hx-target="this"
-        hx-swap="outerHTML"
-        title="Click to change type"
-      >
-        <span class="badge badge--sm">
-          {TYPE_LABEL[item.type] ?? item.type}
-        </span>
-      </td>
+      <LineItemTypeReadCell quoteId={quoteId} index={index} item={item} />
       <ReadCell
         quoteId={quoteId}
         index={index}
@@ -389,9 +430,6 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
       quote.lineItems.map((li) => li.group).filter((g): g is string => !!g),
     ),
   ];
-  const distinctTypes = [
-    ...new Set(quote.lineItems.map((li) => li.type).filter(Boolean)),
-  ];
   return (
     <section class="detail-section" id="quote-line-items-section">
       <h2 class="section-heading">Line Items</h2>
@@ -445,7 +483,6 @@ export const QuoteLineItemsSection: FC<{ quote: Quote }> = ({ quote }) => {
                     index={index}
                     item={item}
                     total={quote.lineItems.length}
-                    distinctTypes={distinctTypes}
                   />
                 ))}
                 {showGroupSubtotals && group && (

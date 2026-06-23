@@ -111,9 +111,28 @@ details[open] .quote-detail__revisions-summary::before {
   color: var(--color-text-muted);
 }
 
-/* Editing cell — input fills the cell */
+/* Editing cell — input + Save/Cancel sit in a stable inline flex row so the
+   controls never overlap adjacent cells or hide behind them. */
 .qli-cell--editing {
   padding: 0;
+}
+
+.qli-edit {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs);
+}
+
+.qli-edit .qli-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.qli-edit__btn {
+  flex: 0 0 auto;
+  padding: var(--space-xxs) var(--space-sm);
+  line-height: 1;
 }
 
 .qli-input {

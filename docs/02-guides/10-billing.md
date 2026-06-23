@@ -77,6 +77,15 @@ Line items support:
 - `discount` + `discount_type` (`percent` or `fixed`)
 - `rate_id` — link to a billing rate record
 
+#### Editing line items inline (draft quotes)
+
+On a draft quote, click any line-item cell to edit it in place. Each open cell
+shows an explicit **✓ Save** and **✕ Cancel** — there is no autosave. Press
+**Enter** to save or **Escape** to cancel; clicking away leaves the cell open
+(use ✓/✕). Only one cell edits at a time: opening another cell restores the
+previous one to its saved value, so an in-progress edit is never silently lost.
+Reorder rows with the **↑/↓** buttons. Non-draft quotes are read-only.
+
 ### Totals (derived, never stored)
 
 `subtotal`, `tax`, and `total` are recomputed from line items on every read.

@@ -433,7 +433,7 @@ export const QuoteDetailView: FC<
     title={`${quote.number} — ${quote.title}`}
     {...viewProps}
     styles={["/css/views/quotes.css", "/css/views/billing.css"]}
-    scripts={["/js/inline-edit.js", "/js/quadrant-edit.js"]}
+    scripts={["/js/inline-edit.js", "/js/qli-edit.js"]}
   >
     <SseRefresh
       getUrl={"/quotes/" + quote.id + (editing ? "?editing=true" : "")}
