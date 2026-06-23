@@ -36,9 +36,11 @@ export const GitHubError: FC<{ message: string }> = ({ message }) => (
 // Tab section wrapper — rendered into portfolio detail
 // ---------------------------------------------------------------------------
 
-export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
+export const GitHubSection: FC<{ itemId: string; provider?: string }> = (
+  { itemId, provider = "GitHub" },
+) => (
   <section class="portfolio-detail__section github-section">
-    <h2 class="section-heading">GitHub</h2>
+    <h2 class="section-heading">{provider}</h2>
 
     <div
       id="github-repo-card"

@@ -388,6 +388,10 @@ async function renderDetail(c: AppContext, id: string) {
   const quoteIds = new Set(quotes.map((q) => q.id));
   const invoices = allInvoices.filter((i) => quoteIds.has(i.quoteId));
 
+  const vcsProvider = item.githubRepo
+    ? await getGitHubService().activeProviderName()
+    : undefined;
+
   return c.html(
     <PortfolioDetailView
       {...viewProps(c, "/portfolio")}
@@ -400,6 +404,7 @@ async function renderDetail(c: AppContext, id: string) {
       quotes={quotes}
       invoices={invoices}
       editing={editing}
+      vcsProvider={vcsProvider}
     />,
   );
 }

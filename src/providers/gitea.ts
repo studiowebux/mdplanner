@@ -228,7 +228,7 @@ export class GiteaProvider implements IGitProvider {
   ): Promise<GitHubIssue[]> {
     let path =
       `/repos/${owner}/${repo}/issues?state=${state}&type=issues&limit=100`;
-    if (assignee) path += `&assigned_by=${encodeURIComponent(assignee)}`;
+    if (assignee) path += `&assignee=${encodeURIComponent(assignee)}`;
     const data = await this.giGet(path) as GhJson[];
     // Gitea's `type=issues` already excludes PRs; guard anyway.
     return (data ?? [])
@@ -328,90 +328,49 @@ export class GiteaProvider implements IGitProvider {
   }
 
   // ---------------------------------------------------------------------------
-  // Actions — Gitea Actions mirrors the GitHub Actions API.
+  // Actions / workflow runs — UNSUPPORTED via this provider.
+  //
+  // Gitea's REST API does NOT expose GitHub-style workflow-run endpoints
+  // (`/actions/runs`, cancel/rerun/dispatch return 404). CI for a Gitea repo is
+  // typically driven by an external engine (Woodpecker, Drone, Concourse, Gitea
+  // Actions runners, etc.) through its own integration — not this VCS provider.
+  // Rather than fire 404s, the read methods return empty so the CI section of
+  // the VCS view simply shows nothing, and the mutating methods fail with a
+  // clear message.
   // ---------------------------------------------------------------------------
 
-  async listWorkflows(
-    owner: string,
-    repo: string,
-  ): Promise<GitHubWorkflow[]> {
-    const data = await this.giGet(
-      `/repos/${owner}/${repo}/actions/workflows`,
-    ) as GhJson;
-    const raw = data?.workflows;
-    const workflows: GhJson[] = Array.isArray(raw) ? raw : [];
-    return workflows.map((w): GitHubWorkflow => ({
-      id: Number(w.id),
-      name: String(w.name ?? ""),
-      path: String(w.path ?? ""),
-      state: String(w.state ?? "") as GitHubWorkflow["state"],
-      htmlUrl: String(w.html_url ?? ""),
-    }));
+  // deno-lint-ignore require-await
+  async listWorkflows(): Promise<GitHubWorkflow[]> {
+    return [];
   }
 
-  async listWorkflowRuns(
-    owner: string,
-    repo: string,
-    options: {
-      page?: number;
-      perPage?: number;
-      status?: string;
-      branch?: string;
-      event?: string;
-    } = {},
-  ): Promise<{ runs: GitHubWorkflowRun[]; totalCount: number }> {
-    const params = new URLSearchParams();
-    params.set("limit", String(options.perPage ?? 20));
-    params.set("page", String(options.page ?? 1));
-    if (options.status) params.set("status", options.status);
-    if (options.branch) params.set("branch", options.branch);
-    if (options.event) params.set("event", options.event);
-    const data = await this.giGet(
-      `/repos/${owner}/${repo}/actions/runs?${params}`,
-    ) as GhJson;
-    const rawRuns = data?.workflow_runs;
-    const runs: GhJson[] = Array.isArray(rawRuns) ? rawRuns : [];
-    return {
-      runs: runs.map(mapWorkflowRun),
-      totalCount: Number(data?.total_count ?? runs.length),
-    };
+  // deno-lint-ignore require-await
+  async listWorkflowRuns(): Promise<
+    { runs: GitHubWorkflowRun[]; totalCount: number }
+  > {
+    return { runs: [], totalCount: 0 };
   }
 
-  async cancelRun(owner: string, repo: string, runId: number): Promise<void> {
-    await this.giPostEmpty(
-      `/repos/${owner}/${repo}/actions/runs/${runId}/cancel`,
-    );
+  cancelRun(): Promise<void> {
+    return Promise.reject(new Error(GITEA_ACTIONS_UNSUPPORTED));
   }
 
-  async rerunRun(owner: string, repo: string, runId: number): Promise<void> {
-    await this.giPostEmpty(
-      `/repos/${owner}/${repo}/actions/runs/${runId}/rerun`,
-    );
+  rerunRun(): Promise<void> {
+    return Promise.reject(new Error(GITEA_ACTIONS_UNSUPPORTED));
   }
 
-  async rerunFailedJobs(
-    owner: string,
-    repo: string,
-    runId: number,
-  ): Promise<void> {
-    await this.giPostEmpty(
-      `/repos/${owner}/${repo}/actions/runs/${runId}/rerun-failed-jobs`,
-    );
+  rerunFailedJobs(): Promise<void> {
+    return Promise.reject(new Error(GITEA_ACTIONS_UNSUPPORTED));
   }
 
-  async triggerWorkflowDispatch(
-    owner: string,
-    repo: string,
-    workflowId: number | string,
-    ref: string,
-    inputs?: Record<string, string>,
-  ): Promise<void> {
-    await this.giPostEmpty(
-      `/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
-      { ref, inputs: inputs ?? {} },
-    );
+  triggerWorkflowDispatch(): Promise<void> {
+    return Promise.reject(new Error(GITEA_ACTIONS_UNSUPPORTED));
   }
 }
+
+const GITEA_ACTIONS_UNSUPPORTED =
+  "Gitea does not expose a workflow-run REST API. CI run control is handled " +
+  "by your external CI provider, not this VCS integration.";
 
 // ---------------------------------------------------------------------------
 // Mappers — Gitea response field names mirror GitHub.
@@ -447,22 +406,5 @@ function mapPR(d: GhJson): GitHubPR {
     createdAt: String(d.created_at ?? ""),
     reviewDecision: null,
     htmlUrl: String(d.html_url ?? ""),
-  };
-}
-
-function mapWorkflowRun(r: GhJson): GitHubWorkflowRun {
-  return {
-    id: Number(r.id),
-    name: String(r.name ?? ""),
-    status: String(r.status ?? "") as GitHubWorkflowRun["status"],
-    conclusion:
-      (r.conclusion ? String(r.conclusion) : null) as GitHubWorkflowRun[
-        "conclusion"
-      ],
-    headBranch: String(r.head_branch ?? ""),
-    event: String(r.event ?? ""),
-    createdAt: String(r.created_at ?? ""),
-    updatedAt: String(r.updated_at ?? ""),
-    htmlUrl: String(r.html_url ?? ""),
   };
 }

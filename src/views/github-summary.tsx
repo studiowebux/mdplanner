@@ -9,25 +9,27 @@ import { GitHubCardFooter, GitHubCardStats } from "./github.tsx";
 
 type Props = ViewProps & {
   items: PortfolioItem[];
+  provider?: string;
 };
 
 export const GitHubSummaryView: FC<Props> = ({
   items,
+  provider = "GitHub",
   ...viewProps
 }) => (
   <MainLayout
-    title="GitHub"
+    title={provider}
     {...viewProps}
     activePath="/github"
     styles={["/css/views/github-summary.css", "/css/views/github.css"]}
   >
     <main class="github-summary">
-      <h1 class="github-summary__title">GitHub ({items.length})</h1>
+      <h1 class="github-summary__title">{provider} ({items.length})</h1>
 
       {items.length === 0
         ? (
           <p class="github-empty">
-            No portfolio items have a GitHub repository configured.
+            No portfolio items have a {provider} repository configured.
           </p>
         )
         : (

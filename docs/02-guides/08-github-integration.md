@@ -58,9 +58,10 @@ at rest with `MDPLANNER_SECRET_KEY`, never echoed to the browser (only a
 `hasGiteaToken` presence flag), masked placeholder when set, blank-keeps /
 typed-replaces / **Clear**-removes.
 
-> CI note: Gitea Actions is supported through the same Actions endpoints, but if
-> you run [Woodpecker CI](https://woodpecker-ci.org/) instead, pipeline status
-> comes from a separate Woodpecker integration (see its own guide).
+> CI note: Gitea does not expose a GitHub-style workflow-run REST API, so the
+> CI/workflow-runs panel stays empty for Gitea repos. CI for a Gitea repo is
+> driven by whatever external engine you use (Woodpecker, Drone, Gitea Actions
+> runners, …) through its own integration, not this VCS provider.
 
 ## Cloudflare integration
 

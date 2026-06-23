@@ -47,6 +47,16 @@ export class GitHubService {
     };
   }
 
+  /**
+   * Human-readable name of the VCS provider that is currently active, derived
+   * from config the same way provider() selects the implementation. Used to
+   * label the VCS view/section (which is otherwise hardcoded to "GitHub").
+   */
+  async activeProviderName(): Promise<"GitHub" | "Gitea"> {
+    const config = await this.projectService.getConfig();
+    return config.giteaBaseUrl && config.giteaToken ? "Gitea" : "GitHub";
+  }
+
   private async provider(): Promise<IGitProvider> {
     const config = await this.projectService.getConfig();
     // Gitea takes precedence when configured (base URL + token): the owner is

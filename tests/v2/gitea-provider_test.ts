@@ -138,3 +138,58 @@ Deno.test("GiteaProvider getLatestRelease returns null on empty list", async () 
     restore();
   }
 });
+
+Deno.test("GiteaProvider listIssues uses Gitea's `assignee` filter (not assigned_by)", async () => {
+  const captures: Capture[] = [];
+  const restore = stubFetch({
+    "/api/v1/repos/acme/web/issues?state=open&type=issues&limit=100&assignee=tommy":
+      [
+        {
+          number: 4,
+          title: "Bug",
+          state: "open",
+          created_at: "2026-06-01T00:00:00Z",
+          html_url: "https://gitea.example.com/acme/web/issues/4",
+        },
+      ],
+  }, captures);
+  try {
+    const provider = new GiteaProvider("https://gitea.example.com", "t");
+    const issues = await provider.listIssues("acme", "web", "open", "tommy");
+    assertEquals(issues.length, 1);
+    assertEquals(issues[0].number, 4);
+    assert(
+      captures[0].url.includes("&assignee=tommy"),
+      "must use Gitea's assignee filter param",
+    );
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("GiteaProvider Actions degrade honestly (no GitHub-style run API on Gitea)", async () => {
+  const captures: Capture[] = [];
+  const restore = stubFetch({}, captures);
+  try {
+    const provider = new GiteaProvider("https://gitea.example.com", "t");
+    // Read methods return empty without hitting any endpoint (no 404 noise).
+    assertEquals(await provider.listWorkflows(), []);
+    assertEquals(await provider.listWorkflowRuns(), {
+      runs: [],
+      totalCount: 0,
+    });
+    assertEquals(captures.length, 0);
+    // Mutating methods fail with a clear, CI-agnostic message.
+    let threw = false;
+    try {
+      await provider.cancelRun();
+    } catch (err) {
+      threw = true;
+      assert(err instanceof Error);
+      assert(/does not expose a workflow-run REST API/.test(err.message));
+    }
+    assert(threw, "cancelRun must reject on Gitea");
+  } finally {
+    restore();
+  }
+});

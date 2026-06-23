@@ -40,6 +40,7 @@ type Props = ViewProps & {
   quotes?: Quote[];
   invoices?: Invoice[];
   editing?: boolean;
+  vcsProvider?: string;
 };
 
 const DescriptionSection: FC<{ item: PortfolioItem }> = ({ item }) => (
@@ -526,6 +527,7 @@ export const PortfolioDetailView: FC<Props> = (
     quotes = [],
     invoices = [],
     editing = false,
+    vcsProvider = "GitHub",
     ...viewProps
   },
 ) => (
@@ -581,7 +583,9 @@ export const PortfolioDetailView: FC<Props> = (
       <LinkedGoalsSection goals={goals} />
       <DnsSection domains={dnsDomains} />
 
-      {item.githubRepo && <GitHubSection itemId={item.id} />}
+      {item.githubRepo && (
+        <GitHubSection itemId={item.id} provider={vcsProvider} />
+      )}
       <AuditMeta
         createdAt={item.createdAt}
         updatedAt={item.updatedAt}

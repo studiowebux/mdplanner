@@ -19,8 +19,13 @@ export const githubSummaryRouter = new Hono<{ Variables: AppVariables }>();
 githubSummaryRouter.get("/", async (c) => {
   const all = await getPortfolioService().list();
   const items = all.filter((p) => p.githubRepo);
+  const provider = await getGitHubService().activeProviderName();
   return c.html(
-    <GitHubSummaryView {...viewProps(c, "/github")} items={items} />,
+    <GitHubSummaryView
+      {...viewProps(c, "/github")}
+      items={items}
+      provider={provider}
+    />,
   );
 });
 
