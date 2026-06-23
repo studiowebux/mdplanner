@@ -128,6 +128,10 @@ export const QuoteSchema = z.object({
   convertedToInvoice: z.string().nullable().optional().openapi({
     description: "Invoice ID if this quote was converted",
   }),
+  revisedFromId: z.string().nullable().optional().openapi({
+    description: "Source quote ID this draft was cloned from via Revise",
+    example: "quote_startup",
+  }),
   sentAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when quote was sent",
   }),
@@ -168,6 +172,7 @@ export const CreateQuoteSchema = QuoteSchema.pick({
   taxRate: true,
   notes: true,
   footer: true,
+  revisedFromId: true,
 }).partial({
   status: true,
   projectId: true,
@@ -178,6 +183,7 @@ export const CreateQuoteSchema = QuoteSchema.pick({
   taxRate: true,
   notes: true,
   footer: true,
+  revisedFromId: true,
 }).openapi("CreateQuote");
 
 export type CreateQuote = z.infer<typeof CreateQuoteSchema>;

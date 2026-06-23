@@ -107,6 +107,7 @@ export class QuoteRepository extends CachedMarkdownRepository<
       footer: fmStr(fm, "footer"),
       revision: fmNum(fm, "revision"),
       convertedToInvoice: fmStr(fm, "convertedToInvoice"),
+      revisedFromId: fmStr(fm, "revisedFromId"),
       createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
       updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
       sentAt: fmStr(fm, "sentAt"),

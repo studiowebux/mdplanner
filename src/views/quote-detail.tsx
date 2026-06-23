@@ -175,6 +175,19 @@ const QuoteActions: FC<{ quote: Quote; editing: boolean }> = (
         View Invoice
       </a>
     )}
+    {["approved", "sent", "accepted"].includes(quote.status) && (
+      <button
+        class="btn btn--secondary btn--sm"
+        type="button"
+        hx-post={`/quotes/${quote.id}/revise`}
+        hx-confirm="Clone this quote into a new editable draft? The original stays locked."
+        data-confirm-title="Revise Quote"
+        data-confirm-label="Revise"
+        hx-swap="none"
+      >
+        Revise
+      </button>
+    )}
     <a
       class="btn btn--secondary btn--sm quote-detail__print-btn"
       href={`/quotes/${quote.id}/print`}
@@ -221,8 +234,10 @@ const QuoteHeader: FC<{ quote: Quote; editing: boolean }> = (
 // ---------------------------------------------------------------------------
 
 /** Customer / currency / expiry / revision info row. */
-const QuoteInfoRow: FC<{ quote: Quote; customerName?: string }> = (
-  { quote, customerName },
+const QuoteInfoRow: FC<
+  { quote: Quote; customerName?: string; revisedFromNumber?: string }
+> = (
+  { quote, customerName, revisedFromNumber },
 ) => (
   <div class="detail-section detail-info-row">
     <InfoItem label="Customer">
@@ -233,6 +248,13 @@ const QuoteInfoRow: FC<{ quote: Quote; customerName?: string }> = (
     {quote.currency && <InfoItem label="Currency">{quote.currency}</InfoItem>}
     {quote.expiresAt && <InfoItem label="Expires">{quote.expiresAt}</InfoItem>}
     {quote.revision && <InfoItem label="Revision">v{quote.revision}</InfoItem>}
+    {quote.revisedFromId && (
+      <InfoItem label="Revised from">
+        <a href={`/quotes/${quote.revisedFromId}`}>
+          {revisedFromNumber ?? quote.revisedFromId}
+        </a>
+      </InfoItem>
+    )}
   </div>
 );
 
@@ -429,6 +451,7 @@ export const QuoteDetailView: FC<
     revisions: QuoteRevision[];
     customerName?: string;
     invoicePaidAmount?: number;
+    revisedFromNumber?: string;
     editing?: boolean;
   }
 > = (
@@ -438,6 +461,7 @@ export const QuoteDetailView: FC<
     revisions,
     customerName,
     invoicePaidAmount = 0,
+    revisedFromNumber,
     editing = false,
     ...viewProps
   },
@@ -471,7 +495,11 @@ export const QuoteDetailView: FC<
       <QuoteHeader quote={quote} editing={editing} />
       <QuoteLockNotice quote={quote} />
       <ArchivedBanner entity={quote} />
-      <QuoteInfoRow quote={quote} customerName={customerName} />
+      <QuoteInfoRow
+        quote={quote}
+        customerName={customerName}
+        revisedFromNumber={revisedFromNumber}
+      />
       <QuoteLineItems quote={quote} />
       <PaymentScheduleSection
         quote={quote}

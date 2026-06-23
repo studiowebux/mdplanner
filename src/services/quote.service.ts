@@ -151,6 +151,37 @@ export class QuoteService extends BaseService<
     });
   }
 
+  /**
+   * Clone a non-draft quote into a new editable draft (the "Revise" action).
+   * The source stays immutable — only domain fields are copied, never the id,
+   * number (a fresh sequential one is generated), audit fields, or status. The
+   * clone back-links to the source via `revisedFromId`, and its revision counter
+   * continues from the source. Existing invoices keep pointing at the source id.
+   */
+  async reviseQuote(id: string): Promise<Quote | null> {
+    const source = await this.getById(id);
+    if (!source) return null;
+    const clone = await this.create({
+      customerId: source.customerId,
+      projectId: source.projectId,
+      portfolioItemId: source.portfolioItemId,
+      title: source.title,
+      status: "draft",
+      currency: source.currency,
+      expiresAt: source.expiresAt,
+      // Strip derived per-line amounts — the repository recomputes them.
+      lineItems: source.lineItems.map(({ amount: _amount, ...li }) =>
+        li as LineItem
+      ),
+      paymentSchedule: source.paymentSchedule,
+      taxRate: source.taxRate,
+      notes: source.notes,
+      footer: source.footer,
+      revisedFromId: source.id,
+    });
+    return this.update(clone.id, { revision: (source.revision ?? 1) + 1 });
+  }
+
   /** Return revision history for a quote. */
   getRevisions(id: string): Promise<QuoteRevision[]> {
     return this.quoteRepo.getRevisions(id);

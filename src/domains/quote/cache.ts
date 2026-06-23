@@ -46,6 +46,7 @@ export function rowToQuote(row: Record<string, string | number | null>): Quote {
     footer: row.footer as string | undefined,
     revision: row.revision != null ? Number(row.revision) : undefined,
     convertedToInvoice: row.converted_to_invoice as string | undefined,
+    revisedFromId: row.revised_from_id as string | undefined,
     sentAt: row.sent_at as string | undefined,
     acceptedAt: row.accepted_at as string | undefined,
     ...archiveFieldsFromRow(row),
@@ -73,6 +74,7 @@ const QUOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${QUOTE_TABLE} (
   footer TEXT,
   revision INTEGER,
   converted_to_invoice TEXT,
+  revised_from_id TEXT,
   sent_at TEXT,
   accepted_at TEXT,
   ${ARCHIVE_COLS_DDL},
@@ -88,9 +90,9 @@ function insertQuoteRow(
     `INSERT OR REPLACE INTO ${QUOTE_TABLE} (id, number, customer_id, project_id,
        portfolio_item_id, title, status, currency, expires_at, line_items,
        payment_schedule, subtotal, tax, tax_rate, total, notes, footer, revision,
-       converted_to_invoice, sent_at, accepted_at,
+       converted_to_invoice, revised_from_id, sent_at, accepted_at,
        ${archiveCols()}, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(q.id),
       val(q.number),
@@ -111,6 +113,7 @@ function insertQuoteRow(
       val(q.footer),
       q.revision ?? null,
       val(q.convertedToInvoice),
+      val(q.revisedFromId),
       val(q.sentAt),
       val(q.acceptedAt),
       ...archiveVals(q),
@@ -130,6 +133,7 @@ export function registerQuoteEntity(repo: QuoteRepository): void {
       "ALTER TABLE quotes ADD COLUMN payment_schedule TEXT",
       "ALTER TABLE quotes ADD COLUMN project_id TEXT",
       "ALTER TABLE quotes ADD COLUMN portfolio_item_id TEXT",
+      "ALTER TABLE quotes ADD COLUMN revised_from_id TEXT",
       ...archiveMigrations(QUOTE_TABLE),
     ],
     fts: {

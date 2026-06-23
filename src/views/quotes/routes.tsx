@@ -58,6 +58,9 @@ async function renderDetail(c: AppContext, id: string) {
       ? getInvoiceService().getById(quote.convertedToInvoice)
       : Promise.resolve(null),
   ]);
+  const revisedFrom = quote.revisedFromId
+    ? await service.getById(quote.revisedFromId)
+    : null;
   const editing = c.req.query("editing") === "true";
   return c.html(
     <QuoteDetailView
@@ -67,6 +70,7 @@ async function renderDetail(c: AppContext, id: string) {
       revisions={revisions}
       customerName={customer?.name}
       invoicePaidAmount={invoice?.paidAmount ?? 0}
+      revisedFromNumber={revisedFrom?.number}
       editing={editing}
     />,
   );
@@ -298,6 +302,31 @@ quotesRouter.post("/:id/to-invoice", async (c) => {
   return new Response(null, {
     status: 204,
     headers: { "HX-Redirect": `/invoices/${invoice.id}` },
+  });
+});
+
+// POST /:id/revise — clone a non-draft quote into a new editable draft.
+quotesRouter.post("/:id/revise", async (c) => {
+  const id = c.req.param("id")!;
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.notFound();
+  if (!["approved", "sent", "accepted"].includes(quote.status)) {
+    return new Response(null, {
+      status: 422,
+      headers: {
+        "HX-Trigger": hxTrigger(
+          "error",
+          "Only approved, sent, or accepted quotes can be revised",
+        ),
+      },
+    });
+  }
+  const clone = await service.reviseQuote(id);
+  if (!clone) return c.notFound();
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/quotes/${clone.id}` },
   });
 });
 

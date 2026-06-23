@@ -125,6 +125,20 @@ When a quote is re-sent, the previous totals are snapshotted as a revision
 record (stored under `billing/quotes/<id>/revisions/`). The `revision` counter
 increments automatically.
 
+### Revising a Locked Quote
+
+A quote is locked once it leaves `draft`. To change a locked quote, use the
+**Revise** button (shown for `approved`, `sent`, and `accepted` quotes, or
+`POST /quotes/:id/revise`). This **clones** the quote into a new editable draft:
+
+1. A new quote is created with the next sequential number (e.g. `Q-2026-002`),
+   copying the customer, line items, currency, terms, notes, and payment
+   schedule. Its status is `draft` and its `revision` continues from the source.
+2. The clone back-links to the original via `revised_from_id`; the quote detail
+   page shows a **Revised from** link.
+3. The original quote stays locked and unchanged — any invoice already created
+   from it keeps pointing at the original (no auto-relink).
+
 ### Converting a Quote to an Invoice
 
 Once a quote is `accepted`, use the **Create Invoice** button on the quote
