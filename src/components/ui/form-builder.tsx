@@ -438,7 +438,6 @@ function dispatchFieldControl(
   strVal: string,
   value: string | undefined,
   displayValue: string | undefined,
-  parsedRows: Record<string, unknown>[],
   arrayDisplayRows: Record<string, string>[] | undefined,
 ) {
   if (def.type === "text") {
@@ -547,6 +546,9 @@ function dispatchFieldControl(
     return <TagsControl id={id} def={def} value={value} />;
   }
   if (def.type === "array-table") {
+    // Only array-table fields hold a JSON value — parse here so scalar fields
+    // (text/number/money/etc.) never run a doomed JSON.parse on render.
+    const parsedRows = parseJson<Record<string, unknown>[]>(value) ?? [];
     return (
       <ArrayTable
         section={def.section}
@@ -570,14 +572,12 @@ const FieldControl: FC<{
   arrayDisplayRows?: Record<string, string>[];
 }> = ({ id, def, value, displayValue, arrayDisplayRows }) => {
   const strVal = value ?? "";
-  const parsedRows = parseJson<Record<string, unknown>[]>(value) ?? [];
   return dispatchFieldControl(
     id,
     def,
     strVal,
     value,
     displayValue,
-    parsedRows,
     arrayDisplayRows,
   );
 };
