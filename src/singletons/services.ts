@@ -331,6 +331,8 @@ export function initServices(
   _set(_svc, "invoice", invoiceService);
   const paymentRepo = new PaymentRepository(projectDir);
   const paymentService = new PaymentService(paymentRepo, invoiceService);
+  // Invoice paidAmount derives from payment records at read time.
+  invoiceService.attachPayments(paymentService);
   _set(_svc, "payment", paymentService);
   // Finance aggregates billing income (payments) read-time, so it depends on
   // payment/invoice/customer — constructed here, after them.

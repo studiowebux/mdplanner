@@ -204,12 +204,18 @@ checksum tracks the local state — re-exporting after any edit yields a new has
 ## 4. Payments
 
 Record money received against an invoice. Multiple partial payments are
-supported — `paid_amount` on the invoice is the sum of all linked payments.
+supported — an invoice's **paid amount is derived at read time** from the sum of
+all payments linked to it (the stored `paid_amount` is only a cache). This means
+imported or hand-edited payments always surface correctly, even if the cached
+field is stale.
+
+Payments are listed on both the **invoice** and the **customer** detail pages
+(the customer page rolls up every payment across that customer's invoices).
 
 In the UI the invoice field is an **autocomplete**: focus it to see every
 invoice (number · title · customer) and pick one — no need to paste a raw id.
 
-**UI:** Invoice detail → Add Payment
+**UI:** Payments → Record Payment
 
 **MCP:** `create_payment`
 

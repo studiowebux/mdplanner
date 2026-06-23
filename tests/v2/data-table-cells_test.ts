@@ -68,7 +68,13 @@ Deno.test("customer billing tables use canonical data-table cells", () => {
   ];
   const html = renderToString(
     BillingSection(
-      { customerId: "c1", quotes, invoices } as Parameters<
+      {
+        customerId: "c1",
+        quotes,
+        invoices,
+        payments: [],
+        invoiceNumbers: new Map(),
+      } as unknown as Parameters<
         typeof BillingSection
       >[0],
     ),

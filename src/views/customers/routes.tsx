@@ -8,6 +8,7 @@ import { customerConfig } from "../../domains/customer/config.tsx";
 import {
   getCustomerService,
   getInvoiceService,
+  getPaymentService,
   getQuoteService,
 } from "../../singletons/services.ts";
 import { CustomerDetailView } from "../customer-detail.tsx";
@@ -30,6 +31,14 @@ async function renderDetail(c: AppContext, id: string) {
     displayStatus: invoiceService.displayStatus(inv),
   }));
 
+  // Payments for this customer = payments against any of the customer's invoices.
+  const invoiceIds = new Set(invoices.map((inv) => inv.id));
+  const invoiceNumbers = new Map(invoices.map((inv) => [inv.id, inv.number]));
+  const allPayments = await getPaymentService().list();
+  const payments = allPayments
+    .filter((p) => invoiceIds.has(p.invoiceId))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
   const editing = c.req.query("editing") === "true";
   return c.html(
     <CustomerDetailView
@@ -37,6 +46,8 @@ async function renderDetail(c: AppContext, id: string) {
       item={customer}
       quotes={quotes}
       invoices={invoicesWithStatus}
+      payments={payments}
+      invoiceNumbers={invoiceNumbers}
       editing={editing}
     />,
   );

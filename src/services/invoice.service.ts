@@ -18,6 +18,12 @@ import { ciIncludes } from "../utils/string.ts";
 import { computeLineAmount, round2 } from "../utils/billing.ts";
 import { BaseService } from "./base.service.ts";
 
+/** Minimal payment source used to derive an invoice's paid amount. */
+interface PaymentSums {
+  sumForInvoice(invoiceId: string): Promise<number>;
+  list(): Promise<{ invoiceId: string; amount: number }[]>;
+}
+
 /** Invoice service: derives customer/line-items/totals from the referenced quote (hydrate), overdue/display-status derivation (isOverdue/displayStatus), and paid-amount sync (updatePaidAmount); filters by customerId, status, and text query (q). */
 export class InvoiceService extends BaseService<
   Invoice,
@@ -30,6 +36,21 @@ export class InvoiceService extends BaseService<
     private quoteService: QuoteService,
   ) {
     super(invoiceRepo);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Paid amount is DERIVED from actual payment records at read time — the stored
+  // `paidAmount` is only a denormalized cache (synced on payment create/delete)
+  // and goes stale for seeded/imported data. Payments are attached after
+  // construction because PaymentService depends on InvoiceService (one-way
+  // constructor dep), so we can't inject it here.
+  // ---------------------------------------------------------------------------
+
+  private payments?: PaymentSums;
+
+  /** Wire the payment source used to derive paidAmount. Call from initServices. */
+  attachPayments(payments: PaymentSums): void {
+    this.payments = payments;
   }
 
   // ---------------------------------------------------------------------------
@@ -79,20 +100,47 @@ export class InvoiceService extends BaseService<
     };
   }
 
-  /** Hydrate a single invoice (frozen snapshot, or live from its quote). */
-  private async hydrate(invoice: Invoice): Promise<Invoice> {
-    if (invoice.frozenAt) return this.withLineAmounts(invoice);
-    const quote = invoice.quoteId
-      ? await this.quoteService.getById(invoice.quoteId) ?? undefined
-      : undefined;
-    return this.hydrateWith(invoice, quote);
+  /** Override the (stale) stored paidAmount with the live sum of payments. */
+  private async withPaid(invoice: Invoice): Promise<Invoice> {
+    if (!this.payments) return invoice;
+    return {
+      ...invoice,
+      paidAmount: round2(await this.payments.sumForInvoice(invoice.id)),
+    };
   }
 
-  /** Hydrate a batch of invoices with a single quote lookup. */
+  /** Hydrate a single invoice (frozen snapshot, or live from its quote). */
+  private async hydrate(invoice: Invoice): Promise<Invoice> {
+    const base = invoice.frozenAt
+      ? this.withLineAmounts(invoice)
+      : this.hydrateWith(
+        invoice,
+        invoice.quoteId
+          ? await this.quoteService.getById(invoice.quoteId) ?? undefined
+          : undefined,
+      );
+    return this.withPaid(base);
+  }
+
+  /** Hydrate a batch of invoices with a single quote + payment lookup. */
   private async hydrateAll(invoices: Invoice[]): Promise<Invoice[]> {
     const quotes = await this.quoteService.list();
     const byId = new Map(quotes.map((q) => [q.id, q]));
-    return invoices.map((inv) => this.hydrateWith(inv, byId.get(inv.quoteId)));
+    const paidByInvoice = new Map<string, number>();
+    if (this.payments) {
+      for (const p of await this.payments.list()) {
+        paidByInvoice.set(
+          p.invoiceId,
+          (paidByInvoice.get(p.invoiceId) ?? 0) + p.amount,
+        );
+      }
+    }
+    return invoices.map((inv) => {
+      const base = this.hydrateWith(inv, byId.get(inv.quoteId));
+      return this.payments
+        ? { ...base, paidAmount: round2(paidByInvoice.get(inv.id) ?? 0) }
+        : base;
+    });
   }
 
   override async list(options?: ListInvoiceOptions): Promise<Invoice[]> {

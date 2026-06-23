@@ -5,6 +5,8 @@ import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
 import type { Customer } from "../types/customer.types.ts";
 import type { Quote } from "../types/quote.types.ts";
 import type { Invoice } from "../types/invoice.types.ts";
+import type { Payment } from "../types/payment.types.ts";
+import { PAYMENT_METHOD_VARIANTS } from "../domains/payment/constants.tsx";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { reconcileBilling } from "../utils/billing-reconciliation.ts";
@@ -45,7 +47,9 @@ export const BillingSection: FC<{
   customerId: string;
   quotes: Quote[];
   invoices: InvoiceWithDisplay[];
-}> = ({ customerId, quotes, invoices }) => {
+  payments: Payment[];
+  invoiceNumbers: Map<string, string>;
+}> = ({ customerId, quotes, invoices, payments, invoiceNumbers }) => {
   const { quoted, invoiced, paid, outstanding } = reconcileBilling(
     quotes,
     invoices,
@@ -54,6 +58,7 @@ export const BillingSection: FC<{
 
   const recentQuotes = quotes.slice(0, CUSTOMER_BILLING_MAX_ROWS);
   const recentInvoices = invoices.slice(0, CUSTOMER_BILLING_MAX_ROWS);
+  const recentPayments = payments.slice(0, CUSTOMER_BILLING_MAX_ROWS);
   const hasBilling = quotes.length > 0 || invoices.length > 0;
 
   return (
@@ -218,6 +223,72 @@ export const BillingSection: FC<{
           )}
         </div>
       )}
+
+      {/* -- Payments table ----------------------------------------------- */}
+      {recentPayments.length > 0 && (
+        <div class="customer-detail__billing-group">
+          <h3 class="customer-detail__billing-subtitle">
+            Payments
+            <span class="customer-detail__billing-count">
+              ({payments.length})
+            </span>
+          </h3>
+          <div class="data-table-wrapper">
+            <table class="data-table data-table--compact">
+              <thead class="data-table__head">
+                <tr>
+                  <th scope="col" class="data-table__th">Date</th>
+                  <th scope="col" class="data-table__th">Invoice</th>
+                  <th scope="col" class="data-table__th data-table__th--right">
+                    Amount
+                  </th>
+                  <th scope="col" class="data-table__th" data-col="status">
+                    Method
+                  </th>
+                  <th scope="col" class="data-table__th">Reference</th>
+                </tr>
+              </thead>
+              <tbody class="data-table__body">
+                {recentPayments.map((p) => (
+                  <tr key={p.id} class="data-table__row">
+                    <td class="data-table__td">
+                      <a href={`/payments/${p.id}`}>{p.date}</a>
+                    </td>
+                    <td class="data-table__td">
+                      <a href={`/invoices/${p.invoiceId}`}>
+                        {invoiceNumbers.get(p.invoiceId) ?? p.invoiceId}
+                      </a>
+                    </td>
+                    <td class="data-table__td data-table__td--right">
+                      {formatCurrency(p.amount) || "$0"}
+                    </td>
+                    <td class="data-table__td" data-col="status">
+                      {p.method
+                        ? (
+                          <span
+                            class={badgeClass(
+                              PAYMENT_METHOD_VARIANTS,
+                              p.method,
+                            )}
+                          >
+                            {p.method}
+                          </span>
+                        )
+                        : ""}
+                    </td>
+                    <td class="data-table__td">{p.reference ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {payments.length > CUSTOMER_BILLING_MAX_ROWS && (
+            <a class="customer-detail__view-all" href="/payments">
+              View all {payments.length} payments
+            </a>
+          )}
+        </div>
+      )}
     </section>
   );
 };
@@ -281,10 +352,20 @@ export const CustomerDetailView: FC<
     item: Customer;
     quotes: Quote[];
     invoices: InvoiceWithDisplay[];
+    payments: Payment[];
+    invoiceNumbers: Map<string, string>;
     editing?: boolean;
   }
 > = (
-  { item: customer, quotes, invoices, editing = false, ...viewProps },
+  {
+    item: customer,
+    quotes,
+    invoices,
+    payments,
+    invoiceNumbers,
+    editing = false,
+    ...viewProps
+  },
 ) => {
   return (
     <MainLayout
@@ -345,6 +426,8 @@ export const CustomerDetailView: FC<
           customerId={customer.id}
           quotes={quotes}
           invoices={invoices}
+          payments={payments}
+          invoiceNumbers={invoiceNumbers}
         />
 
         {/* -- Meta ------------------------------------------------------- */}
