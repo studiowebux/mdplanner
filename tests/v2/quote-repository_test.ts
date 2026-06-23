@@ -741,6 +741,32 @@ Deno.test("QuoteService.removeLineItem drops one item by index and recomputes to
   }
 });
 
+// === line-item type — built-in (material) + custom freetext round-trip ===
+
+Deno.test("QuoteService - non-service line-item types (material) round-trip and compute qty × rate", async () => {
+  const { service, dir } = await setup();
+  try {
+    const created = await service.create({
+      customerId: "c1",
+      title: "Material",
+      lineItems: [
+        line({ id: "li_m", type: "material", quantity: 3, unitRate: 50 }),
+        line({ id: "li_x", type: "licence", quantity: 2, unitRate: 200 }),
+      ],
+    });
+    const fetched = await service.getById(created.id);
+    assertExists(fetched);
+    assertEquals(fetched!.lineItems[0].type, "material");
+    assertEquals(fetched!.lineItems[0].amount, 150);
+    // A custom (non-built-in) type persists unchanged.
+    assertEquals(fetched!.lineItems[1].type, "licence");
+    assertEquals(fetched!.lineItems[1].amount, 400);
+    assertEquals(fetched!.subtotal, 550);
+  } finally {
+    await cleanup(dir);
+  }
+});
+
 // === inline edit — moveLineItem ===
 
 Deno.test("QuoteService.moveLineItem swaps adjacent rows and no-ops at bounds", async () => {

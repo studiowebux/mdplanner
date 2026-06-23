@@ -38,6 +38,8 @@ export function lineItemFieldValue(
 const TYPE_LABEL: Record<string, string> = {
   service: "Service",
   product: "Product",
+  material: "Material",
+  component: "Component",
   expense: "Expense",
   text: "Text",
 };

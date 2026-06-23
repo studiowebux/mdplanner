@@ -13,6 +13,8 @@ type LineItemsTableProps = {
 const TYPE_LABELS: Record<string, string> = {
   service: "Service",
   product: "Product",
+  material: "Material",
+  component: "Component",
   expense: "Expense",
   text: "",
 };

@@ -11,6 +11,8 @@ import { z } from "@hono/zod-openapi";
 export const LINE_ITEM_TYPES = [
   "service",
   "product",
+  "material",
+  "component",
   "expense",
   "text",
 ] as const satisfies readonly string[];

@@ -61,8 +61,14 @@ invoiced → paid → outstanding — derived from its quotes and their invoices
 |------|-----|
 | `service` | Time-based or unit work (has quantity + unit_rate) |
 | `product` | Physical or digital product |
+| `material` | Raw material or supply (quantity × unit price) |
+| `component` | Hardware/electronic component (quantity × unit price) |
 | `expense` | Pass-through cost (e.g. hosting, travel) |
 | `text` | Section header or descriptive text (no amount) |
+
+The `type` field is free text — the built-ins above are suggested in the
+editor's datalist, but any custom label (e.g. `licence`, `labour`) can be typed
+and persists. Non-`text` types all compute `quantity × unit price`.
 
 Line items support:
 - `group` — visual grouping label
