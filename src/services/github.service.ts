@@ -2,6 +2,7 @@
 // Token from project config, repo from portfolio item (passed by caller).
 
 import { GitHubProvider } from "../providers/github.ts";
+import { GiteaProvider } from "../providers/gitea.ts";
 import type { ProjectService } from "./project.service.ts";
 import type { IGitProvider } from "../types/github.types.ts";
 import type {
@@ -48,6 +49,12 @@ export class GitHubService {
 
   private async provider(): Promise<IGitProvider> {
     const config = await this.projectService.getConfig();
+    // Gitea takes precedence when configured (base URL + token): the owner is
+    // migrating off GitHub. Both implement IGitProvider, so every downstream
+    // method, REST route, and MCP tool works unchanged against either backend.
+    if (config.giteaBaseUrl && config.giteaToken) {
+      return new GiteaProvider(config.giteaBaseUrl, config.giteaToken);
+    }
     return new GitHubProvider(config.githubToken);
   }
 

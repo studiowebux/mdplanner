@@ -129,6 +129,10 @@ settingsViewRouter.post("/project", async (c) => {
       body.cloudflareToken,
       body.cloudflareTokenClear,
     ),
+    giteaToken: resolveSecretField(body.giteaToken, body.giteaTokenClear),
+    giteaBaseUrl: body.giteaBaseUrl !== undefined
+      ? String(body.giteaBaseUrl).trim()
+      : undefined,
     cerveauDir: body.cerveauDir !== undefined
       ? String(body.cerveauDir).trim()
       : undefined,

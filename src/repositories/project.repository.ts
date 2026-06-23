@@ -53,6 +53,7 @@ const PROJECT_FM_POST: readonly WriteField[] = [
   ["billingBusinessNumber", "billing_business_number", "emptyToUndef"],
   ["defaultUserId", "default_user_id", "emptyToUndef"],
   ["cerveauDir", "cerveau_dir", "emptyToUndef"],
+  ["giteaBaseUrl", "gitea_base_url", "emptyToUndef"],
 ];
 
 /** Apply a declarative field table onto the frontmatter record. */
@@ -112,6 +113,9 @@ export class ProjectRepository {
     }
     if (config.cloudflareToken) {
       fm.cloudflare_token = await encryptSecret(config.cloudflareToken);
+    }
+    if (config.giteaToken) {
+      fm.gitea_token = await encryptSecret(config.giteaToken);
     }
     if (config.apiKeys && config.apiKeys.length > 0) {
       fm.api_keys = await Promise.all(

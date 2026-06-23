@@ -73,6 +73,32 @@ Deno.test("bulk move/tag — htmx /tasks/batch-move + /tasks/batch-tag", async (
     });
 
     await t.step(
+      "batch-move ignores the colliding toolbar filter `section` (last-wins, no comma)",
+      async () => {
+        // The task-list section FILTER lives inside #tasks-toolbar and shares
+        // its `name="section"` with the bulk Move select; BULK_INCLUDE pulls
+        // both in, so htmx posts `section` twice (filter value first, bulk value
+        // last). The old String(array) joined them with a comma → phantom
+        // `,Done` section. The bulk value must win, intact.
+        const x = await service.create({ title: "Dup A", section: "Todo" });
+        const y = await service.create({ title: "Dup B", section: "Todo" });
+
+        const res = await viewRouter.request(
+          formRequest("/batch-move", [
+            ["taskId", x.id],
+            ["taskId", y.id],
+            ["section", "Backlog"], // toolbar filter (rendered first)
+            ["section", "Done"], // bulk Move select (rendered last)
+          ]),
+        );
+        assertEquals(res.status, 204);
+        await res.body?.cancel();
+        assertEquals((await service.getById(x.id))!.section, "Done");
+        assertEquals((await service.getById(y.id))!.section, "Done");
+      },
+    );
+
+    await t.step(
       "batch-tag add then remove computes next tags server-side",
       async () => {
         const t1 = await service.create({

@@ -203,6 +203,62 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label class="settings-field__label" for="cfg-gitea-base-url">
+          Gitea base URL
+        </label>
+        <input
+          type="url"
+          id="cfg-gitea-base-url"
+          name="giteaBaseUrl"
+          value={config.giteaBaseUrl ?? ""}
+          placeholder="https://gitea.example.com"
+          class="settings-field__input"
+          autocomplete="off"
+        />
+        <span class="settings-field__hint">
+          Self-hosted Gitea instance URL. When set together with a Gitea token,
+          Gitea becomes the active VCS provider (repos, issues, PRs) in place of
+          GitHub.
+        </span>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-field__label" for="cfg-gitea-token">
+          Gitea token (PAT)
+        </label>
+        <div class="settings-field__input-row">
+          <input
+            type="password"
+            id="cfg-gitea-token"
+            name="giteaToken"
+            placeholder={config.hasGiteaToken
+              ? "•••••••• (set — leave blank to keep)"
+              : "Personal access token..."}
+            class="settings-field__input"
+            autocomplete="off"
+          />
+          <input
+            type="hidden"
+            id="cfg-gitea-token-clear"
+            name="giteaTokenClear"
+            value=""
+          />
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            data-clear-input="cfg-gitea-token"
+          >
+            Clear
+          </button>
+        </div>
+        <span class="settings-field__hint">
+          {config.hasGiteaToken ? "A token is set. " : "No token set. "}
+          Generated in Gitea under Settings → Applications. Set
+          MDPLANNER_SECRET_KEY to encrypt at rest.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label class="settings-field__label" for="cfg-cloudflare-token">
           Cloudflare token (API Token)
         </label>

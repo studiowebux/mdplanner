@@ -30,6 +30,38 @@ openssl rand -hex 32
 # Paste the output into your .env as: MDPLANNER_SECRET_KEY=<output>
 ```
 
+## Gitea integration
+
+MD Planner supports [Gitea](https://about.gitea.com/) as a drop-in alternative
+to GitHub. Gitea mirrors GitHub's REST API, so the same repository summaries,
+issues, pull requests, milestones, releases, and Actions all work against a
+self-hosted Gitea instance.
+
+### Setup
+
+1. In Gitea, generate a Personal Access Token under
+   **Settings → Applications** (repo read/write scope).
+2. In MD Planner, navigate to **Settings → Project**.
+3. Set **Gitea base URL** to your instance, e.g. `https://gitea.example.com`
+   (the `/api/v1` suffix is added automatically).
+4. Paste the token into **Gitea token (PAT)** and save.
+
+When both the Gitea base URL and token are set, **Gitea becomes the active VCS
+provider** — every repository summary, issue/PR action, and `github_*` MCP tool
+transparently targets Gitea instead of GitHub. Clear either field to fall back
+to GitHub. There is no separate set of Gitea tools or routes: both back ends
+implement the same provider interface, so the existing GitHub view, REST
+routes, and MCP tools serve Gitea data unchanged.
+
+The Gitea token follows the same security model as the GitHub token: encrypted
+at rest with `MDPLANNER_SECRET_KEY`, never echoed to the browser (only a
+`hasGiteaToken` presence flag), masked placeholder when set, blank-keeps /
+typed-replaces / **Clear**-removes.
+
+> CI note: Gitea Actions is supported through the same Actions endpoints, but if
+> you run [Woodpecker CI](https://woodpecker-ci.org/) instead, pipeline status
+> comes from a separate Woodpecker integration (see its own guide).
+
 ## Cloudflare integration
 
 The DNS Tracker can sync domain expiry and DNS records from Cloudflare

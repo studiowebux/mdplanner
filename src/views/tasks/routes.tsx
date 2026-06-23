@@ -493,6 +493,24 @@ async function resolveBulkIds(
   return Array.from(ids);
 }
 
+// Read a single bulk-bar field value from a parseBody({ all: true }) body.
+//
+// A bulk-bar control can share its `name` with a filter input that lives inside
+// `#tasks-toolbar` (e.g. the `section`/`priority`/`milestone`/`assignee`/
+// `project` filters). Both are pulled in by BULK_INCLUDE, so htmx posts the
+// field twice and parseBody({ all: true }) returns an array. Without this the
+// old `String(body[key])` joined the array with a comma (e.g. `,Done`), moving
+// tasks into a phantom comma-named section. The bulk control is always rendered
+// AFTER the filter panel, so the LAST occurrence is the bulk value.
+function bulkField(
+  body: Record<string, unknown>,
+  key: string,
+): string {
+  const v = body[key];
+  const raw = Array.isArray(v) ? v[v.length - 1] : v;
+  return String(raw ?? "");
+}
+
 // POST /reorder — SortableJS drag reorder/move. Reads the target
 // `reorderSection` plus the ordered `sid` fields (one hidden input per row, in
 // post-drag DOM order) and reconciles section + order in a single pass. A
@@ -556,7 +574,7 @@ tasksRouter.post("/batch-delete", async (c) => {
 tasksRouter.post("/batch-move", async (c) => {
   const body = await c.req.parseBody({ all: true });
   const ids = await resolveBulkIds(c, body);
-  const section = String(body["section"] ?? "").trim();
+  const section = bulkField(body, "section").trim();
 
   if (ids.length > 0 && section) {
     const svc = getTaskService();
@@ -612,8 +630,8 @@ tasksRouter.post("/batch-complete", async (c) => {
 tasksRouter.post("/batch-tag", async (c) => {
   const body = await c.req.parseBody({ all: true });
   const ids = await resolveBulkIds(c, body);
-  const tag = String(body["tag"] ?? "").trim();
-  const mode = String(body["mode"] ?? "add");
+  const tag = bulkField(body, "tag").trim();
+  const mode = bulkField(body, "mode") || "add";
 
   if (ids.length > 0 && tag) {
     const svc = getTaskService();
@@ -673,7 +691,7 @@ async function batchSetField(
 }
 
 const trimmed = (body: BulkBody, key: string) => {
-  const v = String(body[key] ?? "").trim();
+  const v = bulkField(body, key).trim();
   return v.length > 0 ? v : undefined;
 };
 

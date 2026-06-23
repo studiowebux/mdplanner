@@ -105,6 +105,15 @@ export const ProjectConfigSchema = z.object({
     description:
       "Cloudflare API Token for DNS sync (stored in project.md, encrypted at rest)",
   }),
+  giteaToken: z.string().optional().openapi({
+    description:
+      "Gitea Personal Access Token (stored in project.md, encrypted at rest)",
+  }),
+  giteaBaseUrl: z.string().optional().openapi({
+    description:
+      "Gitea instance base URL, e.g. https://gitea.example.com. When set with a Gitea token, Gitea becomes the active VCS provider.",
+    example: "https://gitea.example.com",
+  }),
   pipelinesPerPage: z.number().optional().openapi({
     description: "Number of pipeline runs per page (default: 10)",
     example: 10,
@@ -223,6 +232,7 @@ export const RedactedApiKeySchema = z.object({
 export const PublicProjectConfigSchema = ProjectConfigSchema.omit({
   githubToken: true,
   cloudflareToken: true,
+  giteaToken: true,
   apiKeys: true,
 }).extend({
   hasGithubToken: z.boolean().optional().openapi({
@@ -233,6 +243,11 @@ export const PublicProjectConfigSchema = ProjectConfigSchema.omit({
   hasCloudflareToken: z.boolean().optional().openapi({
     description:
       "Whether a Cloudflare token is stored (the value is never returned)",
+    example: true,
+  }),
+  hasGiteaToken: z.boolean().optional().openapi({
+    description:
+      "Whether a Gitea token is stored (the value is never returned)",
     example: true,
   }),
   apiKeys: z.array(RedactedApiKeySchema).optional().openapi({
@@ -281,6 +296,8 @@ export const FrontmatterProjectSchema = z.object({
   section_order: z.array(z.unknown()).optional(),
   github_token: z.string().optional(),
   cloudflare_token: z.string().optional(),
+  gitea_token: z.string().optional(),
+  gitea_base_url: z.string().optional(),
   pipelines_per_page: z.number().optional(),
   tasks_per_section: z.number().optional(),
   kpi_metrics: z.array(z.unknown()).optional(),
@@ -307,6 +324,9 @@ export const FrontmatterProjectSchema = z.object({
       : undefined;
     const cloudflareToken = fm.cloudflare_token
       ? (await decryptSecret(fm.cloudflare_token) ?? undefined)
+      : undefined;
+    const giteaToken = fm.gitea_token
+      ? (await decryptSecret(fm.gitea_token) ?? undefined)
       : undefined;
 
     return {
@@ -341,6 +361,8 @@ export const FrontmatterProjectSchema = z.object({
         : undefined,
       githubToken,
       cloudflareToken,
+      giteaToken,
+      giteaBaseUrl: fm.gitea_base_url,
       pipelinesPerPage: fm.pipelines_per_page,
       tasksPerSection: typeof fm.tasks_per_section === "number"
         ? fm.tasks_per_section
