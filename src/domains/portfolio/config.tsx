@@ -83,7 +83,16 @@ export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
   },
   { type: "text", name: "logo", label: "Logo URL" },
   { type: "text", name: "license", label: "License" },
-  { type: "text", name: "githubRepo", label: "GitHub repo (owner/repo)" },
+  { type: "text", name: "githubRepo", label: "Repo (owner/repo)" },
+  {
+    type: "select",
+    name: "vcsProvider",
+    label: "Repo host",
+    options: [
+      { value: "github", label: "GitHub" },
+      { value: "gitea", label: "Gitea" },
+    ],
+  },
   {
     type: "autocomplete",
     name: "billingCustomerId",

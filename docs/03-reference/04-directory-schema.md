@@ -238,6 +238,11 @@ endDate: 2026-06-30
 budget: 150000
 spent: 45000
 team: [person_alice, person_bob]
+githubRepo: studiowebux/project-alpha
+vcsProvider: gitea
+urls:
+  - label: Docs
+    href: https://example.com/docs
 badges:
   - imageUrl: https://img.shields.io/badge/build-passing-green.svg
     linkUrl: https://example.com/repo
@@ -251,10 +256,23 @@ Project description.
 
 Status values: `active`, `completed`, `on-hold`, `cancelled`.
 
+`vcsProvider` (`github` | `gitea`) is the VCS host this project's `githubRepo`
+lives on — hosting is **per project**, so different portfolio items can target
+different forges at the same time. Absent → the configured provider (Gitea if
+its base URL + token are set, else GitHub). Set it from the "Repo host" select
+on the portfolio form.
+
+`urls` holds external links, each `{ label, href }`, entered through a multi-row
+table (Label / URL per row) and rendered in the Links section of the detail
+page. A row's URL field also accepts pasted markdown — `[label](href)` — which
+is parsed into structured links on save.
+
 `badges` holds external status badges (CI/CD/pipeline/git shields images),
 each `{ imageUrl, linkUrl?, alt? }`. In the UI they are entered through a
-multi-row table (Image URL / Link URL / Alt text per row) and rendered as the
-clickable badge image on the portfolio card and detail page.
+multi-row table (Image URL / Link URL / Alt text per row); a row's Image URL
+field also accepts pasted markdown image-links — `[![alt](img)](href)` or
+`![alt](img)`, one or many — parsed into structured badges on save. Rendered as
+the clickable badge image on the portfolio card and detail page.
 
 ## Capacity Plans
 

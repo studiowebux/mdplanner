@@ -55,8 +55,8 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
-    return c.json(await getGitHubService().getRepo(repo), 200);
+    const { repo, provider } = await resolveRepo(c);
+    return c.json(await getGitHubService().getRepo(repo, provider), 200);
   },
 );
 
@@ -80,10 +80,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { state, assignee } = c.req.valid("query");
     return c.json(
-      await getGitHubService().listIssues(repo, state, assignee),
+      await getGitHubService().listIssues(repo, state, assignee, provider),
       200,
     );
   },
@@ -105,10 +105,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { number } = c.req.valid("param");
     return c.json(
-      await getGitHubService().getIssue(repo, Number(number)),
+      await getGitHubService().getIssue(repo, Number(number), provider),
       200,
     );
   },
@@ -135,10 +135,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { title, body } = c.req.valid("json");
     return c.json(
-      await getGitHubService().createIssue(repo, title, body),
+      await getGitHubService().createIssue(repo, title, body, provider),
       201,
     );
   },
@@ -166,11 +166,16 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { number } = c.req.valid("param");
     const { state } = c.req.valid("json");
     return c.json(
-      await getGitHubService().setIssueState(repo, Number(number), state),
+      await getGitHubService().setIssueState(
+        repo,
+        Number(number),
+        state,
+        provider,
+      ),
       200,
     );
   },
@@ -196,9 +201,9 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { state } = c.req.valid("query");
-    return c.json(await getGitHubService().listPRs(repo, state), 200);
+    return c.json(await getGitHubService().listPRs(repo, state, provider), 200);
   },
 );
 
@@ -218,10 +223,10 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { number } = c.req.valid("param");
     return c.json(
-      await getGitHubService().getPR(repo, Number(number)),
+      await getGitHubService().getPR(repo, Number(number), provider),
       200,
     );
   },
@@ -249,7 +254,7 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { number } = c.req.valid("param");
     const body = c.req.valid("json");
     return c.json(
@@ -257,6 +262,7 @@ githubRouter.openapi(
         repo,
         Number(number),
         body?.mergeMethod,
+        provider,
       ),
       200,
     );
@@ -282,8 +288,11 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
-    return c.json(await getGitHubService().listMilestones(repo), 200);
+    const { repo, provider } = await resolveRepo(c);
+    return c.json(
+      await getGitHubService().listMilestones(repo, provider),
+      200,
+    );
   },
 );
 
@@ -307,8 +316,8 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
-    const release = await getGitHubService().getLatestRelease(repo);
+    const { repo, provider } = await resolveRepo(c);
+    const release = await getGitHubService().getLatestRelease(repo, provider);
     if (!release) return c.body(null, 204);
     return c.json(release, 200);
   },
@@ -336,8 +345,12 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
-    const { runs } = await getGitHubService().listWorkflowRuns(repo);
+    const { repo, provider } = await resolveRepo(c);
+    const { runs } = await getGitHubService().listWorkflowRuns(
+      repo,
+      {},
+      provider,
+    );
     return c.json(runs, 200);
   },
 );
@@ -358,9 +371,9 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { runId } = c.req.valid("param");
-    await getGitHubService().cancelRun(repo, Number(runId));
+    await getGitHubService().cancelRun(repo, Number(runId), provider);
     return c.body(null, 204);
   },
 );
@@ -381,9 +394,9 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { runId } = c.req.valid("param");
-    await getGitHubService().rerunRun(repo, Number(runId));
+    await getGitHubService().rerunRun(repo, Number(runId), provider);
     return c.body(null, 204);
   },
 );
@@ -404,9 +417,9 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { runId } = c.req.valid("param");
-    await getGitHubService().rerunFailedJobs(repo, Number(runId));
+    await getGitHubService().rerunFailedJobs(repo, Number(runId), provider);
     return c.body(null, 204);
   },
 );
@@ -430,8 +443,8 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
-    return c.json(await getGitHubService().listWorkflows(repo), 200);
+    const { repo, provider } = await resolveRepo(c);
+    return c.json(await getGitHubService().listWorkflows(repo, provider), 200);
   },
 );
 
@@ -457,7 +470,7 @@ githubRouter.openapi(
     },
   }),
   async (c) => {
-    const repo = await resolveRepo(c);
+    const { repo, provider } = await resolveRepo(c);
     const { workflowId } = c.req.valid("param");
     const { ref, inputs } = c.req.valid("json");
     await getGitHubService().triggerWorkflowDispatch(
@@ -465,6 +478,7 @@ githubRouter.openapi(
       workflowId,
       ref,
       inputs,
+      provider,
     );
     return c.body(null, 204);
   },

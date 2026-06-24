@@ -13,6 +13,7 @@ import {
 import { getSectionOrder } from "../../constants/mod.ts";
 import { ciEquals, ciIncludes } from "../../utils/string.ts";
 import type { PortfolioDashboardItem } from "../../types/portfolio.types.ts";
+import type { VcsProvider } from "../../types/github.types.ts";
 
 export function sectionAbbrev(name: string): string {
   return name.split(/\s+/).map((w) => w[0].toUpperCase()).join("");
@@ -64,11 +65,12 @@ function lastActivityOf(
 async function buildGithubStats(
   svc: GitHubSvc,
   repoName: string,
+  provider?: VcsProvider | null,
 ): Promise<PortfolioDashboardItem["github"]> {
   try {
     const [repo, { runs }] = await Promise.all([
-      svc.getRepo(repoName),
-      svc.listWorkflowRuns(repoName, { perPage: 10 }),
+      svc.getRepo(repoName, provider),
+      svc.listWorkflowRuns(repoName, { perPage: 10 }, provider),
     ]);
     const completed = runs.filter((r) => r.status === "completed");
     const successes = completed.filter((r) => r.conclusion === "success");
@@ -113,7 +115,7 @@ async function buildDashboardItem(
     : null;
 
   const github = item.githubRepo
-    ? await buildGithubStats(githubSvc, item.githubRepo)
+    ? await buildGithubStats(githubSvc, item.githubRepo, item.vcsProvider)
     : null;
 
   return {

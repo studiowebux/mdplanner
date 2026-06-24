@@ -33,6 +33,7 @@ import type { PipelineFilters } from "../github.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { GITHUB_PIPELINES_PER_PAGE } from "../../types/github.types.ts";
+import type { VcsProvider } from "../../types/github.types.ts";
 import { DEFAULT_STALE_DAYS } from "../../constants/mod.ts";
 import {
   DashboardTable,
@@ -107,8 +108,8 @@ portfolioRouter.get("/:id/github/card", async (c) => {
   try {
     const gh = getGitHubService();
     const [repo, release] = await Promise.all([
-      gh.getRepo(item.githubRepo),
-      gh.getLatestRelease(item.githubRepo),
+      gh.getRepo(item.githubRepo, item.vcsProvider),
+      gh.getLatestRelease(item.githubRepo, item.vcsProvider),
     ]);
     return c.html(<GitHubRepoCard repo={repo} release={release} />);
   } catch (err) {
@@ -126,7 +127,12 @@ portfolioRouter.get("/:id/github/issues", async (c) => {
     );
   }
   try {
-    const issues = await getGitHubService().listIssues(item.githubRepo);
+    const issues = await getGitHubService().listIssues(
+      item.githubRepo,
+      "open",
+      undefined,
+      item.vcsProvider,
+    );
     return c.html(<GitHubIssuesTable issues={issues} itemId={id} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -143,7 +149,11 @@ portfolioRouter.get("/:id/github/pulls", async (c) => {
     );
   }
   try {
-    const prs = await getGitHubService().listPRs(item.githubRepo);
+    const prs = await getGitHubService().listPRs(
+      item.githubRepo,
+      "open",
+      item.vcsProvider,
+    );
     return c.html(<GitHubPRsTable prs={prs} itemId={id} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -160,7 +170,10 @@ portfolioRouter.get("/:id/github/milestones", async (c) => {
     );
   }
   try {
-    const milestones = await getGitHubService().listMilestones(item.githubRepo);
+    const milestones = await getGitHubService().listMilestones(
+      item.githubRepo,
+      item.vcsProvider,
+    );
     return c.html(<GitHubMilestonesList milestones={milestones} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -193,7 +206,7 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
         status: filters.status,
         branch: filters.branch,
         event: filters.event,
-      });
+      }, item.vcsProvider);
     // q is local-only — GitHub API has no workflow name search
     const filtered = filters.q
       ? runs.filter((r) =>
@@ -243,7 +256,7 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
         status: filters.status,
         branch: filters.branch,
         event: filters.event,
-      });
+      }, item.vcsProvider);
     const filtered = filters.q
       ? runs.filter((r) =>
         r.name.toLowerCase().includes(filters.q?.toLowerCase() ?? "")
@@ -283,7 +296,11 @@ async function pipelineAction(
   c: AppContext,
   id: string,
   runId: string,
-  action: (repo: string, runId: number) => Promise<void>,
+  action: (
+    repo: string,
+    runId: number,
+    provider?: VcsProvider | null,
+  ) => Promise<void>,
   label: string,
 ) {
   const item = await getPortfolioService().getById(id);
@@ -295,13 +312,14 @@ async function pipelineAction(
     );
   }
   try {
-    await action(item.githubRepo, Number(runId));
+    await action(item.githubRepo, Number(runId), item.vcsProvider);
   } catch (err) {
     log.warn(`[portfolio] ${label} failed for run ${runId}:`, err);
   }
   const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
     item.githubRepo,
     {},
+    item.vcsProvider,
   );
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
@@ -324,7 +342,8 @@ portfolioRouter.post(
       c,
       c.req.param("id"),
       c.req.param("runId"),
-      (repo, runId) => getGitHubService().cancelRun(repo, runId),
+      (repo, runId, provider) =>
+        getGitHubService().cancelRun(repo, runId, provider),
       "pipeline cancel",
     ),
 );
@@ -336,7 +355,8 @@ portfolioRouter.post(
       c,
       c.req.param("id"),
       c.req.param("runId"),
-      (repo, runId) => getGitHubService().rerunRun(repo, runId),
+      (repo, runId, provider) =>
+        getGitHubService().rerunRun(repo, runId, provider),
       "pipeline rerun",
     ),
 );
@@ -348,7 +368,8 @@ portfolioRouter.post(
       c,
       c.req.param("id"),
       c.req.param("runId"),
-      (repo, runId) => getGitHubService().rerunFailedJobs(repo, runId),
+      (repo, runId, provider) =>
+        getGitHubService().rerunFailedJobs(repo, runId, provider),
       "pipeline rerun-failed",
     ),
 );
@@ -389,7 +410,7 @@ async function renderDetail(c: AppContext, id: string) {
   const invoices = allInvoices.filter((i) => quoteIds.has(i.quoteId));
 
   const vcsProvider = item.githubRepo
-    ? await getGitHubService().activeProviderName()
+    ? await getGitHubService().activeProviderName(item.vcsProvider)
     : undefined;
 
   return c.html(
@@ -555,7 +576,12 @@ portfolioRouter.patch("/:id/github/issues/:number", async (c) => {
   const body = await c.req.json<{ state?: string }>();
   const state = body.state === "closed" ? "closed" : "open";
   try {
-    await getGitHubService().setIssueState(item.githubRepo, number, state);
+    await getGitHubService().setIssueState(
+      item.githubRepo,
+      number,
+      state,
+      item.vcsProvider,
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return new Response(null, {
@@ -563,8 +589,11 @@ portfolioRouter.patch("/:id/github/issues/:number", async (c) => {
       headers: { "HX-Trigger": hxTrigger("error", msg) },
     });
   }
-  const issues = await getGitHubService().listIssues(item.githubRepo).catch(
-    () => [],
-  );
+  const issues = await getGitHubService().listIssues(
+    item.githubRepo,
+    "open",
+    undefined,
+    item.vcsProvider,
+  ).catch(() => []);
   return c.html(<GitHubIssuesTable issues={issues} itemId={id} />);
 });

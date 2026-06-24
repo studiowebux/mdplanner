@@ -21,6 +21,7 @@ export const PORTFOLIO_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PORTFOLIO_TABLE} (
   logo TEXT,
   license TEXT,
   github_repo TEXT,
+  vcs_provider TEXT,
   billing_customer_id TEXT,
   brain_managed INTEGER,
   linked_goals TEXT,

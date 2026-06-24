@@ -2,6 +2,7 @@
 
 import type { Context, ErrorHandler } from "hono";
 import { getPortfolioService } from "../../../singletons/services.ts";
+import type { VcsProvider } from "../../../types/github.types.ts";
 import {
   type AppError,
   badGateway,
@@ -63,12 +64,15 @@ export const githubOnError: ErrorHandler = (err, c) => {
 };
 
 /**
- * Resolve the portfolio item's githubRepo from the parent :id param.
+ * Resolve the portfolio item's repo + its VCS host from the parent :id param.
  * Throws GitHubHttpError (caught by githubOnError) when the portfolio is
- * missing or has no githubRepo configured, so callers receive the repo
- * string directly.
+ * missing or has no repo configured, so callers receive `{ repo, provider }`
+ * directly. `provider` is the item's per-project host (undefined → the service
+ * falls back to the configured provider).
  */
-export async function resolveRepo(c: Context): Promise<string> {
+export async function resolveRepo(
+  c: Context,
+): Promise<{ repo: string; provider?: VcsProvider | null }> {
   const portfolioId = c.req.param("id");
   const item = portfolioId
     ? await getPortfolioService().getById(portfolioId)
@@ -85,5 +89,5 @@ export async function resolveRepo(c: Context): Promise<string> {
       400,
     );
   }
-  return item.githubRepo;
+  return { repo: item.githubRepo, provider: item.vcsProvider };
 }

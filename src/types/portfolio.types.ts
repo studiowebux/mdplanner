@@ -158,8 +158,14 @@ export const PortfolioItemSchema = z.object({
     example: "MIT",
   }),
   githubRepo: z.string().nullable().optional().openapi({
-    description: "GitHub repository (owner/repo)",
+    description: "Repository (owner/repo) on the host named by vcsProvider",
     example: "studiowebux/mdplanner",
+  }),
+  vcsProvider: z.enum(["github", "gitea"]).nullable().optional().openapi({
+    description:
+      "VCS host this project's repo lives on. Absent → falls back to the " +
+      "configured provider (Gitea if set, else GitHub).",
+    example: "gitea",
   }),
   billingCustomerId: z.string().nullable().optional().openapi({
     description: "External billing system customer ID",

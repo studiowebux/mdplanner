@@ -182,8 +182,12 @@ async function fetchGithubData(
   if (!item.githubRepo) return null;
   try {
     const [repo, { runs }] = await Promise.all([
-      githubSvc.getRepo(item.githubRepo),
-      githubSvc.listWorkflowRuns(item.githubRepo, { perPage: 10 }),
+      githubSvc.getRepo(item.githubRepo, item.vcsProvider),
+      githubSvc.listWorkflowRuns(
+        item.githubRepo,
+        { perPage: 10 },
+        item.vcsProvider,
+      ),
     ]);
     const completed = runs.filter((r) => r.status === "completed");
     const successes = completed.filter((r) => r.conclusion === "success");

@@ -45,8 +45,8 @@ githubSummaryRouter.get("/:id/card", async (c) => {
   try {
     const gh = getGitHubService();
     const [repo, release] = await Promise.all([
-      gh.getRepo(item.githubRepo),
-      gh.getLatestRelease(item.githubRepo),
+      gh.getRepo(item.githubRepo, item.vcsProvider),
+      gh.getLatestRelease(item.githubRepo, item.vcsProvider),
     ]);
     return c.html(
       <GitHubSummaryCard item={item} repo={repo} release={release} />,

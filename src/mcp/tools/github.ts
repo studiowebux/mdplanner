@@ -10,6 +10,7 @@ import {
   ListPRsQuerySchema,
   MergePRBodySchema,
   PatchIssueBodySchema,
+  VcsProviderInput,
 } from "../../types/github.types.ts";
 import { err, ok } from "../utils.ts";
 
@@ -20,12 +21,12 @@ export function registerGitHubTools(server: McpServer): void {
     "github_get_repo",
     {
       description:
-        "Fetch GitHub repository summary: stars, open issues, open PRs, license, last push.",
-      inputSchema: { githubRepo: GitHubRepoInput },
+        "Fetch repository summary: stars, open issues, open PRs, license, last push.",
+      inputSchema: { githubRepo: GitHubRepoInput, provider: VcsProviderInput },
     },
-    async ({ githubRepo }) => {
+    async ({ githubRepo, provider }) => {
       try {
-        return ok(await service.getRepo(githubRepo));
+        return ok(await service.getRepo(githubRepo, provider));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -41,11 +42,12 @@ export function registerGitHubTools(server: McpServer): void {
         query: ListIssuesQuerySchema.shape.assignee.describe(
           "Filter repos by name substring",
         ),
+        provider: VcsProviderInput,
       },
     },
-    async ({ query }) => {
+    async ({ query, provider }) => {
       try {
-        return ok(await service.listRepos(query));
+        return ok(await service.listRepos(query, provider));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -59,11 +61,12 @@ export function registerGitHubTools(server: McpServer): void {
       inputSchema: {
         githubRepo: GitHubRepoInput,
         number: GitHubNumberInput,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, number }) => {
+    async ({ githubRepo, number, provider }) => {
       try {
-        return ok(await service.getIssue(githubRepo, number));
+        return ok(await service.getIssue(githubRepo, number, provider));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -78,11 +81,12 @@ export function registerGitHubTools(server: McpServer): void {
         githubRepo: GitHubRepoInput,
         title: CreateIssueBodySchema.shape.title,
         body: CreateIssueBodySchema.shape.body,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, title, body }) => {
+    async ({ githubRepo, title, body, provider }) => {
       try {
-        return ok(await service.createIssue(githubRepo, title, body));
+        return ok(await service.createIssue(githubRepo, title, body, provider));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -97,11 +101,14 @@ export function registerGitHubTools(server: McpServer): void {
         githubRepo: GitHubRepoInput,
         number: GitHubNumberInput,
         state: PatchIssueBodySchema.shape.state,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, number, state }) => {
+    async ({ githubRepo, number, state, provider }) => {
       try {
-        return ok(await service.setIssueState(githubRepo, number, state));
+        return ok(
+          await service.setIssueState(githubRepo, number, state, provider),
+        );
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -117,11 +124,14 @@ export function registerGitHubTools(server: McpServer): void {
         githubRepo: GitHubRepoInput,
         state: ListIssuesQuerySchema.shape.state,
         assignee: ListIssuesQuerySchema.shape.assignee,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, state, assignee }) => {
+    async ({ githubRepo, state, assignee, provider }) => {
       try {
-        return ok(await service.listIssues(githubRepo, state, assignee));
+        return ok(
+          await service.listIssues(githubRepo, state, assignee, provider),
+        );
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -136,11 +146,12 @@ export function registerGitHubTools(server: McpServer): void {
       inputSchema: {
         githubRepo: GitHubRepoInput,
         state: ListPRsQuerySchema.shape.state,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, state }) => {
+    async ({ githubRepo, state, provider }) => {
       try {
-        return ok(await service.listPRs(githubRepo, state));
+        return ok(await service.listPRs(githubRepo, state, provider));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -154,11 +165,12 @@ export function registerGitHubTools(server: McpServer): void {
       inputSchema: {
         githubRepo: GitHubRepoInput,
         number: GitHubNumberInput,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, number }) => {
+    async ({ githubRepo, number, provider }) => {
       try {
-        return ok(await service.getPR(githubRepo, number));
+        return ok(await service.getPR(githubRepo, number, provider));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -173,11 +185,14 @@ export function registerGitHubTools(server: McpServer): void {
         githubRepo: GitHubRepoInput,
         number: GitHubNumberInput,
         mergeMethod: MergePRBodySchema.shape.mergeMethod,
+        provider: VcsProviderInput,
       },
     },
-    async ({ githubRepo, number, mergeMethod }) => {
+    async ({ githubRepo, number, mergeMethod, provider }) => {
       try {
-        return ok(await service.mergePR(githubRepo, number, mergeMethod));
+        return ok(
+          await service.mergePR(githubRepo, number, mergeMethod, provider),
+        );
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }

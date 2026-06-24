@@ -5,6 +5,7 @@ import {
   resolveDomainHelpers,
 } from "../../factories/domain-routes.ts";
 import { createDomainForm } from "../../factories/domain-view.tsx";
+import type { VcsProvider } from "../../types/github.types.ts";
 import { loadFilteredItems } from "../../factories/domain-routes-collection.ts";
 import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
 import {
@@ -359,14 +360,26 @@ tasksRouter.post("/:id/comments", async (c) => {
 
 async function resolveGitHubRepo(
   task: { githubRepo?: string | null; project?: string | null },
-): Promise<{ repo: string; inherited: string | null } | null> {
+): Promise<
+  {
+    repo: string;
+    inherited: string | null;
+    provider?: VcsProvider | null;
+  } | null
+> {
+  // A task's own repo carries no host; inherited repos use the portfolio
+  // item's per-project provider. Either way undefined → configured fallback.
   if (task.githubRepo) return { repo: task.githubRepo, inherited: null };
   const project = task.project;
   if (!project) return null;
   const all = await getPortfolioService().list();
   const match = all.find((p) => p.name.toLowerCase() === project.toLowerCase());
   if (!match?.githubRepo) return null;
-  return { repo: match.githubRepo, inherited: match.name };
+  return {
+    repo: match.githubRepo,
+    inherited: match.name,
+    provider: match.vcsProvider,
+  };
 }
 
 async function renderGitHubFragment(
@@ -386,10 +399,10 @@ async function renderGitHubFragment(
     const gh = getGitHubService();
     const [issue, pr] = await Promise.all([
       task.githubIssue
-        ? gh.getIssue(effectiveRepo, task.githubIssue)
+        ? gh.getIssue(effectiveRepo, task.githubIssue, resolved.provider)
         : Promise.resolve(null),
       task.githubPR
-        ? gh.getPR(effectiveRepo, task.githubPR)
+        ? gh.getPR(effectiveRepo, task.githubPR, resolved.provider)
         : Promise.resolve(null),
     ]);
     return c.html(

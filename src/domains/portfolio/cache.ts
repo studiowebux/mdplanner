@@ -32,6 +32,7 @@ const PORTFOLIO_STR_COLS: readonly (readonly [string, keyof PortfolioItem])[] =
     ["logo", "logo"],
     ["license", "license"],
     ["github_repo", "githubRepo"],
+    ["vcs_provider", "vcsProvider"],
     ["billing_customer_id", "billingCustomerId"],
     ["created_at", "createdAt"],
     ["updated_at", "updatedAt"],
@@ -115,10 +116,11 @@ export function insertPortfolioRow(
   db.execute(
     `INSERT OR REPLACE INTO ${PORTFOLIO_TABLE} (id, name, category, status,
        description, client, revenue, expenses, progress, start_date, end_date,
-       team, tech_stack, logo, license, github_repo, billing_customer_id,
+       team, tech_stack, logo, license, github_repo, vcs_provider,
+       billing_customer_id,
        brain_managed, linked_goals, kpis, urls, badges, status_updates,
        ${archiveCols()}, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -136,6 +138,7 @@ export function insertPortfolioRow(
       val(p.logo),
       val(p.license),
       val(p.githubRepo),
+      val(p.vcsProvider),
       val(p.billingCustomerId),
       p.brainManaged != null ? (p.brainManaged ? 1 : 0) : null,
       json(p.linkedGoals),
@@ -157,6 +160,7 @@ export function registerPortfolioEntity(repo: PortfolioRepository): void {
     schema: PORTFOLIO_SCHEMA,
     migrations: [
       "ALTER TABLE portfolio ADD COLUMN github_repo TEXT",
+      "ALTER TABLE portfolio ADD COLUMN vcs_provider TEXT",
       "ALTER TABLE portfolio ADD COLUMN billing_customer_id TEXT",
       "ALTER TABLE portfolio ADD COLUMN badges TEXT",
       ...archiveMigrations(PORTFOLIO_TABLE),

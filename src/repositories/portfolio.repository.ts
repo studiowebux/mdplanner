@@ -45,6 +45,7 @@ const PORTFOLIO_SER_FIELDS:
     ["logo", "truthy"],
     ["license", "truthy"],
     ["githubRepo", "truthy"],
+    ["vcsProvider", "truthy"],
     ["billingCustomerId", "truthy"],
     ["brainManaged", "defined"],
     ["linkedGoals", "array"],
@@ -442,6 +443,10 @@ export class PortfolioRepository {
       logo: fmStr(fm, "logo"),
       license: fmStr(fm, "license"),
       githubRepo: fmStr(fm, "github_repo", "githubRepo"),
+      vcsProvider: fmStr(fm, "vcs_provider", "vcsProvider") as
+        | "github"
+        | "gitea"
+        | undefined,
       billingCustomerId: fmStr(fm, "billing_customer_id", "billingCustomerId"),
       brainManaged: fmBool(fm, "brain_managed", "brainManaged"),
       linkedGoals: fmStrArr(fm, "linked_goals", "linkedGoals"),

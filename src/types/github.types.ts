@@ -278,6 +278,9 @@ export const ListPRsQuerySchema = z.object({
 // IGitProvider — shared interface for multi-forge support (GitHub, Gitea)
 // ---------------------------------------------------------------------------
 
+/** VCS host a project's repo lives on. Per-portfolio-item, not global. */
+export type VcsProvider = "github" | "gitea";
+
 export interface IGitProvider {
   getAuthenticatedUser(): Promise<GitHubUser>;
   getRepo(owner: string, repo: string): Promise<GitHubRepo>;
@@ -352,6 +355,10 @@ export const GitHubRepoInput = z.string().describe(
 
 export const GitHubNumberInput = z.number().describe(
   "GitHub issue or PR number",
+);
+
+export const VcsProviderInput = z.enum(["github", "gitea"]).optional().describe(
+  "VCS host to target (github or gitea). Omit to use the configured provider.",
 );
 
 // NumberParam — for GitHub issue/PR number path params (:number).

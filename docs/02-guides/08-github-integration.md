@@ -46,12 +46,23 @@ self-hosted Gitea instance.
    (the `/api/v1` suffix is added automatically).
 4. Paste the token into **Gitea token (PAT)** and save.
 
-When both the Gitea base URL and token are set, **Gitea becomes the active VCS
-provider** — every repository summary, issue/PR action, and `github_*` MCP tool
-transparently targets Gitea instead of GitHub. Clear either field to fall back
-to GitHub. There is no separate set of Gitea tools or routes: both back ends
-implement the same provider interface, so the existing GitHub view, REST
-routes, and MCP tools serve Gitea data unchanged.
+### Per-project hosting
+
+Hosting is a property of **each portfolio item**, not a global switch. Every
+portfolio item has a **Repo host** select (`GitHub` | `Gitea`) next to its
+**Repo (owner/repo)** field. With both GitHub and Gitea configured, a
+GitHub-hosted project and a Gitea-hosted project work **side by side** — each
+repository summary, issue/PR action, and `github_*` MCP tool targets the host
+named on that item.
+
+When an item leaves **Repo host** unset, it falls back to the configured
+provider (Gitea if its base URL + token are set, otherwise GitHub) — so
+existing single-host setups keep working without touching every item.
+
+There is no separate set of Gitea tools or routes: both back ends implement the
+same provider interface, so the existing GitHub view, REST routes, and MCP
+tools serve either host's data unchanged. MCP tools also accept an optional
+`provider` argument (`github` | `gitea`) to target a host explicitly.
 
 The Gitea token follows the same security model as the GitHub token: encrypted
 at rest with `MDPLANNER_SECRET_KEY`, never echoed to the browser (only a
