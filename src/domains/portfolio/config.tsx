@@ -14,6 +14,14 @@ import { PORTFOLIO_TABLE_COLUMNS, portfolioToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 import { buildTeamPersonById } from "./owners.ts";
+import {
+  parseMarkdownBadges,
+  parseMarkdownLinks,
+} from "../../utils/markdown-links.ts";
+import type {
+  PortfolioBadge,
+  PortfolioUrl,
+} from "../../types/portfolio.types.ts";
 
 export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
@@ -97,6 +105,17 @@ export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
   },
   {
     type: "array-table",
+    name: "urls",
+    label: "Link",
+    section: "portfolio_urls",
+    addLabel: "Add link",
+    itemFields: [
+      { type: "text", name: "label", label: "Label", placeholder: "e.g. Docs" },
+      { type: "text", name: "href", label: "URL", placeholder: "https://..." },
+    ],
+  },
+  {
+    type: "array-table",
     name: "badges",
     label: "Status badge",
     section: "portfolio_badges",
@@ -108,6 +127,27 @@ export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
     ],
   },
 ];
+
+/**
+ * Expand any array-table row whose primary field holds markdown into structured
+ * entries, so the same field accepts BOTH plain values typed column-by-column
+ * AND pasted markdown (one or many, "array format"). A row whose field isn't
+ * markdown is kept as-is. Mutates the parsed body in place.
+ */
+function coerceMarkdownArrays(body: Record<string, unknown>): void {
+  if (Array.isArray(body.badges)) {
+    body.badges = (body.badges as PortfolioBadge[]).flatMap((row) => {
+      const parsed = parseMarkdownBadges(String(row.imageUrl ?? ""));
+      return parsed.length > 0 ? parsed : [row];
+    });
+  }
+  if (Array.isArray(body.urls)) {
+    body.urls = (body.urls as PortfolioUrl[]).flatMap((row) => {
+      const parsed = parseMarkdownLinks(`${row.label ?? ""} ${row.href ?? ""}`);
+      return parsed.length > 0 ? parsed : [row];
+    });
+  }
+}
 
 export const portfolioConfig: DomainConfig<
   PortfolioItem,
@@ -154,13 +194,22 @@ export const portfolioConfig: DomainConfig<
 
   Card: ({ item, q }) => <PortfolioCard item={item} q={q} />,
 
-  parseCreate: (body) =>
-    parseFormBody(PORTFOLIO_FORM_FIELDS, body) as CreatePortfolioItem,
+  parseCreate: (body) => {
+    const parsed = parseFormBody(PORTFOLIO_FORM_FIELDS, body) as Record<
+      string,
+      unknown
+    >;
+    coerceMarkdownArrays(parsed);
+    return parsed as CreatePortfolioItem;
+  },
 
-  parseUpdate: (body) =>
-    parseFormBody(PORTFOLIO_FORM_FIELDS, body, {
+  parseUpdate: (body) => {
+    const parsed = parseFormBody(PORTFOLIO_FORM_FIELDS, body, {
       clearEmpty: true,
-    }) as Partial<UpdatePortfolioItem>,
+    }) as Record<string, unknown>;
+    coerceMarkdownArrays(parsed);
+    return parsed as Partial<UpdatePortfolioItem>;
+  },
 
   // Resolve person IDs to names for the team[] array-table autocomplete.
   // Unresolved IDs produce an empty search input — user re-picks.
