@@ -49,17 +49,15 @@ export class GitHubService {
   }
 
   /**
-   * Resolve the effective VCS provider for a per-project choice. When a project
-   * names its host (`vcsProvider`), honor it. When it doesn't, fall back to the
-   * configured provider — Gitea if its base URL + token are set, else GitHub —
-   * so existing single-host setups keep working without per-item configuration.
+   * Resolve the effective VCS provider for a per-project choice. When an item
+   * names its host (`vcsProvider`), honor it. When it doesn't, default to
+   * GitHub — Gitea is opt-in per item, so configuring Gitea never reroutes
+   * unset items and both providers coexist across the portfolio.
    */
-  private async resolveChoice(
+  private resolveChoice(
     choice?: VcsProvider | null,
-  ): Promise<VcsProvider> {
-    if (choice) return choice;
-    const config = await this.projectService.getConfig();
-    return config.giteaBaseUrl && config.giteaToken ? "gitea" : "github";
+  ): VcsProvider {
+    return choice ?? "github";
   }
 
   /**
@@ -67,19 +65,19 @@ export class GitHubService {
    * Used to label the VCS view/section (which is otherwise hardcoded to
    * "GitHub").
    */
-  async activeProviderName(
+  activeProviderName(
     choice?: VcsProvider | null,
-  ): Promise<"GitHub" | "Gitea"> {
-    return (await this.resolveChoice(choice)) === "gitea" ? "Gitea" : "GitHub";
+  ): "GitHub" | "Gitea" {
+    return this.resolveChoice(choice) === "gitea" ? "Gitea" : "GitHub";
   }
 
   private async provider(choice?: VcsProvider | null): Promise<IGitProvider> {
     const config = await this.projectService.getConfig();
     // Both implement IGitProvider, so every downstream method, REST route, and
-    // MCP tool works unchanged against either backend. The host is a per-project
-    // property (portfolio item `vcsProvider`); absent → configured-provider
-    // fallback (see resolveChoice).
-    if ((await this.resolveChoice(choice)) === "gitea") {
+    // MCP tool works unchanged against either backend. The host is a per-item
+    // property (portfolio item `vcsProvider`); absent → GitHub default
+    // (see resolveChoice).
+    if (this.resolveChoice(choice) === "gitea") {
       // baseUrl falls back to "" when a project picks Gitea but it isn't
       // configured — provider calls then fail with a clear Gitea API error.
       return new GiteaProvider(config.giteaBaseUrl ?? "", config.giteaToken);

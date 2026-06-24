@@ -5,8 +5,8 @@
  * config switch: each call passes the item's provider and the service targets
  * that backend. With BOTH GitHub and Gitea configured, a github-hosted project
  * hits api.github.com and a gitea-hosted one hits the Gitea /api/v1 root.
- * Absent choice falls back to the configured provider (gitea-if-set, else
- * github), preserving single-host setups.
+ * Absent choice defaults to GitHub; Gitea is opt-in per item, so configuring
+ * Gitea never reroutes unset items and both providers coexist.
  */
 
 import { assert, assertEquals } from "@std/assert";
@@ -76,24 +76,24 @@ Deno.test("getRepo routes a gitea-hosted project to the gitea /api/v1 root", asy
   assert(!urls.some((u) => u.includes("api.github.com")), "no github call");
 });
 
-Deno.test("absent provider falls back to gitea when configured", async () => {
+Deno.test("absent provider defaults to github even when gitea is configured", () => {
   assertEquals(
-    await new GitHubService(fakeProjectService(BOTH_CONFIGURED))
-      .activeProviderName(),
-    "Gitea",
-  );
-});
-
-Deno.test("absent provider falls back to github when gitea is unconfigured", async () => {
-  assertEquals(
-    await new GitHubService(fakeProjectService({ githubToken: "gh" }))
+    new GitHubService(fakeProjectService(BOTH_CONFIGURED))
       .activeProviderName(),
     "GitHub",
   );
 });
 
-Deno.test("explicit choice overrides the configured fallback", async () => {
+Deno.test("absent provider defaults to github when gitea is unconfigured", () => {
+  assertEquals(
+    new GitHubService(fakeProjectService({ githubToken: "gh" }))
+      .activeProviderName(),
+    "GitHub",
+  );
+});
+
+Deno.test("explicit choice overrides the github default", () => {
   const svc = new GitHubService(fakeProjectService(BOTH_CONFIGURED));
-  assertEquals(await svc.activeProviderName("github"), "GitHub");
-  assertEquals(await svc.activeProviderName("gitea"), "Gitea");
+  assertEquals(svc.activeProviderName("github"), "GitHub");
+  assertEquals(svc.activeProviderName("gitea"), "Gitea");
 });

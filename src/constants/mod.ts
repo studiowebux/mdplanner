@@ -150,7 +150,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   marketing_plan: "Marketing Plan",
   ai_chat: "AI Chat",
   analytics: "Analytics",
-  github: "GitHub",
+  github: "Git",
   upload: "Uploads",
   dashboard: "Dashboard",
   me: "My Work",

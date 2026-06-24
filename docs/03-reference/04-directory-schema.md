@@ -258,8 +258,8 @@ Status values: `active`, `completed`, `on-hold`, `cancelled`.
 
 `vcsProvider` (`github` | `gitea`) is the VCS host this project's `githubRepo`
 lives on — hosting is **per project**, so different portfolio items can target
-different forges at the same time. Absent → the configured provider (Gitea if
-its base URL + token are set, else GitHub). Set it from the "Repo host" select
+different forges at the same time. Absent → GitHub; Gitea is opt-in per item, so
+configuring Gitea never reroutes unset items. Set it from the "Repo host" select
 on the portfolio form.
 
 `urls` holds external links, each `{ label, href }`, entered through a multi-row
