@@ -546,6 +546,9 @@ export const TaskListView: FC<ListProps> = (
       <div class="task-list__sticky-header">
         <div class="task-list__header-controls">
           <SectionJumpBar sections={sectionNames} />
+          <a class="btn btn--secondary btn--sm" href="/tasks/archived">
+            Archived
+          </a>
           <details class="column-toggle" data-column-toggle="tasks">
             <summary class="btn btn--secondary btn--sm">Columns</summary>
             <div class="column-toggle__panel">

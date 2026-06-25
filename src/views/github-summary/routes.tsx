@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import {
   getGitHubService,
   getPortfolioService,
+  getWoodpeckerService,
 } from "../../singletons/services.ts";
 import {
   GitHubSummaryCard,
@@ -19,12 +20,10 @@ export const githubSummaryRouter = new Hono<{ Variables: AppVariables }>();
 githubSummaryRouter.get("/", async (c) => {
   const all = await getPortfolioService().list();
   const items = all.filter((p) => p.githubRepo);
-  const provider = await getGitHubService().activeProviderName();
   return c.html(
     <GitHubSummaryView
       {...viewProps(c, "/github")}
       items={items}
-      provider={provider}
     />,
   );
 });
@@ -38,18 +37,22 @@ githubSummaryRouter.get("/:id/card", async (c) => {
     return c.html(
       <GitHubSummaryCardError
         item={fallback}
-        message="No GitHub repository configured"
+        message="No Git repository configured"
       />,
     );
   }
   try {
     const gh = getGitHubService();
-    const [repo, release] = await Promise.all([
+    const wp = getWoodpeckerService();
+    const [repo, release, ci] = await Promise.all([
       gh.getRepo(item.githubRepo, item.vcsProvider),
       gh.getLatestRelease(item.githubRepo, item.vcsProvider),
+      (await wp.isConfigured())
+        ? wp.latestPipeline(item.githubRepo).catch(() => null)
+        : null,
     ]);
     return c.html(
-      <GitHubSummaryCard item={item} repo={repo} release={release} />,
+      <GitHubSummaryCard item={item} repo={repo} release={release} ci={ci} />,
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

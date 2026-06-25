@@ -122,7 +122,11 @@ export interface GitHubPR {
   /** Use merged to distinguish closed+merged from closed without merge. */
   state: GitHubIssueState;
   merged: boolean;
+  /** PR author login, or null when the API omits it. */
+  author: string | null;
   assignee: string | null;
+  /** Logins of users whose review is requested (empty when none). */
+  requestedReviewers: string[];
   headBranch: string;
   createdAt: string;
   reviewDecision: string | null;
@@ -215,7 +219,9 @@ export const GitHubPRSchema = z.object({
   title: z.string(),
   state: z.enum(GITHUB_ISSUE_STATES),
   merged: z.boolean(),
+  author: z.string().nullable(),
   assignee: z.string().nullable(),
+  requestedReviewers: z.array(z.string()),
   headBranch: z.string(),
   createdAt: z.string(),
   reviewDecision: z.string().nullable(),

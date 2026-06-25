@@ -197,6 +197,12 @@ export const TaskSchema = z.object({
   updatedBy: z.string().nullable().optional().openapi({
     description: "Person ID of the last updater",
   }),
+  boardArchived: z.boolean().optional().openapi({
+    description: "Swept into the monthly archive (kept in search/analytics)",
+  }),
+  archivedMonth: z.string().optional().openapi({
+    description: "Archive month (YYYY-MM) the task was swept into",
+  }),
 }).merge(ArchiveFieldsSchema).openapi("Task");
 
 export type Task = {
@@ -237,6 +243,11 @@ export type Task = {
   archived?: boolean;
   archivedAt?: string;
   archivedBy?: string;
+  /** Monthly board-archive: swept off the active board but kept in search +
+   * analytics. Distinct from `archived` (soft-delete, search-excluded). */
+  boardArchived?: boolean;
+  /** Archive month (YYYY-MM) the task was swept into. */
+  archivedMonth?: string;
 };
 
 // ---------------------------------------------------------------------------

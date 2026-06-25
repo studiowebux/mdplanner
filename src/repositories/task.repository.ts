@@ -48,6 +48,7 @@ function sectionToDir(section: string): string {
 /** Persists Task entities as markdown with a SQLite cache mirror; standalone (not BaseMarkdownRepository) with disk/cache split reads, soft-delete, and section moves (moveToSection). */
 export class TaskRepository {
   private boardDir: string;
+  private archiveDir: string;
   private writer = new SafeWriter();
   private cacheDb: CacheDatabase | null = null;
   // Set after archive/restore/hardDelete so the next list read bypasses the
@@ -58,6 +59,66 @@ export class TaskRepository {
 
   constructor(projectDir: string) {
     this.boardDir = join(projectDir, "board");
+    this.archiveDir = join(projectDir, "archive");
+  }
+
+  /**
+   * Discover all monthly archive directories under archive/ (each holds the
+   * board-archived Done tasks swept into that YYYY-MM). Mirror of
+   * discoverSections but for the archive tree, which is NOT a board section.
+   */
+  private async discoverArchiveMonths(): Promise<string[]> {
+    const months: string[] = [];
+    try {
+      for await (const entry of Deno.readDir(this.archiveDir)) {
+        if (entry.isDirectory) months.push(entry.name);
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return months;
+  }
+
+  /**
+   * Disk-walk of board-archived tasks (archive/YYYY-MM/*.md). The board
+   * section is read from frontmatter (the directory is the month, not the
+   * section). These are kept in the cache → search + analytics, but excluded
+   * from the active board by findAll.
+   */
+  async findBoardArchived(): Promise<Task[]> {
+    const months = await this.discoverArchiveMonths();
+    const tasks: Task[] = [];
+    for (const month of months) {
+      const monthPath = join(this.archiveDir, month);
+      try {
+        for await (const entry of Deno.readDir(monthPath)) {
+          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+          const content = await Deno.readTextFile(join(monthPath, entry.name));
+          const { frontmatter } = parseFrontmatter(content);
+          const section = (frontmatter.section as string) ?? "Done";
+          const task = this.parse(content, section);
+          if (task) {
+            task.boardArchived = true;
+            task.archivedMonth = (frontmatter.archived_month as string) ??
+              month;
+            tasks.push(task);
+          }
+        }
+      } catch (err) {
+        if (!(err instanceof Deno.errors.NotFound)) throw err;
+      }
+    }
+    return tasks;
+  }
+
+  /** Board tasks plus board-archived tasks — the full cache source so archived
+   * months stay searchable + counted in analytics. */
+  async findAllForCache(): Promise<Task[]> {
+    const [board, archived] = await Promise.all([
+      this.findAllFromDisk(),
+      this.findBoardArchived(),
+    ]);
+    return [...board, ...archived];
   }
 
   setCacheDb(db: CacheDatabase): void {
@@ -98,7 +159,8 @@ export class TaskRepository {
         if (count > 0) {
           return this.cacheDb.query<QueryResult>(
             `SELECT * FROM "${TASK_TABLE}"
-             WHERE archived IS NULL OR archived = 0`,
+             WHERE (archived IS NULL OR archived = 0)
+               AND (board_archived IS NULL OR board_archived = 0)`,
           ).map(rowToTask);
         }
       } catch (err) {
@@ -314,6 +376,75 @@ export class TaskRepository {
     return ok;
   }
 
+  /**
+   * Sweep a Done task into the monthly archive: move its file from
+   * board/<section>/ to archive/<YYYY-MM>/ and stamp `board_archived` +
+   * `archived_month` + the original `section` into frontmatter (the dir is the
+   * month, so section must be persisted for restore + parse). Distinct from
+   * `archive` (soft-delete): board_archived tasks stay in search + analytics.
+   * `month` defaults to the task's completion month.
+   */
+  async boardArchive(id: string, month?: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      const found = await this.findRawFileById(id);
+      if (!found) return false;
+      const fm = { ...found.frontmatter };
+      const completedAt = (fm.completed_at as string) ??
+        new Date().toISOString();
+      const archiveMonth = month ?? completedAt.slice(0, 7);
+      // Persist the board section so restore + parse know where it belongs.
+      if (fm.section === undefined) fm.section = found.section;
+      fm.board_archived = true;
+      fm.archived_month = archiveMonth;
+      fm.updated_at = new Date().toISOString();
+      const monthPath = join(this.archiveDir, archiveMonth);
+      await Deno.mkdir(monthPath, { recursive: true });
+      const target = join(monthPath, `${id}.md`);
+      await atomicWrite(target, serializeFrontmatter(fm, found.body));
+      if (target !== found.filePath) {
+        try {
+          await Deno.remove(found.filePath);
+        } catch (err) {
+          if (!(err instanceof Deno.errors.NotFound)) throw err;
+        }
+      }
+      return true;
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /**
+   * Restore a board-archived task to the active board: move its file back to
+   * board/<section>/ and drop `board_archived` + `archived_month`. Section is
+   * read from the persisted frontmatter (falls back to Done).
+   */
+  async boardRestore(id: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      const found = await this.findRawFileById(id);
+      if (!found) return false;
+      const fm = { ...found.frontmatter };
+      const section = (fm.section as string) ?? "Done";
+      delete fm.board_archived;
+      delete fm.archived_month;
+      fm.updated_at = new Date().toISOString();
+      const sectionPath = join(this.boardDir, sectionToDir(section));
+      await Deno.mkdir(sectionPath, { recursive: true });
+      const target = join(sectionPath, `${id}.md`);
+      await atomicWrite(target, serializeFrontmatter(fm, found.body));
+      if (target !== found.filePath) {
+        try {
+          await Deno.remove(found.filePath);
+        } catch (err) {
+          if (!(err instanceof Deno.errors.NotFound)) throw err;
+        }
+      }
+      return true;
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
   /** Permanent delete — removes the file from disk. No recovery. */
   async hardDelete(id: string): Promise<boolean> {
     const ok = await this.writer.write(id, async () => {
@@ -359,10 +490,11 @@ export class TaskRepository {
       frontmatter: Record<string, unknown>;
       body: string;
       filePath: string;
+      section: string;
     } | null
   > {
     const sections = await this.discoverSections();
-    for (const { dir } of sections) {
+    for (const { dir, section } of sections) {
       const sectionPath = join(this.boardDir, dir);
       try {
         for await (const entry of Deno.readDir(sectionPath)) {
@@ -371,7 +503,25 @@ export class TaskRepository {
           const content = await Deno.readTextFile(filePath);
           const parsed = parseFrontmatter(content);
           if (parsed.frontmatter.id === id) {
-            return { ...parsed, filePath };
+            return { ...parsed, filePath, section };
+          }
+        }
+      } catch (err) {
+        if (!(err instanceof Deno.errors.NotFound)) throw err;
+      }
+    }
+    // Also scan the monthly archive tree (board-archived tasks live there).
+    for (const month of await this.discoverArchiveMonths()) {
+      const monthPath = join(this.archiveDir, month);
+      try {
+        for await (const entry of Deno.readDir(monthPath)) {
+          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+          const filePath = join(monthPath, entry.name);
+          const content = await Deno.readTextFile(filePath);
+          const parsed = parseFrontmatter(content);
+          if (parsed.frontmatter.id === id) {
+            const section = (parsed.frontmatter.section as string) ?? "Done";
+            return { ...parsed, filePath, section };
           }
         }
       } catch (err) {
@@ -402,7 +552,25 @@ export class TaskRepository {
         );
         if (row) {
           const cached = rowToTask(row);
-          if (cached.section) {
+          // Board-archived tasks live in archive/<month>/, not board/<section>/.
+          if (cached.boardArchived && cached.archivedMonth) {
+            const filePath = join(
+              this.archiveDir,
+              cached.archivedMonth,
+              `${id}.md`,
+            );
+            try {
+              const content = await Deno.readTextFile(filePath);
+              const task = this.parse(content, cached.section ?? "Done");
+              if (task?.id === id) {
+                task.boardArchived = true;
+                task.archivedMonth = cached.archivedMonth;
+                return { file: filePath, task, sectionDir: null };
+              }
+            } catch (err) {
+              if (!(err instanceof Deno.errors.NotFound)) throw err;
+            }
+          } else if (cached.section) {
             const dir = sectionToDir(cached.section);
             const filePath = join(this.boardDir, dir, `${id}.md`);
             try {
@@ -431,6 +599,28 @@ export class TaskRepository {
           const content = await Deno.readTextFile(filePath);
           const task = this.parse(content, section);
           if (task?.id === id) return { file: filePath, task, sectionDir: dir };
+        }
+      } catch (err) {
+        if (!(err instanceof Deno.errors.NotFound)) throw err;
+      }
+    }
+    // Fall through to the monthly archive tree.
+    for (const month of await this.discoverArchiveMonths()) {
+      const monthPath = join(this.archiveDir, month);
+      try {
+        for await (const entry of Deno.readDir(monthPath)) {
+          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+          const filePath = join(monthPath, entry.name);
+          const content = await Deno.readTextFile(filePath);
+          const { frontmatter } = parseFrontmatter(content);
+          const section = (frontmatter.section as string) ?? "Done";
+          const task = this.parse(content, section);
+          if (task?.id === id) {
+            task.boardArchived = true;
+            task.archivedMonth = (frontmatter.archived_month as string) ??
+              month;
+            return { file: filePath, task, sectionDir: null };
+          }
         }
       } catch (err) {
         if (!(err instanceof Deno.errors.NotFound)) throw err;

@@ -465,9 +465,9 @@ export const TaskDetailView: FC<Props> = (
               </section>
             )}
 
-            {/* GitHub section — live data loaded via htmx */}
+            {/* Git section — live data loaded via htmx */}
             <section class="detail-section task-detail__section">
-              <h2>GitHub</h2>
+              <h2>Git</h2>
               <div
                 id="task-github-section"
                 hx-get={`/tasks/${task.id}/github`}

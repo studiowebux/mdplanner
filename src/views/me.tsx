@@ -58,6 +58,24 @@ export const MeDashboard: FC<MeDashboardProps> = ({
           )
           : (
             <div class="me-dashboard__grid">
+              {
+                /* Git — my PRs, review-requested, assigned issues, CI.
+                  Lazy-loaded so the page render is not blocked on the APIs. */
+              }
+              <section class="me-dashboard__card detail-section">
+                <h2 class="me-dashboard__card-title">Git</h2>
+                <div
+                  id="me-git-section"
+                  hx-get="/me/git"
+                  hx-trigger="load"
+                  hx-swap="innerHTML"
+                >
+                  <div class="loading-spinner" aria-label="Loading">
+                    <div class="loading-spinner__ring" />
+                  </div>
+                </div>
+              </section>
+
               {/* My Tasks */}
               {tasks.length > 0 && (
                 <section class="me-dashboard__card detail-section">

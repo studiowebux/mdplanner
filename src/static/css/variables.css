@@ -564,6 +564,9 @@
   --risk-matrix-y-tick-w: 1.5rem;
   --risk-matrix-legend-dot-size: 0.625rem;
 
+  /* Quote line-item inline editor */
+  --qli-add-time-field-min-width: 12rem;
+
   /* Billing document header */
   --billing-doc-header-gap: var(--space-md);
   --billing-doc-header-logo-h: 3rem;

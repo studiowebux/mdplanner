@@ -142,3 +142,35 @@ Query parameters for list endpoints:
 - `GET .../issues?state=open|closed|all&assignee=<login>`
 - `GET .../pulls?state=open|closed|all`
 - `PUT .../pulls/:n/merge` body: `{ "merge_method": "squash"|"merge"|"rebase" }`
+
+## Generic "Git" / "CI" labels
+
+Because repository hosting is chosen per portfolio item (GitHub or Gitea) and
+CI runs on a separate engine (Woodpecker), provider-agnostic surfaces use the
+generic labels **Git** and **CI** rather than a vendor name. The sidebar entry,
+the repository summary at `/github`, and the task detail repository section all
+read "Git"; pipeline status reads "CI". Provider **selectors** (when choosing a
+host) and the **token/base-URL** settings fields still name the specific vendor.
+
+## CI status badge
+
+When Woodpecker is configured, each repository card — the Git summary at
+`/github` and the Git card on a portfolio detail page — shows the latest
+pipeline status as a colored **CI** badge (green success, red
+failure/error/killed, amber running/pending) linking to the pipeline. Repos not
+registered in Woodpecker simply show no badge.
+
+## My Work — Git card
+
+The **My Work** page (`/me`) includes a lazy-loaded **Git** card that
+aggregates, across every configured portfolio repository (GitHub and Gitea) plus
+Woodpecker CI:
+
+- your open pull requests,
+- pull requests requesting your review,
+- issues assigned to you,
+- CI pipelines needing attention.
+
+"You" is resolved per provider from the configured token's authenticated user
+(`getAuthenticatedUser`), so no separate username mapping is required. A failure
+on any single repository is skipped so it never stalls the card.

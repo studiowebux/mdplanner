@@ -33,6 +33,12 @@ export function rowToTask(row: Record<string, string | number | null>): Task {
   if (archive.archived !== undefined) task.archived = archive.archived;
   if (archive.archivedAt !== undefined) task.archivedAt = archive.archivedAt;
   if (archive.archivedBy !== undefined) task.archivedBy = archive.archivedBy;
+  if (row.board_archived === 1 || row.board_archived === "1") {
+    task.boardArchived = true;
+  }
+  if (row.archived_month != null) {
+    task.archivedMonth = row.archived_month as string;
+  }
   return task;
 }
 
@@ -117,8 +123,9 @@ export function insertTaskRow(
        due_date, assignee, priority, effort, blocked_by, milestone,
        planned_start, planned_end, time_entries, sort_order, attachments,
        project, github_issue, github_repo, github_pr, comments, claimed_by,
-       claimed_at, approval_request, files, children, ${archiveCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       claimed_at, approval_request, files, children, board_archived,
+       archived_month, ${archiveCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(t.id),
       val(t.title),
@@ -151,6 +158,8 @@ export function insertTaskRow(
       json(t.approvalRequest ? [t.approvalRequest] : null),
       json(t.files),
       json(t.children),
+      t.boardArchived ? 1 : 0,
+      val(t.archivedMonth),
       ...archiveVals(t),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -169,6 +178,9 @@ export function registerTaskEntity(repo: TaskRepository): void {
       `CREATE INDEX IF NOT EXISTS idx_tasks_milestone ON ${TASK_TABLE} (milestone)`,
       `CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON ${TASK_TABLE} (due_date)`,
       `CREATE INDEX IF NOT EXISTS idx_tasks_completed ON ${TASK_TABLE} (completed)`,
+      `ALTER TABLE ${TASK_TABLE} ADD COLUMN board_archived INTEGER DEFAULT 0`,
+      `ALTER TABLE ${TASK_TABLE} ADD COLUMN archived_month TEXT`,
+      `CREATE INDEX IF NOT EXISTS idx_tasks_board_archived ON ${TASK_TABLE} (board_archived)`,
       ...archiveMigrations(TASK_TABLE),
     ],
     fts: {
@@ -178,7 +190,9 @@ export function registerTaskEntity(repo: TaskRepository): void {
       contentCol: "description",
     },
     onSyncComplete: () => repo.markClean(),
-    source: () => repo.findAllFromDisk(),
+    // Include board-archived tasks so they stay in the cache → searchable and
+    // counted in analytics, even though findAll (board) filters them out.
+    source: () => repo.findAllForCache(),
     insert: insertTaskRow,
   });
 }

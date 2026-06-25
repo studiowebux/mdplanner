@@ -193,5 +193,5 @@ details[open] .quote-detail__revisions-summary::before {
 }
 
 .qli-add-time__fields .form__autocomplete {
-  min-width: 12rem;
+  min-width: var(--qli-add-time-field-min-width);
 }

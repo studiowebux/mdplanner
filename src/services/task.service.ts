@@ -272,6 +272,75 @@ export class TaskService {
     return ok;
   }
 
+  // -------------------------------------------------------------------------
+  // Monthly board archive — sweep Done tasks off the active board while
+  // keeping them in search + analytics. Distinct from soft-delete `archive`.
+  // -------------------------------------------------------------------------
+
+  /** Sweep a single Done task into the monthly archive. */
+  async boardArchive(id: string, month?: string): Promise<boolean> {
+    const ok = await this.taskRepo.boardArchive(id, month);
+    if (ok) {
+      // Re-cache with board_archived=1: stays searchable + counted, but
+      // findAll (board) filters it out. Leaves the active view → full refetch.
+      const archived = await this.taskRepo.findById(id);
+      if (archived) this.cacheUpsert(archived);
+      this.publishChange("moved");
+    }
+    return ok;
+  }
+
+  /** Restore a board-archived task to the active board. */
+  async boardRestore(id: string): Promise<boolean> {
+    const ok = await this.taskRepo.boardRestore(id);
+    if (ok) {
+      const restored = await this.taskRepo.findById(id);
+      if (restored) this.cacheUpsert(restored);
+      this.publishChange("moved");
+    }
+    return ok;
+  }
+
+  /**
+   * Bulk sweep: board-archive every Done task whose completion month is
+   * strictly before `beforeMonth` (YYYY-MM). Returns the swept task ids.
+   */
+  async sweepDoneBefore(beforeMonth: string): Promise<string[]> {
+    const done = await this.list({ section: DONE_SECTION });
+    const swept: string[] = [];
+    for (const task of done) {
+      const completedMonth = (task.completedAt ?? "").slice(0, 7);
+      if (completedMonth && completedMonth < beforeMonth) {
+        if (await this.taskRepo.boardArchive(task.id, completedMonth)) {
+          const archived = await this.taskRepo.findById(task.id);
+          if (archived) this.cacheUpsert(archived);
+          swept.push(task.id);
+        }
+      }
+    }
+    if (swept.length > 0) this.publishChange("moved");
+    return swept;
+  }
+
+  /** Board-archived tasks only (browse-by-month view). */
+  async listBoardArchived(options?: ListTaskOptions): Promise<Task[]> {
+    const tasks = await this.taskRepo.findBoardArchived();
+    return this.applyFilters(tasks, options);
+  }
+
+  /**
+   * Tasks for analytics: the active board PLUS board-archived tasks (which are
+   * excluded from the board but must still count in rollups). Soft-deleted
+   * `archived` tasks remain excluded.
+   */
+  async listForAnalytics(options?: ListTaskOptions): Promise<Task[]> {
+    const [board, archived] = await Promise.all([
+      this.taskRepo.findAll(),
+      this.taskRepo.findBoardArchived(),
+    ]);
+    return this.applyFilters([...board, ...archived], options);
+  }
+
   /** Permanently delete the task file from disk. No recovery. */
   async hardDelete(id: string): Promise<boolean> {
     const ok = await this.taskRepo.hardDelete(id);

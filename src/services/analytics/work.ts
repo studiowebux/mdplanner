@@ -41,7 +41,9 @@ function buildHoursPerDay(
 export async function collectTaskStats(
   filters: AnalyticsFilters,
 ): Promise<TaskStats> {
-  const tasks = await getTaskService().list(
+  // Includes board-archived tasks: they leave the active board but must still
+  // count in analytics rollups.
+  const tasks = await getTaskService().listForAnalytics(
     filters.project ? { project: filters.project } : {},
   );
   const bySection: Record<string, number> = {};
@@ -98,7 +100,7 @@ export async function collectMilestoneStats(
 export async function collectTimeEntryStats(
   filters: AnalyticsFilters,
 ): Promise<TimeEntryStats> {
-  const tasks = await getTaskService().list(
+  const tasks = await getTaskService().listForAnalytics(
     filters.project ? { project: filters.project } : {},
   );
   const byPerson: Record<string, number> = {};

@@ -84,6 +84,38 @@
   margin: 0;
 }
 
+/* Git card — grouped subsections (PRs / review / issues / CI) */
+.me-git {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.me-git__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.me-git__subhead {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.me-git__repo {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.me-dashboard__empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   .me-dashboard__grid {

@@ -61,6 +61,8 @@ export const TASK_SCHEMA = `CREATE TABLE IF NOT EXISTS ${TASK_TABLE} (
   children TEXT,
   created_by TEXT,
   updated_by TEXT,
+  board_archived INTEGER DEFAULT 0,
+  archived_month TEXT,
   ${ARCHIVE_COLS_DDL},
   synced_at TEXT
 )`;

@@ -54,6 +54,10 @@
   color: var(--color-text-muted);
 }
 
+.github-card__ci {
+  text-decoration: none;
+}
+
 .github-card__release {
   background: var(--color-success-bg);
   color: var(--color-success-text);

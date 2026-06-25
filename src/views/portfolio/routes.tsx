@@ -13,6 +13,7 @@ import {
   getPortfolioService,
   getProjectService,
   getQuoteService,
+  getWoodpeckerService,
 } from "../../singletons/services.ts";
 import { buildTeamPersonById } from "../../domains/portfolio/owners.ts";
 import {
@@ -107,11 +108,15 @@ portfolioRouter.get("/:id/github/card", async (c) => {
   }
   try {
     const gh = getGitHubService();
-    const [repo, release] = await Promise.all([
+    const wp = getWoodpeckerService();
+    const [repo, release, ci] = await Promise.all([
       gh.getRepo(item.githubRepo, item.vcsProvider),
       gh.getLatestRelease(item.githubRepo, item.vcsProvider),
+      (await wp.isConfigured())
+        ? wp.latestPipeline(item.githubRepo).catch(() => null)
+        : null,
     ]);
-    return c.html(<GitHubRepoCard repo={repo} release={release} />);
+    return c.html(<GitHubRepoCard repo={repo} release={release} ci={ci} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return c.html(<GitHubError message={msg} />);

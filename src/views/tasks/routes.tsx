@@ -39,6 +39,7 @@ import {
   resolveTaskDetailProps,
   TaskDetailView,
 } from "../task-detail.tsx";
+import { TaskArchivedView } from "./archived.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { toHtml } from "../../utils/html.ts";
@@ -244,6 +245,56 @@ tasksRouter.get("/row/:id", async (c) => {
       />,
     ),
   );
+});
+
+// ---------------------------------------------------------------------------
+// GET /archived — monthly archive browse page (registered before /:id so the
+// static path wins). Lists board-archived Done tasks grouped by month.
+// ---------------------------------------------------------------------------
+
+tasksRouter.get("/archived", async (c) => {
+  const tasks = await getTaskService().listBoardArchived();
+  const defaultMonth = new Date().toISOString().slice(0, 7);
+  return c.html(
+    <TaskArchivedView
+      {...viewProps(c, "/tasks")}
+      tasks={tasks}
+      defaultMonth={defaultMonth}
+    />,
+  );
+});
+
+// POST /sweep-done — manual bulk sweep: board-archive every Done task completed
+// before the given month (YYYY-MM). Service publishes "moved" → board refetch.
+tasksRouter.post("/sweep-done", async (c) => {
+  const body = await c.req.parseBody();
+  const before = String(body.before ?? "").trim();
+  if (!/^\d{4}-\d{2}$/.test(before)) {
+    return c.body(null, 400, {
+      "HX-Trigger": hxTrigger("error", "Pick a valid month to sweep before."),
+    });
+  }
+  const swept = await getTaskService().sweepDoneBefore(before);
+  return c.body(null, 200, {
+    "HX-Trigger": hxTrigger(
+      "success",
+      swept.length === 0
+        ? "No Done tasks to archive."
+        : `Archived ${swept.length} task${swept.length === 1 ? "" : "s"}.`,
+    ),
+  });
+});
+
+// POST /:id/board-restore — move a board-archived task back to the active board.
+// hx-target swaps out the archived row on success.
+tasksRouter.post("/:id/board-restore", async (c) => {
+  const ok = await getTaskService().boardRestore(c.req.param("id"));
+  if (!ok) {
+    return c.body(null, 404, {
+      "HX-Trigger": hxTrigger("error", "Task not found in the archive."),
+    });
+  }
+  return c.body("", 200);
 });
 
 // ---------------------------------------------------------------------------

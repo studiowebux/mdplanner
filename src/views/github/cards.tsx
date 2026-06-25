@@ -3,8 +3,12 @@
 // cards); imports no sibling github view module.
 
 import type { FC } from "hono/jsx";
-import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
+import {
+  badgeClass,
+  type BadgeVariant,
+} from "../../components/ui/status-badge.tsx";
 import type { GitHubRelease, GitHubRepo } from "../../types/github.types.ts";
+import type { WoodpeckerPipeline } from "../../types/woodpecker.types.ts";
 
 export const GITHUB_STATE_VARIANTS: Record<string, BadgeVariant> = {
   open: "success",
@@ -20,6 +24,39 @@ export const GITHUB_STATE_VARIANTS: Record<string, BadgeVariant> = {
   neutral: "neutral",
   action_required: "warning",
   waiting: "warning",
+};
+
+// CI (Woodpecker) pipeline status → badge variant. Only colored statuses are
+// listed; badgeClass defaults the rest (blocked/declined/skipped/created) to
+// neutral. Labeled generically "CI" — not "Woodpecker" — in the UI.
+export const CI_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  success: "success",
+  failure: "error",
+  error: "error",
+  killed: "error",
+  running: "warning",
+  pending: "warning",
+  started: "warning",
+};
+
+/** Latest CI status pill linking to the pipeline. Null when no pipeline. */
+export const CiStatusBadge: FC<{ pipeline: WoodpeckerPipeline | null }> = (
+  { pipeline },
+) => {
+  if (!pipeline) return null;
+  return (
+    <a
+      href={pipeline.forgeUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="github-card__ci"
+      title={`CI #${pipeline.number} on ${pipeline.branch}`}
+    >
+      <span class={badgeClass(CI_STATUS_VARIANTS, pipeline.status)}>
+        CI: {pipeline.status}
+      </span>
+    </a>
+  );
 };
 
 // ---------------------------------------------------------------------------
@@ -54,8 +91,10 @@ export const GitHubCardFooter: FC<{
   repo: GitHubRepo;
   release: GitHubRelease | null;
   showLicense?: boolean;
-}> = ({ repo, release, showLicense }) => (
+  ci?: WoodpeckerPipeline | null;
+}> = ({ repo, release, showLicense, ci }) => (
   <div class="github-card__footer">
+    <CiStatusBadge pipeline={ci ?? null} />
     {release && (
       <a
         href={release.htmlUrl}
@@ -80,7 +119,8 @@ export const GitHubCardFooter: FC<{
 export const GitHubRepoCard: FC<{
   repo: GitHubRepo;
   release: GitHubRelease | null;
-}> = ({ repo, release }) => (
+  ci?: WoodpeckerPipeline | null;
+}> = ({ repo, release, ci }) => (
   <div class="github-card">
     <div class="github-card__header">
       <a
@@ -94,6 +134,6 @@ export const GitHubRepoCard: FC<{
       {repo.license && <span class="github-card__license">{repo.license}</span>}
     </div>
     <GitHubCardStats repo={repo} />
-    <GitHubCardFooter repo={repo} release={release} />
+    <GitHubCardFooter repo={repo} release={release} ci={ci} />
   </div>
 );

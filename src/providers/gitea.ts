@@ -395,13 +395,20 @@ function mapIssue(d: GhJson): GitHubIssue {
 
 function mapPR(d: GhJson): GitHubPR {
   const assignee = d.assignee as GhJson | null;
+  const author = d.user as GhJson | null;
   const head = d.head as GhJson | null;
+  const reviewers = Array.isArray(d.requested_reviewers)
+    ? (d.requested_reviewers as GhJson[]).map((r) => String(r.login ?? ""))
+      .filter((l) => l.length > 0)
+    : [];
   return {
     number: Number(d.number),
     title: String(d.title ?? ""),
     state: d.state === "closed" ? "closed" : "open",
     merged: d.merged === true || d.merged_at !== null,
+    author: author ? String(author.login ?? "") : null,
     assignee: assignee ? String(assignee.login ?? "") : null,
+    requestedReviewers: reviewers,
     headBranch: head ? String(head.ref ?? "") : "",
     createdAt: String(d.created_at ?? ""),
     reviewDecision: null,
