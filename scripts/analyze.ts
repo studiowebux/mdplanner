@@ -28,6 +28,11 @@
  *   9. Dead Code   — (--dead only) exported symbols with no cross-file
  *                    reference (unused exports / un-migrated leftovers), via
  *                    in-process TypeScript findReferences.
+ *  10. Project Rules— (--rules only) documented house-rule footguns as concrete
+ *                    path:line findings (font floor, theme-split leak, CSP
+ *                    hx-vals, fetch-in-client, raw-markdown, undefined-class).
+ *                    High-confidence findings gate (exit non-zero); heuristic
+ *                    ones are CANDIDATES. See scripts/analyze/rules.ts.
  *
  * The overall grade is a weighted blend of the available dimensions.
  *
@@ -48,6 +53,8 @@
  * Flags:
  *   --deep            also run deno lint + fmt --check (subprocess). Needs --allow-run.
  *   --dead            cross-file unused-export detection (TS findReferences). Needs --allow-env.
+ *   --rules           project house-rule findings (path:line). Exits non-zero on
+ *                     any high-confidence finding; heuristics are report-only.
  *   --json <path>     write the full machine-readable report (needs --allow-write).
  *   --min-score <n>   exit non-zero if the overall score is below n (default 0).
  *   root              directory to analyze (default ./src). A sibling tests/
@@ -57,6 +64,7 @@
 import { dirname, join } from "@std/path";
 import { collectComplexity, collectStructuralClones } from "./analyze/ast.ts";
 import { collectCssRules, type CssRule } from "./analyze/css.ts";
+import { collectRuleFindings, type Finding } from "./analyze/rules.ts";
 // Type-only: erased at compile, so the fast default run loads no typescript via
 // this path. The runtime module is dynamically imported only under --dead.
 import type { DeadExport } from "./analyze/deadcode.ts";
@@ -97,6 +105,7 @@ const CONFIG = {
     docs: 1,
     lintFormat: 2,
     deadCode: 1.5,
+    projectRules: 2,
   } as Record<string, number>,
 };
 
@@ -747,6 +756,65 @@ function analyzeDeadCodeDimension(dead: DeadExport[]): Dimension {
 }
 
 // ---------------------------------------------------------------------------
+// Dimension 10 — Project Rules (--rules, codified Brain Memory footguns)
+// ---------------------------------------------------------------------------
+// Unlike the shape dimensions, this one emits concrete path:line findings split
+// into a high-confidence tier (deterministic, gateable) and a heuristic tier
+// (needs human confirmation — never gates). Score penalizes only high-confidence
+// hits; heuristics are reported for review but do not move the grade.
+function analyzeProjectRules(findings: Finding[]): Dimension {
+  const high = findings.filter((f) => f.confidence === "high");
+  const heur = findings.filter((f) => f.confidence === "heuristic");
+  // Only high-confidence (gateable) findings move the grade; heuristics are
+  // CANDIDATES surfaced for review and must not tank the score.
+  const score = clamp(100 - high.length * 5);
+  const byRule = (list: Finding[]) => {
+    const m = new Map<string, number>();
+    for (const f of list) m.set(f.ruleId, (m.get(f.ruleId) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  };
+  return {
+    name: "Project Rules",
+    score,
+    grade: grade(score),
+    summary: `${high.length} high-confidence + ${heur.length} heuristic ` +
+      `rule finding(s). High-confidence hits SHOULD be fixed (gate); ` +
+      `heuristics are CANDIDATES — confirm by reading.`,
+    findings: [
+      ...byRule(high).map(([id, n]) => `high ×${n}: ${id}`),
+      ...byRule(heur).map(([id, n]) => `heuristic ×${n}: ${id}`),
+    ],
+    recommendations: high.length === 0 ? [] : [
+      "Fix the high-confidence rule findings (run `--rules` for path:line). " +
+      "Each codifies a documented footgun from Brain Memory.",
+    ],
+  };
+}
+
+/** Print the full path:line finding list, grouped by rule id. */
+function renderFindings(findings: Finding[]): void {
+  if (findings.length === 0) {
+    console.log("\n=== PROJECT RULES === \n  No rule findings. Clean.");
+    return;
+  }
+  const groups = new Map<string, Finding[]>();
+  for (const f of findings) {
+    const arr = groups.get(f.ruleId) ?? [];
+    arr.push(f);
+    groups.set(f.ruleId, arr);
+  }
+  console.log("\n=== PROJECT RULES (findings) ===");
+  for (const [ruleId, list] of [...groups.entries()].sort()) {
+    const tier = list[0].confidence === "high" ? "HIGH" : "heuristic";
+    console.log(`\n  [${tier}] ${ruleId} — ${list.length} finding(s)`);
+    for (const f of list) {
+      console.log(`    · ${f.file}:${f.line} — ${f.message}`);
+      console.log(`      → ${f.fix}`);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Report rendering
 // ---------------------------------------------------------------------------
 const BAR_WIDTH = 24;
@@ -771,6 +839,7 @@ interface Report {
   root: string;
   overall: { score: number; grade: string };
   dimensions: Dimension[];
+  findings?: Finding[];
 }
 
 function overallScore(dims: Dimension[]): number {
@@ -785,6 +854,8 @@ function overallScore(dims: Dimension[]): number {
       ? "lintFormat"
       : d.name === "Dead Code"
       ? "deadCode"
+      : d.name === "Project Rules"
+      ? "projectRules"
       : d.name.toLowerCase();
     const w = CONFIG.weights[key] ?? 1;
     weighted += d.score * w;
@@ -800,6 +871,7 @@ async function main(): Promise<void> {
   const args = Deno.args;
   const deep = args.includes("--deep");
   const deadFlag = args.includes("--dead");
+  const rulesFlag = args.includes("--rules");
   const jsonIdx = args.indexOf("--json");
   const jsonPath = jsonIdx !== -1 ? args[jsonIdx + 1] : null;
   const minIdx = args.indexOf("--min-score");
@@ -873,8 +945,21 @@ async function main(): Promise<void> {
     }));
     dims.push(analyzeDeadCodeDimension(analyzeDeadCode(tsFiles)));
   }
+  let ruleFindings: Finding[] = [];
+  if (rulesFlag) {
+    ruleFindings = collectRuleFindings(
+      files.map((f) => ({
+        rel: f.rel,
+        ext: f.ext,
+        text: f.text,
+        isTest: f.isTest,
+      })),
+    );
+    dims.push(analyzeProjectRules(ruleFindings));
+  }
 
   for (const d of dims) renderDimension(d);
+  if (rulesFlag) renderFindings(ruleFindings);
 
   const overall = overallScore(dims);
   const overallGrade = grade(overall);
@@ -903,6 +988,7 @@ async function main(): Promise<void> {
       root,
       overall: { score: overall, grade: overallGrade },
       dimensions: dims,
+      ...(rulesFlag ? { findings: ruleFindings } : {}),
     };
     await Deno.writeTextFile(jsonPath, JSON.stringify(report, null, 2));
     console.log(`\nJSON report written to ${jsonPath}`);
@@ -913,6 +999,21 @@ async function main(): Promise<void> {
       `\nFAIL: overall ${overall} is below --min-score ${minScore}.`,
     );
     Deno.exit(1);
+  }
+
+  // Opt-in gate: --rules exits non-zero when any high-confidence rule fires.
+  // Heuristic findings never gate.
+  if (rulesFlag) {
+    const highCount = ruleFindings.filter((f) =>
+      f.confidence === "high"
+    ).length;
+    if (highCount > 0) {
+      console.error(
+        `\nFAIL: ${highCount} high-confidence project-rule finding(s). ` +
+          `Fix them or adjust the rule allowlist.`,
+      );
+      Deno.exit(1);
+    }
   }
 }
 
