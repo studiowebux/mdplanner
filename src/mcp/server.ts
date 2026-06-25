@@ -21,6 +21,7 @@ import { registerPaymentTools } from "./tools/payments.ts";
 import { registerQuoteTools } from "./tools/quotes.ts";
 import { registerDnsTools } from "./tools/dns.ts";
 import { registerGitHubTools } from "./tools/github.ts";
+import { registerWoodpeckerTools } from "./tools/woodpecker.ts";
 import { registerGoalTools } from "./tools/goals.ts";
 import { registerIdeaTools } from "./tools/ideas.ts";
 import { registerMarketingPlanTools } from "./tools/marketing-plans.ts";
@@ -76,6 +77,7 @@ export function createMcpServer(): McpServer {
   registerQuoteTools(server);
   registerDnsTools(server);
   registerGitHubTools(server);
+  registerWoodpeckerTools(server);
   registerGoalTools(server);
   registerIdeaTools(server);
   registerMarketingPlanTools(server);

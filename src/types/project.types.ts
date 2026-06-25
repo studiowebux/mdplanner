@@ -114,6 +114,15 @@ export const ProjectConfigSchema = z.object({
       "Gitea instance base URL, e.g. https://gitea.example.com. When set with a Gitea token, Gitea becomes the active VCS provider.",
     example: "https://gitea.example.com",
   }),
+  woodpeckerToken: z.string().optional().openapi({
+    description:
+      "Woodpecker CI Personal Access Token (stored in project.md, encrypted at rest)",
+  }),
+  woodpeckerBaseUrl: z.string().optional().openapi({
+    description:
+      "Woodpecker CI server base URL, e.g. https://ci.example.com. When set, CI pipeline status is read from Woodpecker.",
+    example: "https://ci.example.com",
+  }),
   pipelinesPerPage: z.number().optional().openapi({
     description: "Number of pipeline runs per page (default: 10)",
     example: 10,
@@ -233,6 +242,7 @@ export const PublicProjectConfigSchema = ProjectConfigSchema.omit({
   githubToken: true,
   cloudflareToken: true,
   giteaToken: true,
+  woodpeckerToken: true,
   apiKeys: true,
 }).extend({
   hasGithubToken: z.boolean().optional().openapi({
@@ -248,6 +258,11 @@ export const PublicProjectConfigSchema = ProjectConfigSchema.omit({
   hasGiteaToken: z.boolean().optional().openapi({
     description:
       "Whether a Gitea token is stored (the value is never returned)",
+    example: true,
+  }),
+  hasWoodpeckerToken: z.boolean().optional().openapi({
+    description:
+      "Whether a Woodpecker CI token is stored (the value is never returned)",
     example: true,
   }),
   apiKeys: z.array(RedactedApiKeySchema).optional().openapi({
@@ -298,6 +313,8 @@ export const FrontmatterProjectSchema = z.object({
   cloudflare_token: z.string().optional(),
   gitea_token: z.string().optional(),
   gitea_base_url: z.string().optional(),
+  woodpecker_token: z.string().optional(),
+  woodpecker_base_url: z.string().optional(),
   pipelines_per_page: z.number().optional(),
   tasks_per_section: z.number().optional(),
   kpi_metrics: z.array(z.unknown()).optional(),
@@ -327,6 +344,9 @@ export const FrontmatterProjectSchema = z.object({
       : undefined;
     const giteaToken = fm.gitea_token
       ? (await decryptSecret(fm.gitea_token) ?? undefined)
+      : undefined;
+    const woodpeckerToken = fm.woodpecker_token
+      ? (await decryptSecret(fm.woodpecker_token) ?? undefined)
       : undefined;
 
     return {
@@ -363,6 +383,8 @@ export const FrontmatterProjectSchema = z.object({
       cloudflareToken,
       giteaToken,
       giteaBaseUrl: fm.gitea_base_url,
+      woodpeckerToken,
+      woodpeckerBaseUrl: fm.woodpecker_base_url,
       pipelinesPerPage: fm.pipelines_per_page,
       tasksPerSection: typeof fm.tasks_per_section === "number"
         ? fm.tasks_per_section

@@ -71,8 +71,31 @@ typed-replaces / **Clear**-removes.
 
 > CI note: Gitea does not expose a GitHub-style workflow-run REST API, so the
 > CI/workflow-runs panel stays empty for Gitea repos. CI for a Gitea repo is
-> driven by whatever external engine you use (Woodpecker, Drone, Gitea Actions
-> runners, …) through its own integration, not this VCS provider.
+> driven by an external engine — see **Woodpecker CI integration** below.
+
+## Woodpecker CI integration
+
+CI is separate from the VCS host. When you run [Woodpecker CI](https://woodpecker-ci.org/),
+MD Planner reads pipeline (build) status from the Woodpecker server regardless
+of whether the repo is hosted on GitHub or Gitea.
+
+### Setup
+
+1. In Woodpecker, generate a Personal Access Token from your profile settings.
+2. In MD Planner, navigate to **Settings → Project**.
+3. Set **CI server URL** to your Woodpecker server, e.g. `https://ci.example.com`
+   (the `/api` suffix is added automatically).
+4. Paste the token into **CI token (PAT)** and save.
+
+A repository's `owner/repo` slug is resolved to a Woodpecker repo id via
+`/repos/lookup/{owner}/{repo}`, then pipelines are read from
+`/repos/{id}/pipelines`. The CI token follows the same security model as the
+other tokens: encrypted at rest with `MDPLANNER_SECRET_KEY`, never echoed to the
+browser (only a `hasWoodpeckerToken` presence flag), masked placeholder when
+set, blank-keeps / typed-replaces / **Clear**-removes.
+
+The labels are generic (**CI server URL** / **CI token**) — Woodpecker is the
+current backend, but the field naming does not assume it.
 
 ## Cloudflare integration
 
@@ -99,6 +122,14 @@ The GitHub integration is also available via MCP:
 | `github_get_pr`          | Get pull request details          |
 | `github_list_prs`        | List pull requests (state filter) |
 | `github_merge_pr`        | Merge a pull request              |
+
+Woodpecker CI exposes its own tools:
+
+| Tool                        | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `woodpecker_list_repos`     | List CI repositories                         |
+| `woodpecker_list_pipelines` | List recent pipelines (latest CI status)     |
+| `woodpecker_get_pipeline`   | Get a pipeline by number, or `latest`        |
 
 ## GitHub View
 

@@ -33,6 +33,8 @@ const UPDATE_CONFIG_KEYS = [
   "cloudflareToken",
   "giteaToken",
   "giteaBaseUrl",
+  "woodpeckerToken",
+  "woodpeckerBaseUrl",
   "pipelinesPerPage",
   "tasksPerSection",
   "cerveauDir",
@@ -59,13 +61,20 @@ export class ProjectService {
    * and API keys to {name, hasKey}. The raw values never leave the server.
    */
   static toPublicConfig(config: ProjectConfig): PublicProjectConfig {
-    const { githubToken, cloudflareToken, giteaToken, apiKeys, ...rest } =
-      config;
+    const {
+      githubToken,
+      cloudflareToken,
+      giteaToken,
+      woodpeckerToken,
+      apiKeys,
+      ...rest
+    } = config;
     return {
       ...rest,
       hasGithubToken: Boolean(githubToken),
       hasCloudflareToken: Boolean(cloudflareToken),
       hasGiteaToken: Boolean(giteaToken),
+      hasWoodpeckerToken: Boolean(woodpeckerToken),
       apiKeys: apiKeys?.map((k) => ({ name: k.name, hasKey: Boolean(k.key) })),
     };
   }

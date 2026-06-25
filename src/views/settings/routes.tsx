@@ -133,6 +133,13 @@ settingsViewRouter.post("/project", async (c) => {
     giteaBaseUrl: body.giteaBaseUrl !== undefined
       ? String(body.giteaBaseUrl).trim()
       : undefined,
+    woodpeckerToken: resolveSecretField(
+      body.woodpeckerToken,
+      body.woodpeckerTokenClear,
+    ),
+    woodpeckerBaseUrl: body.woodpeckerBaseUrl !== undefined
+      ? String(body.woodpeckerBaseUrl).trim()
+      : undefined,
     cerveauDir: body.cerveauDir !== undefined
       ? String(body.cerveauDir).trim()
       : undefined,

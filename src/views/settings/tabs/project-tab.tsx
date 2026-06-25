@@ -259,6 +259,61 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label class="settings-field__label" for="cfg-woodpecker-base-url">
+          CI server URL
+        </label>
+        <input
+          type="url"
+          id="cfg-woodpecker-base-url"
+          name="woodpeckerBaseUrl"
+          value={config.woodpeckerBaseUrl ?? ""}
+          placeholder="https://ci.example.com"
+          class="settings-field__input"
+          autocomplete="off"
+        />
+        <span class="settings-field__hint">
+          CI server URL (currently Woodpecker). When set together with a CI
+          token, pipeline status is read from the CI server.
+        </span>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-field__label" for="cfg-woodpecker-token">
+          CI token (PAT)
+        </label>
+        <div class="settings-field__input-row">
+          <input
+            type="password"
+            id="cfg-woodpecker-token"
+            name="woodpeckerToken"
+            placeholder={config.hasWoodpeckerToken
+              ? "•••••••• (set — leave blank to keep)"
+              : "Personal access token..."}
+            class="settings-field__input"
+            autocomplete="off"
+          />
+          <input
+            type="hidden"
+            id="cfg-woodpecker-token-clear"
+            name="woodpeckerTokenClear"
+            value=""
+          />
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            data-clear-input="cfg-woodpecker-token"
+          >
+            Clear
+          </button>
+        </div>
+        <span class="settings-field__hint">
+          {config.hasWoodpeckerToken ? "A token is set. " : "No token set. "}
+          Personal access token for the CI server (Woodpecker: profile →
+          settings). Set MDPLANNER_SECRET_KEY to encrypt at rest.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label class="settings-field__label" for="cfg-cloudflare-token">
           Cloudflare token (API Token)
         </label>

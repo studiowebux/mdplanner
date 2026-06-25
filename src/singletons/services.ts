@@ -15,6 +15,7 @@ import { IdeaService } from "../services/idea.service.ts";
 import { MarketingPlanService } from "../services/marketing-plan.service.ts";
 import { SwotService } from "../services/swot.service.ts";
 import { GitHubService } from "../services/github.service.ts";
+import { WoodpeckerService } from "../services/woodpecker.service.ts";
 import { CerveauService } from "../services/cerveau.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import { TaskService } from "../services/task.service.ts";
@@ -383,6 +384,7 @@ export function initServices(
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
+  _set(_svc, "woodpecker", new WoodpeckerService(projectService));
   _set(_svc, "cerveau", new CerveauService(projectService));
 
   if (useCache) {
@@ -715,6 +717,10 @@ export function getDnsService(): DnsService {
 
 export function getGitHubService(): GitHubService {
   return _get<GitHubService>(_svc, "github");
+}
+
+export function getWoodpeckerService(): WoodpeckerService {
+  return _get<WoodpeckerService>(_svc, "woodpecker");
 }
 
 export function getCerveauService(): CerveauService {
