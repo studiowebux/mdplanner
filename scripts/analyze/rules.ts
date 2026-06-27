@@ -44,12 +44,12 @@ export interface RuleFile {
 // ---------------------------------------------------------------------------
 
 /** Strip CSS comments, preserving newlines so line numbers stay correct. */
-function stripCssComments(css: string): string {
+export function stripCssComments(css: string): string {
   return css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "));
 }
 
 /** 1-based line number of a byte offset. */
-function lineAt(text: string, offset: number): number {
+export function lineAt(text: string, offset: number): number {
   let n = 1;
   for (let i = 0; i < offset && i < text.length; i++) {
     if (text[i] === "\n") n++;
@@ -60,7 +60,7 @@ function lineAt(text: string, offset: number): number {
 // ---------------------------------------------------------------------------
 // CSS rule walk — yields each declaration with its selector + media context
 // ---------------------------------------------------------------------------
-interface CssDecl {
+export interface CssDecl {
   prop: string;
   value: string;
   line: number;
@@ -73,7 +73,7 @@ interface CssDecl {
  * under and whether it sits inside an `@media print` container. Good enough for
  * the small component stylesheets here; not a spec-complete CSS parser.
  */
-function walkCssDecls(text: string): CssDecl[] {
+export function walkCssDecls(text: string): CssDecl[] {
   const css = stripCssComments(text);
   const out: CssDecl[] = [];
   // Stack of { selector, isPrint } frames as we descend into nested blocks.

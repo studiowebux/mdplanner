@@ -33,6 +33,10 @@
  *                    hx-vals, fetch-in-client, raw-markdown, undefined-class).
  *                    High-confidence findings gate (exit non-zero); heuristic
  *                    ones are CANDIDATES. See scripts/analyze/rules.ts.
+ *  11. Style        — (--style only) CSS/style-hygiene findings (inline-style,
+ *                    inline-script, hardcoded-color, raw-px, media-breakpoint-px).
+ *                    REPORT-ONLY CANDIDATES — never gates until the owner
+ *                    promotes it. See scripts/analyze/style.ts.
  *
  * The overall grade is a weighted blend of the available dimensions.
  *
@@ -55,6 +59,8 @@
  *   --dead            cross-file unused-export detection (TS findReferences). Needs --allow-env.
  *   --rules           project house-rule findings (path:line). Exits non-zero on
  *                     any high-confidence finding; heuristics are report-only.
+ *   --style           CSS/style-hygiene findings (path:line). Report-only
+ *                     CANDIDATES; never gates.
  *   --json <path>     write the full machine-readable report (needs --allow-write).
  *   --min-score <n>   exit non-zero if the overall score is below n (default 0).
  *   root              directory to analyze (default ./src). A sibling tests/
@@ -65,6 +71,7 @@ import { dirname, join } from "@std/path";
 import { collectComplexity, collectStructuralClones } from "./analyze/ast.ts";
 import { collectCssRules, type CssRule } from "./analyze/css.ts";
 import { collectRuleFindings, type Finding } from "./analyze/rules.ts";
+import { collectStyleFindings } from "./analyze/style.ts";
 // Type-only: erased at compile, so the fast default run loads no typescript via
 // this path. The runtime module is dynamically imported only under --dead.
 import type { DeadExport } from "./analyze/deadcode.ts";
@@ -106,6 +113,7 @@ const CONFIG = {
     lintFormat: 2,
     deadCode: 1.5,
     projectRules: 2,
+    style: 1.5,
   } as Record<string, number>,
 };
 
@@ -791,10 +799,43 @@ function analyzeProjectRules(findings: Finding[]): Dimension {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Dimension 11 — Style (--style, CSS/style-hygiene CANDIDATES)
+// ---------------------------------------------------------------------------
+// Like Project Rules, emits concrete path:line findings, but REPORT-ONLY: every
+// finding is a CANDIDATE that never gates CI (no Deno.exit). The score penalizes
+// for visibility so the dimension surfaces in the overall blend when enabled.
+function analyzeStyleDimension(findings: Finding[]): Dimension {
+  const high = findings.filter((f) => f.confidence === "high");
+  const heur = findings.filter((f) => f.confidence === "heuristic");
+  const score = clamp(100 - high.length * 2 - heur.length * 0.5);
+  const byRule = (list: Finding[]) => {
+    const m = new Map<string, number>();
+    for (const f of list) m.set(f.ruleId, (m.get(f.ruleId) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  };
+  return {
+    name: "Style",
+    score,
+    grade: grade(score),
+    summary: `${high.length} hardcoded-style + ${heur.length} heuristic ` +
+      `finding(s). REPORT-ONLY CANDIDATES — fix toward the token system ` +
+      `(rem/em + var(--*)); never gates until owner-promoted.`,
+    findings: [
+      ...byRule(high).map(([id, n]) => `candidate ×${n}: ${id}`),
+      ...byRule(heur).map(([id, n]) => `heuristic ×${n}: ${id}`),
+    ],
+    recommendations: findings.length === 0 ? [] : [
+      "Replace hardcoded colors/px with var(--*) tokens or rem/em; move inline " +
+      "style=/script to CSS classes + nonce'd static/js (run `--style` for path:line).",
+    ],
+  };
+}
+
 /** Print the full path:line finding list, grouped by rule id. */
-function renderFindings(findings: Finding[]): void {
+function renderFindings(findings: Finding[], title: string): void {
   if (findings.length === 0) {
-    console.log("\n=== PROJECT RULES === \n  No rule findings. Clean.");
+    console.log(`\n=== ${title} === \n  No findings. Clean.`);
     return;
   }
   const groups = new Map<string, Finding[]>();
@@ -803,7 +844,7 @@ function renderFindings(findings: Finding[]): void {
     arr.push(f);
     groups.set(f.ruleId, arr);
   }
-  console.log("\n=== PROJECT RULES (findings) ===");
+  console.log(`\n=== ${title} (findings) ===`);
   for (const [ruleId, list] of [...groups.entries()].sort()) {
     const tier = list[0].confidence === "high" ? "HIGH" : "heuristic";
     console.log(`\n  [${tier}] ${ruleId} — ${list.length} finding(s)`);
@@ -840,6 +881,7 @@ interface Report {
   overall: { score: number; grade: string };
   dimensions: Dimension[];
   findings?: Finding[];
+  styleFindings?: Finding[];
 }
 
 function overallScore(dims: Dimension[]): number {
@@ -856,6 +898,8 @@ function overallScore(dims: Dimension[]): number {
       ? "deadCode"
       : d.name === "Project Rules"
       ? "projectRules"
+      : d.name === "Style"
+      ? "style"
       : d.name.toLowerCase();
     const w = CONFIG.weights[key] ?? 1;
     weighted += d.score * w;
@@ -872,6 +916,7 @@ async function main(): Promise<void> {
   const deep = args.includes("--deep");
   const deadFlag = args.includes("--dead");
   const rulesFlag = args.includes("--rules");
+  const styleFlag = args.includes("--style");
   const jsonIdx = args.indexOf("--json");
   const jsonPath = jsonIdx !== -1 ? args[jsonIdx + 1] : null;
   const minIdx = args.indexOf("--min-score");
@@ -957,9 +1002,22 @@ async function main(): Promise<void> {
     );
     dims.push(analyzeProjectRules(ruleFindings));
   }
+  let styleFindings: Finding[] = [];
+  if (styleFlag) {
+    styleFindings = collectStyleFindings(
+      files.map((f) => ({
+        rel: f.rel,
+        ext: f.ext,
+        text: f.text,
+        isTest: f.isTest,
+      })),
+    );
+    dims.push(analyzeStyleDimension(styleFindings));
+  }
 
   for (const d of dims) renderDimension(d);
-  if (rulesFlag) renderFindings(ruleFindings);
+  if (rulesFlag) renderFindings(ruleFindings, "PROJECT RULES");
+  if (styleFlag) renderFindings(styleFindings, "STYLE");
 
   const overall = overallScore(dims);
   const overallGrade = grade(overall);
@@ -989,6 +1047,7 @@ async function main(): Promise<void> {
       overall: { score: overall, grade: overallGrade },
       dimensions: dims,
       ...(rulesFlag ? { findings: ruleFindings } : {}),
+      ...(styleFlag ? { styleFindings } : {}),
     };
     await Deno.writeTextFile(jsonPath, JSON.stringify(report, null, 2));
     console.log(`\nJSON report written to ${jsonPath}`);
