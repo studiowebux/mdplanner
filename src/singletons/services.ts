@@ -493,6 +493,7 @@ export function initServices(
     taskService.setCache(cacheSync);
     peopleService.setCache(cacheSync);
     _get<PortfolioService>(_svc, "portfolio").setCache(cacheSync);
+    _get<NoteService>(_svc, "note").setCache(cacheSync);
     cacheEnabled = true;
   }
 

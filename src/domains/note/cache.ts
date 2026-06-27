@@ -16,7 +16,7 @@ import type { CacheDatabase } from "../../database/sqlite/mod.ts";
 import type { NoteRepository } from "../../repositories/note.repository.ts";
 import type { Note, NoteParagraph } from "../../types/note.types.ts";
 
-const NOTE_TABLE = "notes";
+export const NOTE_TABLE = "notes";
 
 function blocksText(blocks: NoteParagraph[]): string {
   return blocks.map((b) => b.content).filter(Boolean).join("\n");
@@ -54,7 +54,7 @@ const NOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${NOTE_TABLE} (
   ${AUDIT_COLS_DDL}
 )`;
 
-function insertNoteRow(
+export function insertNoteRow(
   db: CacheDatabase,
   n: Note,
   syncedAt?: string,
