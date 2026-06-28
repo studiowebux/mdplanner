@@ -479,11 +479,78 @@ export class TaskRepository {
   }
 
   /**
+   * Scan one directory for the first `.md` file whose parsed content `handle`
+   * accepts (returns non-null). Swallows a missing directory (NotFound) and
+   * rethrows anything else — the shared inner loop for both id-resolvers.
+   */
+  private async scanDirForId<T>(
+    dirPath: string,
+    handle: (filePath: string, content: string) => T | null,
+  ): Promise<T | null> {
+    try {
+      for await (const entry of Deno.readDir(dirPath)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        const filePath = join(dirPath, entry.name);
+        const content = await Deno.readTextFile(filePath);
+        const result = handle(filePath, content);
+        if (result !== null) return result;
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return null;
+  }
+
+  /**
+   * Walk every task file — board sections first, then the monthly archive
+   * tree — returning the first match. `onBoard`/`onArchive` receive the file's
+   * path + content plus the section/month context for that dir.
+   */
+  private async walkBoardThenArchive<T>(
+    onBoard: (
+      filePath: string,
+      content: string,
+      section: string,
+      dir: string,
+    ) => T | null,
+    onArchive: (filePath: string, content: string, month: string) => T | null,
+  ): Promise<T | null> {
+    for (const { dir, section } of await this.discoverSections()) {
+      const found = await this.scanDirForId(
+        join(this.boardDir, dir),
+        (filePath, content) => onBoard(filePath, content, section, dir),
+      );
+      if (found !== null) return found;
+    }
+    for (const month of await this.discoverArchiveMonths()) {
+      const found = await this.scanDirForId(
+        join(this.archiveDir, month),
+        (filePath, content) => onArchive(filePath, content, month),
+      );
+      if (found !== null) return found;
+    }
+    return null;
+  }
+
+  /** Read+parse a single task file by path; null when the file is absent. */
+  private async readTaskFile(
+    filePath: string,
+    section: string,
+  ): Promise<Task | null> {
+    try {
+      return this.parse(await Deno.readTextFile(filePath), section);
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return null;
+      throw err;
+    }
+  }
+
+  /**
    * Locate a task file by id and return its raw frontmatter + body. Used by
    * `archive`/`restore` so they can mutate frontmatter without rebuilding
    * the body via the normal update path.
    */
-  private async findRawFileById(
+  private findRawFileById(
     id: string,
   ): Promise<
     {
@@ -493,46 +560,70 @@ export class TaskRepository {
       section: string;
     } | null
   > {
-    const sections = await this.discoverSections();
-    for (const { dir, section } of sections) {
-      const sectionPath = join(this.boardDir, dir);
-      try {
-        for await (const entry of Deno.readDir(sectionPath)) {
-          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-          const filePath = join(sectionPath, entry.name);
-          const content = await Deno.readTextFile(filePath);
-          const parsed = parseFrontmatter(content);
-          if (parsed.frontmatter.id === id) {
-            return { ...parsed, filePath, section };
-          }
-        }
-      } catch (err) {
-        if (!(err instanceof Deno.errors.NotFound)) throw err;
-      }
-    }
-    // Also scan the monthly archive tree (board-archived tasks live there).
-    for (const month of await this.discoverArchiveMonths()) {
-      const monthPath = join(this.archiveDir, month);
-      try {
-        for await (const entry of Deno.readDir(monthPath)) {
-          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-          const filePath = join(monthPath, entry.name);
-          const content = await Deno.readTextFile(filePath);
-          const parsed = parseFrontmatter(content);
-          if (parsed.frontmatter.id === id) {
-            const section = (parsed.frontmatter.section as string) ?? "Done";
-            return { ...parsed, filePath, section };
-          }
-        }
-      } catch (err) {
-        if (!(err instanceof Deno.errors.NotFound)) throw err;
-      }
-    }
-    return null;
+    const match = (filePath: string, content: string, section: string) => {
+      const parsed = parseFrontmatter(content);
+      if (parsed.frontmatter.id !== id) return null;
+      return { ...parsed, filePath, section };
+    };
+    return this.walkBoardThenArchive(
+      match,
+      (filePath, content, month) => {
+        const parsed = parseFrontmatter(content);
+        const section = (parsed.frontmatter.section as string) ?? "Done";
+        return match(filePath, content, section);
+      },
+    );
   }
 
   async moveToSection(id: string, newSection: string): Promise<Task | null> {
     return this.update(id, { section: newSection });
+  }
+
+  /**
+   * Cache fast-path for `findFileById`: the cache knows the task's section, so
+   * resolve the file directly (`${id}.md`) instead of scanning every dir.
+   * Returns null on any miss/stale row/error so the caller falls through to the
+   * full scan — turns the O(N) resolve into O(1) for every update.
+   */
+  private async resolveFromCache(
+    id: string,
+  ): Promise<
+    { file: string; task: Task; sectionDir: string | null } | null
+  > {
+    if (!this.cacheDb) return null;
+    try {
+      const row = this.cacheDb.queryOne<QueryResult>(
+        `SELECT * FROM "${TASK_TABLE}" WHERE id = ?`,
+        [id],
+      );
+      if (!row) return null;
+      const cached = rowToTask(row);
+      // Board-archived tasks live in archive/<month>/, not board/<section>/.
+      if (cached.boardArchived && cached.archivedMonth) {
+        const filePath = join(
+          this.archiveDir,
+          cached.archivedMonth,
+          `${id}.md`,
+        );
+        const task = await this.readTaskFile(
+          filePath,
+          cached.section ?? "Done",
+        );
+        if (task?.id === id) {
+          task.boardArchived = true;
+          task.archivedMonth = cached.archivedMonth;
+          return { file: filePath, task, sectionDir: null };
+        }
+      } else if (cached.section) {
+        const dir = sectionToDir(cached.section);
+        const filePath = join(this.boardDir, dir, `${id}.md`);
+        const task = await this.readTaskFile(filePath, cached.section);
+        if (task?.id === id) return { file: filePath, task, sectionDir: dir };
+      }
+    } catch (err) {
+      log.warn("[cache] findFileById fast-path failed, scanning:", err);
+    }
+    return null;
   }
 
   private async findFileById(
@@ -540,93 +631,29 @@ export class TaskRepository {
   ): Promise<
     { file: string | null; task: Task | null; sectionDir: string | null }
   > {
-    // Fast path: the cache knows the task's section, so resolve the file
-    // directly (files are named `${id}.md`) instead of scanning every section
-    // dir. Falls through to the full scan on any miss — keeps correctness if
-    // the cache is stale. Turns the O(N) resolve into O(1) for every update.
-    if (this.cacheDb) {
-      try {
-        const row = this.cacheDb.queryOne<QueryResult>(
-          `SELECT * FROM "${TASK_TABLE}" WHERE id = ?`,
-          [id],
-        );
-        if (row) {
-          const cached = rowToTask(row);
-          // Board-archived tasks live in archive/<month>/, not board/<section>/.
-          if (cached.boardArchived && cached.archivedMonth) {
-            const filePath = join(
-              this.archiveDir,
-              cached.archivedMonth,
-              `${id}.md`,
-            );
-            try {
-              const content = await Deno.readTextFile(filePath);
-              const task = this.parse(content, cached.section ?? "Done");
-              if (task?.id === id) {
-                task.boardArchived = true;
-                task.archivedMonth = cached.archivedMonth;
-                return { file: filePath, task, sectionDir: null };
-              }
-            } catch (err) {
-              if (!(err instanceof Deno.errors.NotFound)) throw err;
-            }
-          } else if (cached.section) {
-            const dir = sectionToDir(cached.section);
-            const filePath = join(this.boardDir, dir, `${id}.md`);
-            try {
-              const content = await Deno.readTextFile(filePath);
-              const task = this.parse(content, cached.section);
-              if (task?.id === id) {
-                return { file: filePath, task, sectionDir: dir };
-              }
-            } catch (err) {
-              if (!(err instanceof Deno.errors.NotFound)) throw err;
-            }
-          }
-        }
-      } catch (err) {
-        log.warn("[cache] findFileById fast-path failed, scanning:", err);
-      }
-    }
+    const cached = await this.resolveFromCache(id);
+    if (cached) return cached;
 
-    const sections = await this.discoverSections();
-    for (const { dir, section } of sections) {
-      const sectionPath = join(this.boardDir, dir);
-      try {
-        for await (const entry of Deno.readDir(sectionPath)) {
-          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-          const filePath = join(sectionPath, entry.name);
-          const content = await Deno.readTextFile(filePath);
-          const task = this.parse(content, section);
-          if (task?.id === id) return { file: filePath, task, sectionDir: dir };
-        }
-      } catch (err) {
-        if (!(err instanceof Deno.errors.NotFound)) throw err;
-      }
-    }
-    // Fall through to the monthly archive tree.
-    for (const month of await this.discoverArchiveMonths()) {
-      const monthPath = join(this.archiveDir, month);
-      try {
-        for await (const entry of Deno.readDir(monthPath)) {
-          if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-          const filePath = join(monthPath, entry.name);
-          const content = await Deno.readTextFile(filePath);
-          const { frontmatter } = parseFrontmatter(content);
-          const section = (frontmatter.section as string) ?? "Done";
-          const task = this.parse(content, section);
-          if (task?.id === id) {
-            task.boardArchived = true;
-            task.archivedMonth = (frontmatter.archived_month as string) ??
-              month;
-            return { file: filePath, task, sectionDir: null };
-          }
-        }
-      } catch (err) {
-        if (!(err instanceof Deno.errors.NotFound)) throw err;
-      }
-    }
-    return { file: null, task: null, sectionDir: null };
+    const found = await this.walkBoardThenArchive<
+      { file: string; task: Task; sectionDir: string | null }
+    >(
+      (filePath, content, section, dir) => {
+        const task = this.parse(content, section);
+        return task?.id === id
+          ? { file: filePath, task, sectionDir: dir }
+          : null;
+      },
+      (filePath, content, month) => {
+        const { frontmatter } = parseFrontmatter(content);
+        const section = (frontmatter.section as string) ?? "Done";
+        const task = this.parse(content, section);
+        if (task?.id !== id) return null;
+        task.boardArchived = true;
+        task.archivedMonth = (frontmatter.archived_month as string) ?? month;
+        return { file: filePath, task, sectionDir: null };
+      },
+    );
+    return found ?? { file: null, task: null, sectionDir: null };
   }
 
   private parse(content: string, section: string): Task | null {
