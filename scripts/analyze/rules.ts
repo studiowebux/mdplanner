@@ -205,9 +205,10 @@ function ruleThemeSplitLeak(f: RuleFile, out: Finding[]): void {
 // ---------------------------------------------------------------------------
 
 // Client-executed files where fetch() is a sanctioned exception (canvas / DnD /
-// editor / @mention) — constraint note_1780201572946. Vendor is always exempt.
+// editor / @mention / [[wiki-link]] autocomplete) — constraint note_1780201572946.
+// Vendor is always exempt.
 const FETCH_ALLOW =
-  /static[\/\\]js[\/\\](vendor[\/\\]|.*(canvas|mindmap|note-editor|mention))/;
+  /static[\/\\]js[\/\\](vendor[\/\\]|.*(canvas|mindmap|note-editor|mention|wikilink))/;
 
 function ruleFetchInClient(f: RuleFile, out: Finding[]): void {
   // Only CLIENT code is constrained: server .tsx routes render server-side, so

@@ -8,6 +8,7 @@ import type {
   NoteParagraph,
 } from "../../types/note.types.ts";
 import { MarkdownJsx } from "../../utils/markdown-jsx.tsx";
+import { WikiLinkText } from "./wiki-link-text.tsx";
 
 // ---------------------------------------------------------------------------
 // Block types for interleaving
@@ -84,7 +85,11 @@ export const ParagraphBlock: FC<{
       data-block-type="text"
       data-block-content={paragraph.content}
     >
-      <MarkdownJsx markdown={paragraph.content} bare />
+      <MarkdownJsx
+        markdown={paragraph.content}
+        bare
+        renderText={(t) => <WikiLinkText text={t} />}
+      />
     </div>
   );
 };

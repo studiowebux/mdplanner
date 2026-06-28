@@ -2195,6 +2195,18 @@ a.badge:hover {
   text-decoration: underline;
 }
 
+/* Inline wiki-link in note prose ([[id|name]] → entity detail link) */
+.wiki-link {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-accent-muted);
+}
+
+.wiki-link:hover {
+  border-bottom-color: var(--color-accent);
+}
+
 .mention--person {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);

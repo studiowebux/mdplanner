@@ -89,6 +89,7 @@ import {
   getInvoiceService,
   getMeetingService,
   getMilestoneService,
+  getNoteService,
   getPeopleService,
   getPortfolioService,
   getProjectService,
@@ -106,6 +107,42 @@ registerAutocompleteSource("portfolio", {
   search: (q) => getPortfolioService().search(q),
   displayKey: "name",
   valueKey: "name",
+});
+
+// Cross-domain entity search for note wiki-links (`[[id|name]]`). Returns
+// {id, title} across notes, tasks, portfolio items, and people, matched by
+// title; archived rows excluded. No listing without a query (avoid dumping
+// every entity). The id prefix encodes the type, so the client builds the
+// token and WikiLinkText resolves the href from it.
+registerAutocompleteSource("entities", {
+  list: () => Promise.resolve([]),
+  search: async (q) => {
+    const [notes, tasks, portfolio, people] = await Promise.all([
+      getNoteService().list(),
+      getTaskService().list(),
+      getPortfolioService().list(),
+      getPeopleService().list(),
+    ]);
+    const out: { id: string; title: string }[] = [];
+    const collect = (
+      rows: { id: string; archived?: boolean }[],
+      titleKey: "title" | "name",
+    ) => {
+      for (const r of rows) {
+        if (r.archived) continue;
+        const title = String((r as Record<string, unknown>)[titleKey] ?? "");
+        if (title && foldIncludes(title, q)) out.push({ id: r.id, title });
+      }
+    };
+    collect(notes, "title");
+    collect(tasks, "title");
+    collect(portfolio, "name");
+    collect(people, "name");
+    return out.slice(0, 12);
+  },
+  displayKey: "title",
+  valueKey: "id",
+  extraKeys: ["title"],
 });
 
 registerAutocompleteSource("people", {
