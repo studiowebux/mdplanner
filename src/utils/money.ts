@@ -19,6 +19,29 @@ import { formatCurrency } from "./format.ts";
  *   otherwise the comma is a decimal point ("125,50" → 125.5).
  * - Only `.` (or no separator) → dot is the decimal point.
  */
+/**
+ * Resolve the decimal separator on a digits+separator string and return a
+ * canonical dot-decimal numeric string (thousands separators stripped). See
+ * the parseMoney heuristic doc. Semantics are locked (note_1781968980787).
+ */
+function normalizeMoneyDigits(raw: string): string {
+  const lastDot = raw.lastIndexOf(".");
+  const lastComma = raw.lastIndexOf(",");
+  if (lastDot >= 0 && lastComma >= 0) {
+    const decimalSep = lastDot > lastComma ? "." : ",";
+    const thousandsSep = decimalSep === "." ? "," : ".";
+    return raw.split(thousandsSep).join("").replace(decimalSep, ".");
+  }
+  if (lastComma >= 0) {
+    const commaCount = raw.length - raw.replaceAll(",", "").length;
+    const digitsAfter = raw.length - lastComma - 1;
+    return commaCount > 1 || (commaCount === 1 && digitsAfter === 3)
+      ? raw.replaceAll(",", "")
+      : raw.replaceAll(",", ".");
+  }
+  return raw;
+}
+
 export function parseMoney(
   input: string | number | null | undefined,
 ): number | undefined {
@@ -30,23 +53,7 @@ export function parseMoney(
   const raw = input.replace(/[^\d.,]/g, "");
   if (raw === "") return undefined;
 
-  const lastDot = raw.lastIndexOf(".");
-  const lastComma = raw.lastIndexOf(",");
-  let normalized: string;
-  if (lastDot >= 0 && lastComma >= 0) {
-    const decimalSep = lastDot > lastComma ? "." : ",";
-    const thousandsSep = decimalSep === "." ? "," : ".";
-    normalized = raw.split(thousandsSep).join("").replace(decimalSep, ".");
-  } else if (lastComma >= 0) {
-    const commaCount = raw.length - raw.replaceAll(",", "").length;
-    const digitsAfter = raw.length - lastComma - 1;
-    normalized = commaCount > 1 || (commaCount === 1 && digitsAfter === 3)
-      ? raw.replaceAll(",", "")
-      : raw.replaceAll(",", ".");
-  } else {
-    normalized = raw;
-  }
-
+  const normalized = normalizeMoneyDigits(raw);
   if (normalized === "" || normalized === ".") return undefined;
   const n = Number(normalized) * (negative ? -1 : 1);
   return Number.isFinite(n) ? n : undefined;

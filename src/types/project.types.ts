@@ -297,6 +297,18 @@ function parseFrontmatterNavCategories(
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
+/** Map an unknown frontmatter value to a string[] (or undefined when absent). */
+function toStringArray(v: unknown): string[] | undefined {
+  return Array.isArray(v) ? (v as unknown[]).map(String) : undefined;
+}
+
+/** Decrypt an optional secret frontmatter value; undefined when absent/empty. */
+function decryptOpt(v: unknown): Promise<string | undefined> {
+  return v
+    ? decryptSecret(String(v)).then((d) => d ?? undefined)
+    : Promise.resolve(undefined);
+}
+
 export const FrontmatterProjectSchema = z.object({
   start_date: z.string().optional(),
   working_days_per_week: z.number().optional(),
@@ -336,31 +348,22 @@ export const FrontmatterProjectSchema = z.object({
   cerveau_dir: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
-    const githubToken = fm.github_token
-      ? (await decryptSecret(fm.github_token) ?? undefined)
-      : undefined;
-    const cloudflareToken = fm.cloudflare_token
-      ? (await decryptSecret(fm.cloudflare_token) ?? undefined)
-      : undefined;
-    const giteaToken = fm.gitea_token
-      ? (await decryptSecret(fm.gitea_token) ?? undefined)
-      : undefined;
-    const woodpeckerToken = fm.woodpecker_token
-      ? (await decryptSecret(fm.woodpecker_token) ?? undefined)
-      : undefined;
+    const [githubToken, cloudflareToken, giteaToken, woodpeckerToken] =
+      await Promise.all([
+        decryptOpt(fm.github_token),
+        decryptOpt(fm.cloudflare_token),
+        decryptOpt(fm.gitea_token),
+        decryptOpt(fm.woodpecker_token),
+      ]);
 
     return {
       startDate: fm.start_date,
       workingDaysPerWeek: fm.working_days_per_week,
-      workingDays: Array.isArray(fm.working_days)
-        ? (fm.working_days as unknown[]).map(String).filter(
-          (d): d is typeof WEEKDAYS[number] =>
-            (WEEKDAYS as readonly string[]).includes(d),
-        )
-        : undefined,
-      tags: Array.isArray(fm.tags)
-        ? (fm.tags as unknown[]).map(String)
-        : undefined,
+      workingDays: toStringArray(fm.working_days)?.filter(
+        (d): d is typeof WEEKDAYS[number] =>
+          (WEEKDAYS as readonly string[]).includes(d),
+      ),
+      tags: toStringArray(fm.tags),
       links: Array.isArray(fm.links)
         ? (fm.links as unknown[]).filter(
           (l): l is ProjectLink =>
@@ -369,16 +372,12 @@ export const FrontmatterProjectSchema = z.object({
             typeof (l as Record<string, unknown>).title === "string",
         )
         : undefined,
-      features: Array.isArray(fm.features)
-        ? (fm.features as unknown[]).map(String)
-        : undefined,
+      features: toStringArray(fm.features),
       navCategories: parseFrontmatterNavCategories(fm.nav_categories),
       port: fm.port,
       locale: fm.locale,
       currency: fm.currency,
-      sectionOrder: Array.isArray(fm.section_order)
-        ? (fm.section_order as unknown[]).map(String)
-        : undefined,
+      sectionOrder: toStringArray(fm.section_order),
       githubToken,
       cloudflareToken,
       giteaToken,
@@ -389,17 +388,13 @@ export const FrontmatterProjectSchema = z.object({
       tasksPerSection: typeof fm.tasks_per_section === "number"
         ? fm.tasks_per_section
         : undefined,
-      kpiMetrics: Array.isArray(fm.kpi_metrics)
-        ? (fm.kpi_metrics as unknown[]).map(String)
-        : undefined,
+      kpiMetrics: toStringArray(fm.kpi_metrics),
       staleDays: fm.stale_days,
       hideCompletedAfterDays: typeof fm.hide_completed_after_days === "number"
         ? fm.hide_completed_after_days
         : undefined,
       stableVersion: fm.stable_version,
-      milestoneStatuses: Array.isArray(fm.milestone_statuses)
-        ? (fm.milestone_statuses as unknown[]).map(String)
-        : undefined,
+      milestoneStatuses: toStringArray(fm.milestone_statuses),
       lastUpdated: fm.last_updated,
       billingCompany: fm.billing_company,
       billingAddress: fm.billing_address,
