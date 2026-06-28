@@ -18,6 +18,7 @@ import {
 import {
   fmStr,
   resolveEntityId,
+  serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
 // Maps ## heading prefixes (lowercase) to section keys
@@ -199,15 +200,7 @@ export class BusinessModelRepository extends CachedMarkdownRepository<
     fm.title = item.title;
     fm.date = item.date;
     if (item.project) fm.project = item.project;
-    fm.created_at = item.createdAt;
-    fm.updated_at = item.updatedAt;
-    if (item.createdBy) fm.created_by = item.createdBy;
-    if (item.updatedBy) fm.updated_by = item.updatedBy;
-    // Preserve archive fields — custom serializers must round-trip these or
-    // update() drops them. See soft-delete architecture note.
-    if (item.archived) fm.archived = item.archived;
-    if (item.archivedAt) fm.archived_at = item.archivedAt;
-    if (item.archivedBy) fm.archived_by = item.archivedBy;
+    serializeAuditFields(fm, item);
 
     const bodyLines: string[] = [];
 

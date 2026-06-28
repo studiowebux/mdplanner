@@ -15,6 +15,7 @@ import {
   fmNum,
   fmStr,
   resolveEntityId,
+  serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
 
@@ -128,15 +129,7 @@ export class HabitRepository extends CachedMarkdownRepository<
     fm.completed_dates = item.completedDates;
     if (item.color) fm.color = item.color;
     if (item.tags && item.tags.length > 0) fm.tags = item.tags;
-    fm.created_at = item.createdAt;
-    fm.updated_at = item.updatedAt;
-    if (item.createdBy) fm.created_by = item.createdBy;
-    if (item.updatedBy) fm.updated_by = item.updatedBy;
-
-    // Preserve archive fields — custom serializers must round-trip these.
-    if (item.archived) fm.archived = item.archived;
-    if (item.archivedAt) fm.archived_at = item.archivedAt;
-    if (item.archivedBy) fm.archived_by = item.archivedBy;
+    serializeAuditFields(fm, item);
 
     const body = item.description ? item.description : "";
     return serializeFrontmatter(fm, body);

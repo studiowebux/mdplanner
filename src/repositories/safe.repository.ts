@@ -8,6 +8,7 @@ import { rowToSafe, SAFE_TABLE } from "../domains/safe/cache.ts";
 
 import {
   resolveEntityId,
+  serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
 /** Persists SAFE-note entities as markdown with a SQLite cache mirror. */
@@ -88,13 +89,7 @@ export class SafeRepository extends CachedMarkdownRepository<
       status: item.status,
     };
     if (item.notes) fm.notes = item.notes;
-    fm.created_at = item.createdAt;
-    fm.updated_at = item.updatedAt;
-    if (item.createdBy) fm.created_by = item.createdBy;
-    if (item.updatedBy) fm.updated_by = item.updatedBy;
-    if (item.archived) fm.archived = item.archived;
-    if (item.archivedAt) fm.archived_at = item.archivedAt;
-    if (item.archivedBy) fm.archived_by = item.archivedBy;
+    serializeAuditFields(fm, item);
 
     const body = `# ${item.investor} — $${item.amount.toLocaleString()} SAFE`;
 

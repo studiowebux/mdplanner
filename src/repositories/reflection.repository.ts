@@ -16,6 +16,7 @@ import {
 import {
   fmStr,
   resolveEntityId,
+  serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
 /** Persists Reflection entities as markdown with a SQLite cache mirror. */
@@ -104,13 +105,7 @@ export class ReflectionRepository extends CachedMarkdownRepository<
     fm.date = item.date;
     if (item.templateId) fm.template_id = item.templateId;
     if (item.tags && item.tags.length > 0) fm.tags = item.tags;
-    fm.created_at = item.createdAt;
-    fm.updated_at = item.updatedAt;
-    if (item.createdBy) fm.created_by = item.createdBy;
-    if (item.updatedBy) fm.updated_by = item.updatedBy;
-    if (item.archived) fm.archived = item.archived;
-    if (item.archivedAt) fm.archived_at = item.archivedAt;
-    if (item.archivedBy) fm.archived_by = item.archivedBy;
+    serializeAuditFields(fm, item);
 
     return serializeFrontmatter(fm, item.content ?? "");
   }

@@ -222,3 +222,40 @@ export function stampAuditFields(
 ): { createdAt: string; updatedAt: string } {
   return { createdAt: now, updatedAt: now };
 }
+
+/** Entity shape consumed by `serializeAuditFields` — the audit + archive tail. */
+interface SerializableAuditEntity {
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  archived?: boolean | null;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
+}
+
+/**
+ * Write the audit + archive frontmatter tail onto `fm`, in the canonical key
+ * order, with the same truthy guards every custom serializer used. The
+ * write-side counterpart to `parseAuditFields`; call at the END of a
+ * repository's `serialize()` so insertion order (and thus the emitted
+ * frontmatter) is byte-identical to the hand-written tail:
+ *
+ *   serializeAuditFields(fm, item);
+ *   return serializeFrontmatter(fm, body);
+ *
+ * Replaces the 7-line audit/archive tail duplicated across 12 repositories.
+ * Archive fields must round-trip — custom serializers preserve them here.
+ */
+export function serializeAuditFields(
+  fm: Record<string, unknown>,
+  item: SerializableAuditEntity,
+): void {
+  fm.created_at = item.createdAt;
+  fm.updated_at = item.updatedAt;
+  if (item.createdBy) fm.created_by = item.createdBy;
+  if (item.updatedBy) fm.updated_by = item.updatedBy;
+  if (item.archived) fm.archived = item.archived;
+  if (item.archivedAt) fm.archived_at = item.archivedAt;
+  if (item.archivedBy) fm.archived_by = item.archivedBy;
+}

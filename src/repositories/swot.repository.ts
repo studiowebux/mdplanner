@@ -14,6 +14,7 @@ import { rowToSwot, SWOT_TABLE } from "../domains/swot/cache.ts";
 
 import {
   resolveEntityId,
+  serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
 /** Persists SWOT entities as markdown with a SQLite cache mirror. */
@@ -95,13 +96,7 @@ export class SwotRepository extends CachedMarkdownRepository<
     fm.title = item.title;
     fm.date = item.date;
     if (item.project) fm.project = item.project;
-    fm.created_at = item.createdAt;
-    fm.updated_at = item.updatedAt;
-    if (item.createdBy) fm.created_by = item.createdBy;
-    if (item.updatedBy) fm.updated_by = item.updatedBy;
-    if (item.archived) fm.archived = item.archived;
-    if (item.archivedAt) fm.archived_at = item.archivedAt;
-    if (item.archivedBy) fm.archived_by = item.archivedBy;
+    serializeAuditFields(fm, item);
 
     const sections: string[] = [];
 
