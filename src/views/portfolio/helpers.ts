@@ -7,6 +7,7 @@ import { log } from "../../singletons/logger.ts";
 import {
   getGitHubService,
   getMilestoneService,
+  getNoteService,
   getPortfolioService,
   getTaskService,
 } from "../../singletons/services.ts";
@@ -27,10 +28,52 @@ type PortfolioItem = Awaited<
   ReturnType<ReturnType<typeof getPortfolioService>["list"]>
 >[number];
 type TaskList = Awaited<ReturnType<ReturnType<typeof getTaskService>["list"]>>;
+type NoteList = Awaited<ReturnType<ReturnType<typeof getNoteService>["list"]>>;
 type MilestoneList = Awaited<
   ReturnType<ReturnType<typeof getMilestoneService>["list"]>
 >;
 type GitHubSvc = ReturnType<typeof getGitHubService>;
+
+// ---------------------------------------------------------------------------
+// Project references — entities that point at a portfolio item by `project`
+// name. Read-only link list for the detail page; cheap full-list + filter,
+// same pattern as the dashboard task grouping. Archived rows are excluded
+// (consistent with global search).
+// ---------------------------------------------------------------------------
+
+export type ProjectReference = { id: string; title: string };
+export type ProjectReferences = {
+  tasks: ProjectReference[];
+  notes: ProjectReference[];
+};
+
+function projectRefs<
+  T extends {
+    id: string;
+    title: string;
+    project?: string | null;
+    archived?: boolean;
+  },
+>(
+  rows: T[],
+  projectName: string,
+): ProjectReference[] {
+  return rows
+    .filter((r) => !r.archived && ciEquals(r.project ?? "", projectName))
+    .map((r) => ({ id: r.id, title: r.title }));
+}
+
+/** Gather tasks + notes referencing `projectName` (by their `project` field). */
+export function gatherProjectReferences(
+  projectName: string,
+  tasks: TaskList,
+  notes: NoteList,
+): ProjectReferences {
+  return {
+    tasks: projectRefs(tasks, projectName),
+    notes: projectRefs(notes, projectName),
+  };
+}
 
 /** Group entities by their lowercased `project` field. */
 function groupByProject<T extends { project?: string | null }>(

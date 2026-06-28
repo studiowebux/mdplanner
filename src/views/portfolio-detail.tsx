@@ -29,6 +29,7 @@ import { InlineEditable } from "./components/inline-editable.tsx";
 import { FormTextarea } from "../components/ui/form-textarea.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
+import type { ProjectReferences } from "./portfolio/helpers.ts";
 
 type Props = ViewProps & {
   item: PortfolioItem;
@@ -39,6 +40,7 @@ type Props = ViewProps & {
   dnsDomains?: DnsDomain[];
   quotes?: Quote[];
   invoices?: Invoice[];
+  references?: ProjectReferences;
   editing?: boolean;
   vcsProvider?: string;
 };
@@ -516,6 +518,40 @@ const DnsSection: FC<{ domains: DnsDomain[] }> = ({ domains }) => {
   );
 };
 
+// Read-only references: tasks / notes that point at this project by name.
+// Compact grouped links, not full data, to keep the page scannable. Hidden
+// when nothing references the item.
+export const ReferencesSection: FC<{ references: ProjectReferences }> = (
+  { references },
+) => {
+  const groups = [
+    { label: "Tasks", basePath: "/tasks", items: references.tasks },
+    { label: "Notes", basePath: "/notes", items: references.notes },
+  ].filter((g) => g.items.length > 0);
+  if (groups.length === 0) return null;
+  return (
+    <section class="detail-section portfolio-detail__section">
+      <h2 class="section-heading">References</h2>
+      <div class="portfolio-detail__references">
+        {groups.map((g) => (
+          <div key={g.label}>
+            <h3 class="portfolio-detail__reference-group-title">
+              {g.label} ({g.items.length})
+            </h3>
+            <ul class="portfolio-detail__reference-list">
+              {g.items.map((it) => (
+                <li key={it.id}>
+                  <a href={`${g.basePath}/${it.id}`}>{it.title}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 export const PortfolioDetailView: FC<Props> = (
   {
     item,
@@ -526,6 +562,7 @@ export const PortfolioDetailView: FC<Props> = (
     dnsDomains = [],
     quotes = [],
     invoices = [],
+    references = { tasks: [], notes: [] },
     editing = false,
     vcsProvider = "GitHub",
     ...viewProps
@@ -582,6 +619,7 @@ export const PortfolioDetailView: FC<Props> = (
       <StatusUpdatesSection item={item} />
       <LinkedGoalsSection goals={goals} />
       <DnsSection domains={dnsDomains} />
+      <ReferencesSection references={references} />
 
       {item.githubRepo && (
         <GitHubSection itemId={item.id} provider={vcsProvider} />

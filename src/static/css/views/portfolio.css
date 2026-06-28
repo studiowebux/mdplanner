@@ -245,11 +245,38 @@
   border-radius: var(--radius-sm);
 }
 
+/* References — compact grouped links to tasks/notes naming this project */
+
+.portfolio-detail__references {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-md);
+}
+
+.portfolio-detail__reference-group-title {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.portfolio-detail__reference-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
 /* Responsive */
 
 @media (max-width: 768px) {
   /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   .portfolio-detail__financials {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-detail__references {
     grid-template-columns: 1fr;
   }
 }

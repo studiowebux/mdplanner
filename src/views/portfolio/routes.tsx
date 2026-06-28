@@ -10,9 +10,11 @@ import {
   getGitHubService,
   getGoalService,
   getInvoiceService,
+  getNoteService,
   getPortfolioService,
   getProjectService,
   getQuoteService,
+  getTaskService,
   getWoodpeckerService,
 } from "../../singletons/services.ts";
 import { buildTeamPersonById } from "../../domains/portfolio/owners.ts";
@@ -44,6 +46,7 @@ import {
   buildSectionMap,
   fetchDashboardItems,
   filterItems,
+  gatherProjectReferences,
   sortItems,
 } from "./helpers.ts";
 
@@ -414,6 +417,14 @@ async function renderDetail(c: AppContext, id: string) {
   const quoteIds = new Set(quotes.map((q) => q.id));
   const invoices = allInvoices.filter((i) => quoteIds.has(i.quoteId));
 
+  // Read-only references: tasks/notes that name this project. Cheap full-list
+  // + filter, same pattern as the linked goals/dns/billing above.
+  const [allTasks, allNotes] = await Promise.all([
+    getTaskService().list(),
+    getNoteService().list(),
+  ]);
+  const references = gatherProjectReferences(item.name, allTasks, allNotes);
+
   const vcsProvider = item.githubRepo
     ? await getGitHubService().activeProviderName(item.vcsProvider)
     : undefined;
@@ -429,6 +440,7 @@ async function renderDetail(c: AppContext, id: string) {
       dnsDomains={dnsDomains}
       quotes={quotes}
       invoices={invoices}
+      references={references}
       editing={editing}
       vcsProvider={vcsProvider}
     />,
