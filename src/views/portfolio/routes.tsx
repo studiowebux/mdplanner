@@ -42,11 +42,13 @@ import {
   DashboardTable,
   PortfolioDashboardView,
 } from "../portfolio-dashboard.tsx";
+import { PortfolioGrid, PortfolioGridView } from "../portfolio-grid.tsx";
 import {
   buildSectionMap,
   fetchDashboardItems,
   filterItems,
   gatherProjectReferences,
+  groupPortfolioByClient,
   sortItems,
 } from "./helpers.ts";
 
@@ -97,6 +99,23 @@ portfolioRouter.get("/dashboard/view", async (c) => {
       filter={filter}
     />,
   );
+});
+
+// -- Grid view routes (must be before /:id) -------------------------------
+
+portfolioRouter.get("/grid", async (c) => {
+  const items = await getPortfolioService().list();
+  return c.html(
+    <PortfolioGridView
+      {...viewProps(c, "/portfolio/grid")}
+      groups={groupPortfolioByClient(items)}
+    />,
+  );
+});
+
+portfolioRouter.get("/grid/view", async (c) => {
+  const items = await getPortfolioService().list();
+  return c.html(<PortfolioGrid groups={groupPortfolioByClient(items)} />);
 });
 
 // -- GitHub fragment routes (htmx partials for portfolio detail) --

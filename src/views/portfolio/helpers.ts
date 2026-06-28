@@ -199,6 +199,59 @@ export async function fetchDashboardItems(): Promise<PortfolioDashboardItem[]> {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Grid grouping — client → category → status-coloured cards. Pure in-memory
+// pass over list() (already loaded for list/dashboard). Archived items are
+// excluded; clientless items fall into a "No client" bucket sorted last;
+// empty categories fall into "Uncategorized". Categories sort alphabetically;
+// items within a category sort by name. (Build ticket task_1781387420081_u9yph1)
+// ---------------------------------------------------------------------------
+
+export const GRID_NO_CLIENT = "No client";
+export const GRID_UNCATEGORIZED = "Uncategorized";
+
+export type GridCategoryGroup = { category: string; items: PortfolioItem[] };
+export type GridClientGroup = {
+  client: string;
+  categories: GridCategoryGroup[];
+};
+
+export function groupPortfolioByClient(
+  items: PortfolioItem[],
+): GridClientGroup[] {
+  const byClient = new Map<string, Map<string, PortfolioItem[]>>();
+  for (const item of items) {
+    if (item.archived) continue;
+    const client = item.client?.trim() || GRID_NO_CLIENT;
+    const category = item.category?.trim() || GRID_UNCATEGORIZED;
+    let categories = byClient.get(client);
+    if (!categories) {
+      categories = new Map<string, PortfolioItem[]>();
+      byClient.set(client, categories);
+    }
+    const bucket = categories.get(category);
+    if (bucket) bucket.push(item);
+    else categories.set(category, [item]);
+  }
+
+  const clients = [...byClient.keys()].sort((a, b) => {
+    // "No client" bucket always last; everything else alphabetical.
+    if (a === GRID_NO_CLIENT) return 1;
+    if (b === GRID_NO_CLIENT) return -1;
+    return a.localeCompare(b);
+  });
+
+  return clients.map((client) => {
+    const categories = [...byClient.get(client)!.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([category, list]) => ({
+        category,
+        items: [...list].sort((a, b) => a.name.localeCompare(b.name)),
+      }));
+    return { client, categories };
+  });
+}
+
 // Sort-key → value accessor. Each returns a same-typed comparable for a column.
 type SortAccessor = (i: PortfolioDashboardItem) => string | number;
 const SORT_ACCESSORS: Record<string, SortAccessor> = {

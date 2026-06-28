@@ -153,6 +153,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   github: "Git",
   upload: "Uploads",
   dashboard: "Dashboard",
+  portfolio_grid: "Portfolio Grid",
   me: "My Work",
   cerveau: "Cerveau",
 };
@@ -208,7 +209,7 @@ export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
   ],
   Notes: ["note", "journal", "habit"],
   Diagrams: ["sticky_note", "mindmap", "c4_component"],
-  Portfolio: ["portfolio", "dashboard"],
+  Portfolio: ["portfolio", "dashboard", "portfolio_grid"],
   Infrastructure: ["dns_domain", "github"],
   AI: ["ai_chat"],
   Tools: ["analytics", "upload", "cerveau"],
@@ -371,6 +372,7 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   github: "/github",
   upload: "/uploads",
   dashboard: "/portfolio/dashboard",
+  portfolio_grid: "/portfolio/grid",
   me: "/me",
   cerveau: "/cerveau",
 };

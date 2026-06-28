@@ -268,6 +268,121 @@
   gap: var(--space-xxs);
 }
 
+/* Grid view — client → category → status-coloured cards */
+
+.portfolio-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.portfolio-grid__client {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.portfolio-grid__client-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.portfolio-grid__categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.portfolio-grid__category {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+.portfolio-grid__category-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.portfolio-grid__category-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg-tertiary);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+}
+
+.portfolio-grid__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.portfolio-grid__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-left: var(--border-width-thick) solid var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
+.portfolio-grid__card:hover {
+  background: var(--color-bg-tertiary);
+  text-decoration: none;
+}
+
+.portfolio-grid__card-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Per-status left-border accent — reuses badge variant colour tokens. */
+.portfolio-grid__card--accent {
+  border-left-color: var(--color-accent);
+}
+.portfolio-grid__card--info {
+  border-left-color: var(--color-info-text);
+}
+.portfolio-grid__card--success {
+  border-left-color: var(--color-success-text);
+}
+.portfolio-grid__card--warning {
+  border-left-color: var(--color-warning-text);
+}
+.portfolio-grid__card--error {
+  border-left-color: var(--color-error-text);
+}
+.portfolio-grid__card--purple {
+  border-left-color: var(--color-purple-text);
+}
+.portfolio-grid__card--teal {
+  border-left-color: var(--color-teal-text);
+}
+.portfolio-grid__card--orange {
+  border-left-color: var(--color-orange-text);
+}
+.portfolio-grid__card--pink {
+  border-left-color: var(--color-pink-text);
+}
+
 /* Responsive */
 
 @media (max-width: 768px) {
@@ -277,6 +392,10 @@
   }
 
   .portfolio-detail__references {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-grid__categories {
     grid-template-columns: 1fr;
   }
 }
