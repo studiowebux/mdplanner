@@ -79,6 +79,30 @@ Deno.test("inline-style: flags style= attribute, not identifier suffixes", () =>
   assertEquals(hits[0].confidence, "high");
 });
 
+Deno.test("inline-style: exempts custom-property-only style (feeds the token system)", () => {
+  const tsx = "<span style={`--ratio:${r}`} />";
+  assertEquals(fire([file("views/x.tsx", tsx)], "inline-style"), []);
+});
+
+Deno.test("inline-style: exempts multi-line custom-prop style, keeps spread untouched", () => {
+  const tsx = [
+    "<span",
+    "  style={ratio !== undefined",
+    "    ? `--habit-ratio:${ratio.toFixed(3)}`",
+    "    : undefined}",
+    '  {...(done ? { "hx-post": "/x" } : {})}',
+    "/>",
+  ].join("\n");
+  assertEquals(fire([file("views/x.tsx", tsx)], "inline-style"), []);
+});
+
+Deno.test("inline-style: still flags a standard property and bare indirection", () => {
+  const standard = `<span style="color:red" />`;
+  const indirect = `<div style={x} />`;
+  assertEquals(fire([file("views/a.tsx", standard)], "inline-style").length, 1);
+  assertEquals(fire([file("views/b.tsx", indirect)], "inline-style").length, 1);
+});
+
 Deno.test("inline-script: flags inline <script> body + on*= handler", () => {
   const tsx = [
     `<script>doThing()</script>`,

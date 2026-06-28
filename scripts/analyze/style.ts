@@ -119,11 +119,60 @@ function ruleMediaBreakpointPx(f: RuleFile, out: Finding[]): void {
 // matching identifier suffixes like `borderStyle=` or `sectionStyle=`.
 const INLINE_STYLE = /(^|\s)style\s*=/;
 
+// CSS property-name tokens inside a style value (`prop:`), custom props included
+// (`[\w-]+` swallows the leading `--`).
+const STYLE_PROP = /([\w-]+)\s*:/g;
+
+// Extract the `style=` attribute value starting at line `i`. Handles both the
+// `style={…}` (JSX expression, may span lines + contain `${…}`) and
+// `style="…"` / `'…'` / `` `…` `` quoted forms via balance/quote scanning over a
+// small line window. Returns null when no value can be isolated (e.g. the
+// `style=` is a fragment) — callers then fall back to flagging.
+function styleAttrValue(lines: string[], i: number): string | null {
+  const window = lines.slice(i, i + 8).join("\n");
+  const m = window.match(/(?:^|\s)style\s*=\s*/);
+  if (!m) return null;
+  const open = m.index! + m[0].length;
+  const ch = window[open];
+  if (ch === "{") {
+    let depth = 0;
+    for (let k = open; k < window.length; k++) {
+      if (window[k] === "{") depth++;
+      else if (window[k] === "}" && --depth === 0) {
+        return window.slice(open + 1, k);
+      }
+    }
+    return window.slice(open + 1);
+  }
+  if (ch === '"' || ch === "'" || ch === "`") {
+    for (let k = open + 1; k < window.length; k++) {
+      if (window[k] === ch && window[k - 1] !== "\\") {
+        return window.slice(open + 1, k);
+      }
+    }
+  }
+  return null;
+}
+
+// An inline style that sets ONLY CSS custom properties (`style={`--ratio:${r}`}`)
+// is FEEDING the token system — the var is consumed by a class (the exact
+// "dynamic values via a class + CSS var" mechanism this rule recommends). It is
+// not a bypass, so it is exempt — parallel to ruleHardcodedColor skipping
+// `--`-prefixed declarations. Indirection (`style={someVar}`) parses no props
+// and stays flagged.
+function isCustomPropOnlyStyle(lines: string[], i: number): boolean {
+  const val = styleAttrValue(lines, i);
+  if (!val) return false;
+  const props = [...val.matchAll(STYLE_PROP)].map((mm) => mm[1]);
+  return props.length > 0 && props.every((p) => p.startsWith("--"));
+}
+
 function ruleInlineStyle(f: RuleFile, out: Finding[]): void {
   if (f.ext !== ".tsx") return;
   const lines = f.text.split("\n");
   for (let i = 0; i < lines.length; i++) {
     if (!INLINE_STYLE.test(lines[i])) continue;
+    if (isCustomPropOnlyStyle(lines, i)) continue;
     out.push({
       file: f.rel,
       line: i + 1,
