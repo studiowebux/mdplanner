@@ -29,6 +29,9 @@ const NoteAttachmentsSection: FC<{ note: Note }> = ({ note }) => {
             const ext = filename.slice(filename.lastIndexOf(".")).toLowerCase();
             const isImage = IMAGE_EXTS.has(ext);
             const href = `/notes/${note.id}/upload/${filename}`;
+            const insertMd = isImage
+              ? `![${filename}](${href})`
+              : `[${filename}](${href})`;
             return (
               <li key={a} class="note-detail__file-row">
                 {isImage
@@ -46,6 +49,14 @@ const NoteAttachmentsSection: FC<{ note: Note }> = ({ note }) => {
                       {filename}
                     </a>
                   )}
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--sm"
+                  data-insert-md={insertMd}
+                  title="Insert into note text at the cursor"
+                >
+                  Insert
+                </button>
                 <button
                   type="button"
                   class="btn btn--ghost btn--sm note-detail__file-delete"
@@ -116,6 +127,7 @@ export const NoteDetailView: FC<Props> = (props) => {
         "/js/note-editor.js",
         "/js/note-undo.js",
         "/js/note-select-all.js",
+        "/js/note-attachment-insert.js",
       ]}
     >
       <main
