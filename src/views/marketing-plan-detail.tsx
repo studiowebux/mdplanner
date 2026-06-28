@@ -28,7 +28,7 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 // ---------------------------------------------------------------------------
 
 const DescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
-  <section class="detail-section mktplan-detail__section">
+  <section class="detail-section">
     <h2 class="section-heading">Description</h2>
     <InlineEditable
       fieldId="mktplan-description"
@@ -45,7 +45,7 @@ const DescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
 // ---------------------------------------------------------------------------
 
 const NotesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
-  <section class="detail-section mktplan-detail__section">
+  <section class="detail-section">
     <h2 class="section-heading">Notes</h2>
     <InlineEditable
       fieldId="mktplan-notes"
@@ -103,7 +103,7 @@ const OverviewRow: FC<{
 const TeamSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if ((plan.team?.length ?? 0) === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Team ({(plan.team ?? []).length})
       </h2>
@@ -121,7 +121,7 @@ const TeamSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
 const TargetAudiencesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if ((plan.targetAudiences?.length ?? 0) === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Target Audiences ({(plan.targetAudiences ?? []).length})
       </h2>
@@ -150,7 +150,7 @@ const TargetAudiencesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
 const ChannelsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if ((plan.channels?.length ?? 0) === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Channels ({(plan.channels ?? []).length})
       </h2>
@@ -196,7 +196,7 @@ const ChannelsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
 const CampaignsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if ((plan.campaigns?.length ?? 0) === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Campaigns ({(plan.campaigns ?? []).length})
       </h2>
@@ -248,7 +248,7 @@ const CampaignsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
 const LinkedGoalsSection: FC<{ goals: Goal[] }> = ({ goals }) => {
   if (goals.length === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Linked Goals ({goals.length})
       </h2>
@@ -309,7 +309,7 @@ const LinkedGoalsSection: FC<{ goals: Goal[] }> = ({ goals }) => {
 const HypothesisSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if ((plan.hypothesis?.length ?? 0) === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Hypothesis ({(plan.hypothesis ?? []).length})
       </h2>
@@ -334,7 +334,7 @@ const HypothesisSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
 const LearningsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if ((plan.learnings?.length ?? 0) === 0) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">
         Learnings ({(plan.learnings ?? []).length})
       </h2>
@@ -348,7 +348,7 @@ const LearningsSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
 const ReadDescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => {
   if (!plan.description) return null;
   return (
-    <section class="detail-section mktplan-detail__section">
+    <section class="detail-section">
       <h2 class="section-heading">Description</h2>
       <p class="mktplan-detail__description">{plan.description}</p>
     </section>
@@ -397,9 +397,9 @@ export const MarketingPlanDetailView: FC<
         <BackButton href="/marketing-plans" label="Back to Marketing Plans" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section detail-header mktplan-detail__header">
-          <div class="detail-title-row mktplan-detail__title-row">
-            <h1 class="detail-title mktplan-detail__title">{plan.name}</h1>
+        <header class="detail-section detail-header">
+          <div class="detail-title-row">
+            <h1 class="detail-title">{plan.name}</h1>
             <span class={badgeClass(MKTPLAN_STATUS_VARIANTS, plan.status)}>
               {plan.status}
             </span>
