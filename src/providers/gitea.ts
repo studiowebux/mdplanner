@@ -339,16 +339,14 @@ export class GiteaProvider implements IGitProvider {
   // clear message.
   // ---------------------------------------------------------------------------
 
-  // deno-lint-ignore require-await
-  async listWorkflows(): Promise<GitHubWorkflow[]> {
-    return [];
+  listWorkflows(): Promise<GitHubWorkflow[]> {
+    return Promise.resolve([]);
   }
 
-  // deno-lint-ignore require-await
-  async listWorkflowRuns(): Promise<
+  listWorkflowRuns(): Promise<
     { runs: GitHubWorkflowRun[]; totalCount: number }
   > {
-    return { runs: [], totalCount: 0 };
+    return Promise.resolve({ runs: [], totalCount: 0 });
   }
 
   cancelRun(): Promise<void> {
