@@ -1,6 +1,8 @@
 // Quote view routes — factory-generated list/create/edit + custom detail route.
 
 import type { AppContext } from "../../types/app.ts";
+import type { Task } from "../../types/task.types.ts";
+import type { BillingRate } from "../../types/billing-rate.types.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { quoteConfig } from "../../domains/quote/config.tsx";
 import {
@@ -437,6 +439,36 @@ quotesRouter.post("/:id/line-items", async (c) => {
   return c.html(<QuoteLineItemsSection quote={updated} />);
 });
 
+// Build a single billed line item from a task's time entries within an
+// optional [from, to] date range: quantity = total hours (rounded), unitRate =
+// the chosen billing rate. Returns null when the range yields no billable hours.
+function billedTimeLine(
+  task: Pick<Task, "title" | "time_entries">,
+  rate: Pick<BillingRate, "unit" | "rate">,
+  from: string,
+  to: string,
+):
+  | {
+    description: string;
+    quantity: number;
+    unit: BillingRate["unit"];
+    unitRate: number;
+  }
+  | null {
+  const entries = (task.time_entries ?? []).filter((e) =>
+    (!from || e.date >= from) && (!to || e.date <= to)
+  );
+  const hours = round2(entries.reduce((sum, e) => sum + e.hours, 0));
+  if (hours <= 0) return null;
+  const range = from || to ? ` (${from || "…"} → ${to || "…"})` : "";
+  return {
+    description: `${task.title} — time${range}`,
+    quantity: hours,
+    unit: rate.unit,
+    unitRate: rate.rate,
+  };
+}
+
 // POST /:id/add-time — turn a task's time entries (in an optional date range)
 // into a single billed line item: quantity = total hours, unitRate = the chosen
 // billing rate. Re-renders the section.
@@ -466,11 +498,8 @@ quotesRouter.post("/:id/add-time", async (c) => {
     });
   }
 
-  const entries = (task.time_entries ?? []).filter((e) =>
-    (!from || e.date >= from) && (!to || e.date <= to)
-  );
-  const hours = round2(entries.reduce((sum, e) => sum + e.hours, 0));
-  if (hours <= 0) {
+  const line = billedTimeLine(task, rate, from, to);
+  if (!line) {
     return new Response(null, {
       status: 422,
       headers: {
@@ -482,13 +511,7 @@ quotesRouter.post("/:id/add-time", async (c) => {
     });
   }
 
-  const range = from || to ? ` (${from || "…"} → ${to || "…"})` : "";
-  const updated = await service.addLineItemRow(quote, {
-    description: `${task.title} — time${range}`,
-    quantity: hours,
-    unit: rate.unit,
-    unitRate: rate.rate,
-  });
+  const updated = await service.addLineItemRow(quote, line);
   if (!updated) return c.notFound();
   return c.html(<QuoteLineItemsSection quote={updated} />);
 });
