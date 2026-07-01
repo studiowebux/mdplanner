@@ -5,6 +5,47 @@ type BillingDocumentHeaderProps = {
   config: ProjectConfig;
 };
 
+const BillingAddress: FC<{ address?: string | null }> = ({ address }) =>
+  address
+    ? (
+      <address class="billing-document-header__address">
+        {address.split("\n").map((line, i) => <span key={i}>{line}</span>)}
+      </address>
+    )
+    : null;
+
+const BillingContact: FC<{ email?: string | null; phone?: string | null }> = (
+  { email, phone },
+) => {
+  if (!email && !phone) return null;
+  return (
+    <div class="billing-document-header__contact">
+      {email && (
+        <span class="billing-document-header__contact-item">{email}</span>
+      )}
+      {phone && (
+        <span class="billing-document-header__contact-item">{phone}</span>
+      )}
+    </div>
+  );
+};
+
+const BillingNumbers: FC<{ tax?: string | null; business?: string | null }> = (
+  { tax, business },
+) => {
+  if (!tax && !business) return null;
+  return (
+    <div class="billing-document-header__numbers">
+      {tax && <span class="billing-document-header__number">Tax: {tax}</span>}
+      {business && (
+        <span class="billing-document-header__number">
+          Business #: {business}
+        </span>
+      )}
+    </div>
+  );
+};
+
 export const BillingDocumentHeader: FC<BillingDocumentHeaderProps> = (
   { config },
 ) => {
@@ -29,41 +70,15 @@ export const BillingDocumentHeader: FC<BillingDocumentHeaderProps> = (
             {config.billingCompany}
           </span>
         )}
-        {config.billingAddress && (
-          <address class="billing-document-header__address">
-            {config.billingAddress.split("\n").map((line, i) => (
-              <span key={i}>{line}</span>
-            ))}
-          </address>
-        )}
-        {(config.billingEmail || config.billingPhone) && (
-          <div class="billing-document-header__contact">
-            {config.billingEmail && (
-              <span class="billing-document-header__contact-item">
-                {config.billingEmail}
-              </span>
-            )}
-            {config.billingPhone && (
-              <span class="billing-document-header__contact-item">
-                {config.billingPhone}
-              </span>
-            )}
-          </div>
-        )}
-        {(config.billingTaxNumber || config.billingBusinessNumber) && (
-          <div class="billing-document-header__numbers">
-            {config.billingTaxNumber && (
-              <span class="billing-document-header__number">
-                Tax: {config.billingTaxNumber}
-              </span>
-            )}
-            {config.billingBusinessNumber && (
-              <span class="billing-document-header__number">
-                Business #: {config.billingBusinessNumber}
-              </span>
-            )}
-          </div>
-        )}
+        <BillingAddress address={config.billingAddress} />
+        <BillingContact
+          email={config.billingEmail}
+          phone={config.billingPhone}
+        />
+        <BillingNumbers
+          tax={config.billingTaxNumber}
+          business={config.billingBusinessNumber}
+        />
       </div>
     </div>
   );

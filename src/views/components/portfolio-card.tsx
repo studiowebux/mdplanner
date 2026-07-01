@@ -12,6 +12,44 @@ import {
 
 type Props = { item: PortfolioItem; q?: string };
 
+const FinancialsMeta: FC<
+  { revenue?: number | null; expenses?: number | null }
+> = ({ revenue, expenses }) => {
+  if (revenue == null && expenses == null) return null;
+  return (
+    <CardMetaItem label="Financials">
+      {formatCurrency(revenue ?? undefined)}
+      {revenue && expenses ? " / " : ""}
+      {expenses ? formatCurrency(expenses) : ""}
+    </CardMetaItem>
+  );
+};
+
+const TechStack: FC<{ techStack?: string[] | null }> = ({ techStack }) => {
+  if (!techStack || techStack.length === 0) return null;
+  return (
+    <div class="portfolio-card__tech-stack">
+      {techStack.slice(0, 4).map((t) => <span key={t} class="badge">{t}</span>)}
+      {techStack.length > 4 && (
+        <span class="badge badge--overflow">+{techStack.length - 4}</span>
+      )}
+    </div>
+  );
+};
+
+const LinkedGoalsBadge: FC<{ linkedGoals?: string[] | null }> = (
+  { linkedGoals },
+) => {
+  if (!linkedGoals || linkedGoals.length === 0) return null;
+  return (
+    <div class="portfolio-card__tech-stack">
+      <span class="badge">
+        {linkedGoals.length} goal{linkedGoals.length !== 1 ? "s" : ""}
+      </span>
+    </div>
+  );
+};
+
 export const PortfolioCard: FC<Props> = ({ item, q }) => {
   const pct = item.progress ?? 0;
 
@@ -39,13 +77,7 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
           </CardMetaItem>
         )}
 
-        {(item.revenue != null || item.expenses != null) && (
-          <CardMetaItem label="Financials">
-            {formatCurrency(item.revenue)}
-            {item.revenue && item.expenses ? " / " : ""}
-            {item.expenses ? formatCurrency(item.expenses) : ""}
-          </CardMetaItem>
-        )}
+        <FinancialsMeta revenue={item.revenue} expenses={item.expenses} />
 
         {item.startDate && (
           <CardMetaItem label="Start">{item.startDate}</CardMetaItem>
@@ -63,18 +95,7 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
         </div>
       </div>
 
-      {item.techStack && item.techStack.length > 0 && (
-        <div class="portfolio-card__tech-stack">
-          {item.techStack.slice(0, 4).map((t) => (
-            <span key={t} class="badge">{t}</span>
-          ))}
-          {item.techStack.length > 4 && (
-            <span class="badge badge--overflow">
-              +{item.techStack.length - 4}
-            </span>
-          )}
-        </div>
-      )}
+      <TechStack techStack={item.techStack} />
 
       {item.badges && item.badges.length > 0 && (
         <div class="portfolio-card__badges">
@@ -82,14 +103,7 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
         </div>
       )}
 
-      {item.linkedGoals && item.linkedGoals.length > 0 && (
-        <div class="portfolio-card__tech-stack">
-          <span class="badge">
-            {item.linkedGoals.length}{" "}
-            goal{item.linkedGoals.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-      )}
+      <LinkedGoalsBadge linkedGoals={item.linkedGoals} />
     </DomainCard>
   );
 };
