@@ -72,7 +72,8 @@ export function createMcpHonoRouter(options?: McpHttpOptions): Hono<{
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
-    const server = createMcpServer();
+    const features = await getProjectService().getEnabledFeatures();
+    const server = createMcpServer(features);
     await server.connect(transport);
     return transport.handleRequest(c.req.raw);
   });

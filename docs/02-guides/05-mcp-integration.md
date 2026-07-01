@@ -100,3 +100,12 @@ The shared `MCP_TOKEN` bearer still works alongside named keys. Set
 ## Tool reference
 
 See [MCP Tools](/mcp/) for the complete list of tools grouped by entity.
+
+## Feature gating
+
+The MCP server only exposes tools for **enabled** features. A module disabled in
+Settings > Feature Visibility does not load its tools on either transport
+(stdio and HTTP) — the same enabled-features config that drives the sidebar
+navigation. Core infrastructure (the context pack and preferences) always
+loads so an agent can boot on a minimal configuration. Enable a feature and
+reconnect to pick up its tools.

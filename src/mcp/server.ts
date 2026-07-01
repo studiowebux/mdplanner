@@ -5,6 +5,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { APP_VERSION } from "../constants/mod.ts";
+import { getProjectService } from "../singletons/services.ts";
 import { registerBrainstormTools } from "./tools/brainstorms.ts";
 import { registerBriefTools } from "./tools/briefs.ts";
 import { registerReflectionTools } from "./tools/reflections.ts";
@@ -55,67 +56,100 @@ import { registerVacationTools } from "./tools/vacation.ts";
 import { registerProjectValueBoardTools } from "./tools/project-value-boards.ts";
 import { registerPreferenceTools } from "./tools/preferences.ts";
 
-export function createMcpServer(): McpServer {
+/**
+ * One MCP tool module = a domain's register*Tools fn gated by its feature key
+ * (ENTITY_TYPE_LABELS key from constants/mod.ts). `feature: null` = always-on
+ * infrastructure (context pack, preferences) that must load regardless of the
+ * enabled-features config so an agent can still boot on a minimal setup.
+ */
+type ToolModule = {
+  feature: string | null;
+  register: (server: McpServer) => void;
+};
+
+const TOOL_MODULES: ToolModule[] = [
+  { feature: "brainstorm", register: registerBrainstormTools },
+  { feature: "brief", register: registerBriefTools },
+  { feature: "reflection", register: registerReflectionTools },
+  { feature: "reflection_template", register: registerReflectionTemplateTools },
+  { feature: "onboarding_template", register: registerOnboardingTemplateTools },
+  { feature: "retrospective", register: registerRetrospectiveTools },
+  { feature: "meeting", register: registerMeetingTools },
+  { feature: "rate", register: registerBillingRateTools },
+  { feature: "contact", register: registerContactTools },
+  { feature: "company", register: registerCompanyTools },
+  { feature: "customer", register: registerCustomerTools },
+  { feature: "invoice", register: registerInvoiceTools },
+  { feature: "payment", register: registerPaymentTools },
+  { feature: "quote", register: registerQuoteTools },
+  { feature: "dns_domain", register: registerDnsTools },
+  { feature: "github", register: registerGitHubTools },
+  // Woodpecker (CI) has no own feature key — gated under the VCS/CI feature.
+  { feature: "github", register: registerWoodpeckerTools },
+  { feature: "goal", register: registerGoalTools },
+  { feature: "idea", register: registerIdeaTools },
+  { feature: "marketing_plan", register: registerMarketingPlanTools },
+  { feature: "swot", register: registerSwotTools },
+  { feature: "eisenhower", register: registerEisenhowerTools },
+  { feature: "mindmap", register: registerMindmapTools },
+  { feature: "lean_canvas", register: registerLeanCanvasTools },
+  { feature: "milestone", register: registerMilestoneTools },
+  { feature: "note", register: registerNoteTools },
+  { feature: "person", register: registerPeopleTools },
+  { feature: "portfolio", register: registerPortfolioTools },
+  { feature: "task", register: registerTaskTools },
+  { feature: null, register: registerContextPackTools },
+  { feature: "sticky_note", register: registerStickyNoteTools },
+  { feature: "c4_component", register: registerC4Tools },
+  { feature: "capacity_plan", register: registerCapacityPlanTools },
+  { feature: "strategic_builder", register: registerStrategicLevelsTools },
+  { feature: "safe", register: registerSafeTools },
+  { feature: "project_value", register: registerProjectValueBoardTools },
+  { feature: "brainstorm_template", register: registerBrainstormTemplateTools },
+  { feature: "business_model", register: registerBusinessModelTools },
+  { feature: "deal", register: registerDealTools },
+  { feature: "finance", register: registerFinanceTools },
+  { feature: "fishbone", register: registerFishboneTools },
+  { feature: "habit", register: registerHabitTools },
+  { feature: "investor", register: registerInvestorTools },
+  { feature: "journal", register: registerJournalTools },
+  { feature: "moscow", register: registerMoscowTools },
+  { feature: "onboarding", register: registerOnboardingTools },
+  { feature: "risk", register: registerRiskTools },
+  { feature: "vacation", register: registerVacationTools },
+  { feature: null, register: registerPreferenceTools },
+];
+
+/**
+ * Select which tool modules to register. `enabledFeatures` undefined → all
+ * modules (back-compat: tests + callers with no config). When provided, only
+ * always-on modules and those whose feature is enabled are returned — disabled
+ * modules MUST NOT load their MCP tools (mirrors the sidebar nav gating).
+ */
+export function enabledToolModules(enabledFeatures?: string[]): ToolModule[] {
+  if (!enabledFeatures) return TOOL_MODULES;
+  const enabled = new Set(enabledFeatures);
+  return TOOL_MODULES.filter(
+    (m) => m.feature === null || enabled.has(m.feature),
+  );
+}
+
+export function createMcpServer(enabledFeatures?: string[]): McpServer {
   const server = new McpServer({
     name: "mdplanner",
     version: APP_VERSION,
   });
 
-  registerBrainstormTools(server);
-  registerBriefTools(server);
-  registerReflectionTools(server);
-  registerReflectionTemplateTools(server);
-  registerOnboardingTemplateTools(server);
-  registerRetrospectiveTools(server);
-  registerMeetingTools(server);
-  registerBillingRateTools(server);
-  registerContactTools(server);
-  registerCompanyTools(server);
-  registerCustomerTools(server);
-  registerInvoiceTools(server);
-  registerPaymentTools(server);
-  registerQuoteTools(server);
-  registerDnsTools(server);
-  registerGitHubTools(server);
-  registerWoodpeckerTools(server);
-  registerGoalTools(server);
-  registerIdeaTools(server);
-  registerMarketingPlanTools(server);
-  registerSwotTools(server);
-  registerEisenhowerTools(server);
-  registerMindmapTools(server);
-  registerLeanCanvasTools(server);
-  registerMilestoneTools(server);
-  registerNoteTools(server);
-  registerPeopleTools(server);
-  registerPortfolioTools(server);
-  registerTaskTools(server);
-  registerContextPackTools(server);
-  registerStickyNoteTools(server);
-  registerC4Tools(server);
-  registerCapacityPlanTools(server);
-  registerStrategicLevelsTools(server);
-  registerSafeTools(server);
-  registerProjectValueBoardTools(server);
-  registerBrainstormTemplateTools(server);
-  registerBusinessModelTools(server);
-  registerDealTools(server);
-  registerFinanceTools(server);
-  registerFishboneTools(server);
-  registerHabitTools(server);
-  registerInvestorTools(server);
-  registerJournalTools(server);
-  registerMoscowTools(server);
-  registerOnboardingTools(server);
-  registerRiskTools(server);
-  registerVacationTools(server);
-  registerPreferenceTools(server);
+  for (const { register } of enabledToolModules(enabledFeatures)) {
+    register(server);
+  }
 
   return server;
 }
 
 export async function startMcpServer(): Promise<void> {
-  const server = createMcpServer();
+  const features = await getProjectService().getEnabledFeatures();
+  const server = createMcpServer(features);
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
