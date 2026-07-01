@@ -6,6 +6,49 @@ type ProjectTabProps = {
   config: PublicProjectConfig;
 };
 
+/**
+ * A password field for a stored secret (GitHub/Gitea/CI/Cloudflare token).
+ * Blank = keep existing; the Clear button flags the hidden `<name>Clear` input
+ * so the server wipes it. Placeholder + hint prefix reflect whether a token is
+ * already set. Extracted from ProjectTab — the four token fields were identical.
+ */
+const SecretTokenField: FC<{
+  id: string;
+  name: string;
+  label: string;
+  hasToken?: boolean;
+  unsetPlaceholder: string;
+  hint: string;
+}> = ({ id, name, label, hasToken, unsetPlaceholder, hint }) => (
+  <div class="settings-field">
+    <label class="settings-field__label" for={id}>{label}</label>
+    <div class="settings-field__input-row">
+      <input
+        type="password"
+        id={id}
+        name={name}
+        placeholder={hasToken
+          ? "•••••••• (set — leave blank to keep)"
+          : unsetPlaceholder}
+        class="settings-field__input"
+        autocomplete="off"
+      />
+      <input type="hidden" id={`${id}-clear`} name={`${name}Clear`} value="" />
+      <button
+        type="button"
+        class="btn btn--secondary btn--sm"
+        data-clear-input={id}
+      >
+        Clear
+      </button>
+    </div>
+    <span class="settings-field__hint">
+      {hasToken ? "A token is set. " : "No token set. "}
+      {hint}
+    </span>
+  </div>
+);
+
 export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
   <div class="settings-tabs__panel settings-tabs__panel--project">
     <form
@@ -166,41 +209,14 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
         </span>
       </div>
 
-      <div class="settings-field">
-        <label class="settings-field__label" for="cfg-github-token">
-          GitHub token (PAT)
-        </label>
-        <div class="settings-field__input-row">
-          <input
-            type="password"
-            id="cfg-github-token"
-            name="githubToken"
-            placeholder={config.hasGithubToken
-              ? "•••••••• (set — leave blank to keep)"
-              : "ghp_..."}
-            class="settings-field__input"
-            autocomplete="off"
-          />
-          <input
-            type="hidden"
-            id="cfg-github-token-clear"
-            name="githubTokenClear"
-            value=""
-          />
-          <button
-            type="button"
-            class="btn btn--secondary btn--sm"
-            data-clear-input="cfg-github-token"
-          >
-            Clear
-          </button>
-        </div>
-        <span class="settings-field__hint">
-          {config.hasGithubToken ? "A token is set. " : "No token set. "}
-          Shared across all portfolio items. Set MDPLANNER_SECRET_KEY to encrypt
-          at rest.
-        </span>
-      </div>
+      <SecretTokenField
+        id="cfg-github-token"
+        name="githubToken"
+        label="GitHub token (PAT)"
+        hasToken={config.hasGithubToken}
+        unsetPlaceholder="ghp_..."
+        hint="Shared across all portfolio items. Set MDPLANNER_SECRET_KEY to encrypt at rest."
+      />
 
       <div class="settings-field">
         <label class="settings-field__label" for="cfg-gitea-base-url">
@@ -222,41 +238,14 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
         </span>
       </div>
 
-      <div class="settings-field">
-        <label class="settings-field__label" for="cfg-gitea-token">
-          Gitea token (PAT)
-        </label>
-        <div class="settings-field__input-row">
-          <input
-            type="password"
-            id="cfg-gitea-token"
-            name="giteaToken"
-            placeholder={config.hasGiteaToken
-              ? "•••••••• (set — leave blank to keep)"
-              : "Personal access token..."}
-            class="settings-field__input"
-            autocomplete="off"
-          />
-          <input
-            type="hidden"
-            id="cfg-gitea-token-clear"
-            name="giteaTokenClear"
-            value=""
-          />
-          <button
-            type="button"
-            class="btn btn--secondary btn--sm"
-            data-clear-input="cfg-gitea-token"
-          >
-            Clear
-          </button>
-        </div>
-        <span class="settings-field__hint">
-          {config.hasGiteaToken ? "A token is set. " : "No token set. "}
-          Generated in Gitea under Settings → Applications. Set
-          MDPLANNER_SECRET_KEY to encrypt at rest.
-        </span>
-      </div>
+      <SecretTokenField
+        id="cfg-gitea-token"
+        name="giteaToken"
+        label="Gitea token (PAT)"
+        hasToken={config.hasGiteaToken}
+        unsetPlaceholder="Personal access token..."
+        hint="Generated in Gitea under Settings → Applications. Set MDPLANNER_SECRET_KEY to encrypt at rest."
+      />
 
       <div class="settings-field">
         <label class="settings-field__label" for="cfg-woodpecker-base-url">
@@ -277,77 +266,23 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
         </span>
       </div>
 
-      <div class="settings-field">
-        <label class="settings-field__label" for="cfg-woodpecker-token">
-          CI token (PAT)
-        </label>
-        <div class="settings-field__input-row">
-          <input
-            type="password"
-            id="cfg-woodpecker-token"
-            name="woodpeckerToken"
-            placeholder={config.hasWoodpeckerToken
-              ? "•••••••• (set — leave blank to keep)"
-              : "Personal access token..."}
-            class="settings-field__input"
-            autocomplete="off"
-          />
-          <input
-            type="hidden"
-            id="cfg-woodpecker-token-clear"
-            name="woodpeckerTokenClear"
-            value=""
-          />
-          <button
-            type="button"
-            class="btn btn--secondary btn--sm"
-            data-clear-input="cfg-woodpecker-token"
-          >
-            Clear
-          </button>
-        </div>
-        <span class="settings-field__hint">
-          {config.hasWoodpeckerToken ? "A token is set. " : "No token set. "}
-          Personal access token for the CI server (Woodpecker: profile →
-          settings). Set MDPLANNER_SECRET_KEY to encrypt at rest.
-        </span>
-      </div>
+      <SecretTokenField
+        id="cfg-woodpecker-token"
+        name="woodpeckerToken"
+        label="CI token (PAT)"
+        hasToken={config.hasWoodpeckerToken}
+        unsetPlaceholder="Personal access token..."
+        hint="Personal access token for the CI server (Woodpecker: profile → settings). Set MDPLANNER_SECRET_KEY to encrypt at rest."
+      />
 
-      <div class="settings-field">
-        <label class="settings-field__label" for="cfg-cloudflare-token">
-          Cloudflare token (API Token)
-        </label>
-        <div class="settings-field__input-row">
-          <input
-            type="password"
-            id="cfg-cloudflare-token"
-            name="cloudflareToken"
-            placeholder={config.hasCloudflareToken
-              ? "•••••••• (set — leave blank to keep)"
-              : "Bearer token..."}
-            class="settings-field__input"
-            autocomplete="off"
-          />
-          <input
-            type="hidden"
-            id="cfg-cloudflare-token-clear"
-            name="cloudflareTokenClear"
-            value=""
-          />
-          <button
-            type="button"
-            class="btn btn--secondary btn--sm"
-            data-clear-input="cfg-cloudflare-token"
-          >
-            Clear
-          </button>
-        </div>
-        <span class="settings-field__hint">
-          {config.hasCloudflareToken ? "A token is set. " : "No token set. "}
-          Used for DNS sync. Requires Zone:Read, DNS:Read permissions.
-          Registrar:Read is optional for expiry data.
-        </span>
-      </div>
+      <SecretTokenField
+        id="cfg-cloudflare-token"
+        name="cloudflareToken"
+        label="Cloudflare token (API Token)"
+        hasToken={config.hasCloudflareToken}
+        unsetPlaceholder="Bearer token..."
+        hint="Used for DNS sync. Requires Zone:Read, DNS:Read permissions. Registrar:Read is optional for expiry data."
+      />
 
       <FormActions />
     </form>
