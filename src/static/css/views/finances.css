@@ -250,13 +250,11 @@
   color: var(--color-error);
 }
 
-.finance-bytag__subtotal--net[data-positive="true"]
-  .finance-bytag__subtotal-value {
+.finance-bytag__subtotal--net[data-positive="true"] .finance-bytag__subtotal-value {
   color: var(--color-success);
 }
 
-.finance-bytag__subtotal--net[data-positive="false"]
-  .finance-bytag__subtotal-value {
+.finance-bytag__subtotal--net[data-positive="false"] .finance-bytag__subtotal-value {
   color: var(--color-error);
 }
 

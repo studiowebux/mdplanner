@@ -332,9 +332,7 @@
   transition: transform var(--transition-fast);
 }
 
-.task-list__section[open]
-  > .task-list__section-summary
-  .task-list__section-chevron {
+.task-list__section[open] > .task-list__section-summary .task-list__section-chevron {
   transform: rotate(90deg);
 }
 
@@ -407,8 +405,7 @@
 }
 
 /* No grab cursor when a non-order sort is active */
-.task-list[data-sort]:not([data-sort=""]):not([data-sort="order"])
-  .task-list__row {
+.task-list[data-sort]:not([data-sort=""]):not([data-sort="order"]) .task-list__row {
   cursor: default;
 }
 

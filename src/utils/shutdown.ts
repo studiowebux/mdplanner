@@ -60,7 +60,7 @@ export async function runShutdown(deps: ShutdownDeps): Promise<void> {
       log(`[shutdown] drain failed: ${String(err)}`);
     });
 
-    let timer: number | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<void>((resolve) => {
       timer = setTimeout(() => {
         log(`[shutdown] drain exceeded ${drainMs}ms — forcing exit`);

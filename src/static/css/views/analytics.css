@@ -495,26 +495,22 @@
 
 /* Band colors mirror capacity-plan-detail bandwidth bars (utilizationBand):
    80–100% healthy, 60–80% ramping, <60% underassigned, >100% overallocated. */
-.analytics__util-chart-row--ok
-  .analytics__util-chart-bar::-webkit-progress-value {
+.analytics__util-chart-row--ok .analytics__util-chart-bar::-webkit-progress-value {
   background: var(--color-success);
 }
 .analytics__util-chart-row--ok .analytics__util-chart-bar::-moz-progress-bar {
   background: var(--color-success);
 }
 
-.analytics__util-chart-row--warn
-  .analytics__util-chart-bar::-webkit-progress-value {
+.analytics__util-chart-row--warn .analytics__util-chart-bar::-webkit-progress-value {
   background: var(--color-warning);
 }
 .analytics__util-chart-row--warn .analytics__util-chart-bar::-moz-progress-bar {
   background: var(--color-warning);
 }
 
-.analytics__util-chart-row--under
-  .analytics__util-chart-bar::-webkit-progress-value,
-.analytics__util-chart-row--over
-  .analytics__util-chart-bar::-webkit-progress-value {
+.analytics__util-chart-row--under .analytics__util-chart-bar::-webkit-progress-value,
+.analytics__util-chart-row--over .analytics__util-chart-bar::-webkit-progress-value {
   background: var(--color-danger);
 }
 .analytics__util-chart-row--under .analytics__util-chart-bar::-moz-progress-bar,

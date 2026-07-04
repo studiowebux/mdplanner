@@ -144,8 +144,7 @@
 }
 
 /* Dashed underline hint when tasks exist */
-.capacity-plan-detail__cell-wrap--has-tasks
-  .capacity-plan-detail__cell-summary {
+.capacity-plan-detail__cell-wrap--has-tasks .capacity-plan-detail__cell-summary {
   cursor: default;
   border-bottom: var(--border-width) dashed var(--color-border-default);
 }

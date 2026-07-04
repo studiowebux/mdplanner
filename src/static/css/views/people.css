@@ -560,8 +560,7 @@
 /* Disabled during drag (container gets .orgchart-is-dragging via JS) */
 /* All rules share the .orgchart-tree:not(.orgchart-is-dragging) prefix for equal specificity */
 
-.orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover)
-  .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover) .orgchart-node {
   opacity: var(--orgchart-drag-opacity);
   transition: opacity var(--transition-fast);
 }
@@ -570,16 +569,11 @@
   opacity: 1;
 }
 
-.orgchart-tree:not(.orgchart-is-dragging)
-  .orgchart-node-wrapper:has(.orgchart-node:hover)
-  > .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node-wrapper:has(.orgchart-node:hover) > .orgchart-node {
   opacity: 1;
 }
 
-.orgchart-tree:not(.orgchart-is-dragging)
-  .orgchart-node:hover
-  + .orgchart-children
-  .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node:hover + .orgchart-children .orgchart-node {
   opacity: 1;
 }
 
