@@ -1,6 +1,7 @@
 // Eisenhower MCP tools — thin wrappers over the service layer.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getEisenhowerService } from "../../singletons/services.ts";
 import {
   CreateEisenhowerSchema,
@@ -65,3 +66,8 @@ export function registerEisenhowerTools(server: McpServer): void {
     return ok({ success: true });
   });
 }
+
+export const eisenhowerModule = defineMcpModule({
+  feature: "eisenhower",
+  register: registerEisenhowerTools,
+});

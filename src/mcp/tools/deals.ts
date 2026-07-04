@@ -1,6 +1,7 @@
 // MCP tools for deal operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getDealService } from "../../singletons/services.ts";
 import {
   CreateDealSchema,
@@ -42,3 +43,8 @@ export function registerDealTools(server: McpServer): void {
     },
   });
 }
+
+export const dealModule = defineMcpModule({
+  feature: "deal",
+  register: registerDealTools,
+});

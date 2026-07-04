@@ -2,6 +2,7 @@
 // All Zod schemas derived from types/milestone.types.ts — single source of truth.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getMilestoneService } from "../../singletons/services.ts";
 import {
   CreateMilestoneSchema,
@@ -139,3 +140,8 @@ export function registerMilestoneTools(server: McpServer): void {
     },
   );
 }
+
+export const milestoneModule = defineMcpModule({
+  feature: "milestone",
+  register: registerMilestoneTools,
+});

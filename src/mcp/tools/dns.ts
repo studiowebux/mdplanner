@@ -3,6 +3,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getDnsService } from "../../singletons/services.ts";
 import {
   CreateDnsDomainSchema,
@@ -177,3 +178,8 @@ export function registerDnsTools(server: McpServer): void {
     },
   );
 }
+
+export const dnsModule = defineMcpModule({
+  feature: "dns_domain",
+  register: registerDnsTools,
+});

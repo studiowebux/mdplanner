@@ -1,6 +1,7 @@
 // MCP tools for SAFe agreement operations — thin wrappers over SafeService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getSafeService } from "../../singletons/services.ts";
 import { SAFE_STATUSES, SAFE_TYPES } from "../../types/safe.types.ts";
@@ -145,3 +146,8 @@ export function registerSafeTools(server: McpServer): void {
     },
   );
 }
+
+export const safeModule = defineMcpModule({
+  feature: "safe",
+  register: registerSafeTools,
+});

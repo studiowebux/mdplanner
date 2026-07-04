@@ -1,6 +1,7 @@
 // MCP tools for brainstorm operations — thin wrappers over BrainstormService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getBrainstormService } from "../../singletons/services.ts";
 import {
   BrainstormSchema,
@@ -51,3 +52,8 @@ export function registerBrainstormTools(server: McpServer): void {
     },
   });
 }
+
+export const brainstormModule = defineMcpModule({
+  feature: "brainstorm",
+  register: registerBrainstormTools,
+});

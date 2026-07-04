@@ -1,6 +1,7 @@
 // MCP tools for finance operations — thin wrappers over FinanceService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getFinanceService } from "../../singletons/services.ts";
 import {
@@ -119,3 +120,8 @@ export function registerFinanceTools(server: McpServer): void {
     },
   );
 }
+
+export const financeModule = defineMcpModule({
+  feature: "finance",
+  register: registerFinanceTools,
+});

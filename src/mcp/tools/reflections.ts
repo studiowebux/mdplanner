@@ -1,6 +1,7 @@
 // MCP tools for reflection operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getReflectionService } from "../../singletons/services.ts";
 import {
   CreateReflectionSchema,
@@ -51,3 +52,8 @@ export function registerReflectionTools(server: McpServer): void {
     },
   });
 }
+
+export const reflectionModule = defineMcpModule({
+  feature: "reflection",
+  register: registerReflectionTools,
+});

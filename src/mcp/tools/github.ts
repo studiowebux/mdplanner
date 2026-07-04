@@ -1,6 +1,7 @@
 // MCP tools for GitHub operations — thin wrappers over GitHubService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getGitHubService } from "../../singletons/services.ts";
 import {
   CreateIssueBodySchema,
@@ -199,3 +200,8 @@ export function registerGitHubTools(server: McpServer): void {
     },
   );
 }
+
+export const gitHubModule = defineMcpModule({
+  feature: "github",
+  register: registerGitHubTools,
+});

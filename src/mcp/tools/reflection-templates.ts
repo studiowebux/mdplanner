@@ -1,6 +1,7 @@
 // MCP tools for reflection template operations — thin wrappers over ReflectionTemplateService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getReflectionTemplateService } from "../../singletons/services.ts";
 import {
   CreateReflectionTemplateSchema,
@@ -55,3 +56,8 @@ export function registerReflectionTemplateTools(server: McpServer): void {
     },
   });
 }
+
+export const reflectionTemplateModule = defineMcpModule({
+  feature: "reflection_template",
+  register: registerReflectionTemplateTools,
+});

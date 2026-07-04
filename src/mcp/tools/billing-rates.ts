@@ -1,6 +1,7 @@
 // MCP tools for billing rate operations — thin wrappers over BillingRateService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getBillingRateService } from "../../singletons/services.ts";
 import {
   BillingRateSchema,
@@ -51,3 +52,8 @@ export function registerBillingRateTools(server: McpServer): void {
     },
   });
 }
+
+export const billingRateModule = defineMcpModule({
+  feature: "rate",
+  register: registerBillingRateTools,
+});

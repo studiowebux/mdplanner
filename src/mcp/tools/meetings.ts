@@ -1,6 +1,7 @@
 // MCP tools for meeting operations — thin wrappers over MeetingService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getMeetingService } from "../../singletons/services.ts";
 import {
   CreateMeetingSchema,
@@ -149,3 +150,8 @@ export function registerMeetingTools(server: McpServer): void {
     },
   );
 }
+
+export const meetingModule = defineMcpModule({
+  feature: "meeting",
+  register: registerMeetingTools,
+});

@@ -1,6 +1,7 @@
 // SWOT MCP tools — thin wrappers over the service layer.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getSwotService } from "../../singletons/services.ts";
 import {
   CreateSwotSchema,
@@ -52,3 +53,8 @@ export function registerSwotTools(server: McpServer): void {
     },
   });
 }
+
+export const swotModule = defineMcpModule({
+  feature: "swot",
+  register: registerSwotTools,
+});

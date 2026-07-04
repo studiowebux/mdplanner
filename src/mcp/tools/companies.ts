@@ -1,6 +1,7 @@
 // MCP tools for company operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getCompanyService } from "../../singletons/services.ts";
 import {
   CompanySchema,
@@ -52,3 +53,8 @@ export function registerCompanyTools(server: McpServer): void {
     },
   });
 }
+
+export const companyModule = defineMcpModule({
+  feature: "company",
+  register: registerCompanyTools,
+});

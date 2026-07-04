@@ -1,6 +1,7 @@
 // MCP tools for Lean Canvas operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getLeanCanvasService } from "../../singletons/services.ts";
 import {
   CreateLeanCanvasSchema,
@@ -52,3 +53,8 @@ export function registerLeanCanvasTools(server: McpServer): void {
     },
   });
 }
+
+export const leanCanvasModule = defineMcpModule({
+  feature: "lean_canvas",
+  register: registerLeanCanvasTools,
+});

@@ -1,6 +1,7 @@
 // MCP tools for capacity plan operations — thin wrappers over CapacityPlanService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getCapacityPlanService } from "../../singletons/services.ts";
 import {
   CapacityPlanSchema,
@@ -178,3 +179,8 @@ export function registerCapacityPlanTools(server: McpServer): void {
     },
   );
 }
+
+export const capacityPlanModule = defineMcpModule({
+  feature: "capacity_plan",
+  register: registerCapacityPlanTools,
+});

@@ -1,6 +1,7 @@
 // MCP tools for onboarding flow operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getOnboardingService } from "../../singletons/services.ts";
 import {
   CreateOnboardingSchema,
@@ -51,3 +52,8 @@ export function registerOnboardingTools(server: McpServer): void {
     },
   });
 }
+
+export const onboardingModule = defineMcpModule({
+  feature: "onboarding",
+  register: registerOnboardingTools,
+});

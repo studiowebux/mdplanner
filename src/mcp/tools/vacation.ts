@@ -1,6 +1,7 @@
 // MCP tools for vacation request operations — thin wrappers over VacationService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getVacationService } from "../../singletons/services.ts";
 import {
   CreateVacationRequestSchema,
@@ -84,3 +85,8 @@ export function registerVacationTools(server: McpServer): void {
     },
   );
 }
+
+export const vacationModule = defineMcpModule({
+  feature: "vacation",
+  register: registerVacationTools,
+});

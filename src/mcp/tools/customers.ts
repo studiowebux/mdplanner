@@ -1,6 +1,7 @@
 // MCP tools for customer operations — thin wrappers over CustomerService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getCustomerService } from "../../singletons/services.ts";
 import {
   CreateCustomerSchema,
@@ -50,3 +51,8 @@ export function registerCustomerTools(server: McpServer): void {
     },
   });
 }
+
+export const customerModule = defineMcpModule({
+  feature: "customer",
+  register: registerCustomerTools,
+});

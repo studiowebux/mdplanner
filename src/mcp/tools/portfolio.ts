@@ -3,6 +3,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getPortfolioService } from "../../singletons/services.ts";
 import {
   AddStatusUpdateSchema,
@@ -197,3 +198,8 @@ export function registerPortfolioTools(server: McpServer): void {
     },
   );
 }
+
+export const portfolioModule = defineMcpModule({
+  feature: "portfolio",
+  register: registerPortfolioTools,
+});

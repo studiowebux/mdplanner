@@ -3,6 +3,7 @@
 // human-type person in the registry.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getPeopleService } from "../../singletons/services.ts";
 import { resolveActivePerson } from "../../utils/actor.ts";
@@ -62,3 +63,8 @@ export function registerPreferenceTools(server: McpServer): void {
     },
   );
 }
+
+export const preferenceModule = defineMcpModule({
+  feature: null,
+  register: registerPreferenceTools,
+});

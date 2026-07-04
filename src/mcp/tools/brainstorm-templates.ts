@@ -1,6 +1,7 @@
 // MCP tools for brainstorm template operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getBrainstormTemplateService } from "../../singletons/services.ts";
 import {
   BrainstormTemplateSchema,
@@ -55,3 +56,8 @@ export function registerBrainstormTemplateTools(server: McpServer): void {
     },
   });
 }
+
+export const brainstormTemplateModule = defineMcpModule({
+  feature: "brainstorm_template",
+  register: registerBrainstormTemplateTools,
+});

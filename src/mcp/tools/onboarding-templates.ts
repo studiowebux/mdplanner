@@ -1,6 +1,7 @@
 // MCP tools for onboarding template operations — thin wrappers over OnboardingTemplateService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getOnboardingTemplateService } from "../../singletons/services.ts";
 import {
   CreateOnboardingTemplateSchema,
@@ -55,3 +56,8 @@ export function registerOnboardingTemplateTools(server: McpServer): void {
     },
   });
 }
+
+export const onboardingTemplateModule = defineMcpModule({
+  feature: "onboarding_template",
+  register: registerOnboardingTemplateTools,
+});

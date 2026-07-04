@@ -1,6 +1,7 @@
 // MCP tools for sticky note + board operations — thin wrappers over services.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "@hono/zod-openapi";
 import {
   getStickyBoardService,
@@ -234,3 +235,8 @@ export function registerStickyNoteTools(server: McpServer): void {
     },
   );
 }
+
+export const stickyNoteModule = defineMcpModule({
+  feature: "sticky_note",
+  register: registerStickyNoteTools,
+});

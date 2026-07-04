@@ -1,6 +1,7 @@
 // MCP tools for invoice operations — thin wrappers over InvoiceService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getInvoiceService } from "../../singletons/services.ts";
 import {
   CreateInvoiceSchema,
@@ -52,3 +53,8 @@ export function registerInvoiceTools(server: McpServer): void {
     },
   });
 }
+
+export const invoiceModule = defineMcpModule({
+  feature: "invoice",
+  register: registerInvoiceTools,
+});

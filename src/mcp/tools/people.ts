@@ -2,6 +2,7 @@
 // All Zod schemas derived from types/person.types.ts — single source of truth.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getPeopleService } from "../../singletons/services.ts";
 import {
   CreatePersonSchema,
@@ -260,3 +261,8 @@ export function registerPeopleTools(server: McpServer): void {
     },
   );
 }
+
+export const peopleModule = defineMcpModule({
+  feature: "person",
+  register: registerPeopleTools,
+});

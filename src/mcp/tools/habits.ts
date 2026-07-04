@@ -1,6 +1,7 @@
 // MCP tools for habit operations — thin wrappers over HabitService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getHabitService } from "../../singletons/services.ts";
 import {
@@ -149,3 +150,8 @@ export function registerHabitTools(server: McpServer): void {
     },
   );
 }
+
+export const habitModule = defineMcpModule({
+  feature: "habit",
+  register: registerHabitTools,
+});

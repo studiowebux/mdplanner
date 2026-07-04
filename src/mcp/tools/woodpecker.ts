@@ -1,6 +1,7 @@
 // MCP tools for Woodpecker CI — thin wrappers over WoodpeckerService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getWoodpeckerService } from "../../singletons/services.ts";
 import {
   WoodpeckerLimitInput,
@@ -71,3 +72,8 @@ export function registerWoodpeckerTools(server: McpServer): void {
     },
   );
 }
+
+export const woodpeckerModule = defineMcpModule({
+  feature: "ci",
+  register: registerWoodpeckerTools,
+});

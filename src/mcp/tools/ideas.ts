@@ -1,6 +1,7 @@
 // MCP tools for idea operations — thin wrappers over IdeaService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getIdeaService } from "../../singletons/services.ts";
 import {
   CreateIdeaSchema,
@@ -140,3 +141,8 @@ export function registerIdeaTools(server: McpServer): void {
     },
   );
 }
+
+export const ideaModule = defineMcpModule({
+  feature: "idea",
+  register: registerIdeaTools,
+});

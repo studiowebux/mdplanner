@@ -1,6 +1,7 @@
 // Mindmap MCP tools — thin wrappers over the service layer.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getMindmapService } from "../../singletons/services.ts";
 import {
   CreateMindmapSchema,
@@ -65,3 +66,8 @@ export function registerMindmapTools(server: McpServer): void {
     return ok({ success: true });
   });
 }
+
+export const mindmapModule = defineMcpModule({
+  feature: "mindmap",
+  register: registerMindmapTools,
+});

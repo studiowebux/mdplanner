@@ -1,6 +1,7 @@
 // MCP tools for business model operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getBusinessModelService } from "../../singletons/services.ts";
 import {
   BusinessModelSchema,
@@ -51,3 +52,8 @@ export function registerBusinessModelTools(server: McpServer): void {
     },
   });
 }
+
+export const businessModelModule = defineMcpModule({
+  feature: "business_model",
+  register: registerBusinessModelTools,
+});

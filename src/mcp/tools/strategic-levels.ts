@@ -1,6 +1,7 @@
 // MCP tools for Strategic Levels Builder operations — thin wrappers over StrategicLevelsService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getStrategicLevelsService } from "../../singletons/services.ts";
 import {
@@ -245,3 +246,8 @@ export function registerStrategicLevelsTools(server: McpServer): void {
     },
   );
 }
+
+export const strategicLevelsModule = defineMcpModule({
+  feature: "strategic_builder",
+  register: registerStrategicLevelsTools,
+});

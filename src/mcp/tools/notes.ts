@@ -2,6 +2,7 @@
 // All Zod schemas derived from types/note.types.ts — single source of truth.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getNoteService } from "../../singletons/services.ts";
 import {
@@ -129,3 +130,8 @@ export function registerNoteTools(server: McpServer): void {
     },
   );
 }
+
+export const noteModule = defineMcpModule({
+  feature: "note",
+  register: registerNoteTools,
+});

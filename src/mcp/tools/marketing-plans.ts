@@ -1,6 +1,7 @@
 // Marketing Plan MCP tools — thin wrappers over the service layer.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getMarketingPlanService } from "../../singletons/services.ts";
 import {
   CreateMarketingPlanSchema,
@@ -52,3 +53,8 @@ export function registerMarketingPlanTools(server: McpServer): void {
     },
   });
 }
+
+export const marketingPlanModule = defineMcpModule({
+  feature: "marketing_plan",
+  register: registerMarketingPlanTools,
+});

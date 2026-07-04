@@ -1,6 +1,7 @@
 // MCP tools for quote operations — thin wrappers over QuoteService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getQuoteService } from "../../singletons/services.ts";
 import {
   CreateQuoteSchema,
@@ -52,3 +53,8 @@ export function registerQuoteTools(server: McpServer): void {
     },
   });
 }
+
+export const quoteModule = defineMcpModule({
+  feature: "quote",
+  register: registerQuoteTools,
+});

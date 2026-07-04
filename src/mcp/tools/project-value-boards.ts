@@ -1,6 +1,7 @@
 // MCP tools for Project Value Board operations — thin wrappers over ProjectValueBoardService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
 import { getProjectValueBoardService } from "../../singletons/services.ts";
 import { type ProjectValueBoardSectionKey } from "../../types/project-value-board.types.ts";
@@ -218,3 +219,8 @@ export function registerProjectValueBoardTools(server: McpServer): void {
     },
   );
 }
+
+export const projectValueBoardModule = defineMcpModule({
+  feature: "project_value",
+  register: registerProjectValueBoardTools,
+});

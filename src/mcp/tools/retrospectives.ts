@@ -1,6 +1,7 @@
 // MCP tools for retrospective operations — thin wrappers over RetrospectiveService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getRetrospectiveService } from "../../singletons/services.ts";
 import {
   CreateRetrospectiveSchema,
@@ -51,3 +52,8 @@ export function registerRetrospectiveTools(server: McpServer): void {
     },
   });
 }
+
+export const retrospectiveModule = defineMcpModule({
+  feature: "retrospective",
+  register: registerRetrospectiveTools,
+});

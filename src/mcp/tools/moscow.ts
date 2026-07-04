@@ -1,6 +1,7 @@
 // MCP tools for MoSCoW board operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getMoscowService } from "../../singletons/services.ts";
 import {
   CreateMoscowSchema,
@@ -51,3 +52,8 @@ export function registerMoscowTools(server: McpServer): void {
     },
   });
 }
+
+export const moscowModule = defineMcpModule({
+  feature: "moscow",
+  register: registerMoscowTools,
+});

@@ -151,6 +151,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   ai_chat: "AI Chat",
   analytics: "Analytics",
   github: "Git",
+  ci: "CI",
   upload: "Uploads",
   dashboard: "Dashboard",
   portfolio_grid: "Portfolio Grid",
@@ -210,7 +211,7 @@ export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
   Notes: ["note", "journal", "habit"],
   Diagrams: ["sticky_note", "mindmap", "c4_component"],
   Portfolio: ["portfolio", "dashboard", "portfolio_grid"],
-  Infrastructure: ["dns_domain", "github"],
+  Infrastructure: ["dns_domain", "github", "ci"],
   AI: ["ai_chat"],
   Tools: ["analytics", "upload", "cerveau"],
 };

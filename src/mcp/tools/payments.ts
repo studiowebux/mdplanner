@@ -1,6 +1,7 @@
 // MCP tools for payment operations — thin wrappers over PaymentService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getPaymentService } from "../../singletons/services.ts";
 import {
   CreatePaymentSchema,
@@ -82,3 +83,8 @@ export function registerPaymentTools(server: McpServer): void {
     },
   );
 }
+
+export const paymentModule = defineMcpModule({
+  feature: "payment",
+  register: registerPaymentTools,
+});

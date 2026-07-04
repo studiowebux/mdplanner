@@ -3,6 +3,7 @@
 // shape reuses ContextPackQuerySchema so the query contract lives in one place.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { ContextPackQuerySchema } from "../../types/context-pack.types.ts";
 import { assembleContextPack } from "../../services/context-pack.service.ts";
 import { ok } from "../utils.ts";
@@ -29,3 +30,8 @@ export function registerContextPackTools(server: McpServer): void {
       ok(await assembleContextPack({ project, milestone })),
   );
 }
+
+export const contextPackModule = defineMcpModule({
+  feature: null,
+  register: registerContextPackTools,
+});

@@ -1,6 +1,7 @@
 // MCP tools for goal operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getGoalService } from "../../singletons/services.ts";
 import {
   CreateGoalSchema,
@@ -45,3 +46,8 @@ export function registerGoalTools(server: McpServer): void {
     },
   });
 }
+
+export const goalModule = defineMcpModule({
+  feature: "goal",
+  register: registerGoalTools,
+});

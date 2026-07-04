@@ -2,6 +2,7 @@
 // All Zod schemas derived from types/c4.types.ts — single source of truth.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "@hono/zod-openapi";
 import { getC4Service } from "../../singletons/services.ts";
 import {
@@ -172,3 +173,8 @@ export function registerC4Tools(server: McpServer): void {
     },
   );
 }
+
+export const c4Module = defineMcpModule({
+  feature: "c4_component",
+  register: registerC4Tools,
+});

@@ -1,6 +1,7 @@
 // MCP tools for investor operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getInvestorService } from "../../singletons/services.ts";
 import {
   CreateInvestorSchema,
@@ -51,3 +52,8 @@ export function registerInvestorTools(server: McpServer): void {
     },
   });
 }
+
+export const investorModule = defineMcpModule({
+  feature: "investor",
+  register: registerInvestorTools,
+});

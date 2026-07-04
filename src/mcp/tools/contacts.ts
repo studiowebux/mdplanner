@@ -1,6 +1,7 @@
 // MCP tools for contact operations — thin wrappers over ContactService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getContactService } from "../../singletons/services.ts";
 import {
   ContactSchema,
@@ -81,3 +82,8 @@ export function registerContactTools(server: McpServer): void {
     },
   );
 }
+
+export const contactModule = defineMcpModule({
+  feature: "contact",
+  register: registerContactTools,
+});

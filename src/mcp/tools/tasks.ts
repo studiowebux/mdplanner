@@ -7,6 +7,7 @@
 // preserved exactly from the original flat file.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { createTaskToolContext } from "./tasks/context.ts";
 import { registerTaskCrudTools } from "./tasks/crud.ts";
 import { registerTaskWorkflowTools } from "./tasks/workflow.ts";
@@ -26,3 +27,8 @@ export function registerTaskTools(server: McpServer): void {
   registerTaskTimeTools(server, ctx); // time entries
   registerTaskGithubTools(server, ctx); // github issue/PR linking
 }
+
+export const taskModule = defineMcpModule({
+  feature: "task",
+  register: registerTaskTools,
+});

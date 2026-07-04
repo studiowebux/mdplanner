@@ -1,6 +1,7 @@
 // MCP tools for fishbone operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getFishboneService } from "../../singletons/services.ts";
 import {
   CreateFishboneSchema,
@@ -51,3 +52,8 @@ export function registerFishboneTools(server: McpServer): void {
     },
   });
 }
+
+export const fishboneModule = defineMcpModule({
+  feature: "fishbone",
+  register: registerFishboneTools,
+});

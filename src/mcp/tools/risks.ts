@@ -1,6 +1,7 @@
 // MCP tools for risk operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getRiskService } from "../../singletons/services.ts";
 import {
   CreateRiskSchema,
@@ -42,3 +43,8 @@ export function registerRiskTools(server: McpServer): void {
     },
   });
 }
+
+export const riskModule = defineMcpModule({
+  feature: "risk",
+  register: registerRiskTools,
+});

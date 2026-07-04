@@ -12,7 +12,7 @@ links:
     title: Discord
   - url: "https://figma.com/file/taskflow"
     title: Figma Designs
-features: [ai_chat, analytics, rate, brainstorm, brainstorm_template, brief, business_model, c4_component, capacity_plan, company, contact, customer, dashboard, deal, dns_domain, eisenhower, finance, fishbone, github, goal, habit, idea, investor, invoice, journal, lean_canvas, marketing_plan, meeting, milestone, mindmap, moscow, note, onboarding, onboarding_template, payment, person, portfolio, project_value, quote, reflection, reflection_template, retrospective, risk, safe, safe_agreement, sticky_note, strategic_builder, swot, task, time_entry, upload, me]
+features: [ai_chat, analytics, rate, brainstorm, brainstorm_template, brief, business_model, c4_component, capacity_plan, company, contact, customer, dashboard, deal, dns_domain, eisenhower, finance, fishbone, github, ci, goal, habit, idea, investor, invoice, journal, lean_canvas, marketing_plan, meeting, milestone, mindmap, moscow, note, onboarding, onboarding_template, payment, person, portfolio, project_value, quote, reflection, reflection_template, retrospective, risk, safe, safe_agreement, sticky_note, strategic_builder, swot, task, time_entry, upload, me]
 nav_categories:
   Personal: [me]
   Admin: [upload, analytics]

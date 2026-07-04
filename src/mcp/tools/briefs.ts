@@ -1,6 +1,7 @@
 // MCP tools for brief operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { getBriefService } from "../../singletons/services.ts";
 import {
   BriefSchema,
@@ -42,3 +43,8 @@ export function registerBriefTools(server: McpServer): void {
     },
   });
 }
+
+export const briefModule = defineMcpModule({
+  feature: "brief",
+  register: registerBriefTools,
+});
