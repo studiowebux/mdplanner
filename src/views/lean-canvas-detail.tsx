@@ -2,12 +2,8 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
-import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { LeanCanvas } from "../types/lean-canvas.types.ts";
-import {
-  LEAN_CANVAS_SECTIONS,
-  type LeanCanvasSectionKey,
-} from "../types/lean-canvas.types.ts";
+import { LEAN_CANVAS_SECTIONS } from "../types/lean-canvas.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
@@ -15,88 +11,7 @@ import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
-
-// ---------------------------------------------------------------------------
-// Section block
-// ---------------------------------------------------------------------------
-
-const SectionBlock: FC<{
-  id: string;
-  sectionKey: LeanCanvasSectionKey;
-  label: string;
-  items: string[];
-  editing: boolean;
-  editSuffix: string;
-}> = ({ id, sectionKey, label, items, editing, editSuffix }) => (
-  <div class="lc-section">
-    <h3 class="lc-section__title">{label}</h3>
-    {items.length === 0 && !editing
-      ? <p class="lc-section__empty">Add items…</p>
-      : (
-        <ul class="lc-section__list">
-          {items.map((item, idx) =>
-            editing
-              ? (
-                <li key={idx} class="quadrant-card__item">
-                  <textarea
-                    id={`qed-${sectionKey}-${idx}`}
-                    class="quadrant-card__inline-edit quadrant-card__textarea"
-                    name="text"
-                    data-quadrant-edit={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-put={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-trigger="quadrant-save"
-                    hx-target="#lc-detail-root"
-                    hx-select="#lc-detail-root"
-                    hx-swap="outerHTML"
-                    hx-include="this"
-                  >
-                    {item}
-                  </textarea>
-                  <button
-                    type="button"
-                    class="quadrant-card__save btn btn--primary btn--sm is-hidden"
-                    data-quadrant-save-for={`qed-${sectionKey}-${idx}`}
-                    aria-label="Save"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    type="button"
-                    class="quadrant-card__remove"
-                    hx-delete={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    {...immediateDeleteConfirm(`"${item}"`)}
-                    hx-target="#lc-detail-root"
-                    hx-select="#lc-detail-root"
-                    hx-swap="outerHTML"
-                    aria-label={`Remove "${item}"`}
-                  >
-                    &times;
-                  </button>
-                </li>
-              )
-              : <li key={idx}>{item}</li>
-          )}
-        </ul>
-      )}
-    {editing && (
-      <form
-        class="quadrant-card__add"
-        hx-post={`/lean-canvases/${id}/${sectionKey}${editSuffix}`}
-        hx-target="#lc-detail-root"
-        hx-select="#lc-detail-root"
-        hx-swap="outerHTML"
-      >
-        <input
-          type="text"
-          class="quadrant-card__input quadrant-card__input--ghost"
-          name="text"
-          placeholder={`Add ${label.toLowerCase()}…`}
-          autocomplete="off"
-        />
-      </form>
-    )}
-  </div>
-);
+import { CanvasSectionBlock } from "./components/canvas-section-block.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -170,7 +85,9 @@ export const LeanCanvasDetailView: FC<
               key={s.key}
               class={`lc-canvas__cell lc-canvas__cell--${s.key}`}
             >
-              <SectionBlock
+              <CanvasSectionBlock
+                basePath="/lean-canvases"
+                rootId="lc-detail-root"
                 id={lc.id}
                 sectionKey={s.key}
                 label={s.label}

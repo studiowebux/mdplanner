@@ -2,12 +2,8 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { Breadcrumb } from "../components/ui/breadcrumb.tsx";
-import { immediateDeleteConfirm } from "../utils/confirm.ts";
 import type { BusinessModel } from "../types/business-model.types.ts";
-import {
-  BUSINESS_MODEL_SECTION_KEYS,
-  type BusinessModelSectionKey,
-} from "../types/business-model.types.ts";
+import { BUSINESS_MODEL_SECTION_KEYS } from "../types/business-model.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
@@ -15,6 +11,7 @@ import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { InlineEditable } from "./components/inline-editable.tsx";
+import { CanvasSectionBlock } from "./components/canvas-section-block.tsx";
 import { ArchivedBanner } from "./components/archived-banner.tsx";
 import { BUSINESS_MODEL_SECTION_META } from "../domains/business-model/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -36,88 +33,6 @@ const NotesSection: FC<{ bmc: BusinessModel }> = ({ bmc }) => (
       rootId="bmc-detail-root"
     />
   </section>
-);
-
-// ---------------------------------------------------------------------------
-// Section block
-// ---------------------------------------------------------------------------
-
-const SectionBlock: FC<{
-  id: string;
-  sectionKey: BusinessModelSectionKey;
-  label: string;
-  items: string[];
-  editing: boolean;
-  editSuffix: string;
-}> = ({ id, sectionKey, label, items, editing, editSuffix }) => (
-  <div class="lc-section">
-    <h3 class="lc-section__title">{label}</h3>
-    {items.length === 0 && !editing
-      ? <p class="lc-section__empty">Add items…</p>
-      : (
-        <ul class="lc-section__list">
-          {items.map((item, idx) =>
-            editing
-              ? (
-                <li key={idx} class="quadrant-card__item">
-                  <textarea
-                    id={`qed-${sectionKey}-${idx}`}
-                    class="quadrant-card__inline-edit quadrant-card__textarea"
-                    name="text"
-                    data-quadrant-edit={`/business-models/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-put={`/business-models/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    hx-trigger="quadrant-save"
-                    hx-target="#bmc-detail-root"
-                    hx-select="#bmc-detail-root"
-                    hx-swap="outerHTML"
-                    hx-include="this"
-                  >
-                    {item}
-                  </textarea>
-                  <button
-                    type="button"
-                    class="quadrant-card__save btn btn--primary btn--sm is-hidden"
-                    data-quadrant-save-for={`qed-${sectionKey}-${idx}`}
-                    aria-label="Save"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    type="button"
-                    class="quadrant-card__remove"
-                    hx-delete={`/business-models/${id}/${sectionKey}/${idx}${editSuffix}`}
-                    {...immediateDeleteConfirm(`"${item}"`)}
-                    hx-target="#bmc-detail-root"
-                    hx-select="#bmc-detail-root"
-                    hx-swap="outerHTML"
-                    aria-label={`Remove "${item}"`}
-                  >
-                    &times;
-                  </button>
-                </li>
-              )
-              : <li key={idx}>{item}</li>
-          )}
-        </ul>
-      )}
-    {editing && (
-      <form
-        class="quadrant-card__add"
-        hx-post={`/business-models/${id}/${sectionKey}${editSuffix}`}
-        hx-target="#bmc-detail-root"
-        hx-select="#bmc-detail-root"
-        hx-swap="outerHTML"
-      >
-        <input
-          type="text"
-          class="quadrant-card__input quadrant-card__input--ghost"
-          name="text"
-          placeholder={`Add ${label.toLowerCase()}…`}
-          autocomplete="off"
-        />
-      </form>
-    )}
-  </div>
 );
 
 // ---------------------------------------------------------------------------
@@ -193,7 +108,9 @@ export const BusinessModelDetailView: FC<
                 key={key}
                 class={`lc-canvas__cell bmc-canvas__cell--${meta.gridArea}`}
               >
-                <SectionBlock
+                <CanvasSectionBlock
+                  basePath="/business-models"
+                  rootId="bmc-detail-root"
                   id={bmc.id}
                   sectionKey={key}
                   label={meta.label}
