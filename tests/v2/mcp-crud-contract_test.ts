@@ -16,6 +16,7 @@ import { initServices } from "../../src/singletons/services.ts";
 import { registerBriefTools } from "../../src/mcp/tools/briefs.ts";
 import { registerBusinessModelTools } from "../../src/mcp/tools/business-models.ts";
 import { registerCompanyTools } from "../../src/mcp/tools/companies.ts";
+import { registerContactTools } from "../../src/mcp/tools/contacts.ts";
 import { registerDealTools } from "../../src/mcp/tools/deals.ts";
 import { registerFishboneTools } from "../../src/mcp/tools/fishbone.ts";
 import { registerGoalTools } from "../../src/mcp/tools/goals.ts";
@@ -24,6 +25,7 @@ import { registerJournalTools } from "../../src/mcp/tools/journal.ts";
 import { registerLeanCanvasTools } from "../../src/mcp/tools/lean-canvases.ts";
 import { registerMoscowTools } from "../../src/mcp/tools/moscow.ts";
 import { registerOnboardingTools } from "../../src/mcp/tools/onboarding.ts";
+import { registerPaymentTools } from "../../src/mcp/tools/payments.ts";
 import { registerReflectionTools } from "../../src/mcp/tools/reflections.ts";
 import { registerRiskTools } from "../../src/mcp/tools/risks.ts";
 import { registerBrainstormTemplateTools } from "../../src/mcp/tools/brainstorm-templates.ts";
@@ -301,6 +303,77 @@ const GOLDEN: Record<string, CapturedTool[]> = {
         "id",
       ],
       "notFound": "Error: Company '__missing__' not found",
+    },
+  ],
+  "contacts": [
+    {
+      "name": "list_contacts",
+      "description":
+        "List contacts. Optionally filter by q (matches name/email/role/company/notes), type (lead/customer/partner/vendor/other), or company.",
+      "inputKeys": [
+        "company",
+        "q",
+        "type",
+      ],
+      "notFound": null,
+    },
+    {
+      "name": "get_contact",
+      "description": "Get a single contact by its ID.",
+      "inputKeys": [
+        "id",
+      ],
+      "notFound": "Error: Contact '__missing__' not found",
+    },
+    {
+      "name": "get_contact_by_name",
+      "description":
+        "Find a contact by its name (case-insensitive). Returns the first match.",
+      "inputKeys": [
+        "name",
+      ],
+      "notFound": "Error: Contact '__missing__' not found",
+    },
+    {
+      "name": "create_contact",
+      "description":
+        "Create a new CRM contact. Provide name (required), and optionally email, phone, role, company, type, notes, tags.",
+      "inputKeys": [
+        "company",
+        "email",
+        "name",
+        "notes",
+        "phone",
+        "role",
+        "tags",
+        "type",
+      ],
+      "notFound": null,
+    },
+    {
+      "name": "update_contact",
+      "description": "Update an existing contact's fields.",
+      "inputKeys": [
+        "company",
+        "email",
+        "id",
+        "name",
+        "notes",
+        "phone",
+        "positionHistory",
+        "role",
+        "tags",
+        "type",
+      ],
+      "notFound": "Error: Contact '__missing__' not found",
+    },
+    {
+      "name": "delete_contact",
+      "description": "Delete a contact by its ID.",
+      "inputKeys": [
+        "id",
+      ],
+      "notFound": "Error: Contact '__missing__' not found",
     },
   ],
   "deals": [
@@ -898,6 +971,73 @@ const GOLDEN: Record<string, CapturedTool[]> = {
       "notFound": "Error: Onboarding '__missing__' not found",
     },
   ],
+  "payments": [
+    {
+      "name": "list_payments",
+      "description":
+        "List all payments. Optionally filter by invoiceId, method, or search query.",
+      "inputKeys": [
+        "invoiceId",
+        "method",
+        "q",
+      ],
+      "notFound": null,
+    },
+    {
+      "name": "get_payment",
+      "description": "Get a single payment by its ID.",
+      "inputKeys": [
+        "id",
+      ],
+      "notFound": "Error: Payment '__missing__' not found",
+    },
+    {
+      "name": "get_payment_by_name",
+      "description":
+        "Get a payment by its reference (case-insensitive). Prefer this over list_payments when the reference is known.",
+      "inputKeys": [
+        "name",
+      ],
+      "notFound": "Error: Payment '__missing__' not found",
+    },
+    {
+      "name": "create_payment",
+      "description":
+        "Create a payment. Automatically updates the linked invoice's paidAmount and status.",
+      "inputKeys": [
+        "amount",
+        "date",
+        "invoiceId",
+        "method",
+        "notes",
+        "reference",
+      ],
+      "notFound": null,
+    },
+    {
+      "name": "update_payment",
+      "description": "Update an existing payment's fields.",
+      "inputKeys": [
+        "amount",
+        "date",
+        "id",
+        "invoiceId",
+        "method",
+        "notes",
+        "reference",
+      ],
+      "notFound": "Error: Payment '__missing__' not found",
+    },
+    {
+      "name": "delete_payment",
+      "description":
+        "Delete a payment. Automatically updates the linked invoice's paidAmount and status.",
+      "inputKeys": [
+        "id",
+      ],
+      "notFound": "Error: Payment '__missing__' not found",
+    },
+  ],
   "reflections": [
     {
       "name": "list_reflections",
@@ -1113,6 +1253,7 @@ Deno.test("MCP CRUD contract — factory-driven domains stay byte-identical", as
       ["briefs", registerBriefTools],
       ["business-models", registerBusinessModelTools],
       ["companies", registerCompanyTools],
+      ["contacts", registerContactTools],
       ["deals", registerDealTools],
       ["fishbone", registerFishboneTools],
       ["goals", registerGoalTools],
@@ -1121,6 +1262,7 @@ Deno.test("MCP CRUD contract — factory-driven domains stay byte-identical", as
       ["lean-canvases", registerLeanCanvasTools],
       ["moscow", registerMoscowTools],
       ["onboarding", registerOnboardingTools],
+      ["payments", registerPaymentTools],
       ["reflections", registerReflectionTools],
       ["risks", registerRiskTools],
       ["brainstorm-templates", registerBrainstormTemplateTools],

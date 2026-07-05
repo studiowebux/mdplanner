@@ -1,6 +1,7 @@
 // MCP tools for payment operations — thin wrappers over PaymentService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "@hono/zod-openapi";
 import { defineMcpModule } from "../module.ts";
 import { getPaymentService } from "../../singletons/services.ts";
 import {
@@ -9,79 +10,49 @@ import {
   PaymentSchema,
   UpdatePaymentSchema,
 } from "../../types/payment.types.ts";
-import { err, ok } from "../utils.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
 export function registerPaymentTools(server: McpServer): void {
-  const service = getPaymentService();
-
-  server.registerTool(
-    "list_payments",
-    {
-      description:
-        "List all payments. Optionally filter by invoiceId, method, or search query.",
-      inputSchema: ListPaymentOptionsSchema.shape,
-    },
-    async ({ invoiceId, method, q }) => {
-      const payments = await service.list({ invoiceId, method, q });
-      return ok(payments);
-    },
-  );
-
-  server.registerTool(
-    "get_payment",
-    {
-      description: "Get a single payment by its ID.",
-      inputSchema: { id: PaymentSchema.shape.id.describe("Payment ID") },
-    },
-    async ({ id }) => {
-      const payment = await service.getById(id);
-      if (!payment) return err(`Payment '${id}' not found`);
-      return ok(payment);
-    },
-  );
-
-  server.registerTool(
-    "create_payment",
-    {
-      description:
-        "Create a payment. Automatically updates the linked invoice's paidAmount and status.",
-      inputSchema: CreatePaymentSchema.shape,
-    },
-    async (data) => {
-      const payment = await service.create(data);
-      return ok({ id: payment.id });
-    },
-  );
-
-  server.registerTool(
-    "update_payment",
-    {
-      description: "Update an existing payment's fields.",
-      inputSchema: {
-        id: PaymentSchema.shape.id.describe("Payment ID"),
-        ...UpdatePaymentSchema.shape,
+  registerCrudTools(server, {
+    service: getPaymentService(),
+    notFoundLabel: "Payment",
+    idParam: PaymentSchema.shape.id.describe("Payment ID"),
+    nameParam: z.string().describe("Payment reference"),
+    listSchema: ListPaymentOptionsSchema,
+    createSchema: CreatePaymentSchema,
+    updateSchema: UpdatePaymentSchema,
+    mutationReturn: "id-success",
+    tools: {
+      list: {
+        name: "list_payments",
+        description:
+          "List all payments. Optionally filter by invoiceId, method, or search query.",
+      },
+      get: {
+        name: "get_payment",
+        description: "Get a single payment by its ID.",
+      },
+      getByName: {
+        name: "get_payment_by_name",
+        description:
+          "Get a payment by its reference (case-insensitive). Prefer this over list_payments when the reference is known.",
+      },
+      create: {
+        name: "create_payment",
+        description:
+          "Create a payment. Automatically updates the linked invoice's paidAmount and status.",
+      },
+      update: {
+        name: "update_payment",
+        description: "Update an existing payment's fields.",
+      },
+      delete: {
+        name: "delete_payment",
+        description:
+          "Delete a payment. Automatically updates the linked invoice's paidAmount and status.",
       },
     },
-    async ({ id, ...fields }) => {
-      const payment = await service.update(id, fields);
-      if (!payment) return err(`Payment '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_payment",
-    {
-      description:
-        "Delete a payment. Automatically updates the linked invoice's paidAmount and status.",
-      inputSchema: { id: PaymentSchema.shape.id.describe("Payment ID") },
-    },
-    async ({ id }) => {
-      const success = await service.delete(id);
-      if (!success) return err(`Payment '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
 
 export const paymentModule = defineMcpModule({
