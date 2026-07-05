@@ -376,17 +376,7 @@
   gap: var(--space-md);
 }
 
-.analytics__stat-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-md) var(--space-sm);
-  background: var(--color-bg-primary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-  border-radius: var(--radius-sm);
-  text-align: center;
-}
+/* .analytics__stat-card shared with .person-detail__stat-card (components.css) */
 
 .analytics__stat-value {
   font-size: var(--analytics-stat-value-size);

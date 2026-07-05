@@ -11,7 +11,7 @@
 
 .identity-card {
   background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-default);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
   width: 100%;
@@ -56,7 +56,7 @@
   width: 100%;
   padding: var(--space-sm) var(--space-md);
   background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border-default);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);

@@ -15,7 +15,8 @@
 .quote-detail__lock-notice {
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
-  border-left: 3px var(--border-style) var(--color-border-default);
+  border-left: var(--border-width-thick) var(--border-style)
+    var(--color-border-default);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);

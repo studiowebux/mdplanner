@@ -114,34 +114,9 @@
   border-bottom-color: var(--color-accent);
 }
 
-.sl-item__remove {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-lg);
-  height: var(--space-lg);
-  background: var(--color-bg-tertiary);
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-md);
-  line-height: 1;
-  cursor: pointer;
-  opacity: 0;
-  transition:
-    opacity var(--transition-fast),
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
+/* .sl-item__remove base + :hover shared with .quadrant-card__remove (components.css) */
 .sl-item:hover .sl-item__remove {
   opacity: 1;
-}
-
-.sl-item__remove:hover {
-  background: var(--color-error-bg);
-  color: var(--color-error);
 }
 
 .sl-detail--editing .sl-item:hover {

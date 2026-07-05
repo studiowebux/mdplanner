@@ -36,7 +36,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   padding-bottom: var(--space-xs);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: var(--border-width) solid var(--color-border-default);
 }
 
 .me-dashboard__list {

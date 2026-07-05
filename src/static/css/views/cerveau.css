@@ -43,7 +43,7 @@
 .cerveau-sidebar-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-2xs);
 }
 
 .cerveau-sidebar-item {
@@ -224,7 +224,7 @@
 .cerveau-filelist {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0.0625rem;
 }
 
 .cerveau-filerow {

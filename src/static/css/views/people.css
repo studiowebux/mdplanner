@@ -109,17 +109,7 @@
   gap: var(--space-md);
 }
 
-.person-detail__stat-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-md) var(--space-sm);
-  background: var(--color-bg-primary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-  border-radius: var(--radius-sm);
-  text-align: center;
-}
+/* .person-detail__stat-card shared with .analytics__stat-card (components.css) */
 
 .person-detail__stat-value {
   font-size: var(--analytics-stat-value-size);
@@ -612,6 +602,7 @@
 
 .orgchart-drag-ghost {
   position: absolute;
+  /* Off-screen parking idiom for the drag clone — exact px, not a layout dim. */
   top: -9999px;
   transform: scale(var(--orgchart-current-zoom));
   transform-origin: 0 0;

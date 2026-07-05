@@ -140,16 +140,7 @@
 
 /* -- Note dialog --------------------------------------------------------- */
 
-.habit-note-dialog {
-  border: none;
-  border-radius: var(--radius-lg);
-  padding: 0;
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-lg);
-  max-width: var(--dialog-max-width);
-  width: 90%;
-}
+/* .habit-note-dialog base shared with .confirm-dialog (components.css) */
 
 .habit-note-dialog::backdrop {
   background: var(--overlay-bg);

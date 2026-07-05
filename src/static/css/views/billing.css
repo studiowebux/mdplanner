@@ -51,7 +51,7 @@
 /* Group subtotal row */
 .line-items-table__group-subtotal td {
   padding: var(--space-xs) var(--space-sm);
-  border-top: 1px solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border);
   font-size: var(--font-size-sm);
 }
 

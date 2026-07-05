@@ -764,7 +764,8 @@ a.badge:hover {
    Confirm dialog (native <dialog>)
    ------------------------------------------------------------------------- */
 
-.confirm-dialog {
+.confirm-dialog,
+.habit-note-dialog {
   border: none;
   border-radius: var(--radius-lg);
   padding: 0;
@@ -1319,7 +1320,8 @@ a.badge:hover {
   background: var(--color-bg-primary);
 }
 
-.filter-bar__select {
+.filter-bar__select,
+.domain-toolbar__date {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
@@ -1353,19 +1355,6 @@ a.badge:hover {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
-}
-
-.domain-toolbar__date {
-  padding: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-sans);
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-  border-radius: var(--radius-md);
-  outline: none;
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
 }
 
 .domain-toolbar__date:focus {
@@ -1752,9 +1741,9 @@ a.badge:hover {
     display: none;
   }
 
-  /* Touch targets: minimum 44px height on all buttons */
+  /* Touch targets: minimum 44px (2.75rem) height on all buttons */
   .btn {
-    min-height: 44px;
+    min-height: 2.75rem;
   }
 
   /* Actions column: sticky to right edge on horizontal scroll */
@@ -2058,7 +2047,9 @@ a.badge:hover {
   flex: 1;
 }
 
-.quadrant-card__remove {
+/* Shared inline remove-button (quadrant cards ↔ strategic-levels items). */
+.quadrant-card__remove,
+.sl-item__remove {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -2083,7 +2074,8 @@ a.badge:hover {
   opacity: 1;
 }
 
-.quadrant-card__remove:hover {
+.quadrant-card__remove:hover,
+.sl-item__remove:hover {
   background: var(--color-error-bg);
   color: var(--color-error);
 }
@@ -2409,6 +2401,8 @@ div.load-more-sentinel {
    Accessibility utilities
    ========================================================================= */
 
+/* Canonical visually-hidden idiom — the 1px clip-box + -1px margin must stay
+   pixel-exact (rem/token conversion would break the sr-only technique). */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2579,4 +2573,51 @@ div.load-more-sentinel {
 .money-mixed__line {
   font-size: var(--font-size-sm);
   white-space: nowrap;
+}
+
+/* =========================================================================
+   Cross-view shared card fragments
+   Selectors grouped here to keep one source of truth for rules duplicated
+   across view stylesheets (see analyzer CSS-clone hotspots).
+   ========================================================================= */
+
+/* Faded, scrollable card description (milestones ↔ goals). */
+.milestone-card__description,
+.goal-card__description {
+  position: relative;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--body-line-height);
+  max-height: var(--card-description-max-height);
+  overflow-y: auto;
+  padding-bottom: var(--card-description-fade);
+  flex: 1;
+  mask-image: linear-gradient(
+    to bottom,
+    var(--card-description-fade-color) calc(
+      100% - var(--card-description-fade)
+    ),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    var(--card-description-fade-color) calc(
+      100% - var(--card-description-fade)
+    ),
+    transparent
+  );
+}
+
+/* Centered stat card (person detail ↔ analytics). */
+.person-detail__stat-card,
+.analytics__stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-sm);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  text-align: center;
 }

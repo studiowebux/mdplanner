@@ -238,7 +238,8 @@
   max-width: calc(var(--space-xl) * 4);
 }
 
-.github-pipeline__select {
+.github-pipeline__select,
+.task-github__input {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   border: var(--card-border);
@@ -249,7 +250,8 @@
   transition: border-color var(--transition-fast);
 }
 
-.github-pipeline__select:focus {
+.github-pipeline__select:focus,
+.task-github__input:focus {
   border-color: var(--color-border-focus);
 }
 
@@ -300,21 +302,6 @@
   gap: var(--space-sm);
   align-items: center;
   flex-wrap: wrap;
-}
-
-.task-github__input {
-  padding: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-sm);
-  border: var(--card-border);
-  border-radius: var(--radius-md);
-  background: var(--card-bg);
-  color: var(--color-text-primary);
-  outline: none;
-  transition: border-color var(--transition-fast);
-}
-
-.task-github__input:focus {
-  border-color: var(--color-border-focus);
 }
 
 .task-github__labels {

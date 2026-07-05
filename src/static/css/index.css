@@ -67,8 +67,8 @@ pre {
   outline: none;
 }
 :focus-visible {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
+  outline: var(--space-2xs) solid var(--color-border-focus);
+  outline-offset: var(--space-2xs);
 }
 ::selection {
   background-color: var(--color-accent);

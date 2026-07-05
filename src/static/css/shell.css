@@ -449,8 +449,8 @@ html.focus-mode .focus-mode-exit {
   top: calc(100% + var(--space-xs));
   right: 0;
   z-index: var(--z-dropdown);
-  min-width: 200px;
-  max-width: 320px;
+  min-width: 12.5rem;
+  max-width: 20rem;
   background: var(--color-bg-primary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
@@ -518,7 +518,7 @@ html.focus-mode .focus-mode-exit {
 
 /* Scrollable option list — fixed height so long lists never blow up the panel. */
 .topbar__filter-list {
-  max-height: 240px;
+  max-height: 15rem;
   overflow-y: auto;
 }
 
