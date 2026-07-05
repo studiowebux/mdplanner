@@ -21,11 +21,6 @@ export const INVOICE_STATUSES = [
 
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
-export const INVOICE_COMPLETED_STATUSES = new Set<InvoiceStatus>([
-  "paid",
-  "cancelled",
-]);
-
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
 // ---------------------------------------------------------------------------

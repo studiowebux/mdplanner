@@ -18,8 +18,6 @@ export const PAYMENT_METHODS = [
   "other",
 ] as const;
 
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
 // ---------------------------------------------------------------------------

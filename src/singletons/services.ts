@@ -506,10 +506,6 @@ export function initServices(
   }
 }
 
-export function isCacheEnabled(): boolean {
-  return cacheEnabled;
-}
-
 export function getProjectDir(): string {
   return _projectDir;
 }

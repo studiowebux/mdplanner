@@ -14,8 +14,6 @@ export const SetIdentitySchema = z.object({
   }),
 }).openapi("SetIdentity");
 
-export type SetIdentity = z.infer<typeof SetIdentitySchema>;
-
 export const SetGlobalFiltersSchema = z.object({
   globalProjects: z.array(z.string()).optional().openapi({
     description:
@@ -29,13 +27,9 @@ export const SetGlobalFiltersSchema = z.object({
   }),
 }).openapi("SetGlobalFilters");
 
-export type SetGlobalFilters = z.infer<typeof SetGlobalFiltersSchema>;
-
 export const SetPersonSchema = z.object({
   personId: z.string().openapi({
     description: "Person ID to activate. Empty string clears identity.",
     example: "person_0000000000000_000000",
   }),
 }).openapi("SetPerson");
-
-export type SetPerson = z.infer<typeof SetPersonSchema>;

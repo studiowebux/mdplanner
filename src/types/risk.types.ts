@@ -29,9 +29,6 @@ export const RISK_STATUSES = [
   "accepted",
 ] as const;
 
-export type RiskCategory = typeof RISK_CATEGORIES[number];
-export type RiskStatus = typeof RISK_STATUSES[number];
-
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
 // ---------------------------------------------------------------------------
