@@ -9,7 +9,10 @@
  * re-runnable tool (CI gate + pre-release check).
  *
  * Dimensions (each scored 0-100 → letter grade):
- *   1. Structure   — LOC, file count, god-files over a size threshold.
+ *   1. Structure   — per-file roll-up of REAL defects (duplicated code +
+ *                    over-complex functions), NOT line count. A large file only
+ *                    triggers a deeper look; large-but-cohesive files score
+ *                    nothing.
  *   2. Type Safety — any / as any / as unknown as / non-null `!.` /
  *                    @ts-ignore / deno-lint-ignore density per KLOC.
  *   3. Debt        — TODO/FIXME/HACK/XXX markers, console.* bypassing the log
@@ -68,7 +71,11 @@
  */
 
 import { dirname, join } from "@std/path";
-import { collectComplexity, collectStructuralClones } from "./analyze/ast.ts";
+import {
+  collectComplexity,
+  collectStructuralClones,
+  type FnComplexity,
+} from "./analyze/ast.ts";
 import { collectCssRules, type CssRule } from "./analyze/css.ts";
 import { collectRuleFindings, type Finding } from "./analyze/rules.ts";
 import { collectStyleFindings } from "./analyze/style.ts";
@@ -80,7 +87,12 @@ import type { DeadExport } from "./analyze/deadcode.ts";
 // Tunables — thresholds that define "good". Adjust per project, not per run.
 // ---------------------------------------------------------------------------
 const CONFIG = {
-  godFileLoc: 600, // a single source file over this many lines is a god-file
+  // Size at which a file is INVESTIGATED more deeply (not itself a penalty). A
+  // large file is only a defect if the deeper look finds real problems —
+  // duplicated code or over-complex functions. A large-but-cohesive file (many
+  // small, distinct functions) is fine and scores no penalty.
+  godFileLoc: 600,
+  hotspotDefects: 3, // over-complex + duplicated blocks in one file → a refactor hotspot
   maxCyclomatic: 15, // McCabe-ish decision-point count over which a fn is flagged
   typeEscapePer1k: 2, // tolerated type-escape hatches per 1000 source lines
   minTestRatio: 0.25, // tests-LOC : source-LOC target ratio
@@ -240,28 +252,100 @@ function countMatches(
 // ---------------------------------------------------------------------------
 // Dimension 1 — Structure
 // ---------------------------------------------------------------------------
-function analyzeStructure(files: FileInfo[]): Dimension {
+// A large file is NOT a defect on its own — it is a trigger to look INSIDE. What
+// actually makes a file bad structure is duplication and unnecessary complexity,
+// not line count. Structure is the per-FILE roll-up of those two real signals
+// (already surfaced globally by the Complexity + Duplication dimensions): it
+// ranks the files that most need refactoring. A file over godFileLoc is
+// investigated; if it holds no duplicated code and no over-complex function it is
+// "large but cohesive" and scores nothing. Only real findings carry a penalty.
+function analyzeStructure(
+  files: FileInfo[],
+  fns: FnComplexity[],
+  dupFnRels: Map<string, number>,
+): Dimension {
   const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
   const totalLoc = src.reduce((n, f) => n + f.loc, 0);
-  const god = src
+
+  // Unnecessary complexity: functions over the cyclomatic threshold.
+  const overComplex = fns
+    .filter((f) => f.cc > CONFIG.maxCyclomatic)
+    .sort((a, b) => b.cc - a.cc);
+
+  // Per-file defect counts: over-complex functions + duplicated code blocks
+  // (dupFnRels = how many clone-participating functions each file holds).
+  const complexByFile = new Map<string, number>();
+  for (const f of overComplex) {
+    complexByFile.set(f.rel, (complexByFile.get(f.rel) ?? 0) + 1);
+  }
+  const defectFiles = new Set<string>([
+    ...complexByFile.keys(),
+    ...dupFnRels.keys(),
+  ]);
+  const totalDupFns = [...dupFnRels.values()].reduce((n, c) => n + c, 0);
+
+  // Investigate every large file; a concern is one whose deeper look found
+  // duplicated or over-complex code. The rest are large-but-cohesive (no action).
+  const large = src
     .filter((f) => f.loc > CONFIG.godFileLoc)
     .sort((a, b) => b.loc - a.loc);
-  const godLoc = god.reduce((n, f) => n + f.loc, 0);
-  // Score: penalize the share of code trapped in oversized files.
-  const share = totalLoc === 0 ? 0 : godLoc / totalLoc;
-  const score = clamp(100 - share * 250 - god.length * 1.5);
+  const concernLarge = large.filter((f) => defectFiles.has(f.rel));
+  const cohesiveLarge = large.filter((f) => !defectFiles.has(f.rel));
+
+  // Rank the worst files by combined real-defect count.
+  const worstFiles = [...defectFiles]
+    .map((rel) => ({
+      rel,
+      complex: complexByFile.get(rel) ?? 0,
+      dup: dupFnRels.get(rel) ?? 0,
+    }))
+    .sort((a, b) => (b.complex + b.dup) - (a.complex + a.dup));
+
+  // A hotspot is a file that CONCENTRATES defects (≥ hotspotDefects). Score on
+  // the SHARE of files that are hotspots — how widely refactor debt is spread —
+  // plus every over-complex function. This measures concentration, not the raw
+  // clone count (that is the Duplication dimension's job); a scattered clone here
+  // and there barely moves it, a cluster of hotspot files does.
+  const hotspots = worstFiles.filter((w) =>
+    w.complex + w.dup >= CONFIG.hotspotDefects
+  );
+  const hotspotShare = src.length === 0 ? 0 : hotspots.length / src.length;
+  const penalty = hotspotShare * 300 + overComplex.length * 2 +
+    concernLarge.length * 1.5;
+  const score = clamp(100 - penalty);
+
+  const findings = [
+    ...worstFiles.slice(0, 6).map((w) =>
+      `${w.rel} — ${w.complex} over-complex fn(s), ${w.dup} duplicated block(s)`
+    ),
+    ...cohesiveLarge.slice(0, 4).map((f) =>
+      `large but cohesive (no action): ${f.rel} — ${f.loc} LOC, no duplication/complexity`
+    ),
+  ];
+
+  const recommendations: string[] = [];
+  if (hotspots.length || overComplex.length) {
+    recommendations.push(
+      `Refactor the ${hotspots.length} hotspot file(s) (≥${CONFIG.hotspotDefects} ` +
+        `real defects each) first — ${overComplex.length} over-complex ` +
+        `function(s), ${totalDupFns} duplicated block(s) total. See the ` +
+        `Complexity and Duplication dimensions for exact call sites. File size ` +
+        `alone is not a target.`,
+    );
+  }
+
   return {
     name: "Structure",
     score,
     grade: grade(score),
     summary: `${src.length} source files, ${totalLoc.toLocaleString()} LOC; ` +
-      `${god.length} god-file(s) >${CONFIG.godFileLoc} LOC ` +
-      `(${(share * 100).toFixed(1)}% of code).`,
-    findings: god.slice(0, 10).map((f) => `${f.rel} — ${f.loc} LOC`),
-    recommendations: god.length === 0 ? [] : [
-      `Decompose the ${god.length} god-file(s); the largest (${god[0].rel}, ` +
-      `${god[0].loc} LOC) is the priority. Extract cohesive sub-modules.`,
-    ],
+      `scored on real defects — ${hotspots.length} hotspot file(s) ` +
+      `(≥${CONFIG.hotspotDefects} defects) out of ${defectFiles.size} with any; ` +
+      `${overComplex.length} over-complex function(s), ${totalDupFns} duplicated ` +
+      `block(s). ${large.length} large file(s) investigated ` +
+      `(${cohesiveLarge.length} cohesive, ${concernLarge.length} with concerns).`,
+    findings,
+    recommendations,
   };
 }
 
@@ -378,10 +462,8 @@ function analyzeDebt(files: FileInfo[]): Dimension {
 // TypeScript AST walk (scripts/analyze/ast.ts), NOT line/brace heuristics: each
 // real function is scored on its own, so a function inside a classic-script
 // IIFE is no longer counted as part of one giant file-wide "function".
-function analyzeComplexity(files: FileInfo[]): Dimension {
-  const src = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
-  const complex = src
-    .flatMap((f) => collectComplexity(f.rel, f.text))
+function analyzeComplexity(fns: FnComplexity[]): Dimension {
+  const complex = fns
     .filter((c) => c.cc > CONFIG.maxCyclomatic)
     .sort((a, b) => b.cc - a.cc);
 
@@ -960,11 +1042,32 @@ async function main(): Promise<void> {
     Deno.exit(2);
   }
 
+  // AST signals shared by Structure + Complexity — parse each source file once.
+  const astSrc = files.filter((f) => SOURCE_EXT.has(f.ext) && !f.isTest);
+  const allFns = astSrc.flatMap((f) => collectComplexity(f.rel, f.text));
+  // Per-file count of clone-participating functions (structural clones whose
+  // shape recurs) — the "duplication" half of Structure's real-defect signal.
+  const dupKeyLocs = new Map<string, string[]>();
+  for (const f of astSrc) {
+    for (
+      const c of collectStructuralClones(f.rel, f.text, CONFIG.minCloneNodes)
+    ) {
+      const arr = dupKeyLocs.get(c.key);
+      if (arr) arr.push(c.rel);
+      else dupKeyLocs.set(c.key, [c.rel]);
+    }
+  }
+  const dupFnRels = new Map<string, number>();
+  for (const rels of dupKeyLocs.values()) {
+    if (rels.length < 2) continue;
+    for (const rel of rels) dupFnRels.set(rel, (dupFnRels.get(rel) ?? 0) + 1);
+  }
+
   const dims: Dimension[] = [
-    analyzeStructure(files),
+    analyzeStructure(files, allFns, dupFnRels),
     analyzeTypeSafety(files),
     analyzeDebt(files),
-    analyzeComplexity(files),
+    analyzeComplexity(allFns),
     analyzeDuplication(files),
     analyzeTesting(files),
     analyzeDocs(files),
