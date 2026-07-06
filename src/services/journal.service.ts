@@ -7,7 +7,11 @@ import type {
   ListJournalOptions,
   UpdateJournalEntry,
 } from "../types/journal.types.ts";
-import { ciIncludes } from "../utils/string.ts";
+import {
+  filterByDateRange,
+  filterByQuery,
+  filterByTag,
+} from "../utils/list-filters.ts";
 import { BaseService } from "./base.service.ts";
 
 /** Journal CRUD service; filters by mood, tag, date range (from/to), and text query (q). */
@@ -28,26 +32,9 @@ export class JournalService extends BaseService<
     if (options.mood) {
       items = items.filter((e) => e.mood === options.mood);
     }
-    if (options.tag) {
-      const tag = options.tag;
-      items = items.filter((e) => e.tags?.includes(tag));
-    }
-    if (options.from) {
-      const from = options.from;
-      items = items.filter((e) => e.date >= from);
-    }
-    if (options.to) {
-      const to = options.to;
-      items = items.filter((e) => e.date <= to);
-    }
-    if (options.q) {
-      const q = options.q;
-      items = items.filter(
-        (e) =>
-          ciIncludes(e.title, q) ||
-          ciIncludes(e.content, q),
-      );
-    }
+    items = filterByTag(items, options.tag);
+    items = filterByDateRange(items, options.from, options.to);
+    items = filterByQuery(items, options.q, (e) => [e.title, e.content]);
     return items;
   }
 }

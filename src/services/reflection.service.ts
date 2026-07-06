@@ -7,7 +7,11 @@ import type {
   Reflection,
   UpdateReflection,
 } from "../types/reflection.types.ts";
-import { ciIncludes } from "../utils/string.ts";
+import {
+  filterByDateRange,
+  filterByQuery,
+  filterByTag,
+} from "../utils/list-filters.ts";
 import { BaseService } from "./base.service.ts";
 
 /** Reflection CRUD service; filters by period, tag, date range (from/to), and text query (q). */
@@ -28,26 +32,9 @@ export class ReflectionService extends BaseService<
     if (options.period) {
       items = items.filter((r) => r.period === options.period);
     }
-    if (options.tag) {
-      const tag = options.tag;
-      items = items.filter((r) => r.tags?.includes(tag));
-    }
-    if (options.from) {
-      const from = options.from;
-      items = items.filter((r) => r.date >= from);
-    }
-    if (options.to) {
-      const to = options.to;
-      items = items.filter((r) => r.date <= to);
-    }
-    if (options.q) {
-      const q = options.q;
-      items = items.filter(
-        (r) =>
-          ciIncludes(r.title, q) ||
-          ciIncludes(r.content, q),
-      );
-    }
+    items = filterByTag(items, options.tag);
+    items = filterByDateRange(items, options.from, options.to);
+    items = filterByQuery(items, options.q, (r) => [r.title, r.content]);
     return items;
   }
 }
