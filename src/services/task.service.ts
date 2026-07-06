@@ -21,6 +21,7 @@ import { TASK_TABLE } from "../domains/task/constants.ts";
 import { generateId } from "../utils/id.ts";
 import { ciEquals } from "../utils/string.ts";
 import { publish } from "../singletons/event-bus.ts";
+import { applyTaskFilters } from "./task-filters.ts";
 import {
   DONE_SECTION,
   IN_PROGRESS_SECTION,
@@ -28,36 +29,13 @@ import {
   TODO_SECTION,
 } from "../constants/mod.ts";
 
-// ---------------------------------------------------------------------------
-// Error types
-// ---------------------------------------------------------------------------
-
-/** Thrown on optimistic-lock failure: the task's revision changed since it was read. */
-export class RevisionConflictError extends Error {
-  readonly code = "REVISION_CONFLICT";
-  constructor(id: string, expected: number, actual: number) {
-    super(`Task ${id}: expected revision ${expected}, found ${actual}`);
-    this.name = "RevisionConflictError";
-  }
-}
-
-/** Thrown when claiming a task that is no longer in Todo (another agent claimed it first). */
-export class ClaimConflictError extends Error {
-  readonly code = "CLAIM_CONFLICT";
-  constructor(id: string, currentSection: string) {
-    super(`Task ${id} is in section '${currentSection}', expected 'Todo'`);
-    this.name = "ClaimConflictError";
-  }
-}
-
-/** Thrown when updating a task currently claimed by a different agent. */
-export class ClaimGuardError extends Error {
-  readonly code = "CLAIM_GUARD";
-  constructor(id: string, claimedBy: string) {
-    super(`Task ${id} is claimed by ${claimedBy} — cannot update`);
-    this.name = "ClaimGuardError";
-  }
-}
+// Error types live in task.errors.ts; re-exported here for existing importers.
+import {
+  ClaimConflictError,
+  ClaimGuardError,
+  RevisionConflictError,
+} from "./task.errors.ts";
+export { ClaimConflictError, ClaimGuardError, RevisionConflictError };
 
 // ---------------------------------------------------------------------------
 // Service
@@ -108,13 +86,31 @@ export class TaskService {
     publish(`task.${event}`, id !== undefined ? { id } : undefined);
   }
 
+  /**
+   * Shared tail for single-task mutations that go through `taskRepo` and return
+   * the task: refresh the cache mirror and emit the SSE event, but only when the
+   * repo returned a task. Pass `id` for a targeted same-section "updated" row
+   * swap; omit it for membership/section changes ("moved"/"created"/"deleted").
+   */
+  private commit(
+    task: Task | null,
+    event: "updated" | "created" | "moved" | "deleted",
+    id?: string,
+  ): Task | null {
+    if (task) {
+      this.cacheUpsert(task);
+      this.publishChange(event, id);
+    }
+    return task;
+  }
+
   // -------------------------------------------------------------------------
   // Read
   // -------------------------------------------------------------------------
 
   async list(options?: ListTaskOptions): Promise<Task[]> {
     const tasks = await this.taskRepo.findAll();
-    return this.applyFilters(tasks, options);
+    return applyTaskFilters(tasks, options);
   }
 
   /**
@@ -125,43 +121,7 @@ export class TaskService {
    */
   async listArchived(options?: ListTaskOptions): Promise<Task[]> {
     const tasks = await this.taskRepo.findArchived();
-    return this.applyFilters(tasks, options);
-  }
-
-  private applyFilters(
-    tasks: Task[],
-    options?: ListTaskOptions,
-  ): Task[] {
-    let result = tasks;
-    if (options?.section) {
-      result = result.filter((t) => ciEquals(t.section, options.section));
-    }
-    if (options?.project) {
-      result = result.filter((t) => ciEquals(t.project, options.project));
-    }
-    if (options?.milestone) {
-      result = result.filter((t) => ciEquals(t.milestone, options.milestone));
-    }
-    if (options?.assignee) {
-      result = result.filter((t) => t.assignee === options.assignee);
-    }
-    if (options?.tags?.length) {
-      const required = options.tags.map((t) => t.toLowerCase());
-      result = result.filter((t) => {
-        const taskTags = (t.tags ?? []).map((tg) => tg.toLowerCase());
-        return required.every((r) => taskTags.includes(r));
-      });
-    }
-    if (options?.ready) {
-      result = result.filter((t) => {
-        if (!t.blocked_by?.length) return true;
-        return t.blocked_by.every((bid) => {
-          const blocker = result.find((bt) => bt.id === bid);
-          return !blocker || blocker.completed;
-        });
-      });
-    }
-    return result;
+    return applyTaskFilters(tasks, options);
   }
 
   async getById(id: string): Promise<Task | null> {
@@ -191,9 +151,7 @@ export class TaskService {
 
   async create(data: CreateTask): Promise<Task> {
     const created = await this.taskRepo.create(data);
-    this.cacheUpsert(created);
-    this.publishChange("created");
-    return created;
+    return this.commit(created, "created")!;
   }
 
   async update(
@@ -225,18 +183,15 @@ export class TaskService {
       }
     }
 
+    // A section/completion change relocates the row across sections and shifts
+    // section counts → full-view refetch ("moved"). A pure field edit keeps the
+    // row in place → targeted single-row swap ("updated" + id).
+    const membershipChange = data.section !== undefined ||
+      data.completed !== undefined;
     const updated = await this.taskRepo.update(id, data);
-    if (updated) {
-      this.cacheUpsert(updated);
-      // A section/completion change relocates the row across sections and
-      // shifts section counts → full-view refetch ("moved"). A pure field edit
-      // keeps the row in place → targeted single-row swap ("updated" + id).
-      const membershipChange = data.section !== undefined ||
-        data.completed !== undefined;
-      if (membershipChange) this.publishChange("moved");
-      else this.publishChange("updated", id);
-    }
-    return updated;
+    return membershipChange
+      ? this.commit(updated, "moved")
+      : this.commit(updated, "updated", id);
   }
 
   async delete(id: string): Promise<boolean> {
@@ -325,7 +280,7 @@ export class TaskService {
   /** Board-archived tasks only (browse-by-month view). */
   async listBoardArchived(options?: ListTaskOptions): Promise<Task[]> {
     const tasks = await this.taskRepo.findBoardArchived();
-    return this.applyFilters(tasks, options);
+    return applyTaskFilters(tasks, options);
   }
 
   /**
@@ -338,7 +293,7 @@ export class TaskService {
       this.taskRepo.findAll(),
       this.taskRepo.findBoardArchived(),
     ]);
-    return this.applyFilters([...board, ...archived], options);
+    return applyTaskFilters([...board, ...archived], options);
   }
 
   /** Permanently delete the task file from disk. No recovery. */
@@ -368,27 +323,21 @@ export class TaskService {
     }
 
     const now = new Date().toISOString();
+    // Section → In Progress → full refetch.
     const updated = await this.taskRepo.update(id, {
       section: IN_PROGRESS_SECTION,
       assignee,
       claimedBy: assignee,
       claimedAt: now,
     });
-    if (updated) {
-      this.cacheUpsert(updated);
-      // Section → In Progress → full refetch.
-      this.publishChange("moved");
-    }
-    return updated;
+    return this.commit(updated, "moved");
   }
 
   async moveTask(id: string, newSection: string): Promise<Task | null> {
-    const updated = await this.taskRepo.moveToSection(id, newSection);
-    if (updated) {
-      this.cacheUpsert(updated);
-      this.publishChange("moved");
-    }
-    return updated;
+    return this.commit(
+      await this.taskRepo.moveToSection(id, newSection),
+      "moved",
+    );
   }
 
   async sweepStaleClaims(ttlMinutes = 60): Promise<string[]> {
@@ -496,11 +445,7 @@ export class TaskService {
     };
 
     const comments = [...(task.comments ?? []), comment];
-    const updated = await this.taskRepo.update(id, { comments });
-    if (updated) {
-      this.cacheUpsert(updated);
-      this.publishChange("updated", id);
-    }
+    this.commit(await this.taskRepo.update(id, { comments }), "updated", id);
     return comment;
   }
 
@@ -517,11 +462,11 @@ export class TaskService {
 
     const entry: TimeEntry = { id: generateId("te"), ...data };
     const time_entries = [...(task.time_entries ?? []), entry];
-    const updated = await this.taskRepo.update(id, { time_entries });
-    if (updated) {
-      this.cacheUpsert(updated);
-      this.publishChange("updated", id);
-    }
+    this.commit(
+      await this.taskRepo.update(id, { time_entries }),
+      "updated",
+      id,
+    );
     return entry;
   }
 
@@ -533,11 +478,11 @@ export class TaskService {
     const time_entries = (task.time_entries ?? []).filter((e) =>
       e.id !== entryId
     );
-    const updated = await this.taskRepo.update(id, { time_entries });
-    if (updated) {
-      this.cacheUpsert(updated);
-      this.publishChange("updated", id);
-    }
+    this.commit(
+      await this.taskRepo.update(id, { time_entries }),
+      "updated",
+      id,
+    );
     return true;
   }
 
@@ -550,12 +495,11 @@ export class TaskService {
     if (!task) return null;
 
     const attachments = [...(task.attachments ?? []), ...paths];
-    const updated = await this.taskRepo.update(id, { attachments });
-    if (updated) {
-      this.cacheUpsert(updated);
-      this.publishChange("updated", id);
-    }
-    return updated;
+    return this.commit(
+      await this.taskRepo.update(id, { attachments }),
+      "updated",
+      id,
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -578,16 +522,12 @@ export class TaskService {
       ...(artifactUrls?.length ? { artifactUrls } : {}),
     };
 
+    // Section → Pending Review → full refetch.
     const updated = await this.taskRepo.update(id, {
       section: PENDING_REVIEW_SECTION,
       approvalRequest: approval,
     });
-    if (updated) {
-      this.cacheUpsert(updated);
-      // Section → Pending Review → full refetch.
-      this.publishChange("moved");
-    }
-    return updated;
+    return this.commit(updated, "moved");
   }
 
   async approveTask(
@@ -609,6 +549,7 @@ export class TaskService {
       ? { ...task.approvalRequest, verdict }
       : undefined;
 
+    // Section → Done → full refetch.
     const updated = await this.taskRepo.update(id, {
       section: DONE_SECTION,
       completed: true,
@@ -616,12 +557,7 @@ export class TaskService {
       claimedAt: null,
       approvalRequest: approvalRequest ?? null,
     });
-    if (updated) {
-      this.cacheUpsert(updated);
-      // Section → Done → full refetch.
-      this.publishChange("moved");
-    }
-    return updated;
+    return this.commit(updated, "moved");
   }
 
   async rejectTask(
@@ -645,17 +581,13 @@ export class TaskService {
       ? { ...task.approvalRequest, verdict }
       : undefined;
 
+    // Section → In Progress → full refetch.
     const updated = await this.taskRepo.update(id, {
       section: IN_PROGRESS_SECTION,
       claimedBy: null,
       claimedAt: null,
       approvalRequest: approvalRequest ?? null,
     });
-    if (updated) {
-      this.cacheUpsert(updated);
-      // Section → In Progress → full refetch.
-      this.publishChange("moved");
-    }
-    return updated;
+    return this.commit(updated, "moved");
   }
 }
