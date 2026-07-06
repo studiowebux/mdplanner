@@ -152,6 +152,7 @@ import { registerCompanyEntity } from "../domains/company/cache.ts";
 import { InvestorRepository } from "../repositories/investor.repository.ts";
 import { InvestorService } from "../services/investor.service.ts";
 import { registerInvestorEntity } from "../domains/investor/cache.ts";
+import { _get, _repo, _set, _svc, registryState } from "./service-registry.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -209,34 +210,13 @@ const SSE_PREFIX_BY_KEY: Record<string, string> = {
   vacation: "vacation",
 };
 
-const _svc = new Map<string, unknown>();
-const _repo = new Map<string, unknown>();
-
-function _set<T>(map: Map<string, unknown>, key: string, value: T): T {
-  map.set(key, value);
-  return value;
-}
-
-function _get<T>(map: Map<string, unknown>, key: string): T {
-  const v = map.get(key);
-  if (v === undefined) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return v as T;
-}
-
-let _projectDir = "";
-let cacheDb: CacheDatabase | null = null;
-let cacheSync: CacheSync | null = null;
-let searchEngine: SearchEngine | null = null;
-let cacheEnabled = false;
-
 export function initServices(
   projectDir: string,
   options: InitOptions = {},
 ): void {
-  _projectDir = projectDir;
+  registryState.projectDir = projectDir;
   const useCache = options.cache ?? true;
+  let cacheDb: CacheDatabase | null = null;
 
   const milestoneRepo = _set(
     _repo,
@@ -486,15 +466,15 @@ export function initServices(
     companyRepo.setCacheDb(cacheDb);
     investorRepo.setCacheDb(cacheDb);
 
-    cacheSync = new CacheSync(cacheDb);
+    const cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
-    searchEngine = new SearchEngine(cacheDb);
+    registryState.cacheSync = cacheSync;
+    registryState.searchEngine = new SearchEngine(cacheDb);
     milestoneService.setCache(cacheSync);
     taskService.setCache(cacheSync);
     peopleService.setCache(cacheSync);
     _get<PortfolioService>(_svc, "portfolio").setCache(cacheSync);
     _get<NoteService>(_svc, "note").setCache(cacheSync);
-    cacheEnabled = true;
   }
 
   // Wire each domain service's SSE event prefix from the authoritative config
@@ -506,241 +486,12 @@ export function initServices(
   }
 }
 
-export function getProjectDir(): string {
-  return _projectDir;
-}
-
-export function getTaskRepository(): TaskRepository {
-  return _get<TaskRepository>(_repo, "task");
-}
-
-export function getTaskService(): TaskService {
-  return _get<TaskService>(_svc, "task");
-}
-
-export function getPeopleRepository(): PeopleRepository {
-  return _get<PeopleRepository>(_repo, "people");
-}
-
-export function getPeopleService(): PeopleService {
-  return _get<PeopleService>(_svc, "people");
-}
-
-export function getMilestoneService(): MilestoneService {
-  return _get<MilestoneService>(_svc, "milestone");
-}
-
-export function getMilestoneRepository(): MilestoneRepository {
-  return _get<MilestoneRepository>(_repo, "milestone");
-}
-
-export function getNoteService(): NoteService {
-  return _get<NoteService>(_svc, "note");
-}
-
-export function getPortfolioService(): PortfolioService {
-  return _get<PortfolioService>(_svc, "portfolio");
-}
-
-export function getProjectService(): ProjectService {
-  return _get<ProjectService>(_svc, "project");
-}
-
-export function getGoalService(): GoalService {
-  return _get<GoalService>(_svc, "goal");
-}
-
-export function getIdeaService(): IdeaService {
-  return _get<IdeaService>(_svc, "idea");
-}
-
-export function getMarketingPlanService(): MarketingPlanService {
-  return _get<MarketingPlanService>(_svc, "marketingPlan");
-}
-
-export function getSwotService(): SwotService {
-  return _get<SwotService>(_svc, "swot");
-}
-
-export function getMoscowService(): MoscowService {
-  return _get<MoscowService>(_svc, "moscow");
-}
-
-export function getC4Service(): C4Service {
-  return _get<C4Service>(_svc, "c4");
-}
-
-export function getEisenhowerService(): EisenhowerService {
-  return _get<EisenhowerService>(_svc, "eisenhower");
-}
-
-export function getMindmapService(): MindmapService {
-  return _get<MindmapService>(_svc, "mindmap");
-}
-
-export function getFishboneService(): FishboneService {
-  return _get<FishboneService>(_svc, "fishbone");
-}
-
-export function getBusinessModelService(): BusinessModelService {
-  return _get<BusinessModelService>(_svc, "businessModel");
-}
-
-export function getRiskService(): RiskService {
-  return _get<RiskService>(_svc, "risk");
-}
-
-export function getVacationService(): VacationService {
-  return _get<VacationService>(_svc, "vacation");
-}
-
-export function getStrategicLevelsService(): StrategicLevelsService {
-  return _get<StrategicLevelsService>(_svc, "strategicLevels");
-}
-
-export function getSafeService(): SafeService {
-  return _get<SafeService>(_svc, "safe");
-}
-
-export function getProjectValueBoardService(): ProjectValueBoardService {
-  return _get<ProjectValueBoardService>(_svc, "projectValueBoard");
-}
-
-export function getCustomerService(): CustomerService {
-  return _get<CustomerService>(_svc, "customer");
-}
-
-export function getContactService(): ContactService {
-  return _get<ContactService>(_svc, "contact");
-}
-
-export function getDealService(): DealService {
-  return _get<DealService>(_svc, "deal");
-}
-
-export function getHabitService(): HabitService {
-  return _get<HabitService>(_svc, "habit");
-}
-
-export function getJournalService(): JournalService {
-  return _get<JournalService>(_svc, "journal");
-}
-
-export function getReflectionService(): ReflectionService {
-  return _get<ReflectionService>(_svc, "reflection");
-}
-
-export function getReflectionTemplateService(): ReflectionTemplateService {
-  return _get<ReflectionTemplateService>(_svc, "reflectionTemplate");
-}
-
-export function getOnboardingService(): OnboardingService {
-  return _get<OnboardingService>(_svc, "onboarding");
-}
-
-export function getOnboardingTemplateService(): OnboardingTemplateService {
-  return _get<OnboardingTemplateService>(_svc, "onboardingTemplate");
-}
-
-export function getFinanceService(): FinanceService {
-  return _get<FinanceService>(_svc, "finance");
-}
-
-export function getCompanyService(): CompanyService {
-  return _get<CompanyService>(_svc, "company");
-}
-
-export function getBillingRateService(): BillingRateService {
-  return _get<BillingRateService>(_svc, "billingRate");
-}
-
-export function getQuoteService(): QuoteService {
-  return _get<QuoteService>(_svc, "quote");
-}
-
-export function getInvoiceService(): InvoiceService {
-  return _get<InvoiceService>(_svc, "invoice");
-}
-
-export function getPaymentService(): PaymentService {
-  return _get<PaymentService>(_svc, "payment");
-}
-
-export function getBrainstormService(): BrainstormService {
-  return _get<BrainstormService>(_svc, "brainstorm");
-}
-
-export function getBrainstormTemplateService(): BrainstormTemplateService {
-  return _get<BrainstormTemplateService>(_svc, "brainstormTemplate");
-}
-
-export function getBriefService(): BriefService {
-  return _get<BriefService>(_svc, "brief");
-}
-
-export function getCapacityPlanService(): CapacityPlanService {
-  return _get<CapacityPlanService>(_svc, "capacityPlan");
-}
-
-export function getRetrospectiveService(): RetrospectiveService {
-  return _get<RetrospectiveService>(_svc, "retrospective");
-}
-
-export function getMeetingService(): MeetingService {
-  return _get<MeetingService>(_svc, "meeting");
-}
-
-export function getLeanCanvasService(): LeanCanvasService {
-  return _get<LeanCanvasService>(_svc, "leanCanvas");
-}
-
-export function getStickyNoteService(): StickyNoteService {
-  return _get<StickyNoteService>(_svc, "stickyNote");
-}
-
-export function getStickyNoteServiceForBoard(
-  boardId: string,
-): StickyNoteService {
-  return new StickyNoteService(new StickyNoteRepository(_projectDir, boardId));
-}
-
-export function getStickyBoardService(): StickyBoardService {
-  return _get<StickyBoardService>(_svc, "stickyBoard");
-}
-
-export function getDnsService(): DnsService {
-  return _get<DnsService>(_svc, "dns");
-}
-
-export function getGitHubService(): GitHubService {
-  return _get<GitHubService>(_svc, "github");
-}
-
-export function getWoodpeckerService(): WoodpeckerService {
-  return _get<WoodpeckerService>(_svc, "woodpecker");
-}
-
-export function getCerveauService(): CerveauService {
-  return _get<CerveauService>(_svc, "cerveau");
-}
-
-export function getInvestorService(): InvestorService {
-  return _get<InvestorService>(_svc, "investor");
-}
-
-export function getCacheSync(): CacheSync | null {
-  return cacheSync;
-}
-
-export function getSearchEngine(): SearchEngine | null {
-  return searchEngine;
-}
-
 /**
  * Run full cache sync. Call after initServices().
  * No-op if cache is disabled.
  */
 export async function bootCacheSync(): Promise<void> {
+  const cacheSync = registryState.cacheSync;
   if (!cacheSync) return;
   const result = await cacheSync.fullSync();
   if (result.errors.length > 0) {
@@ -751,3 +502,6 @@ export async function bootCacheSync(): Promise<void> {
     );
   }
 }
+
+// Re-export the registry accessors so consumers keep importing them from here.
+export * from "./service-registry.ts";
