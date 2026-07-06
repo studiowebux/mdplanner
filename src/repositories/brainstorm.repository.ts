@@ -13,6 +13,7 @@ import {
   rowToBrainstorm,
 } from "../domains/brainstorm/cache.ts";
 import { BRAINSTORM_BODY_KEYS } from "../domains/brainstorm/constants.ts";
+import { splitH2Sections } from "../utils/markdown-sections.ts";
 
 import {
   resolveEntityId,
@@ -98,27 +99,10 @@ export class BrainstormRepository extends CachedMarkdownRepository<
 
   /** Parse H2 sections into question/answer pairs. */
   private parseQuestions(body: string): BrainstormQuestion[] {
-    const questions: BrainstormQuestion[] = [];
-    const h2Pattern = /^##\s+(.+)$/gm;
-    const matches: { question: string; start: number }[] = [];
-
-    let match: RegExpExecArray | null;
-    while ((match = h2Pattern.exec(body)) !== null) {
-      matches.push({
-        question: match[1],
-        start: match.index + match[0].length,
-      });
-    }
-
-    for (let i = 0; i < matches.length; i++) {
-      const end = i + 1 < matches.length
-        ? body.lastIndexOf("\n##", matches[i + 1].start)
-        : body.length;
-      const answer = body.slice(matches[i].start, end).trim() || undefined;
-      questions.push({ question: matches[i].question, answer });
-    }
-
-    return questions;
+    return splitH2Sections(body).map(({ heading, content }) => ({
+      question: heading,
+      answer: content || undefined,
+    }));
   }
 
   protected serialize(item: Brainstorm): string {

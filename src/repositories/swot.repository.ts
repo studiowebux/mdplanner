@@ -9,11 +9,10 @@ import {
   type SwotQuadrantKey,
 } from "../domains/swot/constants.tsx";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
-import { parseQuadrantMarkdown } from "../utils/quadrant-parse.ts";
+import { parseQuadrantEntity } from "../utils/quadrant-parse.ts";
 import { rowToSwot, SWOT_TABLE } from "../domains/swot/cache.ts";
 
 import {
-  resolveEntityId,
   serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -60,30 +59,22 @@ export class SwotRepository extends CachedMarkdownRepository<
     fm: Record<string, unknown>,
     body: string,
   ): Swot | null {
-    if (!fm.id && !fm.title) return null;
-    const id = resolveEntityId(filename, fm);
-
-    const { title, quadrants, notes } = parseQuadrantMarkdown(
+    const base = parseQuadrantEntity(
+      filename,
+      fm,
       body,
       SWOT_SECTION_MAP,
-      fm.title,
-      fm.notes,
+      "Untitled SWOT",
     );
+    if (!base) return null;
 
+    const { quadrants, ...common } = base;
     return {
-      id,
-      title: title || "Untitled SWOT",
-      date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
+      ...common,
       strengths: quadrants.strengths,
       weaknesses: quadrants.weaknesses,
       opportunities: quadrants.opportunities,
       threats: quadrants.threats,
-      project: fm.project != null ? String(fm.project) : undefined,
-      notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

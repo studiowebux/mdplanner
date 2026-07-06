@@ -5,6 +5,8 @@
 // Not used by Business Model Canvas — its parser uses multi-prefix matching and
 // allows section re-entry, a deliberately different state machine.
 
+import { resolveEntityId } from "./frontmatter-mapper.ts";
+
 /**
  * Parse a quadrant builder body.
  *
@@ -109,4 +111,56 @@ export function parseQuadrantMarkdown(
   const fmNotesStr = fmNotes != null ? String(fmNotes) : "";
   const notes = bodyNotes || fmNotesStr || undefined;
   return { title: acc.title, quadrants, notes };
+}
+
+/** Common frontmatter/body fields shared by every quadrant entity's parse(). */
+export interface QuadrantEntityBase {
+  id: string;
+  title: string;
+  date: string;
+  project: string | undefined;
+  notes: string | undefined;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string | undefined;
+  updatedBy: string | undefined;
+  quadrants: Record<string, string[]>;
+}
+
+/**
+ * Build the shared entity shell for a quadrant builder (SWOT, MoSCoW): resolves
+ * the id, runs {@link parseQuadrantMarkdown}, and reads the common frontmatter
+ * fields (date/project/notes/audit). Returns `null` when the file has neither an
+ * `id` nor a `title` (the standard quadrant discard guard). The caller spreads
+ * `quadrants` into its domain-specific named fields.
+ */
+export function parseQuadrantEntity(
+  filename: string,
+  fm: Record<string, unknown>,
+  body: string,
+  sectionMap: Record<string, string>,
+  titleFallback: string,
+): QuadrantEntityBase | null {
+  if (!fm.id && !fm.title) return null;
+  const id = resolveEntityId(filename, fm);
+
+  const { title, quadrants, notes } = parseQuadrantMarkdown(
+    body,
+    sectionMap,
+    fm.title,
+    fm.notes,
+  );
+
+  return {
+    id,
+    title: title || titleFallback,
+    date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
+    project: fm.project != null ? String(fm.project) : undefined,
+    notes,
+    createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+    updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+    createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+    updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+    quadrants,
+  };
 }

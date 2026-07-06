@@ -11,6 +11,7 @@ import { BRIEF_SECTIONS } from "../types/brief.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { BRIEF_TABLE, rowToBrief } from "../domains/brief/cache.ts";
 import { BRIEF_BODY_KEYS } from "../domains/brief/constants.ts";
+import { splitH2Sections } from "../utils/markdown-sections.ts";
 
 import {
   resolveEntityId,
@@ -96,25 +97,11 @@ export class BriefRepository extends CachedMarkdownRepository<
     body: string,
   ): Record<BriefSectionKey, string[] | undefined> {
     const result: Record<string, string[] | undefined> = {};
-    const h2Pattern = /^##\s+(.+)$/gm;
-    const matches: { heading: string; start: number }[] = [];
 
-    let match: RegExpExecArray | null;
-    while ((match = h2Pattern.exec(body)) !== null) {
-      matches.push({
-        heading: match[1],
-        start: match.index + match[0].length,
-      });
-    }
-
-    for (let i = 0; i < matches.length; i++) {
-      const end = i + 1 < matches.length
-        ? body.lastIndexOf("\n##", matches[i + 1].start)
-        : body.length;
-      const content = body.slice(matches[i].start, end).trim();
+    for (const { heading, content } of splitH2Sections(body)) {
       if (!content) continue;
 
-      const key = this.matchSectionKey(matches[i].heading);
+      const key = this.matchSectionKey(heading);
       if (!key) continue;
 
       result[key] = this.parseContent(content);

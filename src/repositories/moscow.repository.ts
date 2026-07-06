@@ -14,11 +14,10 @@ import {
   type MoscowQuadrantKey,
 } from "../domains/moscow/constants.tsx";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
-import { parseQuadrantMarkdown } from "../utils/quadrant-parse.ts";
+import { parseQuadrantEntity } from "../utils/quadrant-parse.ts";
 import { MOSCOW_TABLE, rowToMoscow } from "../domains/moscow/cache.ts";
 
 import {
-  resolveEntityId,
   serializeAuditFields,
   stampAuditFields,
 } from "../utils/frontmatter-mapper.ts";
@@ -69,30 +68,22 @@ export class MoscowRepository extends CachedMarkdownRepository<
     fm: Record<string, unknown>,
     body: string,
   ): Moscow | null {
-    if (!fm.id && !fm.title) return null;
-    const id = resolveEntityId(filename, fm);
-
-    const { title, quadrants, notes } = parseQuadrantMarkdown(
+    const base = parseQuadrantEntity(
+      filename,
+      fm,
       body,
       MOSCOW_SECTION_MAP,
-      fm.title,
-      fm.notes,
+      "Untitled MoSCoW",
     );
+    if (!base) return null;
 
+    const { quadrants, ...common } = base;
     return {
-      id,
-      title: title || "Untitled MoSCoW",
-      date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
+      ...common,
       must: quadrants.must,
       should: quadrants.should,
       could: quadrants.could,
       wont: quadrants.wont,
-      project: fm.project != null ? String(fm.project) : undefined,
-      notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 
