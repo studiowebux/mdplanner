@@ -15,6 +15,7 @@
 
 import { log } from "../singletons/logger.ts";
 import { mapIssue, mapPR } from "./vcs-mappers.ts";
+import { VcsHttpClient } from "./vcs-http.ts";
 import type {
   GhJson,
   GitHubCreatedIssue,
@@ -48,10 +49,12 @@ export function giteaApiBase(baseUrl: string): string {
 export class GiteaProvider implements IGitProvider {
   private apiBase: string;
   private token?: string;
+  private http: VcsHttpClient;
 
   constructor(baseUrl: string, token?: string) {
     this.apiBase = giteaApiBase(baseUrl);
     this.token = token;
+    this.http = new VcsHttpClient(this.apiBase, () => this.headers, "Gitea");
   }
 
   private get headers(): HeadersInit {
@@ -62,68 +65,16 @@ export class GiteaProvider implements IGitProvider {
     return h;
   }
 
-  private async giGet(path: string): Promise<unknown> {
-    const res = await fetch(`${this.apiBase}${path}`, {
-      headers: this.headers,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`Gitea API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private giGet(path: string): Promise<unknown> {
+    return this.http.get(path);
   }
 
-  private async giPost(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${this.apiBase}${path}`, {
-      method: "POST",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`Gitea API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private giPost(path: string, body: unknown): Promise<unknown> {
+    return this.http.post(path, body);
   }
 
-  /** POST to endpoints that return 201/202/204 with no body. */
-  private async giPostEmpty(path: string, body?: unknown): Promise<void> {
-    const res = await fetch(`${this.apiBase}${path}`, {
-      method: "POST",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`Gitea API error ${res.status}: ${text}`);
-    }
-    await res.body?.cancel();
-  }
-
-  private async giPatch(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${this.apiBase}${path}`, {
-      method: "PATCH",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`Gitea API error ${res.status}: ${text}`);
-    }
-    return res.json();
-  }
-
-  private async giPut(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${this.apiBase}${path}`, {
-      method: "PUT",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`Gitea API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private giPatch(path: string, body: unknown): Promise<unknown> {
+    return this.http.patch(path, body);
   }
 
   // ---------------------------------------------------------------------------

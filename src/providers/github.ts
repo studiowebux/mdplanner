@@ -12,6 +12,7 @@
 
 import { log } from "../singletons/logger.ts";
 import { mapIssue, mapPR } from "./vcs-mappers.ts";
+import { VcsHttpClient } from "./vcs-http.ts";
 import type {
   GhJson,
   GitHubCreatedIssue,
@@ -36,9 +37,11 @@ const GITHUB_API = "https://api.github.com";
 /** GitHub provider (IGitProvider): repos, issues, PRs, milestones, releases, and Actions via the GitHub REST API. */
 export class GitHubProvider implements IGitProvider {
   private token?: string;
+  private http: VcsHttpClient;
 
   constructor(token?: string) {
     this.token = token;
+    this.http = new VcsHttpClient(GITHUB_API, () => this.headers, "GitHub");
   }
 
   private get headers(): HeadersInit {
@@ -50,66 +53,25 @@ export class GitHubProvider implements IGitProvider {
     return h;
   }
 
-  private async ghGet(path: string): Promise<unknown> {
-    const res = await fetch(`${GITHUB_API}${path}`, { headers: this.headers });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`GitHub API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private ghGet(path: string): Promise<unknown> {
+    return this.http.get(path);
   }
 
-  private async ghPost(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${GITHUB_API}${path}`, {
-      method: "POST",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`GitHub API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private ghPost(path: string, body: unknown): Promise<unknown> {
+    return this.http.post(path, body);
   }
 
   /** POST to endpoints that return 201/202/204 with no body. */
-  private async ghPostEmpty(path: string, body?: unknown): Promise<void> {
-    const res = await fetch(`${GITHUB_API}${path}`, {
-      method: "POST",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`GitHub API error ${res.status}: ${text}`);
-    }
-    await res.body?.cancel();
+  private ghPostEmpty(path: string, body?: unknown): Promise<void> {
+    return this.http.postEmpty(path, body);
   }
 
-  private async ghPatch(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${GITHUB_API}${path}`, {
-      method: "PATCH",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`GitHub API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private ghPatch(path: string, body: unknown): Promise<unknown> {
+    return this.http.patch(path, body);
   }
 
-  private async ghPut(path: string, body: unknown): Promise<unknown> {
-    const res = await fetch(`${GITHUB_API}${path}`, {
-      method: "PUT",
-      headers: { ...this.headers, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`GitHub API error ${res.status}: ${text}`);
-    }
-    return res.json();
+  private ghPut(path: string, body: unknown): Promise<unknown> {
+    return this.http.put(path, body);
   }
 
   // ---------------------------------------------------------------------------
