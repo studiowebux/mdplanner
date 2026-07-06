@@ -1,5 +1,4 @@
 ---
-id: portfolio_inventory_system
 name: Inventory System
 category: Client Work
 status: completed
@@ -7,6 +6,8 @@ client: RetailMax
 revenue: 32000
 expenses: 14000
 progress: 100
+created_at: "2026-04-05T06:09:18.093Z"
+updated_at: "2026-04-05T06:09:18.093Z"
 ---
 
 # Inventory System

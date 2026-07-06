@@ -1,0 +1,110 @@
+// Sticky Note repository — markdown file CRUD under sticky-notes/.
+
+import type {
+  CreateStickyNote,
+  StickyNote,
+  UpdatePosition,
+  UpdateSize,
+  UpdateStickyNote,
+} from "../types/sticky-note.types.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import {
+  rowToStickyNote,
+  STICKY_NOTE_TABLE,
+} from "../domains/sticky-note/cache.ts";
+import { STICKY_NOTE_BODY_KEYS } from "../domains/sticky-note/constants.ts";
+import { readMarkdownDir } from "../utils/repo-helpers.ts";
+
+import { stampAuditFields } from "../utils/frontmatter-mapper.ts";
+/** Persists StickyNote entities as markdown with a SQLite cache mirror; adds canvas position/size updates and a build-free active count (countActive). */
+export class StickyNoteRepository extends CachedMarkdownRepository<
+  StickyNote,
+  CreateStickyNote,
+  UpdateStickyNote
+> {
+  protected readonly tableName = STICKY_NOTE_TABLE;
+  protected override readonly supportsArchive = true;
+  private readonly boardId: string;
+
+  constructor(projectDir: string, boardId = "default") {
+    super(projectDir, {
+      directory: `sticky-notes/${boardId}`,
+      idPrefix: "sticky",
+      nameField: "content",
+    });
+    this.boardId = boardId;
+  }
+
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): StickyNote {
+    return rowToStickyNote(row);
+  }
+
+  async updatePosition(
+    id: string,
+    position: UpdatePosition,
+  ): Promise<StickyNote | null> {
+    return this.update(id, { position });
+  }
+
+  async updateSize(id: string, size: UpdateSize): Promise<StickyNote | null> {
+    return this.update(id, { size });
+  }
+
+  /**
+   * Count non-archived notes without building full entities or sorting.
+   * Same read + frontmatter-parse path and non-archived semantics as
+   * `findAll`, used by the board card grid which only needs `.length`.
+   */
+  async countActive(): Promise<number> {
+    const rows = await readMarkdownDir(
+      this.dir,
+      (_filename, fm) => (fm.archived === true ? null : true),
+    );
+    return rows.length;
+  }
+
+  protected fromCreateInput(
+    data: CreateStickyNote,
+    id: string,
+    now: string,
+  ): StickyNote {
+    return {
+      ...data,
+      id,
+      color: data.color ?? "yellow",
+      position: data.position ?? { x: 100, y: 100 },
+      boardId: this.boardId,
+      ...stampAuditFields(now),
+    };
+  }
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): StickyNote | null {
+    if (!fm.color) return null;
+    const id = filename.replace(/\.md$/, "");
+    const pos = fm.position as { x: number; y: number } | undefined;
+    const sz = fm.size as { width: number; height: number } | undefined;
+
+    return {
+      id,
+      content: body.trim(),
+      color: String(fm.color),
+      position: pos ?? { x: 100, y: 100 },
+      size: sz ?? undefined,
+      boardId: this.boardId,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+    };
+  }
+
+  protected serialize(note: StickyNote): string {
+    return this.serializeStandard(note, STICKY_NOTE_BODY_KEYS, note.content);
+  }
+}

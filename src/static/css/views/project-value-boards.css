@@ -1,0 +1,135 @@
+/* Project Value Board — list + detail view styles */
+
+/* ---------------------------------------------------------------------------
+   Detail header
+--------------------------------------------------------------------------- */
+
+.pv-detail__header {
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Value board grid — 2×2 named-area layout.
+   CS = Customer Segments | PR = Problem
+   SL = Solution          | BN = Benefit
+--------------------------------------------------------------------------- */
+
+.pv-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "cs pr"
+    "sl bn";
+  gap: var(--space-md);
+  margin-block: var(--space-md);
+}
+
+@media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
+  .pv-board {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "cs"
+      "pr"
+      "sl"
+      "bn";
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Board cell — card with colored top border per section
+--------------------------------------------------------------------------- */
+
+.pv-board__cell {
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pv-board__cell[data-quadrant="blue"] {
+  border-top: var(--space-xs) solid var(--color-info);
+  grid-area: cs;
+}
+
+.pv-board__cell[data-quadrant="red"] {
+  border-top: var(--space-xs) solid var(--color-error);
+  grid-area: pr;
+}
+
+.pv-board__cell[data-quadrant="green"] {
+  border-top: var(--space-xs) solid var(--color-success);
+  grid-area: sl;
+}
+
+.pv-board__cell[data-quadrant="yellow"] {
+  border-top: var(--space-xs) solid var(--color-accent);
+  grid-area: bn;
+}
+
+.pv-board__cell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.pv-board__cell-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Reuse quadrant-card list/item/empty/add/input styles from components.css */
+.pv-board .quadrant-card__list {
+  padding: var(--space-sm) var(--space-md);
+  margin: 0;
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.pv-board .quadrant-card__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) 0;
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  min-width: 0;
+}
+
+.pv-board .quadrant-card__item:last-child {
+  border-bottom: none;
+}
+
+.pv-board .quadrant-card__empty {
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  margin: 0;
+}
+
+.pv-board .quadrant-card__add {
+  padding: var(--space-xs) var(--space-md) var(--space-sm);
+  border-top: var(--border-width) solid var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+/* Inputs/inline-edit + edit-mode hover come from components.css
+   (.quadrant-card__input--ghost modifier on add inputs; canonical
+   .quadrant-card__inline-edit covers row editing). */
+
+/* ---------------------------------------------------------------------------
+   Card list view
+--------------------------------------------------------------------------- */
+
+.pv-date-badge {
+  font-size: var(--font-size-xs);
+}

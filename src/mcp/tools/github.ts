@@ -1,140 +1,35 @@
-/**
- * MCP tools for GitHub integration.
- * Tools: github_get_repo, github_get_issue, github_create_issue,
- *        github_set_issue_state, github_list_repos, github_get_pr
- *
- * All tools require a GitHub PAT configured via Settings > Integrations.
- * Returns an error content block (not a throw) when no token is configured.
- */
+// MCP tools for GitHub operations — thin wrappers over GitHubService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
+import { defineMcpModule } from "../module.ts";
+import { getGitHubService } from "../../singletons/services.ts";
+import {
+  CreateIssueBodySchema,
+  GitHubNumberInput,
+  GitHubRepoInput,
+  ListIssuesQuerySchema,
+  ListPRsQuerySchema,
+  MergePRBodySchema,
+  PatchIssueBodySchema,
+  VcsProviderInput,
+} from "../../types/github.types.ts";
+import { err, ok } from "../utils.ts";
 
-function ok(data: unknown) {
-  return {
-    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
-  };
-}
+export function registerGitHubTools(server: McpServer): void {
+  const service = getGitHubService();
 
-function err(message: string) {
-  return {
-    content: [{ type: "text" as const, text: `Error: ${message}` }],
-    isError: true as const,
-  };
-}
-
-async function resolveProvider(
-  pm: ProjectManager,
-): Promise<GitHubApiProvider | null> {
-  const token = await pm.getIntegrationSecret("github", "token");
-  if (!token) return null;
-  return new GitHubApiProvider(token);
-}
-
-export function registerGitHubTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
   server.registerTool(
     "github_get_repo",
     {
       description:
-        "Fetch summary stats for a GitHub repository: stars, open issues, open PRs, last push date, license. Requires GitHub token configured in Settings.",
-      inputSchema: {
-        owner: z.string().describe("Repository owner (GitHub username or org)"),
-        repo: z.string().describe("Repository name"),
-      },
+        "Fetch repository summary: stars, open issues, open PRs, license, last push.",
+      inputSchema: { githubRepo: GitHubRepoInput, provider: VcsProviderInput },
     },
-    async ({ owner, repo }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
+    async ({ githubRepo, provider }) => {
       try {
-        const data = await provider.getRepo(owner, repo);
-        return ok(data);
+        return ok(await service.getRepo(githubRepo, provider));
       } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
-      }
-    },
-  );
-
-  server.registerTool(
-    "github_get_issue",
-    {
-      description:
-        "Fetch the state and details of a single GitHub issue by number.",
-      inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        number: z.number().int().positive().describe("Issue number"),
-      },
-    },
-    async ({ owner, repo, number }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
-      try {
-        const issue = await provider.getIssue(owner, repo, number);
-        return ok(issue);
-      } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
-      }
-    },
-  );
-
-  server.registerTool(
-    "github_create_issue",
-    {
-      description:
-        "Create a new GitHub issue in a repository. Returns the created issue number and URL.",
-      inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        title: z.string().min(1).describe("Issue title"),
-        body: z.string().optional().describe(
-          "Issue body / description (markdown)",
-        ),
-      },
-    },
-    async ({ owner, repo, title, body }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
-      try {
-        const created = await provider.createIssue(
-          owner,
-          repo,
-          title,
-          body ?? "",
-        );
-        return ok(created);
-      } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
-      }
-    },
-  );
-
-  server.registerTool(
-    "github_set_issue_state",
-    {
-      description:
-        "Close or reopen a GitHub issue. Use state='closed' to close, state='open' to reopen.",
-      inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        number: z.number().int().positive().describe("Issue number"),
-        state: z.enum(["open", "closed"]).describe(
-          "Target state: 'open' or 'closed'",
-        ),
-      },
-    },
-    async ({ owner, repo, number, state }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
-      try {
-        const issue = await provider.setIssueState(owner, repo, number, state);
-        return ok(issue);
-      } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
+        return err(e instanceof Error ? e.message : String(e));
       }
     },
   );
@@ -143,21 +38,80 @@ export function registerGitHubTools(
     "github_list_repos",
     {
       description:
-        "List GitHub repositories accessible to the authenticated user. Supports optional query filter.",
+        "List GitHub repositories accessible to the authenticated user, optionally filtered by query.",
       inputSchema: {
-        query: z.string().optional().describe(
-          "Optional filter string to narrow results by repo full name",
+        query: ListIssuesQuerySchema.shape.assignee.describe(
+          "Filter repos by name substring",
         ),
+        provider: VcsProviderInput,
       },
     },
-    async ({ query }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
+    async ({ query, provider }) => {
       try {
-        const repos = await provider.listRepos(query);
-        return ok(repos);
+        return ok(await service.listRepos(query, provider));
       } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
+        return err(e instanceof Error ? e.message : String(e));
+      }
+    },
+  );
+
+  server.registerTool(
+    "github_get_issue",
+    {
+      description: "Fetch a single GitHub issue by number.",
+      inputSchema: {
+        githubRepo: GitHubRepoInput,
+        number: GitHubNumberInput,
+        provider: VcsProviderInput,
+      },
+    },
+    async ({ githubRepo, number, provider }) => {
+      try {
+        return ok(await service.getIssue(githubRepo, number, provider));
+      } catch (e) {
+        return err(e instanceof Error ? e.message : String(e));
+      }
+    },
+  );
+
+  server.registerTool(
+    "github_create_issue",
+    {
+      description: "Create a new GitHub issue.",
+      inputSchema: {
+        githubRepo: GitHubRepoInput,
+        title: CreateIssueBodySchema.shape.title,
+        body: CreateIssueBodySchema.shape.body,
+        provider: VcsProviderInput,
+      },
+    },
+    async ({ githubRepo, title, body, provider }) => {
+      try {
+        return ok(await service.createIssue(githubRepo, title, body, provider));
+      } catch (e) {
+        return err(e instanceof Error ? e.message : String(e));
+      }
+    },
+  );
+
+  server.registerTool(
+    "github_set_issue_state",
+    {
+      description: "Open or close a GitHub issue.",
+      inputSchema: {
+        githubRepo: GitHubRepoInput,
+        number: GitHubNumberInput,
+        state: PatchIssueBodySchema.shape.state,
+        provider: VcsProviderInput,
+      },
+    },
+    async ({ githubRepo, number, state, provider }) => {
+      try {
+        return ok(
+          await service.setIssueState(githubRepo, number, state, provider),
+        );
+      } catch (e) {
+        return err(e instanceof Error ? e.message : String(e));
       }
     },
   );
@@ -166,26 +120,21 @@ export function registerGitHubTools(
     "github_list_issues",
     {
       description:
-        "List issues for a GitHub repository. Filters out pull requests. Supports state and assignee filters.",
+        "List GitHub issues for a repository, optionally filtered by state and assignee.",
       inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        state: z.enum(["open", "closed", "all"]).optional().describe(
-          "Filter by state (default: open)",
-        ),
-        assignee: z.string().optional().describe(
-          "Filter by assignee login",
-        ),
+        githubRepo: GitHubRepoInput,
+        state: ListIssuesQuerySchema.shape.state,
+        assignee: ListIssuesQuerySchema.shape.assignee,
+        provider: VcsProviderInput,
       },
     },
-    async ({ owner, repo, state, assignee }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
+    async ({ githubRepo, state, assignee, provider }) => {
       try {
-        const issues = await provider.listIssues(owner, repo, state, assignee);
-        return ok(issues);
+        return ok(
+          await service.listIssues(githubRepo, state, assignee, provider),
+        );
       } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
+        return err(e instanceof Error ? e.message : String(e));
       }
     },
   );
@@ -194,53 +143,18 @@ export function registerGitHubTools(
     "github_list_prs",
     {
       description:
-        "List pull requests for a GitHub repository. Supports state filter.",
+        "List GitHub pull requests for a repository, optionally filtered by state.",
       inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        state: z.enum(["open", "closed", "all"]).optional().describe(
-          "Filter by state (default: open)",
-        ),
+        githubRepo: GitHubRepoInput,
+        state: ListPRsQuerySchema.shape.state,
+        provider: VcsProviderInput,
       },
     },
-    async ({ owner, repo, state }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
+    async ({ githubRepo, state, provider }) => {
       try {
-        const prs = await provider.listPRs(owner, repo, state);
-        return ok(prs);
+        return ok(await service.listPRs(githubRepo, state, provider));
       } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
-      }
-    },
-  );
-
-  server.registerTool(
-    "github_merge_pr",
-    {
-      description:
-        "Merge a GitHub pull request. Defaults to squash merge. Fails if PR is not mergeable.",
-      inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        number: z.number().int().positive().describe("Pull request number"),
-        merge_method: z.enum(["merge", "squash", "rebase"]).optional()
-          .describe("Merge strategy (default: squash)"),
-      },
-    },
-    async ({ owner, repo, number, merge_method }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
-      try {
-        const result = await provider.mergePR(
-          owner,
-          repo,
-          number,
-          merge_method,
-        );
-        return ok(result);
-      } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
+        return err(e instanceof Error ? e.message : String(e));
       }
     },
   );
@@ -248,23 +162,46 @@ export function registerGitHubTools(
   server.registerTool(
     "github_get_pr",
     {
-      description:
-        "Fetch the state and details of a single GitHub pull request by number.",
+      description: "Fetch a single GitHub pull request by number.",
       inputSchema: {
-        owner: z.string().describe("Repository owner"),
-        repo: z.string().describe("Repository name"),
-        number: z.number().int().positive().describe("Pull request number"),
+        githubRepo: GitHubRepoInput,
+        number: GitHubNumberInput,
+        provider: VcsProviderInput,
       },
     },
-    async ({ owner, repo, number }) => {
-      const provider = await resolveProvider(pm);
-      if (!provider) return err("GitHub token not configured");
+    async ({ githubRepo, number, provider }) => {
       try {
-        const pr = await provider.getPR(owner, repo, number);
-        return ok(pr);
+        return ok(await service.getPR(githubRepo, number, provider));
       } catch (e) {
-        return err(e instanceof Error ? e.message : "GitHub API error");
+        return err(e instanceof Error ? e.message : String(e));
+      }
+    },
+  );
+
+  server.registerTool(
+    "github_merge_pr",
+    {
+      description: "Merge a GitHub pull request.",
+      inputSchema: {
+        githubRepo: GitHubRepoInput,
+        number: GitHubNumberInput,
+        mergeMethod: MergePRBodySchema.shape.mergeMethod,
+        provider: VcsProviderInput,
+      },
+    },
+    async ({ githubRepo, number, mergeMethod, provider }) => {
+      try {
+        return ok(
+          await service.mergePR(githubRepo, number, mergeMethod, provider),
+        );
+      } catch (e) {
+        return err(e instanceof Error ? e.message : String(e));
       }
     },
   );
 }
+
+export const gitHubModule = defineMcpModule({
+  feature: "github",
+  register: registerGitHubTools,
+});

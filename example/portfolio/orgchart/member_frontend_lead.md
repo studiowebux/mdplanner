@@ -2,10 +2,10 @@
 id: member_frontend_lead
 title: Frontend Lead
 department: Engineering
-reportsTo: member_cto
+reports_to: member_cto
 email: bob.smith@taskflow.io
 phone: "+1-555-0111"
-startDate: "2021-04-20"
+start_date: "2021-04-20"
 ---
 
 # Bob Smith

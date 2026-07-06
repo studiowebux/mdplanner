@@ -1,40 +1,47 @@
-/**
- * MCP tools for habit tracker operations.
- * Tools: list_habits, get_habit, create_habit, update_habit,
- *        mark_habit_complete, unmark_habit_complete, delete_habit
- */
+// MCP tools for habit operations — thin wrappers over HabitService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { getHabitService } from "../../singletons/services.ts";
+import {
+  CreateHabitSchema,
+  HabitSchema,
+  ListHabitOptionsSchema,
+  UpdateHabitSchema,
+} from "../../types/habit.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
+import { defaultScope, scopeForUserId } from "../../utils/actor.ts";
 
-export function registerHabitTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerHabitTools(server: McpServer): void {
+  const service = getHabitService();
 
   server.registerTool(
     "list_habits",
     {
-      description: "List all habits in the project.",
-      inputSchema: {},
+      description: "List all habits. Optionally filter by project.",
+      inputSchema: { ...ListHabitOptionsSchema.shape, slim: slimParam },
     },
-    async () => ok(await parser.readHabits()),
+    async ({ slim, ...options }) => {
+      const items = await service.list(options);
+      return slim
+        ? ok(
+          projectSlim(items, ["title", "frequency", "targetPerPeriod", "unit"]),
+        )
+        : ok(items);
+    },
   );
 
   server.registerTool(
     "get_habit",
     {
       description: "Get a single habit by its ID.",
-      inputSchema: { id: z.string().describe("Habit ID") },
+      inputSchema: { id: HabitSchema.shape.id.describe("Habit ID") },
     },
     async ({ id }) => {
-      const habits = await parser.readHabits();
-      const habit = habits.find((h) => h.id === id);
-      if (!habit) return err(`Habit '${id}' not found`);
-      return ok(habit);
+      const item = await service.getById(id);
+      if (!item) return err(`Habit '${id}' not found`);
+      return ok(item);
     },
   );
 
@@ -42,13 +49,13 @@ export function registerHabitTools(
     "get_habit_by_name",
     {
       description:
-        "Get a habit by its name (case-insensitive). Prefer this over list_habits when the name is known.",
-      inputSchema: { name: z.string().describe("Habit name") },
+        "Get a habit by its title (case-insensitive). Prefer this over list_habits when the title is known.",
+      inputSchema: { name: HabitSchema.shape.title.describe("Habit title") },
     },
     async ({ name }) => {
-      const habit = await parser.readHabitByName(name);
-      if (!habit) return err(`Habit '${name}' not found`);
-      return ok(habit);
+      const item = await service.getByName(name);
+      if (!item) return err(`Habit '${name}' not found`);
+      return ok(item);
     },
   );
 
@@ -56,54 +63,39 @@ export function registerHabitTools(
     "create_habit",
     {
       description: "Create a new habit to track.",
-      inputSchema: {
-        name: z.string().describe("Habit name"),
-        description: z.string().optional(),
-        frequency: z.enum(["daily", "weekly"]).optional().describe(
-          "Tracking frequency (default: daily)",
-        ),
-        target_days: z.array(z.string()).optional().describe(
-          "Target days for weekly habits (e.g. ['Mon','Wed','Fri'])",
-        ),
-        notes: z.string().optional().describe("Markdown body notes"),
-      },
+      inputSchema: CreateHabitSchema.shape,
     },
-    async ({ name, description, frequency, target_days, notes }) => {
-      const habit = await parser.addHabit({
-        name,
-        ...(description && { description }),
-        frequency: frequency ?? "daily",
-        ...(target_days?.length && { targetDays: target_days }),
-        completions: [],
-        ...(notes && { notes }),
-      });
-      return ok({ id: habit.id });
+    async (data) => {
+      const item = await service.create(data);
+      return ok({ id: item.id });
     },
   );
 
   server.registerTool(
     "update_habit",
     {
-      description: "Update an existing habit's metadata.",
+      description: "Update an existing habit's fields.",
       inputSchema: {
-        id: z.string().describe("Habit ID"),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        frequency: z.enum(["daily", "weekly"]).optional(),
-        target_days: z.array(z.string()).optional(),
-        notes: z.string().optional(),
-        day_notes: z.record(z.string(), z.string()).optional().describe(
-          "Per-day notes keyed by ISO date (YYYY-MM-DD). Merged with existing day notes.",
-        ),
+        id: HabitSchema.shape.id.describe("Habit ID"),
+        ...UpdateHabitSchema.shape,
       },
     },
-    async ({ id, target_days, day_notes, ...rest }) => {
-      const updated = await parser.updateHabit(id, {
-        ...rest,
-        ...(target_days !== undefined && { targetDays: target_days }),
-        ...(day_notes !== undefined && { dayNotes: day_notes }),
-      });
-      if (!updated) return err(`Habit '${id}' not found`);
+    async ({ id, ...fields }) => {
+      const item = await service.update(id, fields);
+      if (!item) return err(`Habit '${id}' not found`);
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "delete_habit",
+    {
+      description: "Delete a habit by its ID.",
+      inputSchema: { id: HabitSchema.shape.id.describe("Habit ID") },
+    },
+    async ({ id }) => {
+      const success = await service.delete(id);
+      if (!success) return err(`Habit '${id}' not found`);
       return ok({ success: true });
     },
   );
@@ -112,55 +104,54 @@ export function registerHabitTools(
     "mark_habit_complete",
     {
       description:
-        "Mark a habit as completed for a specific date (defaults to today).",
+        "Mark a habit as complete for a specific date. Completions are " +
+        "scoped per user; pass userId to log for a specific person, " +
+        "otherwise the project's default user is used.",
       inputSchema: {
-        id: z.string().describe("Habit ID"),
-        date: z.string().optional().describe(
-          "ISO date (YYYY-MM-DD, defaults to today)",
+        id: HabitSchema.shape.id.describe("Habit ID"),
+        date: z.string().describe("Date to mark complete (YYYY-MM-DD)"),
+        userId: z.string().optional().describe(
+          "Person ID to attribute the completion to (defaults to project default user)",
         ),
-        note: z.string().optional().describe("Optional note for this day"),
       },
     },
-    async ({ id, date, note }) => {
-      const updated = await parser.markHabitComplete(id, date);
-      if (!updated) return err(`Habit '${id}' not found`);
-      // Attach per-day note if provided
-      if (note) {
-        const targetDate = date ??
-          new Date().toISOString().split("T")[0];
-        const dayNotes = { ...(updated.dayNotes ?? {}), [targetDate]: note };
-        await parser.updateHabit(id, { dayNotes });
-      }
-      return ok({ success: true, streakCount: updated.streakCount });
+    async ({ id, date, userId }) => {
+      const scope = userId
+        ? await scopeForUserId(userId)
+        : await defaultScope();
+      const item = await service.markComplete(id, date, scope);
+      if (!item) return err(`Habit '${id}' not found`);
+      return ok({ success: true });
     },
   );
 
   server.registerTool(
     "unmark_habit_complete",
     {
-      description: "Remove a completion mark for a specific date.",
+      description:
+        "Remove a completion entry for a habit on a specific date. Completions " +
+        "are scoped per user; pass userId to target a specific person, " +
+        "otherwise the project's default user is used.",
       inputSchema: {
-        id: z.string().describe("Habit ID"),
-        date: z.string().describe("ISO date (YYYY-MM-DD) to unmark"),
+        id: HabitSchema.shape.id.describe("Habit ID"),
+        date: z.string().describe("Date to unmark (YYYY-MM-DD)"),
+        userId: z.string().optional().describe(
+          "Person ID whose completion to remove (defaults to project default user)",
+        ),
       },
     },
-    async ({ id, date }) => {
-      const updated = await parser.unmarkHabitComplete(id, date);
-      if (!updated) return err(`Habit '${id}' not found`);
-      return ok({ success: true, streakCount: updated.streakCount });
-    },
-  );
-
-  server.registerTool(
-    "delete_habit",
-    {
-      description: "Delete a habit by its ID.",
-      inputSchema: { id: z.string().describe("Habit ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteHabit(id);
-      if (!success) return err(`Habit '${id}' not found`);
+    async ({ id, date, userId }) => {
+      const scope = userId
+        ? await scopeForUserId(userId)
+        : await defaultScope();
+      const item = await service.unmarkComplete(id, date, scope);
+      if (!item) return err(`Habit '${id}' not found`);
       return ok({ success: true });
     },
   );
 }
+
+export const habitModule = defineMcpModule({
+  feature: "habit",
+  register: registerHabitTools,
+});

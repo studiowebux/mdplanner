@@ -1,0 +1,627 @@
+// Declarative form builder — renders create/edit forms from a FieldDef[].
+import type { FC } from "hono/jsx";
+import { parseJson } from "../../database/sqlite/mod.ts";
+import { AutocompleteWidget } from "./autocomplete-widget.tsx";
+import { Sidenav } from "./sidenav.tsx";
+import { FormTextarea } from "./form-textarea.tsx";
+
+type Option = { value: string; label: string };
+
+/** Field definition for a single column within an array-table row. */
+export type ArrayTableItemField =
+  | { type: "hidden"; name: string }
+  | { type: "text"; name: string; label: string; placeholder?: string }
+  | { type: "number"; name: string; label: string; min?: number; max?: number }
+  | { type: "money"; name: string; label: string; placeholder?: string }
+  | { type: "date"; name: string; label: string }
+  | { type: "select"; name: string; label: string; options: Option[] }
+  | {
+    type: "textarea";
+    name: string;
+    label: string;
+    rows?: number;
+    placeholder?: string;
+  }
+  | {
+    type: "autocomplete";
+    name: string;
+    label: string;
+    source: string;
+    placeholder?: string;
+    /**
+     * Map from data-autofill attribute keys (returned on <li> items)
+     * to sibling field names within the same array-table row.
+     * Example: `{ unit: "unit", rate: "unitRate" }` fills the row's
+     * unit and unitRate fields when a rate is selected.
+     */
+    autofill?: Record<string, string>;
+  };
+
+/** Discriminated union of form field kinds (text, number, date, select, textarea, autocomplete, array-table, sidenav, ...) consumed by FormBuilder. */
+export type FieldDef =
+  | { type: "hidden"; name: string }
+  | {
+    type: "text";
+    name: string;
+    label: string;
+    required?: boolean;
+    placeholder?: string;
+    maxLength?: number;
+  }
+  | {
+    type: "number";
+    name: string;
+    label: string;
+    required?: boolean;
+    min?: number;
+    max?: number;
+  }
+  | {
+    type: "money";
+    name: string;
+    label: string;
+    required?: boolean;
+    placeholder?: string;
+  }
+  | { type: "date"; name: string; label: string; required?: boolean }
+  | {
+    type: "select";
+    name: string;
+    label: string;
+    options: Option[];
+    required?: boolean;
+    /**
+     * Optional htmx wiring fired when the selection changes — e.g. seed a
+     * sibling array-table from a chosen template. The select's own value is
+     * sent as a query/form param (htmx includes the triggering element).
+     */
+    hx?: {
+      get: string;
+      target: string;
+      trigger?: string;
+      swap?: string;
+    };
+  }
+  | {
+    type: "textarea";
+    name: string;
+    label: string;
+    rows?: number;
+    required?: boolean;
+    maxLength?: number;
+  }
+  | {
+    type: "autocomplete";
+    name: string;
+    label: string;
+    source: string;
+    required?: boolean;
+    placeholder?: string;
+    /** Allow free text alongside suggestions. Typed text syncs to hidden input. */
+    freetext?: boolean;
+  }
+  | {
+    type: "tags";
+    name: string;
+    label: string;
+    required?: boolean;
+    /** Autocomplete source for suggestions. Omit for freetext-only tags. */
+    source?: string;
+    placeholder?: string;
+  }
+  | { type: "boolean"; name: string; label: string }
+  | {
+    type: "array-table";
+    name: string;
+    label: string;
+    /** Unique section key used in input names: `{section}[{idx}].{field}`. */
+    section: string;
+    /** Field definitions for each row (flat types only: text, number, date, select). */
+    itemFields: ArrayTableItemField[];
+    /** Label for the add button. Defaults to "Add {label}". */
+    addLabel?: string;
+  };
+
+type Props = {
+  id: string;
+  title: string;
+  fields: FieldDef[];
+  values?: Record<string, string>;
+  /** Display overrides for autocomplete search inputs (show name, store ID). */
+  displayValues?: Record<string, string>;
+  /**
+   * Per-row display overrides for nested array-table autocomplete fields.
+   * Keyed by the array-table field's `name`; value is the per-row map
+   * (`{ fieldName → displayString }[]`) index-aligned with the row array.
+   * Out-of-range rows fall back to an empty displayValue.
+   */
+  arrayDisplayValues?: Record<string, Record<string, string>[]>;
+  submitLabel?: string;
+  action: string;
+  method: "post" | "put";
+  open?: boolean;
+};
+
+const fieldId = (formId: string, name: string) => `${formId}-${name}`;
+
+// ---------------------------------------------------------------------------
+// Array-table helpers — render structured object arrays as editable rows
+// ---------------------------------------------------------------------------
+
+const ArrayTableRowField: FC<
+  {
+    section: string;
+    idx: number;
+    field: ArrayTableItemField;
+    value?: string;
+    /** Display override for the autocomplete search input (show name, store ID). */
+    displayValue?: string;
+  }
+> = ({ section, idx, field, value, displayValue }) => {
+  const name = `${section}[${idx}].${field.name}`;
+  const strVal = value ?? "";
+  if (field.type === "hidden") {
+    return <input type="hidden" name={name} value={strVal} />;
+  }
+  return (
+    <div class="array-table__field">
+      <label class="array-table__field-label">{field.label}</label>
+      {field.type === "text" && (
+        <input
+          type="text"
+          name={name}
+          class="form__input"
+          value={strVal}
+          placeholder={field.placeholder}
+          autocomplete="do-not-autofill"
+        />
+      )}
+      {field.type === "number" && (
+        <input
+          type="number"
+          name={name}
+          class="form__input"
+          value={strVal}
+          min={field.min}
+          max={field.max}
+          step="any"
+          autocomplete="off"
+        />
+      )}
+      {field.type === "money" && (
+        <input
+          type="text"
+          inputmode="decimal"
+          name={name}
+          class="form__input"
+          value={strVal}
+          placeholder={field.placeholder ?? "0.00"}
+          autocomplete="off"
+        />
+      )}
+      {field.type === "date" && (
+        <input
+          type="date"
+          name={name}
+          class="form__input"
+          value={strVal}
+        />
+      )}
+      {field.type === "select" && (
+        <select name={name} class="form__select">
+          <option value="">—</option>
+          {field.options.map((o) => (
+            <option key={o.value} value={o.value} selected={value === o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      )}
+      {field.type === "textarea" && (
+        <FormTextarea
+          name={name}
+          rows={field.rows ?? 2}
+          placeholder={field.placeholder}
+          value={strVal}
+        />
+      )}
+      {field.type === "autocomplete" && (
+        <AutocompleteWidget
+          id={`at-${section}-${idx}-${field.name}`}
+          name={name}
+          source={field.source}
+          value={value}
+          displayValue={displayValue}
+          placeholder={field.placeholder}
+          autofillMap={field.autofill}
+        />
+      )}
+    </div>
+  );
+};
+
+const ArrayTableRow: FC<
+  {
+    section: string;
+    idx: number;
+    itemFields: ArrayTableItemField[];
+    rowData?: Record<string, unknown>;
+    /** Per-field display overrides for autocomplete search inputs in this row. */
+    rowDisplayData?: Record<string, string>;
+  }
+> = ({ section, idx, itemFields, rowData, rowDisplayData }) => (
+  <div class="array-table__row">
+    <div class="array-table__row-fields">
+      {itemFields.map((field) => (
+        <ArrayTableRowField
+          key={field.name}
+          section={section}
+          idx={idx}
+          field={field}
+          value={rowData ? String(rowData[field.name] ?? "") : ""}
+          displayValue={rowDisplayData?.[field.name]}
+        />
+      ))}
+    </div>
+    <button
+      type="button"
+      class="array-table__remove"
+      aria-label="Remove row"
+      data-remove-closest=".array-table__row"
+    >
+      &times;
+    </button>
+  </div>
+);
+
+/** Editable rows + Add button for a structured object array. */
+const ArrayTable: FC<
+  {
+    section: string;
+    itemFields: ArrayTableItemField[];
+    rows: Record<string, unknown>[];
+    rowsId: string;
+    addLabel: string;
+    /** Per-row display overrides, index-aligned with `rows`. */
+    rowsDisplayData?: Record<string, string>[];
+  }
+> = ({ section, itemFields, rows, rowsId, addLabel, rowsDisplayData }) => (
+  <div class="array-table" data-array-table={section}>
+    <div class="array-table__rows" id={rowsId}>
+      {rows.map((rowData, idx) => (
+        <ArrayTableRow
+          key={idx}
+          section={section}
+          idx={idx}
+          itemFields={itemFields}
+          rowData={rowData}
+          rowDisplayData={rowsDisplayData?.[idx]}
+        />
+      ))}
+    </div>
+    <button
+      type="button"
+      class="btn btn--secondary btn--sm array-table__add"
+      hx-get={`/forms/array-row/${section}`}
+      hx-target={`#${rowsId}`}
+      hx-swap="beforeend"
+    >
+      {addLabel}
+    </button>
+  </div>
+);
+
+/** ArrayTable + ArrayTableRow exported for the array-row server endpoint
+    and for callers (e.g. settings) that render the table outside FormBuilder. */
+export { ArrayTable, ArrayTableRow, ArrayTableRowField };
+
+const Field: FC<
+  {
+    formId: string;
+    def: FieldDef;
+    value?: string;
+    displayValue?: string;
+    /** Per-row display overrides for nested array-table autocomplete fields. */
+    arrayDisplayRows?: Record<string, string>[];
+  }
+> = (
+  { formId, def, value, displayValue, arrayDisplayRows },
+) => {
+  const id = fieldId(formId, def.name);
+
+  if (def.type === "hidden") {
+    return <input type="hidden" id={id} name={def.name} value={value ?? ""} />;
+  }
+
+  return (
+    <div class="form__field">
+      <label class="form__label" for={id}>
+        {def.label}
+        {"required" in def && def.required && (
+          <span class="form__required" aria-hidden="true">*</span>
+        )}
+      </label>
+      <FieldControl
+        id={id}
+        def={def}
+        value={value}
+        displayValue={displayValue}
+        arrayDisplayRows={arrayDisplayRows}
+      />
+    </div>
+  );
+};
+
+/** Select control — options + optional htmx wiring. */
+const SelectControl: FC<{
+  id: string;
+  def: Extract<FieldDef, { type: "select" }>;
+  value?: string;
+}> = ({ id, def, value }) => (
+  <select
+    id={id}
+    name={def.name}
+    class="form__select"
+    required={def.required}
+    {...(def.hx
+      ? {
+        "hx-get": def.hx.get,
+        "hx-target": def.hx.target,
+        "hx-trigger": def.hx.trigger ?? "change",
+        "hx-swap": def.hx.swap ?? "innerHTML",
+      }
+      : {})}
+  >
+    {def.options.map((o) => (
+      <option key={o.value} value={o.value} selected={value === o.value}>
+        {o.label}
+      </option>
+    ))}
+  </select>
+);
+
+/** Tags control — comma-encoded pills + add input with optional autocomplete. */
+const TagsControl: FC<{
+  id: string;
+  def: Extract<FieldDef, { type: "tags" }>;
+  value?: string;
+}> = ({ id, def, value }) => {
+  const tags = (value ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return (
+    <div class="form__tags" data-tags-field={id}>
+      <div class="form__tags-pills" id={`${id}-pills`}>
+        {tags.map((tag) => (
+          <span key={tag} class="form__tags-pill" data-tag-value={tag}>
+            {tag}
+            <button
+              type="button"
+              class="form__tags-pill-remove"
+              data-tag-remove={tag}
+              aria-label={`Remove ${tag}`}
+            >
+              &times;
+            </button>
+          </span>
+        ))}
+      </div>
+      <input
+        type="text"
+        id={`${id}-input`}
+        class="form__input form__tags-input"
+        placeholder={def.placeholder ?? "Type and press Enter..."}
+        autocomplete="off"
+        name="q"
+        data-tags-target={id}
+        {...(def.source
+          ? {
+            "hx-get": `/autocomplete/${def.source}`,
+            "hx-trigger": "input changed delay:150ms, focus",
+            "hx-target": `#${id}-results`,
+            "hx-swap": "innerHTML",
+          }
+          : {})}
+      />
+      <input type="hidden" id={id} name={def.name} value={value ?? ""} />
+      {def.source && (
+        <ul
+          class="form__autocomplete-list"
+          id={`${id}-results`}
+        />
+      )}
+    </div>
+  );
+};
+
+function dispatchFieldControl(
+  id: string,
+  def: FieldDef,
+  strVal: string,
+  value: string | undefined,
+  displayValue: string | undefined,
+  arrayDisplayRows: Record<string, string>[] | undefined,
+) {
+  if (def.type === "text") {
+    return (
+      <input
+        type="text"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        placeholder={def.placeholder}
+        maxlength={def.maxLength}
+        value={strVal}
+        autocomplete="do-not-autofill"
+      />
+    );
+  }
+  if (def.type === "number") {
+    return (
+      <input
+        type="number"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        min={def.min}
+        max={def.max}
+        step="any"
+        value={strVal}
+        autocomplete="off"
+      />
+    );
+  }
+  if (def.type === "money") {
+    return (
+      <input
+        type="text"
+        inputmode="decimal"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        placeholder={def.placeholder ?? "0.00"}
+        value={strVal}
+        autocomplete="off"
+      />
+    );
+  }
+  if (def.type === "date") {
+    return (
+      <input
+        type="date"
+        id={id}
+        name={def.name}
+        class="form__input"
+        required={def.required}
+        value={strVal}
+      />
+    );
+  }
+  if (def.type === "select") {
+    return <SelectControl id={id} def={def} value={value} />;
+  }
+  if (def.type === "textarea") {
+    return (
+      <FormTextarea
+        id={id}
+        name={def.name}
+        rows={def.rows ?? 4}
+        required={def.required}
+        maxlength={def.maxLength}
+        value={strVal}
+      />
+    );
+  }
+  if (def.type === "boolean") {
+    return (
+      <label class="form__checkbox-label">
+        <input
+          type="checkbox"
+          id={id}
+          name={def.name}
+          value="true"
+          checked={value === "true"}
+          class="form__checkbox"
+        />
+        {def.label}
+      </label>
+    );
+  }
+  if (def.type === "autocomplete") {
+    return (
+      <AutocompleteWidget
+        id={id}
+        name={def.name}
+        source={def.source}
+        value={value}
+        displayValue={displayValue}
+        placeholder={def.placeholder}
+        required={def.required}
+        freetext={def.freetext}
+      />
+    );
+  }
+  if (def.type === "tags") {
+    return <TagsControl id={id} def={def} value={value} />;
+  }
+  if (def.type === "array-table") {
+    // Only array-table fields hold a JSON value — parse here so scalar fields
+    // (text/number/money/etc.) never run a doomed JSON.parse on render.
+    const parsedRows = parseJson<Record<string, unknown>[]>(value) ?? [];
+    return (
+      <ArrayTable
+        section={def.section}
+        itemFields={def.itemFields}
+        rows={parsedRows}
+        rowsId={`${id}-rows`}
+        addLabel={def.addLabel ?? `Add ${def.label}`}
+        rowsDisplayData={arrayDisplayRows}
+      />
+    );
+  }
+  return null;
+}
+
+/** Renders the type-specific input control for one field (no label wrapper). */
+const FieldControl: FC<{
+  id: string;
+  def: FieldDef;
+  value?: string;
+  displayValue?: string;
+  arrayDisplayRows?: Record<string, string>[];
+}> = ({ id, def, value, displayValue, arrayDisplayRows }) => {
+  const strVal = value ?? "";
+  return dispatchFieldControl(
+    id,
+    def,
+    strVal,
+    value,
+    displayValue,
+    arrayDisplayRows,
+  );
+};
+
+/** Renders a complete create/edit form from a FieldDef[]; supports array-table rows, autocomplete, and nested sidenav fields. */
+export const FormBuilder: FC<Props> = (
+  {
+    id,
+    title,
+    fields,
+    values,
+    displayValues,
+    arrayDisplayValues,
+    submitLabel,
+    action,
+    method,
+    open,
+  },
+) => (
+  <Sidenav id={id} title={title} open={open}>
+    <form
+      id={`${id}-body`}
+      class="form"
+      {...{ [`hx-${method}`]: action }}
+      hx-swap="none"
+    >
+      {fields.map((def) => (
+        <Field
+          key={def.name}
+          formId={id}
+          def={def}
+          value={values?.[def.name]}
+          displayValue={displayValues?.[def.name]}
+          arrayDisplayRows={arrayDisplayValues?.[def.name]}
+        />
+      ))}
+      <div class="form__actions">
+        <button type="submit" class="btn btn--primary">
+          {submitLabel ?? "Save"}
+        </button>
+        <button type="button" class="btn btn--secondary" data-sidenav-close>
+          Cancel
+        </button>
+      </div>
+    </form>
+  </Sidenav>
+);

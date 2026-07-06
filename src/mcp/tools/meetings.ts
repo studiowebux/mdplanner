@@ -1,59 +1,48 @@
-/**
- * MCP tools for meeting operations.
- * Tools: list_meetings, get_meeting, create_meeting, update_meeting, delete_meeting
- */
+// MCP tools for meeting operations — thin wrappers over MeetingService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getMeetingService } from "../../singletons/services.ts";
+import {
+  CreateMeetingSchema,
+  ListMeetingOptionsSchema,
+  MeetingSchema,
+  UpdateMeetingSchema,
+} from "../../types/meeting.types.ts";
+import { z } from "@hono/zod-openapi";
+import { err, ok } from "../utils.ts";
 
-const ActionSchema = z.object({
-  description: z.string(),
-  owner: z.string().optional(),
-  due: z.string().optional().describe("Due date (YYYY-MM-DD)"),
-  status: z.enum(["open", "done"]).optional().default("open"),
-});
-
-export function registerMeetingTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerMeetingTools(server: McpServer): void {
+  const service = getMeetingService();
 
   server.registerTool(
     "list_meetings",
     {
-      description: "List all meetings sorted by date descending.",
-      inputSchema: {
-        date_from: z.string().optional().describe(
-          "Only include meetings on or after this date (YYYY-MM-DD)",
-        ),
-        date_to: z.string().optional().describe(
-          "Only include meetings on or before this date (YYYY-MM-DD)",
-        ),
+      description:
+        "List all meetings sorted by date descending. Optionally filter by date range, search query, or open actions.",
+      inputSchema: ListMeetingOptionsSchema.extend({
         open_actions_only: z.boolean().optional().describe(
-          "Only include meetings that have at least one open action item",
+          "Only include meetings with at least one open action item",
         ),
-      },
+      }).shape,
     },
-    async ({ date_from, date_to, open_actions_only }) => {
-      let meetings = await parser.readMeetings();
-      if (date_from) meetings = meetings.filter((m) => m.date >= date_from);
-      if (date_to) meetings = meetings.filter((m) => m.date <= date_to);
-      if (open_actions_only) {
-        meetings = meetings.filter((m) =>
-          m.actions.some((a) => a.status === "open")
-        );
-      }
-      return ok(meetings.map((m) => ({
-        id: m.id,
-        title: m.title,
-        date: m.date,
-        attendees: m.attendees,
-        actionCount: m.actions.length,
-        openActions: m.actions.filter((a) => a.status === "open").length,
-      })));
+    async ({ q, date_from, date_to, open_actions_only }) => {
+      const items = await service.list({
+        q,
+        date_from,
+        date_to,
+        open_actions_only: open_actions_only ? "true" : undefined,
+      });
+      return ok(
+        items.map((m) => ({
+          id: m.id,
+          title: m.title,
+          date: m.date,
+          attendees: m.attendees,
+          actionCount: m.actions.length,
+          openActions: m.actions.filter((a) => a.status === "open").length,
+        })),
+      );
     },
   );
 
@@ -62,13 +51,14 @@ export function registerMeetingTools(
     {
       description:
         "Get a single meeting by its ID, including agenda, notes, and action items.",
-      inputSchema: { id: z.string().describe("Meeting ID") },
+      inputSchema: {
+        id: MeetingSchema.shape.id.describe("Meeting ID"),
+      },
     },
     async ({ id }) => {
-      const meetings = await parser.readMeetings();
-      const meeting = meetings.find((m) => m.id === id);
-      if (!meeting) return err(`Meeting '${id}' not found`);
-      return ok(meeting);
+      const item = await service.getById(id);
+      if (!item) return err(`Meeting '${id}' not found`);
+      return ok(item);
     },
   );
 
@@ -77,12 +67,15 @@ export function registerMeetingTools(
     {
       description:
         "Get a meeting by its title (case-insensitive). Prefer this over list_meetings when the title is known.",
-      inputSchema: { name: z.string().describe("Meeting title") },
+      inputSchema: {
+        name: MeetingSchema.shape.title.describe("Meeting title"),
+      },
     },
     async ({ name }) => {
-      const meeting = await parser.readMeetingByName(name);
-      if (!meeting) return err(`Meeting '${name}' not found`);
-      return ok(meeting);
+      const item = await (service as ReturnType<typeof getMeetingService>)
+        .findByName(name);
+      if (!item) return err(`Meeting '${name}' not found`);
+      return ok(item);
     },
   );
 
@@ -90,73 +83,55 @@ export function registerMeetingTools(
     "create_meeting",
     {
       description: "Create a new meeting record.",
-      inputSchema: {
-        title: z.string().describe("Meeting title"),
-        date: z.string().describe("Meeting date (YYYY-MM-DD or ISO datetime)"),
-        attendees: z.array(z.string()).optional().describe(
-          "List of attendee names or person IDs",
-        ),
-        agenda: z.string().optional().describe("Meeting agenda (markdown)"),
-        notes: z.string().optional().describe("Meeting notes (markdown body)"),
-        actions: z.array(ActionSchema).optional().describe(
-          "Action items for this meeting",
-        ),
-      },
+      inputSchema: CreateMeetingSchema.shape,
     },
-    async ({ title, date, attendees, agenda, notes, actions }) => {
-      const meeting = await parser.addMeeting({
-        title,
-        date,
-        attendees: attendees ?? [],
-        agenda: agenda ?? "",
-        notes: notes ?? "",
-        actions: (actions ?? []).map((a, i) => ({
-          id: `action_${Date.now()}_${i}`,
-          description: a.description,
-          owner: a.owner,
-          due: a.due,
-          status: a.status ?? "open",
-        })),
-      });
-      return ok({ id: meeting.id });
+    async (input) => {
+      const item = await service.create(input);
+      return ok(item);
     },
   );
 
   server.registerTool(
     "update_meeting",
     {
-      description: "Update an existing meeting's fields.",
+      description:
+        "Update an existing meeting's fields. Actions array is a full replacement.",
       inputSchema: {
-        id: z.string().describe("Meeting ID"),
-        title: z.string().optional(),
-        date: z.string().optional(),
-        attendees: z.array(z.string()).optional(),
-        agenda: z.string().optional(),
-        notes: z.string().optional(),
-        actions: z.array(ActionSchema).optional().describe(
-          "Full replacement list of action items",
+        id: MeetingSchema.shape.id.describe("Meeting ID"),
+        ...UpdateMeetingSchema.shape,
+      },
+    },
+    async ({ id, ...data }) => {
+      const item = await service.update(id, data);
+      if (!item) return err(`Meeting '${id}' not found`);
+      return ok(item);
+    },
+  );
+
+  server.registerTool(
+    "get_open_meeting_actions",
+    {
+      description:
+        "Return all open (incomplete) action items across all meetings, optionally filtered to only meetings before a given date. Useful for planning follow-ups and identifying unresolved items.",
+      inputSchema: {
+        before_date: z.string().optional().describe(
+          "Only include meetings on or before this date (YYYY-MM-DD)",
         ),
       },
     },
-    async ({ id, title, date, attendees, agenda, notes, actions }) => {
-      const success = await parser.updateMeeting(id, {
-        ...(title !== undefined && { title }),
-        ...(date !== undefined && { date }),
-        ...(attendees !== undefined && { attendees }),
-        ...(agenda !== undefined && { agenda }),
-        ...(notes !== undefined && { notes }),
-        ...(actions !== undefined && {
-          actions: actions.map((a, i) => ({
-            id: `action_${Date.now()}_${i}`,
-            description: a.description,
-            owner: a.owner,
-            due: a.due,
-            status: a.status ?? "open",
-          })),
-        }),
-      });
-      if (!success) return err(`Meeting '${id}' not found`);
-      return ok({ success: true });
+    async ({ before_date }) => {
+      const entries = await service.getOpenActions(before_date);
+      return ok(
+        entries.map((e) => ({
+          meetingId: e.meetingId,
+          meetingTitle: e.meetingTitle,
+          meetingDate: e.meetingDate,
+          actionId: e.action.id,
+          description: e.action.description,
+          owner: e.action.owner,
+          due: e.action.due,
+        })),
+      );
     },
   );
 
@@ -164,12 +139,19 @@ export function registerMeetingTools(
     "delete_meeting",
     {
       description: "Delete a meeting by its ID.",
-      inputSchema: { id: z.string().describe("Meeting ID") },
+      inputSchema: {
+        id: MeetingSchema.shape.id.describe("Meeting ID"),
+      },
     },
     async ({ id }) => {
-      const success = await parser.deleteMeeting(id);
-      if (!success) return err(`Meeting '${id}' not found`);
+      const deleted = await service.delete(id);
+      if (!deleted) return err(`Meeting '${id}' not found`);
       return ok({ success: true });
     },
   );
 }
+
+export const meetingModule = defineMcpModule({
+  feature: "meeting",
+  register: registerMeetingTools,
+});

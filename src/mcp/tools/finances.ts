@@ -1,68 +1,90 @@
-/**
- * MCP tools for financial period operations.
- * Tools: list_finances, get_finance, create_finance, update_finance, delete_finance
- */
+// MCP tools for finance operations — thin wrappers over FinanceService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { getFinanceService } from "../../singletons/services.ts";
+import {
+  CreateFinanceSchema,
+  FinanceSchema,
+  ListFinanceOptionsSchema,
+  UpdateFinanceSchema,
+} from "../../types/finance.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
-export function registerFinanceTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerFinanceTools(server: McpServer): void {
+  const service = getFinanceService();
 
   server.registerTool(
     "list_finances",
-    { description: "List all financial periods.", inputSchema: {} },
-    async () => ok(await parser.readFinancialPeriods()),
+    {
+      description:
+        "List all finance entries. Optionally filter by type, project, or date range.",
+      inputSchema: { ...ListFinanceOptionsSchema.shape, slim: slimParam },
+    },
+    async ({ slim, ...options }) => {
+      const items = await service.list(options);
+      return slim
+        ? ok(
+          projectSlim(items, ["title", "type", "amount", "currency", "date"]),
+        )
+        : ok(items);
+    },
   );
 
   server.registerTool(
     "get_finance",
     {
-      description: "Get a single financial period by its ID.",
-      inputSchema: { id: z.string().describe("Financial period ID") },
+      description: "Get a single finance entry by its ID.",
+      inputSchema: { id: FinanceSchema.shape.id.describe("Finance entry ID") },
     },
     async ({ id }) => {
-      const items = await parser.readFinancialPeriods();
-      const item = items.find((i) => i.id === id);
-      if (!item) return err(`Financial period '${id}' not found`);
+      const item = await service.getById(id);
+      if (!item) return err(`Finance entry '${id}' not found`);
       return ok(item);
+    },
+  );
+
+  server.registerTool(
+    "get_finance_by_name",
+    {
+      description:
+        "Get a finance entry by its title (case-insensitive). Prefer this over list_finances when the title is known.",
+      inputSchema: {
+        name: FinanceSchema.shape.title.describe("Finance entry title"),
+      },
+    },
+    async ({ name }) => {
+      const item = await service.getByName(name);
+      if (!item) return err(`Finance entry '${name}' not found`);
+      return ok(item);
+    },
+  );
+
+  server.registerTool(
+    "get_finance_summary",
+    {
+      description:
+        "Get an income/expense summary for a project, optionally scoped to a date range.",
+      inputSchema: {
+        from: z.string().optional().describe("Start date (YYYY-MM-DD)"),
+        to: z.string().optional().describe("End date (YYYY-MM-DD)"),
+      },
+    },
+    async ({ from, to }) => {
+      const summary = await service.getSummary({ from, to });
+      return ok(summary);
     },
   );
 
   server.registerTool(
     "create_finance",
     {
-      description:
-        "Create a new financial period. Revenue and expenses are arrays of {category, amount} line items.",
-      inputSchema: {
-        period: z.string().describe("Period label (e.g. 2026-02 or Q1-2026)"),
-        cash_on_hand: z.number().optional().describe(
-          "End-of-period cash balance",
-        ),
-        revenue: z.array(z.object({
-          category: z.string(),
-          amount: z.number(),
-        })).optional().describe("Revenue line items"),
-        expenses: z.array(z.object({
-          category: z.string(),
-          amount: z.number(),
-        })).optional().describe("Expense line items"),
-        notes: z.string().optional(),
-      },
+      description: "Create a new finance entry (income or expense).",
+      inputSchema: CreateFinanceSchema.shape,
     },
-    async ({ period, cash_on_hand, revenue, expenses, notes }) => {
-      const item = await parser.addFinancialPeriod({
-        period,
-        cash_on_hand: cash_on_hand ?? 0,
-        revenue: revenue ?? [],
-        expenses: expenses ?? [],
-        ...(notes !== undefined && { notes }),
-      });
+    async (data) => {
+      const item = await service.create(data);
       return ok({ id: item.id });
     },
   );
@@ -70,31 +92,15 @@ export function registerFinanceTools(
   server.registerTool(
     "update_finance",
     {
-      description: "Update a financial period.",
+      description: "Update an existing finance entry's fields.",
       inputSchema: {
-        id: z.string().describe("Financial period ID"),
-        period: z.string().optional(),
-        cash_on_hand: z.number().optional(),
-        revenue: z.array(z.object({
-          category: z.string(),
-          amount: z.number(),
-        })).optional(),
-        expenses: z.array(z.object({
-          category: z.string(),
-          amount: z.number(),
-        })).optional(),
-        notes: z.string().optional(),
+        id: FinanceSchema.shape.id.describe("Finance entry ID"),
+        ...UpdateFinanceSchema.shape,
       },
     },
-    async ({ id, period, cash_on_hand, revenue, expenses, notes }) => {
-      const success = await parser.updateFinancialPeriod(id, {
-        ...(period !== undefined && { period }),
-        ...(cash_on_hand !== undefined && { cash_on_hand }),
-        ...(revenue !== undefined && { revenue }),
-        ...(expenses !== undefined && { expenses }),
-        ...(notes !== undefined && { notes }),
-      });
-      if (!success) return err(`Financial period '${id}' not found`);
+    async ({ id, ...fields }) => {
+      const item = await service.update(id, fields);
+      if (!item) return err(`Finance entry '${id}' not found`);
       return ok({ success: true });
     },
   );
@@ -102,13 +108,20 @@ export function registerFinanceTools(
   server.registerTool(
     "delete_finance",
     {
-      description: "Delete a financial period by its ID.",
-      inputSchema: { id: z.string().describe("Financial period ID") },
+      description: "Delete a finance entry by its ID.",
+      inputSchema: {
+        id: FinanceSchema.shape.id.describe("Finance entry ID"),
+      },
     },
     async ({ id }) => {
-      const success = await parser.deleteFinancialPeriod(id);
-      if (!success) return err(`Financial period '${id}' not found`);
+      const success = await service.delete(id);
+      if (!success) return err(`Finance entry '${id}' not found`);
       return ok({ success: true });
     },
   );
 }
+
+export const financeModule = defineMcpModule({
+  feature: "finance",
+  register: registerFinanceTools,
+});

@@ -1,0 +1,96 @@
+/* Business Model Canvas — detail view styles */
+
+.bmc-detail__header {
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Canvas grid — 6-column named-area layout, mirrors lean canvas pattern.
+   VP gets 2 cols (wider centre); CO/RE split 50/50 on the bottom row.
+--------------------------------------------------------------------------- */
+
+.bmc-canvas {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-areas:
+    "kp ka vp vp cr cs"
+    "kp kr vp vp ch cs"
+    "co co co re re re";
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.bmc-canvas__cell--kp {
+  grid-area: kp;
+}
+.bmc-canvas__cell--ka {
+  grid-area: ka;
+}
+.bmc-canvas__cell--kr {
+  grid-area: kr;
+}
+.bmc-canvas__cell--vp {
+  grid-area: vp;
+}
+.bmc-canvas__cell--cr {
+  grid-area: cr;
+}
+.bmc-canvas__cell--ch {
+  grid-area: ch;
+}
+.bmc-canvas__cell--cs {
+  grid-area: cs;
+}
+.bmc-canvas__cell--co {
+  grid-area: co;
+}
+.bmc-canvas__cell--re {
+  grid-area: re;
+}
+
+/* ---------------------------------------------------------------------------
+   Edit mode — hover bg, ghost input (.quadrant-card__input--ghost), and
+   textarea (.quadrant-card__textarea) come from components.css.
+   .lc-section layout (padding, flex fill, overflow) lives in lean-canvases.css
+   and is shared with the Lean Canvas detail view.
+--------------------------------------------------------------------------- */
+
+/* Strip quadrant-card__add double-padding; lc-section already pads the card. */
+.bmc-canvas .quadrant-card__add {
+  padding: var(--space-xs) 0 0;
+  border-top: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Responsive
+--------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  /* intentional deviation: canvas wide-layout collapse (not a mobile breakpoint) */
+  .bmc-canvas {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "kp ka  vp"
+      "kp kr  vp"
+      "cs cr  ch"
+      "co co  re";
+  }
+}
+
+@media (max-width: 700px) {
+  /* intentional deviation: canvas single-column collapse (dense layout needs earlier reflow than --bp-mobile 768px) */
+  .bmc-canvas {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "kp"
+      "ka"
+      "kr"
+      "vp"
+      "cr"
+      "ch"
+      "cs"
+      "co"
+      "re";
+  }
+}

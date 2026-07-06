@@ -1,225 +1,156 @@
-/* Marketing Plans View */
+/* Marketing Plans view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
 
-.marketing-plans-view-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-border-default);
-  flex-wrap: wrap;
-  gap: 0.5rem;
+/* Status + item status badge colors now use shared .badge--{variant} from components.css */
+
+/* ---------------------------------------------------------------------------
+   Card — extends .domain-card
+--------------------------------------------------------------------------- */
+
+.mktplan-card--completed {
+  opacity: var(--card-opacity-muted);
 }
 
-.marketing-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
-  gap: 1rem;
-  padding: 1.5rem;
-}
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
 
-/* ---------------------------------------------------------------
-   Card view
-   --------------------------------------------------------------- */
-
-.mktplan-card {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-primary);
-  cursor: pointer;
-  transition: border-color 0.15s;
-  overflow: hidden;
-}
-
-.mktplan-card:hover {
-  border-color: var(--color-text-muted);
-}
-
-.mktplan-card-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem 0.25rem;
-}
-
-.mktplan-card-name {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.mktplan-status-badge {
-  font-size: var(--font-size-xs);
-  padding: 0.15em 0.5em;
-  border-radius: 999px;
-  border: 1px solid var(--color-border-default);
-  color: var(--color-text-secondary);
-  background: var(--color-bg-tertiary);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.mktplan-card-desc {
+.mktplan-detail__description {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  padding: 0 1rem 0.25rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0;
 }
 
-.mktplan-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.375rem 1rem 0.75rem;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
+/* Detail tables use shared .data-table --compact --uppercase from components.css */
 
-.mktplan-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  padding: 0 1rem 0.75rem;
-}
+/* ---------------------------------------------------------------------------
+   KPI progress
+--------------------------------------------------------------------------- */
 
-.mktplan-channel-tag {
-  font-size: var(--font-size-xs);
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-default);
-}
-
-.mktplan-empty {
-  padding: 3rem;
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-/* ---------------------------------------------------------------
-   Sidenav — view mode
-   --------------------------------------------------------------- */
-
-.mktplan-view-field {
-  margin-bottom: 0.75rem;
-}
-
-.mktplan-view-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.25rem;
-}
-
-.mktplan-view-value {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-.mktplan-section-title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 1rem 0 0.5rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.mktplan-list-item {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.375rem;
-}
-
-.mktplan-list-item-name {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.mktplan-list-item-detail {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin-top: 0.125rem;
-}
-
-/* ---------------------------------------------------------------
-   Sidenav — edit mode (inline editors)
-   --------------------------------------------------------------- */
-
-.mktplan-array-editor {
+.mktplan-detail__kpis {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-md);
 }
 
-.mktplan-array-item {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: 0.5rem;
-  position: relative;
-}
-
-.mktplan-array-item-header {
+.mktplan-kpi {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--space-xxs);
 }
 
-.mktplan-array-item-header .form-input {
-  flex: 1;
+.mktplan-kpi__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   font-size: var(--font-size-sm);
-  padding: 0.25rem 0.5rem;
 }
 
-.mktplan-remove-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  padding: 0.125rem 0.375rem;
-  border-radius: var(--radius-sm);
-  line-height: 1;
-  flex-shrink: 0;
+.mktplan-kpi__metric {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
 }
 
-.mktplan-remove-btn:hover {
-  color: var(--color-error);
-  background: var(--color-error-bg);
+.mktplan-kpi__metric a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.mktplan-array-item-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.375rem;
-  margin-top: 0.375rem;
-}
-
-.mktplan-array-item-fields .form-input,
-.mktplan-array-item-fields select {
+.mktplan-kpi__label {
   font-size: var(--font-size-xs);
-  padding: 0.2rem 0.4rem;
+  color: var(--color-text-secondary);
 }
 
-@media (max-width: 36rem) {
-  .marketing-plans-grid {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-    gap: 0.75rem;
-  }
+.mktplan-kpi__values {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
 
-  .marketing-plans-view-header {
-    padding: 0.75rem 1rem;
-  }
+.mktplan-kpi__bar {
+  height: var(--space-sm);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
 
-  .mktplan-array-item-fields {
-    grid-template-columns: 1fr;
-  }
+.mktplan-kpi__fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-fast);
+}
+
+.mktplan-kpi__pct {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  align-self: flex-end;
+}
+
+/* ---------------------------------------------------------------------------
+   Hypothesis
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__hypothesis-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.mktplan-detail__hypothesis-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.mktplan-detail__hypothesis-text {
+  flex: 1;
+}
+
+/* Verdict badge colors now use shared .badge--{variant} from components.css */
+
+/* ---------------------------------------------------------------------------
+   Team
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__team {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Detail tables — borders for markdown-rendered tables
+--------------------------------------------------------------------------- */
+
+.mktplan-detail table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin: var(--space-sm) 0;
+}
+
+.mktplan-detail th {
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: calc(var(--border-width) * 2) var(--border-style)
+    var(--color-border-strong);
+  background: var(--color-bg-secondary);
+}
+
+.mktplan-detail td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.mktplan-detail tr:hover td {
+  background: var(--color-bg-hover);
 }

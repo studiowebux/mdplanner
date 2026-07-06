@@ -1,114 +1,59 @@
-/**
- * MCP tools for journal operations.
- * Tools: list_journal_entries, get_journal_entry, create_journal_entry,
- *        update_journal_entry, delete_journal_entry
- */
+// MCP tools for journal entry operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getJournalService } from "../../singletons/services.ts";
+import {
+  CreateJournalEntrySchema,
+  JournalEntrySchema,
+  ListJournalOptionsSchema,
+  UpdateJournalEntrySchema,
+} from "../../types/journal.types.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
-export function registerJournalTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
-
-  server.registerTool(
-    "list_journal_entries",
-    {
-      description: "List all journal entries sorted by date descending.",
-      inputSchema: {},
-    },
-    async () => {
-      const entries = await parser.readJournalEntries();
-      return ok(entries.map((e) => ({
-        id: e.id,
-        date: e.date,
-        title: e.title,
-        mood: e.mood,
-        tags: e.tags,
-      })));
-    },
-  );
-
-  server.registerTool(
-    "get_journal_entry",
-    {
-      description: "Get a single journal entry by its ID, including full body.",
-      inputSchema: { id: z.string().describe("Journal entry ID") },
-    },
-    async ({ id }) => {
-      const entries = await parser.readJournalEntries();
-      const entry = entries.find((e) => e.id === id);
-      if (!entry) return err(`Journal entry '${id}' not found`);
-      return ok(entry);
-    },
-  );
-
-  server.registerTool(
-    "create_journal_entry",
-    {
-      description: "Create a new journal entry.",
-      inputSchema: {
-        date: z.string().describe("Entry date (YYYY-MM-DD)"),
-        title: z.string().optional().describe("Optional title"),
-        mood: z.enum(["great", "good", "neutral", "bad", "terrible"]).optional()
-          .describe("Optional mood"),
-        tags: z.array(z.string()).optional().describe("Optional tags"),
-        body: z.string().optional().describe("Entry body (markdown)"),
+export function registerJournalTools(server: McpServer): void {
+  registerCrudTools(server, {
+    service: getJournalService(),
+    notFoundLabel: "Journal entry",
+    idParam: JournalEntrySchema.shape.id.describe("Journal entry ID"),
+    nameParam: JournalEntrySchema.shape.title.describe("Journal entry title"),
+    listSchema: ListJournalOptionsSchema,
+    createSchema: CreateJournalEntrySchema,
+    updateSchema: UpdateJournalEntrySchema,
+    mutationReturn: "id-success",
+    slimFields: ["title", "date", "mood"],
+    tools: {
+      list: {
+        name: "list_journal_entries",
+        description:
+          "List all journal entries. Optionally filter by project, mood, or date range. Pass slim: true to browse with a compact projection.",
+      },
+      get: {
+        name: "get_journal_entry",
+        description: "Get a single journal entry by its ID.",
+      },
+      getByName: {
+        name: "get_journal_entry_by_name",
+        description:
+          "Get a journal entry by its title (case-insensitive). Prefer this over list_journal_entries when the title is known.",
+      },
+      create: {
+        name: "create_journal_entry",
+        description: "Create a new journal entry.",
+      },
+      update: {
+        name: "update_journal_entry",
+        description: "Update an existing journal entry's fields.",
+      },
+      delete: {
+        name: "delete_journal_entry",
+        description: "Delete a journal entry by its ID.",
       },
     },
-    async ({ date, title, mood, tags, body }) => {
-      const entry = await parser.addJournalEntry({
-        date,
-        title,
-        mood,
-        tags,
-        body: body ?? "",
-      });
-      return ok({ id: entry.id });
-    },
-  );
-
-  server.registerTool(
-    "update_journal_entry",
-    {
-      description: "Update an existing journal entry's fields.",
-      inputSchema: {
-        id: z.string().describe("Journal entry ID"),
-        date: z.string().optional(),
-        title: z.string().optional(),
-        mood: z.enum(["great", "good", "neutral", "bad", "terrible"])
-          .optional(),
-        tags: z.array(z.string()).optional(),
-        body: z.string().optional(),
-      },
-    },
-    async ({ id, date, title, mood, tags, body }) => {
-      const success = await parser.updateJournalEntry(id, {
-        ...(date !== undefined && { date }),
-        ...(title !== undefined && { title }),
-        ...(mood !== undefined && { mood }),
-        ...(tags !== undefined && { tags }),
-        ...(body !== undefined && { body }),
-      });
-      if (!success) return err(`Journal entry '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_journal_entry",
-    {
-      description: "Delete a journal entry by its ID.",
-      inputSchema: { id: z.string().describe("Journal entry ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteJournalEntry(id);
-      if (!success) return err(`Journal entry '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
+
+export const journalModule = defineMcpModule({
+  feature: "journal",
+  register: registerJournalTools,
+});

@@ -1,18 +1,26 @@
 # syntax=docker/dockerfile:1
 FROM denoland/deno:alpine-2.6.10
 
+RUN addgroup -S mdplanner && adduser -S mdplanner -G mdplanner \
+    && mkdir -p /data /backups \
+    && chown mdplanner:mdplanner /data /backups
+
 WORKDIR /app
 
-COPY deno.json deno.lock main.ts ./
+COPY deno.json deno.lock ./
 COPY src/ ./src/
+COPY scripts/ ./scripts/
 
 # BuildKit inline cache: persists the Deno module store across builds so
 # re-runs of deno cache skip network downloads when deps haven't changed.
-RUN --mount=type=cache,target=/root/.cache/deno deno cache main.ts
+RUN --mount=type=cache,target=/home/mdplanner/.cache/deno \
+    DENO_DIR=/home/mdplanner/.cache/deno deno cache src/bin.ts
+
+USER mdplanner
 
 VOLUME ["/data"]
 
 EXPOSE 8003
 
-ENTRYPOINT ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "main.ts"]
+ENTRYPOINT ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "src/bin.ts"]
 CMD ["/data"]

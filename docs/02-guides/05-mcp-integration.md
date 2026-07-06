@@ -4,64 +4,31 @@ title: MCP Integration
 
 # MCP Integration
 
-MD Planner ships a built-in MCP server with 244 tools. Two transport modes are
-available.
+MD Planner ships a built-in MCP server. Two transport modes are available.
 
-## stdio (local binary)
+## HTTP
 
-Compile the MCP binary:
+The MCP endpoint is at `/mcp` on the running v2 server. It accepts two kinds of
+credential:
 
-```bash
-deno task compile:mcp:macos-arm    # Apple Silicon
-deno task compile:mcp:macos-intel  # Intel Mac
-deno task compile:mcp:linux        # Linux x86_64
-deno task compile:mcp:windows      # Windows x86_64
-```
+1. **Shared token** — set `MCP_TOKEN` and send it as `Authorization: Bearer`.
+   Grants access without a named identity.
 
-Or run directly with Deno:
+   ```bash
+   MCP_TOKEN=mytoken deno task dev:v2
+   ```
 
-```bash
-deno task mcp ./my-project
-deno task mcp --cache ./my-project
-```
+2. **Named identity** — a project API key (see [Identity](#identity)). The
+   connection is attributed to the key's name (e.g. `Claude`).
 
-## HTTP (remote server)
-
-When running the HTTP server, the MCP endpoint is at `/mcp`. Protect it with
-`--mcp-token`:
-
-```bash
-mdplanner --mcp-token mytoken ./my-project
-```
+When neither `MCP_TOKEN` nor any `api_keys` are configured, the endpoint is open
+(local single-user default).
 
 ## Claude Desktop configuration
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
-or the equivalent path on your platform:
-
-```json
-{
-  "mcpServers": {
-    "mdplanner": {
-      "command": "/path/to/mdplanner-mcp-macos-arm",
-      "args": ["/path/to/your/project"]
-    }
-  }
-}
-```
-
-With SQLite cache:
-
-```json
-{
-  "mcpServers": {
-    "mdplanner": {
-      "command": "/path/to/mdplanner-mcp-macos-arm",
-      "args": ["--cache", "/path/to/your/project"]
-    }
-  }
-}
-```
+Claude Desktop does not support HTTP MCP servers directly. Use Claude Code
+(CLI or IDE extension) instead — it connects via the `type: url` transport shown
+below.
 
 ## Claude Code configuration
 
@@ -81,6 +48,46 @@ Add to `.claude/settings.json` or `~/.claude/settings.json`:
 }
 ```
 
+## Identity
+
+To attribute an MCP connection to a named principal, add an API key to
+`project.md`. The key's `name` becomes the actor (the same `X-Api-Key`
+mechanism the REST API uses).
+
+```yaml
+---
+api_keys:
+  - name: Claude
+    key: your-secret-value
+---
+```
+
+Connect with the key sent as either `X-Api-Key` or `Authorization: Bearer`:
+
+```json
+{
+  "mcpServers": {
+    "mdplanner": {
+      "type": "url",
+      "url": "http://localhost:8003/mcp",
+      "headers": {
+        "X-Api-Key": "your-secret-value"
+      }
+    }
+  }
+}
+```
+
+Or via the CLI:
+
+```bash
+claude mcp add --transport http mdplanner http://localhost:8003/mcp \
+  --header "X-Api-Key: your-secret-value"
+```
+
+The shared `MCP_TOKEN` bearer still works alongside named keys. Set
+`MDPLANNER_SECRET_KEY` to encrypt the stored key values at rest.
+
 ## Available resources
 
 | URI                   | Description                         |
@@ -93,3 +100,12 @@ Add to `.claude/settings.json` or `~/.claude/settings.json`:
 ## Tool reference
 
 See [MCP Tools](/mcp/) for the complete list of tools grouped by entity.
+
+## Feature gating
+
+The MCP server only exposes tools for **enabled** features. A module disabled in
+Settings > Feature Visibility does not load its tools on either transport
+(stdio and HTTP) — the same enabled-features config that drives the sidebar
+navigation. Core infrastructure (the context pack and preferences) always
+loads so an agent can boot on a minimal configuration. Enable a feature and
+reconnect to pick up its tools.

@@ -1,0 +1,98 @@
+// Sticky Board repository — markdown file CRUD under sticky-notes/*.md (board manifests).
+
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
+import type {
+  CreateStickyBoard,
+  StickyBoard,
+  UpdateStickyBoard,
+} from "../types/sticky-note.types.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import {
+  rowToStickyBoard,
+  STICKY_BOARD_TABLE,
+} from "../domains/sticky-note/cache.ts";
+
+import {
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
+/** Persists sticky-note boards as markdown with a SQLite cache mirror. */
+export class StickyBoardRepository extends CachedMarkdownRepository<
+  StickyBoard,
+  CreateStickyBoard,
+  UpdateStickyBoard
+> {
+  protected readonly tableName = STICKY_BOARD_TABLE;
+  protected override readonly supportsArchive = true;
+
+  constructor(projectDir: string) {
+    super(projectDir, {
+      directory: "sticky-notes",
+      idPrefix: "sboard",
+      nameField: "title",
+    });
+  }
+
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): StickyBoard {
+    return rowToStickyBoard(row);
+  }
+
+  protected fromCreateInput(
+    data: CreateStickyBoard,
+    id: string,
+    now: string,
+  ): StickyBoard {
+    return {
+      ...data,
+      id,
+      title: data.title,
+      description: data.description,
+      projects: data.projects ?? [],
+      ...stampAuditFields(now),
+    };
+  }
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    _body: string,
+  ): StickyBoard | null {
+    // Board files use sboard_ prefix — skip note files and subdirectory markers
+    const id = resolveEntityId(filename, fm);
+    if (!id.startsWith("sboard")) return null;
+    if (!fm.title) return null;
+
+    return {
+      id,
+      title: String(fm.title),
+      description: fm.description != null ? String(fm.description) : undefined,
+      projects: Array.isArray(fm.projects)
+        ? (fm.projects as unknown[]).map(String)
+        : [],
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+    };
+  }
+
+  protected serialize(board: StickyBoard): string {
+    const fm: Record<string, unknown> = {
+      id: board.id,
+      title: board.title,
+    };
+    if (board.description) fm.description = board.description;
+    if (board.projects.length > 0) fm.projects = board.projects;
+    fm.created_at = board.createdAt;
+    fm.updated_at = board.updatedAt;
+    if (board.createdBy) fm.created_by = board.createdBy;
+    if (board.updatedBy) fm.updated_by = board.updatedBy;
+    if (board.archived) fm.archived = board.archived;
+    if (board.archivedAt) fm.archived_at = board.archivedAt;
+    if (board.archivedBy) fm.archived_by = board.archivedBy;
+
+    return serializeFrontmatter(fm, "");
+  }
+}

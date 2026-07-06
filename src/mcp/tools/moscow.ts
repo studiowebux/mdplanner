@@ -1,103 +1,59 @@
-/**
- * MCP tools for MoSCoW analysis operations.
- * Tools: list_moscow, get_moscow, create_moscow, update_moscow, delete_moscow
- */
+// MCP tools for MoSCoW board operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getMoscowService } from "../../singletons/services.ts";
+import {
+  CreateMoscowSchema,
+  ListMoscowOptionsSchema,
+  MoscowSchema,
+  UpdateMoscowSchema,
+} from "../../types/moscow.types.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
-export function registerMoscowTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
-
-  server.registerTool(
-    "list_moscow",
-    {
-      description: "List all MoSCoW analyses in the project.",
-      inputSchema: {},
-    },
-    async () => ok(await parser.readMoscowAnalyses()),
-  );
-
-  server.registerTool(
-    "get_moscow",
-    {
-      description: "Get a single MoSCoW analysis by its ID.",
-      inputSchema: { id: z.string().describe("MoSCoW analysis ID") },
-    },
-    async ({ id }) => {
-      const analyses = await parser.readMoscowAnalyses();
-      const a = analyses.find((a) => a.id === id);
-      if (!a) return err(`MoSCoW analysis '${id}' not found`);
-      return ok(a);
-    },
-  );
-
-  server.registerTool(
-    "create_moscow",
-    {
-      description: "Create a new MoSCoW analysis.",
-      inputSchema: {
-        title: z.string().describe("Analysis title"),
-        date: z.string().optional().describe("Date (YYYY-MM-DD)"),
+export function registerMoscowTools(server: McpServer): void {
+  registerCrudTools(server, {
+    service: getMoscowService(),
+    notFoundLabel: "MoSCoW board",
+    idParam: MoscowSchema.shape.id.describe("MoSCoW board ID"),
+    nameParam: MoscowSchema.shape.title.describe("MoSCoW board title"),
+    listSchema: ListMoscowOptionsSchema,
+    createSchema: CreateMoscowSchema,
+    updateSchema: UpdateMoscowSchema,
+    mutationReturn: "id-success",
+    slimFields: ["title", "project", "date"],
+    tools: {
+      list: {
+        name: "list_moscow",
+        description:
+          "List all MoSCoW prioritization boards. Optionally filter by project. Pass slim: true to browse with a compact projection.",
+      },
+      get: {
+        name: "get_moscow",
+        description: "Get a single MoSCoW board by its ID.",
+      },
+      getByName: {
+        name: "get_moscow_by_name",
+        description:
+          "Get a MoSCoW board by its title (case-insensitive). Prefer this over list_moscow when the title is known.",
+      },
+      create: {
+        name: "create_moscow",
+        description: "Create a new MoSCoW prioritization board.",
+      },
+      update: {
+        name: "update_moscow",
+        description: "Update an existing MoSCoW board's fields.",
+      },
+      delete: {
+        name: "delete_moscow",
+        description: "Delete a MoSCoW board by its ID.",
       },
     },
-    async ({ title, date }) => {
-      const a = await parser.addMoscowAnalysis({
-        title,
-        date: date ?? new Date().toISOString().slice(0, 10),
-        must: [],
-        should: [],
-        could: [],
-        wont: [],
-      });
-      return ok({ id: a.id });
-    },
-  );
-
-  server.registerTool(
-    "update_moscow",
-    {
-      description:
-        "Update a MoSCoW analysis (title, description, or item lists).",
-      inputSchema: {
-        id: z.string().describe("MoSCoW analysis ID"),
-        title: z.string().optional(),
-        description: z.string().optional(),
-        must: z.array(z.string()).optional().describe("Must-have items"),
-        should: z.array(z.string()).optional().describe("Should-have items"),
-        could: z.array(z.string()).optional().describe("Could-have items"),
-        wont: z.array(z.string()).optional().describe("Won't-have items"),
-      },
-    },
-    async ({ id, title, description, must, should, could, wont }) => {
-      const success = await parser.updateMoscowAnalysis(id, {
-        ...(title !== undefined && { title }),
-        ...(description !== undefined && { description }),
-        ...(must !== undefined && { must }),
-        ...(should !== undefined && { should }),
-        ...(could !== undefined && { could }),
-        ...(wont !== undefined && { wont }),
-      });
-      if (!success) return err(`MoSCoW analysis '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_moscow",
-    {
-      description: "Delete a MoSCoW analysis by its ID.",
-      inputSchema: { id: z.string().describe("MoSCoW analysis ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteMoscowAnalysis(id);
-      if (!success) return err(`MoSCoW analysis '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
+
+export const moscowModule = defineMcpModule({
+  feature: "moscow",
+  register: registerMoscowTools,
+});

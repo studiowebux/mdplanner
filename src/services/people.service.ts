@@ -1,0 +1,249 @@
+// People service — orchestrates repository + domain logic.
+// Consumed by API routes, MCP tools, and SSR views.
+
+import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import type { PeopleRepository } from "../repositories/people.repository.ts";
+import type {
+  CreatePerson,
+  PeopleSummary,
+  Person,
+  PersonPreferences,
+  PersonSkillMatch,
+  PersonWithChildren,
+  PersonWorkload,
+  UpdatePerson,
+} from "../types/person.types.ts";
+import { ciEquals } from "../utils/string.ts";
+import { SafeWriter } from "../utils/safe-io.ts";
+import { insertPersonRow } from "../domains/people/cache.ts";
+import { PEOPLE_TABLE } from "../domains/people/constants.ts";
+import { CachedService } from "./cached.service.ts";
+
+interface PeopleListOptions {
+  department?: string;
+}
+
+/** People service (cached): CRUD plus org tree, direct reports, departments, skill/availability matching, workload, agent heartbeat, and preference updates; filters by department. */
+export class PeopleService extends CachedService<
+  Person,
+  CreatePerson,
+  UpdatePerson,
+  PeopleListOptions
+> {
+  protected readonly tableName = PEOPLE_TABLE;
+
+  /** Serializes read-merge-write of preferences per person (prevents lost updates). */
+  private prefsWriter = new SafeWriter();
+
+  constructor(private peopleRepo: PeopleRepository) {
+    super(peopleRepo);
+  }
+
+  protected insertRow(db: CacheDatabase, item: Person): void {
+    insertPersonRow(db, item);
+  }
+
+  protected applyFilters(
+    people: Person[],
+    options: PeopleListOptions,
+  ): Person[] {
+    if (options.department) {
+      people = people.filter(
+        (p) => p.departments?.some((d) => ciEquals(d, options.department)),
+      );
+    }
+    return people;
+  }
+
+  /** Update agent heartbeat — sets lastSeen, optionally status and currentTaskId. */
+  async heartbeat(
+    id: string,
+    status?: Person["status"],
+    currentTaskId?: string | null,
+  ): Promise<boolean> {
+    const update: UpdatePerson = {
+      lastSeen: new Date().toISOString(),
+    };
+    if (status !== undefined) update.status = status;
+    if (currentTaskId !== undefined) {
+      update.currentTaskId = currentTaskId ?? undefined;
+    }
+    const result = await this.peopleRepo.update(id, update);
+    if (result) this.cacheUpsert(result);
+    return result !== null;
+  }
+
+  /** Build hierarchical org tree from reportsTo references. */
+  async getTree(): Promise<PersonWithChildren[]> {
+    const all = await this.peopleRepo.findAll();
+    return PeopleService.buildTree(all);
+  }
+
+  /** Build a tree from a given list of people. */
+  static buildTree(people: Person[]): PersonWithChildren[] {
+    const map = new Map<string, PersonWithChildren>();
+    for (const p of people) {
+      map.set(p.id, { ...p, children: [] });
+    }
+
+    const roots: PersonWithChildren[] = [];
+    for (const node of map.values()) {
+      if (node.reportsTo && map.has(node.reportsTo)) {
+        const parent = map.get(node.reportsTo);
+        if (parent?.children) parent.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+    return roots;
+  }
+
+  /** Get direct reports for a person. */
+  async getDirectReports(id: string): Promise<Person[]> {
+    const all = await this.peopleRepo.findAll();
+    return all.filter((p) => p.reportsTo === id);
+  }
+
+  /** Get all unique department names across all people. */
+  async getDepartments(): Promise<string[]> {
+    const all = await this.peopleRepo.findAll();
+    const depts = new Set<string>();
+    for (const p of all) {
+      for (const d of p.departments ?? []) {
+        depts.add(d);
+      }
+    }
+    return [...depts].sort();
+  }
+
+  /** Get summary statistics. */
+  async getSummary(): Promise<PeopleSummary> {
+    const all = await this.peopleRepo.findAll();
+    const departments = await this.getDepartments();
+    return {
+      totalPeople: all.length,
+      totalDepartments: departments.length,
+      departments,
+    };
+  }
+
+  /** Filter people by skill (case-insensitive). */
+  async listBySkill(skill: string): Promise<Person[]> {
+    const all = await this.peopleRepo.findAll();
+    return all.filter(
+      (p) => p.skills?.some((s) => ciEquals(s, skill)),
+    );
+  }
+
+  /** Get available people — excludes offline agents by default. */
+  async getAvailable(excludeOffline = true): Promise<Person[]> {
+    const all = await this.peopleRepo.findAll();
+    if (!excludeOffline) return all;
+    return all.filter((p) => p.status !== "offline");
+  }
+
+  /** Find people matching required skills, ranked by match count. Excludes offline. */
+  async findForSkills(skills: string[]): Promise<PersonSkillMatch[]> {
+    const all = await this.peopleRepo.findAll();
+    const required = skills.map((s) => s.toLowerCase());
+    const matches: PersonSkillMatch[] = [];
+
+    for (const p of all) {
+      if (p.status === "offline") continue;
+      const personSkills = (p.skills ?? []).map((s) => s.toLowerCase());
+      const matched = required.filter((r) => personSkills.includes(r));
+      if (matched.length > 0) {
+        matches.push({
+          person: p,
+          matchedSkills: matched,
+          score: matched.length,
+        });
+      }
+    }
+
+    matches.sort((a, b) => b.score - a.score);
+    return matches;
+  }
+
+  /** Find a person by their external account identity. */
+  async findByAccount(
+    provider: string,
+    username: string,
+  ): Promise<Person | null> {
+    const all = await this.list();
+    const lower = username.toLowerCase();
+    return all.find(
+      (p) => p.accounts?.[provider]?.toLowerCase() === lower,
+    ) ?? null;
+  }
+
+  /** Get workload info for a person — capacity and current assignment. */
+  async getWorkload(id: string): Promise<PersonWorkload | null> {
+    const p = await this.peopleRepo.findById(id);
+    if (!p) return null;
+    return {
+      id: p.id,
+      name: p.name,
+      status: p.status,
+      currentTaskId: p.currentTaskId,
+      hoursPerDay: p.hoursPerDay,
+      workingDays: p.workingDays,
+      agentType: p.agentType,
+    };
+  }
+
+  /**
+   * Deep-merge a preferences patch into the person's existing preferences.
+   * Each top-level key (viewPrefs, keybindings, pinnedNav, filterDefaults) is
+   * merged one level deep — sub-keys within an object are merged, not replaced.
+   * Arrays (pinnedNav) are replaced wholesale by the patch value.
+   */
+  async updatePreferences(
+    id: string,
+    patch: PersonPreferences,
+  ): Promise<Person | null> {
+    // Serialize per-person so concurrent disjoint-key patches don't lost-update:
+    // the read-merge-write must run atomically against the same starting state.
+    return await this.prefsWriter.write(id, async () => {
+      const person = await this.peopleRepo.findById(id);
+      if (!person) return null;
+
+      const existing = person.preferences ?? {};
+      const merged: PersonPreferences = { ...existing };
+
+      if (patch == null) return person;
+
+      for (
+        const key of Object.keys(patch) as Array<
+          keyof NonNullable<PersonPreferences>
+        >
+      ) {
+        const patchVal = patch[key];
+        const existingVal = existing[key];
+        if (patchVal === undefined) continue;
+
+        if (
+          Array.isArray(patchVal) ||
+          typeof patchVal !== "object" ||
+          patchVal === null ||
+          Array.isArray(existingVal) ||
+          typeof existingVal !== "object" ||
+          existingVal === null
+        ) {
+          // Arrays and non-objects: replace wholesale
+          (merged as Record<string, unknown>)[key] = patchVal;
+        } else {
+          // Objects: merge one level deep
+          (merged as Record<string, unknown>)[key] = {
+            ...(existingVal as Record<string, unknown>),
+            ...(patchVal as Record<string, unknown>),
+          };
+        }
+      }
+
+      const updated = await this.peopleRepo.update(id, { preferences: merged });
+      if (updated) this.cacheUpsert(updated);
+      return updated;
+    });
+  }
+}

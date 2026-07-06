@@ -1,0 +1,16 @@
+/* Payments view — domain-specific styles only. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.payment-detail__amount-section {
+  text-align: center;
+}
+
+.payment-detail__amount {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}

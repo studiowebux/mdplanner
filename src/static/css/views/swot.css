@@ -1,10 +1,52 @@
-/* SWOT Analysis View */
+/* SWOT-specific styles — builds on .quadrant-grid in components.css */
 
-.swot-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+/* -- Date badge ----------------------------------------------------------- */
+
+.swot-date-badge {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
-.swot-grid:not(.hidden) {
-  display: grid;
+/* -- Card counts ---------------------------------------------------------- */
+
+.swot-card__counts {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.swot-card__count--s {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.swot-card__count--w {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.swot-card__count--o {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.swot-card__count--t {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+/* -- Detail page ---------------------------------------------------------- */
+
+.swot-detail__header {
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.swot-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.swot-detail__title {
+  margin: 0;
 }

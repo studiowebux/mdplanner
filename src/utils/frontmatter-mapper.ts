@@ -1,0 +1,261 @@
+// Frontmatter key mapper — bidirectional snake_case ↔ camelCase conversion.
+// All .md frontmatter uses snake_case. All TypeScript entities use camelCase.
+// This module is the single boundary between the two naming conventions.
+
+// ---------------------------------------------------------------------------
+// Key converters
+// ---------------------------------------------------------------------------
+
+/** Convert a snake_case string to camelCase. */
+function snakeToCamel(s: string): string {
+  return s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+}
+
+/** Convert a camelCase string to snake_case. Handles consecutive uppercase (e.g. githubPR → github_pr). */
+export function camelToSnake(s: string): string {
+  return s
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replace(/([a-z\d])([A-Z])/g, "$1_$2")
+    .toLowerCase();
+}
+
+// ---------------------------------------------------------------------------
+// Audit fields — every entity gets these automatically
+// ---------------------------------------------------------------------------
+
+/** Standard audit field mappings (snake_case → camelCase). */
+const AUDIT_KEYS: ReadonlyMap<string, string> = new Map([
+  ["created_at", "createdAt"],
+  ["updated_at", "updatedAt"],
+  ["created_by", "createdBy"],
+  ["updated_by", "updatedBy"],
+]);
+
+/** Reverse of AUDIT_KEYS (camelCase → snake_case). */
+const AUDIT_KEYS_REVERSE: ReadonlyMap<string, string> = new Map(
+  [...AUDIT_KEYS].map(([k, v]) => [v, k]),
+);
+
+// ---------------------------------------------------------------------------
+// Object key mappers
+// ---------------------------------------------------------------------------
+
+/**
+ * Map frontmatter keys (snake_case) to entity keys (camelCase).
+ * Single-word keys pass through unchanged.
+ *
+ * @param raw - Parsed frontmatter record
+ * @param overrides - Optional snake→camel overrides for non-standard mappings
+ * @returns New object with camelCase keys
+ */
+export function mapKeysFromFm(
+  raw: Record<string, unknown>,
+  overrides?: Readonly<Record<string, string>>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (value === undefined || value === null) continue;
+    const mapped = overrides?.[key] ?? AUDIT_KEYS.get(key) ?? snakeToCamel(key);
+    result[mapped] = value;
+  }
+  return result;
+}
+
+/**
+ * Map entity keys (camelCase) to frontmatter keys (snake_case).
+ * Single-word keys pass through unchanged. Strips undefined/null values.
+ *
+ * @param entity - Entity record with camelCase keys
+ * @param overrides - Optional camel→snake overrides for non-standard mappings
+ * @returns New object with snake_case keys, null/undefined removed
+ */
+export function mapKeysToFm(
+  entity: Record<string, unknown>,
+  overrides?: Readonly<Record<string, string>>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(entity)) {
+    if (value === undefined || value === null) continue;
+    const mapped = overrides?.[key] ?? AUDIT_KEYS_REVERSE.get(key) ??
+      camelToSnake(key);
+    result[mapped] = value;
+  }
+  return result;
+}
+
+/**
+ * Map keys of each item in an array from snake_case to camelCase.
+ * Use for nested structured arrays (campaigns, channels, target_audiences, etc.).
+ */
+export function mapArrayFromFm(
+  items: unknown[],
+  overrides?: Readonly<Record<string, string>>,
+): Record<string, unknown>[] {
+  return items.map((item) =>
+    mapKeysFromFm(item as Record<string, unknown>, overrides)
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Audit field reader — single helper, used by every domain's parse()
+// ---------------------------------------------------------------------------
+
+/** Audit fields extracted from raw frontmatter (only set when non-null). */
+export interface ParsedAuditFields {
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+}
+
+/**
+ * Extract the four audit fields from raw frontmatter, handling both
+ * snake_case (disk shape — standalone repos that bypass mapKeysFromFm) and
+ * camelCase (post-mapKeysFromFm shape — cached repos extending
+ * BaseMarkdownRepository). Snake_case wins when both are present.
+ *
+ * Use in every domain's parse() — spread into the returned entity:
+ *
+ *   return { id, name, ..., ...parseAuditFields(fm) };
+ *
+ * Eliminates the 4-line per-module duplication that historically drifted
+ * between snake_case and camelCase reads. Investigation note
+ * `note_1779855618481_n2klqz` identified 14 affected modules.
+ */
+export function parseAuditFields(
+  fm: Record<string, unknown>,
+): ParsedAuditFields {
+  const result: ParsedAuditFields = {};
+  const createdAt = fm.created_at ?? fm.createdAt;
+  if (createdAt != null) result.createdAt = String(createdAt);
+  const updatedAt = fm.updated_at ?? fm.updatedAt;
+  if (updatedAt != null) result.updatedAt = String(updatedAt);
+  const createdBy = fm.created_by ?? fm.createdBy;
+  if (createdBy != null) result.createdBy = String(createdBy);
+  const updatedBy = fm.updated_by ?? fm.updatedBy;
+  if (updatedBy != null) result.updatedBy = String(updatedBy);
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Scalar field readers — collapse the per-field `fm.x != null ? String(fm.x)
+// : undefined` chains that historically inflated repository parse() complexity.
+// Each accepts the snake_case + camelCase fallback keys in order; the first
+// present (type-matching) value wins. Used by standalone and cached repos.
+// ---------------------------------------------------------------------------
+
+/** First present (non-null) value across keys, coerced to string. */
+export function fmStr(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): string | undefined {
+  for (const k of keys) {
+    if (fm[k] != null) return String(fm[k]);
+  }
+  return undefined;
+}
+
+/** First number-typed value across keys. */
+export function fmNum(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): number | undefined {
+  for (const k of keys) {
+    if (typeof fm[k] === "number") return fm[k] as number;
+  }
+  return undefined;
+}
+
+/** First boolean-typed value across keys. */
+export function fmBool(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): boolean | undefined {
+  for (const k of keys) {
+    if (typeof fm[k] === "boolean") return fm[k] as boolean;
+  }
+  return undefined;
+}
+
+/** First array-typed value across keys, each element coerced to string. */
+export function fmStrArr(
+  fm: Record<string, unknown>,
+  ...keys: string[]
+): string[] | undefined {
+  for (const k of keys) {
+    if (Array.isArray(fm[k])) return (fm[k] as unknown[]).map(String);
+  }
+  return undefined;
+}
+
+/**
+ * Derive an entity id from frontmatter, falling back to the filename stem.
+ *
+ * The canonical preamble of every repository `parse()`: a persisted `fm.id`
+ * wins, otherwise the filename without its `.md` extension. Use after the
+ * domain's identity guard:
+ *
+ *   const id = resolveEntityId(filename, fm);
+ *
+ * Replaces the line-for-line duplication that appeared in 39 repositories.
+ */
+export function resolveEntityId(
+  filename: string,
+  fm: Record<string, unknown>,
+): string {
+  return fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+}
+
+/**
+ * Stamp the audit timestamps for a freshly created entity — `createdAt` and
+ * `updatedAt` both take the creation instant. The write-side counterpart to
+ * `parseAuditFields` (read side); spread into the entity built by a
+ * repository's `fromCreateInput`:
+ *
+ *   return { ...data, id, ...stampAuditFields(now) };
+ *
+ * Replaces the `createdAt: now, updatedAt: now,` pair duplicated across 44
+ * repositories.
+ */
+export function stampAuditFields(
+  now: string,
+): { createdAt: string; updatedAt: string } {
+  return { createdAt: now, updatedAt: now };
+}
+
+/** Entity shape consumed by `serializeAuditFields` — the audit + archive tail. */
+interface SerializableAuditEntity {
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  archived?: boolean | null;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
+}
+
+/**
+ * Write the audit + archive frontmatter tail onto `fm`, in the canonical key
+ * order, with the same truthy guards every custom serializer used. The
+ * write-side counterpart to `parseAuditFields`; call at the END of a
+ * repository's `serialize()` so insertion order (and thus the emitted
+ * frontmatter) is byte-identical to the hand-written tail:
+ *
+ *   serializeAuditFields(fm, item);
+ *   return serializeFrontmatter(fm, body);
+ *
+ * Replaces the 7-line audit/archive tail duplicated across 12 repositories.
+ * Archive fields must round-trip — custom serializers preserve them here.
+ */
+export function serializeAuditFields(
+  fm: Record<string, unknown>,
+  item: SerializableAuditEntity,
+): void {
+  fm.created_at = item.createdAt;
+  fm.updated_at = item.updatedAt;
+  if (item.createdBy) fm.created_by = item.createdBy;
+  if (item.updatedBy) fm.updated_by = item.updatedBy;
+  if (item.archived) fm.archived = item.archived;
+  if (item.archivedAt) fm.archived_at = item.archivedAt;
+  if (item.archivedBy) fm.archived_by = item.archivedBy;
+}

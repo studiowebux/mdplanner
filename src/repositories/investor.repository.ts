@@ -1,0 +1,117 @@
+// Investor repository — markdown file CRUD under investors/.
+// Body: notes markdown in the main body.
+
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
+import type {
+  CreateInvestor,
+  Investor,
+  UpdateInvestor,
+} from "../types/investor.types.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { INVESTOR_TABLE, rowToInvestor } from "../domains/investor/cache.ts";
+
+import {
+  fmStr,
+  resolveEntityId,
+  serializeAuditFields,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
+/** Persists Investor entities as markdown with a SQLite cache mirror. */
+export class InvestorRepository extends CachedMarkdownRepository<
+  Investor,
+  CreateInvestor,
+  UpdateInvestor
+> {
+  protected readonly tableName = INVESTOR_TABLE;
+  protected override readonly supportsArchive = true;
+
+  constructor(projectDir: string) {
+    super(projectDir, {
+      directory: "investors",
+      idPrefix: "investor",
+      nameField: "name",
+    });
+  }
+
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): Investor {
+    return rowToInvestor(row);
+  }
+
+  protected fromCreateInput(
+    data: CreateInvestor,
+    id: string,
+    now: string,
+  ): Investor {
+    return {
+      ...data,
+      id,
+      type: data.type ?? "vc",
+      stage: data.stage ?? "lead",
+      status: data.status ?? "not_started",
+      tags: data.tags ?? [],
+      ...stampAuditFields(now),
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Parse — frontmatter + body (notes)
+  // ---------------------------------------------------------------------------
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): Investor | null {
+    if (!fm.id && !fm.name) return null;
+    const id = resolveEntityId(filename, fm);
+
+    const notes = body.trim() || undefined;
+
+    return {
+      id,
+      name: fmStr(fm, "name") ?? "Untitled Investor",
+      type: (fm.type as Investor["type"]) ?? "vc",
+      stage: (fm.stage as Investor["stage"]) ?? "lead",
+      status: (fm.status as Investor["status"]) ?? "not_started",
+      amountTarget: fm.amountTarget != null
+        ? Number(fm.amountTarget)
+        : undefined,
+      contact: fmStr(fm, "contact"),
+      introDate: fmStr(fm, "introDate"),
+      lastContact: fmStr(fm, "lastContact"),
+      notes,
+      tags: Array.isArray(fm.tags)
+        ? fm.tags.map(String)
+        : fm.tags != null
+        ? [String(fm.tags)]
+        : [],
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Serialize — frontmatter + body
+  // ---------------------------------------------------------------------------
+
+  protected serialize(item: Investor): string {
+    const fm: Record<string, unknown> = {};
+    fm.id = item.id;
+    fm.name = item.name;
+    fm.type = item.type;
+    fm.stage = item.stage;
+    fm.status = item.status;
+    if (item.amountTarget != null) fm.amount_target = item.amountTarget;
+    if (item.contact) fm.contact = item.contact;
+    if (item.introDate) fm.intro_date = item.introDate;
+    if (item.lastContact) fm.last_contact = item.lastContact;
+    if (item.tags && item.tags.length > 0) fm.tags = item.tags;
+    serializeAuditFields(fm, item);
+
+    return serializeFrontmatter(fm, item.notes ?? "");
+  }
+}

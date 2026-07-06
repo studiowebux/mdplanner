@@ -1,0 +1,759 @@
+// C4 Architecture canvas — force-directed layout, pan, zoom, drag, minimap.
+// CSSOM only — no inline styles (CSP-safe). No external dependencies.
+
+(function () {
+  "use strict";
+
+  // ── Constants ───────────────────────────────────────────────────────────────
+
+  var BOX_W = 224; // must match --c4-box-w
+  var BOX_H = 128; // must match --c4-box-h
+
+  var ZOOM_MIN = 0.15;
+  var ZOOM_MAX = 3.0;
+  var ZOOM_STEP = 0.2;
+
+  // Pure force-directed layout (no DOM) — loaded before this file as
+  // globalThis.C4Layout (src/static/js/c4-layout.js).
+  var simulate = globalThis.C4Layout.simulate;
+
+  // Level colours for minimap (match variables.css)
+  var LEVEL_COLOURS = {
+    context: "#e3f2fd",
+    container: "#e8f5e9",
+    component: "#fff3e0",
+    code: "#f3e5f5",
+  };
+  var LEVEL_BORDER = {
+    context: "#90caf9",
+    container: "#66bb6a",
+    component: "#ffa726",
+    code: "#ce93d8",
+  };
+
+  // ── State ───────────────────────────────────────────────────────────────────
+
+  var state = {
+    scale: 1,
+    tx: 0,
+    ty: 0,
+    nodes: [], // { id, x, y, vx, vy, el }
+    edges: [], // { s, t } node indices
+    dragging: null, // { node, startMouseX, startMouseY, startNodeX, startNodeY }
+    panning: false,
+    panStart: null, // { mx, my, tx, ty }
+    initialized: false, // true after init() has run — prevents double-init
+    connecting: null, // { fromId } — set while drawing a connection
+  };
+
+  // ── DOM helpers ─────────────────────────────────────────────────────────────
+
+  function elId(id) {
+    return document.getElementById(id);
+  }
+  function root() {
+    return elId("c4Root");
+  }
+  function wrapper() {
+    return elId("c4Wrapper");
+  }
+  function canvas() {
+    return elId("c4Canvas");
+  }
+  function isOnCanvas() {
+    return !!root();
+  }
+
+  // ── Force simulation ────────────────────────────────────────────────────────
+
+  function buildGraph() {
+    var boxes = document.querySelectorAll(".c4-box[data-id]");
+    var nodes = [];
+    var idxById = {};
+    var savedPositionCount = 0;
+
+    boxes.forEach(function (box, i) {
+      var x = parseFloat(box.getAttribute("data-x")) || 0;
+      var y = parseFloat(box.getAttribute("data-y")) || 0;
+      var hasSaved = x !== 0 || y !== 0;
+      if (hasSaved) savedPositionCount++;
+      // Scatter boxes that share the same position so simulation can separate them
+      var duplicate = nodes.some(function (n) {
+        return Math.abs(n.x - x) < 10 && Math.abs(n.y - y) < 10;
+      });
+      if (!hasSaved && duplicate) {
+        var angle = (i / Math.max(boxes.length, 1)) * 2 * Math.PI;
+        var r = 200 + i * 40;
+        x = 600 + Math.cos(angle) * r;
+        y = 400 + Math.sin(angle) * r;
+      }
+      idxById[box.getAttribute("data-id")] = i;
+      nodes.push({
+        id: box.getAttribute("data-id"),
+        x: x,
+        y: y,
+        vx: 0,
+        vy: 0,
+        el: box,
+      });
+    });
+
+    // Read connections from data-connections attr on each box (comma-separated target IDs)
+    var edges = [];
+    boxes.forEach(function (box, si) {
+      var conns = box.getAttribute("data-connections");
+      if (!conns) return;
+      conns.split(",").forEach(function (targetId) {
+        targetId = targetId.trim();
+        if (targetId && idxById[targetId] !== undefined) {
+          edges.push({ s: si, t: idxById[targetId] });
+        }
+      });
+    });
+
+    state.nodes = nodes;
+    state.edges = edges;
+    // All nodes have server-saved positions — skip force simulation to preserve layout.
+    state.allSaved = boxes.length > 0 && savedPositionCount === boxes.length;
+  }
+
+  // ── Apply positions ─────────────────────────────────────────────────────────
+
+  function applyPositions() {
+    state.nodes.forEach(function (node) {
+      var x = Math.round(node.x);
+      var y = Math.round(node.y);
+      node.el.style.setProperty("left", x + "px");
+      node.el.style.setProperty("top", y + "px");
+      node.el.setAttribute("data-x", x);
+      node.el.setAttribute("data-y", y);
+    });
+  }
+
+  // ── Transform ───────────────────────────────────────────────────────────────
+
+  function applyTransform() {
+    var c = canvas();
+    if (!c) return;
+    c.style.setProperty(
+      "transform",
+      "translate(" + state.tx + "px," + state.ty + "px) scale(" + state.scale +
+        ")",
+    );
+  }
+
+  function clampZoom(z) {
+    return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
+  }
+
+  function zoomAround(newScale, mx, my) {
+    newScale = clampZoom(newScale);
+    var ratio = newScale / state.scale;
+    state.tx = mx - ratio * (mx - state.tx);
+    state.ty = my - ratio * (my - state.ty);
+    state.scale = newScale;
+    applyTransform();
+    drawMinimap();
+  }
+
+  // ── Fit to screen ───────────────────────────────────────────────────────────
+
+  function fitToScreen() {
+    var nodes = state.nodes;
+    if (!nodes.length) return;
+    var w = wrapper();
+    if (!w) return;
+    var vw = w.clientWidth;
+    var vh = w.clientHeight;
+    var pad = 80;
+
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(function (node) {
+      minX = Math.min(minX, node.x);
+      minY = Math.min(minY, node.y);
+      maxX = Math.max(maxX, node.x + BOX_W);
+      maxY = Math.max(maxY, node.y + BOX_H);
+    });
+
+    var contentW = maxX - minX + pad * 2;
+    var contentH = maxY - minY + pad * 2;
+    var scale = clampZoom(Math.min(vw / contentW, vh / contentH, 1));
+    state.scale = scale;
+    state.tx = (vw - (maxX + minX) * scale) / 2;
+    state.ty = (vh - (maxY + minY) * scale) / 2;
+    applyTransform();
+    drawMinimap();
+  }
+
+  // ── Pan ─────────────────────────────────────────────────────────────────────
+
+  function onWrapperMousedown(e) {
+    if (!isOnCanvas()) return;
+    if (e.target.closest(".c4-box")) return;
+    if (!e.target.closest("#c4Wrapper")) return;
+    e.preventDefault();
+    state.panning = true;
+    state.panStart = {
+      mx: e.clientX,
+      my: e.clientY,
+      tx: state.tx,
+      ty: state.ty,
+    };
+    var w = wrapper();
+    if (w) w.style.setProperty("cursor", "grabbing");
+  }
+
+  function onMousemove(e) {
+    if (state.panning && state.panStart) {
+      state.tx = state.panStart.tx + (e.clientX - state.panStart.mx);
+      state.ty = state.panStart.ty + (e.clientY - state.panStart.my);
+      applyTransform();
+      drawMinimap();
+      return;
+    }
+
+    if (state.dragging) {
+      var d = state.dragging;
+      var dx = (e.clientX - d.startMouseX) / state.scale;
+      var dy = (e.clientY - d.startMouseY) / state.scale;
+      var newX = Math.round(d.startNodeX + dx);
+      var newY = Math.round(d.startNodeY + dy);
+      d.node.x = newX;
+      d.node.y = newY;
+      d.node.el.style.setProperty("left", newX + "px");
+      d.node.el.style.setProperty("top", newY + "px");
+      d.node.el.setAttribute("data-x", newX);
+      d.node.el.setAttribute("data-y", newY);
+      updateArrows();
+      drawMinimap();
+    }
+  }
+
+  function onMouseup() {
+    if (state.panning) {
+      state.panning = false;
+      state.panStart = null;
+      var w = wrapper();
+      if (w) w.style.setProperty("cursor", "grab");
+    }
+    if (state.dragging) {
+      var d = state.dragging;
+      d.node.el.classList.remove("is-dragging");
+      var movedX = Math.abs(d.node.x - d.startNodeX);
+      var movedY = Math.abs(d.node.y - d.startNodeY);
+      if (movedX > 5 || movedY > 5) {
+        patchPosition(d.node.id, d.node.x, d.node.y);
+      }
+      state.dragging = null;
+    }
+  }
+
+  // ── Box drag ─────────────────────────────────────────────────────────────────
+
+  // ── Port click — connection drawing ─────────────────────────────────────────
+
+  function cancelConnecting() {
+    state.connecting = null;
+    var r = root();
+    if (r) r.classList.remove("c4-connecting");
+    document.querySelectorAll(".c4-box--connecting-source").forEach(
+      function (b) {
+        b.classList.remove("c4-box--connecting-source");
+      },
+    );
+  }
+
+  function createConnection(sourceId, targetId) {
+    fetch("/api/v1/c4/connections", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sourceId: sourceId, targetId: targetId }),
+    }).catch(function () {});
+    // SSE c4.updated will refresh the canvas automatically
+  }
+
+  function onPortClick(e) {
+    e.stopPropagation();
+    var box = e.currentTarget.closest(".c4-box");
+    if (!box) return;
+    var boxId = box.getAttribute("data-id");
+
+    if (state.connecting) {
+      if (state.connecting.fromId === boxId) {
+        // Clicking own port again cancels
+        cancelConnecting();
+      } else {
+        // Clicking a different box's port completes the connection
+        var fromId = state.connecting.fromId;
+        cancelConnecting();
+        createConnection(fromId, boxId);
+      }
+      return;
+    }
+
+    // No active connection — start one from this box
+    state.connecting = { fromId: boxId };
+    var r = root();
+    if (r) r.classList.add("c4-connecting");
+    box.classList.add("c4-box--connecting-source");
+  }
+
+  function onBoxClickForConnect(e) {
+    if (!state.connecting) return;
+    var box = e.target.closest(".c4-box");
+    if (!box) {
+      cancelConnecting();
+      return;
+    }
+    var targetId = box.getAttribute("data-id");
+    if (!targetId || targetId === state.connecting.fromId) {
+      cancelConnecting();
+      return;
+    }
+    var fromId = state.connecting.fromId;
+    cancelConnecting();
+    createConnection(fromId, targetId);
+  }
+
+  function wirePortClick() {
+    document.querySelectorAll(".c4-port").forEach(function (port) {
+      port.removeEventListener("click", onPortClick);
+      port.addEventListener("click", onPortClick);
+    });
+  }
+
+  function wireBoxClickForConnect() {
+    document.querySelectorAll(".c4-box").forEach(function (box) {
+      box.removeEventListener("click", onBoxClickForConnect);
+      box.addEventListener("click", onBoxClickForConnect);
+    });
+  }
+
+  // ── Box drag ─────────────────────────────────────────────────────────────────
+
+  function onBoxMousedown(e) {
+    // Bail if in connection-drawing mode — click handler handles it
+    if (state.connecting) return;
+    // Allow buttons (sidenav open) and links to handle their own click
+    if (e.target.tagName === "BUTTON" || e.target.tagName === "A") return;
+    e.preventDefault();
+    e.stopPropagation();
+    var box = e.currentTarget;
+    var id = box.getAttribute("data-id");
+    var node = null;
+    for (var i = 0; i < state.nodes.length; i++) {
+      if (state.nodes[i].id === id) {
+        node = state.nodes[i];
+        break;
+      }
+    }
+    if (!node) return;
+    box.classList.add("is-dragging");
+    state.dragging = {
+      node: node,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startNodeX: node.x,
+      startNodeY: node.y,
+    };
+  }
+
+  function wireBoxDrag() {
+    document.querySelectorAll(".c4-box[data-id]").forEach(function (box) {
+      // Remove old listener before re-adding (avoids duplicates on SSE refresh)
+      box.removeEventListener("mousedown", onBoxMousedown);
+      box.addEventListener("mousedown", onBoxMousedown);
+    });
+  }
+
+  // ── Wheel zoom ───────────────────────────────────────────────────────────────
+
+  function onWheel(e) {
+    if (!isOnCanvas()) return;
+    if (!e.target.closest("#c4Wrapper")) return;
+    e.preventDefault();
+    var w = wrapper();
+    if (!w) return;
+    var rect = w.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var delta = e.deltaY < 0 ? 1.1 : (1 / 1.1);
+    zoomAround(state.scale * delta, mx, my);
+  }
+
+  // ── PATCH position ───────────────────────────────────────────────────────────
+
+  function patchPosition(id, x, y) {
+    fetch("/api/v1/c4/" + encodeURIComponent(id) + "/position", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ x: x, y: y }),
+    }).catch(function () {});
+  }
+
+  // ── SVG arrows ───────────────────────────────────────────────────────────────
+
+  function updateArrows() {
+    var svg = elId("c4Connections");
+    if (!svg) return;
+    var byId = {};
+    state.nodes.forEach(function (n) {
+      byId[n.id] = n;
+    });
+
+    svg.querySelectorAll(".c4-arrow[data-src][data-tgt]").forEach(function (g) {
+      var line = g.querySelector("line");
+      if (!line) return;
+      var src = byId[g.getAttribute("data-src")];
+      var tgt = byId[g.getAttribute("data-tgt")];
+      if (!src || !tgt) return;
+      var x1 = src.x + BOX_W / 2;
+      var y1 = src.y + BOX_H / 2;
+      var x2 = tgt.x + BOX_W / 2;
+      var y2 = tgt.y + BOX_H / 2;
+      line.setAttribute("x1", x1);
+      line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2);
+      line.setAttribute("y2", y2);
+      var label = g.querySelector("text");
+      if (label) {
+        label.setAttribute("x", (x1 + x2) / 2);
+        label.setAttribute("y", (y1 + y2) / 2 - 6);
+      }
+    });
+  }
+
+  // ── Minimap ───────────────────────────────────────────────────────────────────
+
+  function drawMinimap() {
+    var minimap = elId("c4Minimap");
+    var cv = elId("c4MinimapCanvas");
+    if (!minimap || !cv) return;
+    var nodes = state.nodes;
+    if (!nodes.length) return;
+
+    var mw = minimap.clientWidth || 176;
+    var mh = minimap.clientHeight || 112;
+    cv.width = mw;
+    cv.height = mh;
+
+    var ctx = cv.getContext("2d");
+    ctx.clearRect(0, 0, mw, mh);
+
+    // Bounding box of all nodes
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(function (n) {
+      minX = Math.min(minX, n.x);
+      minY = Math.min(minY, n.y);
+      maxX = Math.max(maxX, n.x + BOX_W);
+      maxY = Math.max(maxY, n.y + BOX_H);
+    });
+    var pad = 20;
+    var contentW = maxX - minX + pad * 2;
+    var contentH = maxY - minY + pad * 2;
+    var mmScale = Math.min(mw / contentW, mh / contentH);
+    var offX = (mw - contentW * mmScale) / 2 - (minX - pad) * mmScale;
+    var offY = (mh - contentH * mmScale) / 2 - (minY - pad) * mmScale;
+
+    // Draw edges
+    ctx.strokeStyle = "rgba(0,0,0,0.18)";
+    ctx.lineWidth = 1;
+    state.edges.forEach(function (e) {
+      var a = nodes[e.s], b = nodes[e.t];
+      ctx.beginPath();
+      ctx.moveTo(
+        a.x * mmScale + offX + (BOX_W / 2) * mmScale,
+        a.y * mmScale + offY + (BOX_H / 2) * mmScale,
+      );
+      ctx.lineTo(
+        b.x * mmScale + offX + (BOX_W / 2) * mmScale,
+        b.y * mmScale + offY + (BOX_H / 2) * mmScale,
+      );
+      ctx.stroke();
+    });
+
+    // Draw boxes
+    nodes.forEach(function (node) {
+      var level = node.el.getAttribute("data-level") || "context";
+      var bx = node.x * mmScale + offX;
+      var by = node.y * mmScale + offY;
+      var bw = BOX_W * mmScale;
+      var bh = BOX_H * mmScale;
+      ctx.fillStyle = LEVEL_COLOURS[level] || "#e0e0e0";
+      ctx.strokeStyle = LEVEL_BORDER[level] || "#999";
+      ctx.lineWidth = 1;
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, 3);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.strokeRect(bx, by, bw, bh);
+      }
+    });
+
+    // Viewport indicator
+    var w = wrapper();
+    if (!w) return;
+    var vw = w.clientWidth;
+    var vh = w.clientHeight;
+    var vtlX = -state.tx / state.scale;
+    var vtlY = -state.ty / state.scale;
+    var vwC = vw / state.scale;
+    var vhC = vh / state.scale;
+    ctx.strokeStyle = "rgba(0,100,255,0.7)";
+    ctx.lineWidth = 1.5;
+    ctx.fillStyle = "rgba(0,100,255,0.08)";
+    var rx = vtlX * mmScale + offX;
+    var ry = vtlY * mmScale + offY;
+    var rw = vwC * mmScale;
+    var rh = vhC * mmScale;
+    ctx.fillRect(rx, ry, rw, rh);
+    ctx.strokeRect(rx, ry, rw, rh);
+  }
+
+  function wireMinimapClick() {
+    var cv = elId("c4MinimapCanvas");
+    if (!cv) return;
+    cv.addEventListener("click", function (e) {
+      var minimap = elId("c4Minimap");
+      var nodes = state.nodes;
+      if (!minimap || !nodes.length) return;
+      var mw = minimap.clientWidth || 176;
+      var mh = minimap.clientHeight || 112;
+      var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      nodes.forEach(function (n) {
+        minX = Math.min(minX, n.x);
+        minY = Math.min(minY, n.y);
+        maxX = Math.max(maxX, n.x + BOX_W);
+        maxY = Math.max(maxY, n.y + BOX_H);
+      });
+      var pad = 20;
+      var contentW = maxX - minX + pad * 2;
+      var contentH = maxY - minY + pad * 2;
+      var mmScale = Math.min(mw / contentW, mh / contentH);
+      var offX = (mw - contentW * mmScale) / 2 - (minX - pad) * mmScale;
+      var offY = (mh - contentH * mmScale) / 2 - (minY - pad) * mmScale;
+      var rect = cv.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      var cx = (mx - offX) / mmScale;
+      var cy = (my - offY) / mmScale;
+      var w = wrapper();
+      if (!w) return;
+      state.tx = w.clientWidth / 2 - cx * state.scale;
+      state.ty = w.clientHeight / 2 - cy * state.scale;
+      applyTransform();
+      drawMinimap();
+    });
+  }
+
+  // ── Canvas height ─────────────────────────────────────────────────────────────
+
+  function sizeCanvas() {
+    var r = root();
+    if (!r) return;
+    var top = r.getBoundingClientRect().top;
+    var h = window.innerHeight - top;
+    document.documentElement.style.setProperty("--c4-canvas-height", h + "px");
+  }
+
+  // ── Zoom buttons ───────────────────────────────────────────────────────────────
+
+  function wireZoomButtons() {
+    var zoomIn = elId("c4ZoomIn");
+    var zoomOut = elId("c4ZoomOut");
+    var fit = elId("c4FitScreen");
+    var w = wrapper();
+
+    if (zoomIn) {
+      zoomIn.disabled = false;
+      zoomIn.addEventListener("click", function () {
+        var cx = w ? w.clientWidth / 2 : 400;
+        var cy = w ? w.clientHeight / 2 : 300;
+        zoomAround(state.scale * (1 + ZOOM_STEP), cx, cy);
+      });
+    }
+    if (zoomOut) {
+      zoomOut.disabled = false;
+      zoomOut.addEventListener("click", function () {
+        var cx = w ? w.clientWidth / 2 : 400;
+        var cy = w ? w.clientHeight / 2 : 300;
+        zoomAround(state.scale * (1 - ZOOM_STEP), cx, cy);
+      });
+    }
+    if (fit) {
+      fit.disabled = false;
+      fit.addEventListener("click", fitToScreen);
+    }
+  }
+
+  // ── Edit toggle ────────────────────────────────────────────────────────────────
+
+  function wireEditToggle() {
+    var btn = elId("c4ToggleEdit");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var r = root();
+      if (!r) return;
+      var isEdit = r.classList.toggle("c4-edit-mode");
+      btn.textContent = isEdit ? "View" : "Edit";
+      btn.setAttribute("aria-pressed", isEdit ? "true" : "false");
+      btn.classList.toggle("is-active", isEdit);
+    });
+  }
+
+  // ── Diagram switcher ───────────────────────────────────────────────────────────
+
+  function wireDiagramSwitcher() {
+    var btn = elId("c4NewDiagram");
+    var input = elId("c4NewDiagramInput");
+    if (!btn || !input) return;
+
+    btn.addEventListener("click", function () {
+      input.classList.toggle("is-hidden");
+      if (!input.classList.contains("is-hidden")) {
+        input.value = "";
+        input.focus();
+      }
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        input.classList.add("is-hidden");
+        return;
+      }
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      var name = input.value.trim();
+      if (!name) return;
+      var params = new URLSearchParams(window.location.search);
+      params.set("diagram", name);
+      params.set("view", "canvas");
+      params.delete("level");
+      params.delete("parent");
+      var viewUrl = "/c4/view?" + params.toString();
+      var pageUrl = "/c4?" + params.toString();
+      input.classList.add("is-hidden");
+      input.value = "";
+      if (typeof htmx !== "undefined") {
+        htmx.ajax("GET", viewUrl, {
+          target: "#c4-view",
+          swap: "outerHTML",
+        });
+        history.pushState({}, "", pageUrl);
+      } else {
+        window.location.href = pageUrl;
+      }
+    });
+  }
+
+  // ── SSE refresh ────────────────────────────────────────────────────────────────
+
+  // ── Init ───────────────────────────────────────────────────────────────────────
+
+  function init() {
+    if (!isOnCanvas() || state.initialized) return;
+    state.initialized = true;
+
+    sizeCanvas();
+    buildGraph();
+    if (!state.allSaved) {
+      simulate(state.nodes, state.edges, { boxW: BOX_W, boxH: BOX_H });
+    }
+    applyPositions();
+    var c = canvas();
+    if (c) c.removeAttribute("data-loading");
+    fitToScreen();
+    updateArrows();
+
+    wireBoxDrag();
+    wirePortClick();
+    wireBoxClickForConnect();
+    wireEditToggle();
+    wireDiagramSwitcher();
+    wireZoomButtons();
+    wireMinimapClick();
+    drawMinimap();
+
+    // mousedown/wheel on document so they survive SSE DOM replacement
+    document.addEventListener("mousedown", onWrapperMousedown);
+    document.addEventListener("mousemove", onMousemove);
+    document.addEventListener("mouseup", onMouseup);
+    document.addEventListener("wheel", onWheel, { passive: false });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && state.connecting) cancelConnecting();
+    });
+    window.addEventListener("resize", function () {
+      sizeCanvas();
+      fitToScreen();
+    });
+  }
+
+  // ── Top-level htmx:afterSettle — handles both SSE refresh and htmx navigation ──
+  // Runs on every settle. If canvas just appeared (htmx nav), init it.
+  // If canvas was already initialized, handle SSE data refresh only.
+
+  document.addEventListener("htmx:afterSettle", function () {
+    if (!isOnCanvas()) {
+      // Left the canvas page — reset so re-entering re-inits cleanly
+      state.initialized = false;
+      return;
+    }
+
+    if (!state.initialized) {
+      // htmx navigation brought us to the canvas — run full init
+      init();
+      return;
+    }
+
+    // Skip SSE rebuild while a drag is active — node objects would be replaced
+    // mid-drag, making state.dragging.node stale and causing position flashing.
+    if (state.dragging) return;
+
+    // SSE data refresh — rebuild graph, always preserve in-memory positions for
+    // existing nodes (position changes are not broadcast via SSE). Only new nodes
+    // get server positions.
+    var prevById = {};
+    state.nodes.forEach(function (n) {
+      prevById[n.id] = n;
+    });
+
+    var prevCount = state.nodes.length;
+    buildGraph();
+    wireBoxDrag();
+    wirePortClick();
+    wireBoxClickForConnect();
+    wireEditToggle();
+    wireDiagramSwitcher();
+    wireZoomButtons();
+    wireMinimapClick();
+
+    state.nodes.forEach(function (node) {
+      var prev = prevById[node.id];
+      if (prev) {
+        node.x = prev.x;
+        node.y = prev.y;
+      }
+    });
+
+    if (state.nodes.length !== prevCount) {
+      simulate(state.nodes, state.edges, { boxW: BOX_W, boxH: BOX_H });
+      fitToScreen();
+    }
+
+    applyPositions();
+    var c = canvas();
+    if (c) c.removeAttribute("data-loading");
+    applyTransform();
+    updateArrows();
+    drawMinimap();
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

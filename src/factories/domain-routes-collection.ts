@@ -1,0 +1,268 @@
+// Domain collection routes — the UI-state middleware and the three list
+// endpoints (full page `/`, view fragment `/view`, pagination `/more`). Split
+// from the domain route factory; registered before the entity routes so the
+// `*` middleware wraps every domain route (state persistence is request-wide).
+
+import type { Hono } from "hono";
+import { getPeopleService } from "../singletons/services.ts";
+import { mergeParams } from "../utils/ui-state.ts";
+import { toHtml } from "../utils/html.ts";
+import { viewProps } from "../middleware/view-props.ts";
+import type { AppContext, AppVariables } from "../types/app.ts";
+import {
+  type DomainConfig,
+  type DomainFilterState,
+  type Entity,
+} from "./domain.types.ts";
+import { createDomainPage, createMoreFragment } from "./domain-view.tsx";
+import type { FilterHelpers } from "./domain-routes-helpers.ts";
+
+type Router = Hono<{ Variables: AppVariables }>;
+
+/**
+ * Load a domain's items and apply the full filter pipeline (source switch →
+ * per-domain filters → global filters). Single source of truth shared by the
+ * generated `/` and `/view` endpoints and by custom routes (e.g. the task
+ * per-section paginator) so filtering can never drift between them.
+ */
+export async function loadFilteredItems<T extends Entity, C, U>(
+  c: AppContext,
+  cfg: DomainConfig<T, C, U>,
+  helpers: FilterHelpers<T>,
+  state: DomainFilterState,
+): Promise<{
+  all: T[];
+  filtered: T[];
+  dynamicFilterOptions:
+    | Awaited<
+      ReturnType<
+        NonNullable<DomainConfig<T, C, U>["extractFilterOptions"]>
+      >
+    >
+    | undefined;
+}> {
+  const all = await helpers.loadItems(c, state);
+  const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
+  const filtered = await helpers.applyGlobalFilters(
+    helpers.applyFilters(all, state, dynamicFilterOptions),
+    c,
+  );
+  return { all, filtered, dynamicFilterOptions };
+}
+
+/**
+ * UI-state middleware: resolve filter state from query params + the user's saved
+ * account preferences, expose it as `filterState`, and persist any change back
+ * to the account after the request. Registered first so it wraps all routes.
+ */
+type PersonPrefs = {
+  viewPrefs?: Record<string, string>;
+  filterDefaults?: Record<string, Record<string, string>>;
+  uiState?: Record<string, Record<string, string>>;
+} | undefined;
+
+export function registerStateMiddleware<T extends Entity, C, U>(
+  router: Router,
+  cfg: DomainConfig<T, C, U>,
+  opts: {
+    stateKeys: string[];
+    archiveEnabled: boolean;
+    helpers: FilterHelpers<T>;
+  },
+) {
+  const { stateKeys, archiveEnabled, helpers } = opts;
+
+  // Boolean toolbar toggles (hideCompleted / archived / showHidden) submit via
+  // htmx form-include. An unchecked checkbox is OMITTED per HTML spec, so force
+  // absent keys to "false" on htmx requests so unchecks round-trip correctly.
+  function applyHtmxToggleDefaults(
+    params: Record<string, string | undefined>,
+  ): void {
+    if (cfg.hideCompleted && params.hideCompleted === undefined) {
+      params.hideCompleted = "false";
+    }
+    if (archiveEnabled && params.archived === undefined) {
+      params.archived = "false";
+    }
+    if (cfg.showHiddenToggle && params.showHidden === undefined) {
+      params.showHidden = "false";
+    }
+  }
+
+  // Apply Settings-configured view + filter defaults when nothing is saved.
+  function applyPersonDefaults(
+    merged: Record<string, string>,
+    personPrefs: PersonPrefs,
+  ): void {
+    if (!merged.view && personPrefs?.viewPrefs?.[cfg.name]) {
+      merged.view = personPrefs.viewPrefs[cfg.name];
+    }
+    const domainFilterDefaults = personPrefs?.filterDefaults?.[cfg.name];
+    if (domainFilterDefaults) {
+      for (const key of cfg.stateKeys) {
+        if (key !== "view" && !merged[key] && domainFilterDefaults[key]) {
+          merged[key] = domainFilterDefaults[key];
+        }
+      }
+    }
+  }
+
+  router.use("*", async (c, next) => {
+    const isHtmx = c.req.header("HX-Request") === "true";
+    const activePerson = c.get("activePerson" as never) as {
+      id?: string;
+      preferences?: PersonPrefs;
+    } | undefined;
+    const actorId = activePerson?.id;
+    const personPrefs = activePerson?.preferences;
+    // Last-used filter state lives in the user's account (preferences.uiState),
+    // not a browser cookie. Anonymous requests (no actor) do not persist.
+    const saved: Record<string, unknown> = personPrefs?.uiState?.[cfg.name] ??
+      {};
+
+    const params: Record<string, string | undefined> = {};
+    for (const key of stateKeys) {
+      params[key] = c.req.query(key);
+    }
+    if (isHtmx) applyHtmxToggleDefaults(params);
+    const merged = mergeParams(params, saved);
+    if (personPrefs) applyPersonDefaults(merged, personPrefs);
+
+    const state = helpers.buildState(merged);
+    c.set("filterState" as never, state as never);
+    await next();
+
+    // Persist last-used filter state to the account — only when there is an
+    // actor and the state actually changed, so the person file isn't rewritten
+    // on every request.
+    if (actorId) {
+      const serialized = helpers.serializeFilterState(state);
+      if (!helpers.sameStringMap(serialized, saved)) {
+        await getPeopleService().updatePreferences(actorId, {
+          uiState: { [cfg.name]: serialized },
+        });
+      }
+    }
+  });
+}
+
+/** List endpoints: full page `/`, view fragment `/view`, pagination `/more`. */
+export function registerCollectionRoutes<T extends Entity, C, U>(
+  router: Router,
+  cfg: DomainConfig<T, C, U>,
+  opts: { extraKeys: Set<string>; helpers: FilterHelpers<T> },
+) {
+  const { extraKeys, helpers } = opts;
+  const { DomainPage, DomainViewContainer } = createDomainPage(cfg);
+
+  // Full page
+  router.get("/", async (c) => {
+    const state = c.get("filterState" as never) as DomainFilterState;
+    const { all, filtered, dynamicFilterOptions } = await loadFilteredItems(
+      c,
+      cfg,
+      helpers,
+      state,
+    );
+    const pageSize = state.limit
+      ? parseInt(String(state.limit), 10)
+      : cfg.pageSize;
+    const items = pageSize ? filtered.slice(0, pageSize) : filtered;
+    const hasMore = !!pageSize && filtered.length > pageSize;
+    const nextOffset = pageSize ?? 0;
+    const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
+      ? await cfg.customViewRenderer(
+        state.view,
+        state,
+        items,
+        c.get("nonce"),
+      )
+      : undefined;
+    const topSlotContent = cfg.topSlot ? await cfg.topSlot(c) : undefined;
+    return c.html(
+      toHtml(
+        await DomainPage({
+          ...viewProps(c, cfg.path),
+          items,
+          totalCount: all.length,
+          filteredCount: filtered.length,
+          hasMore,
+          nextOffset,
+          state,
+          dynamicFilterOptions,
+          customContent,
+          topSlotContent,
+        }),
+      ),
+    );
+  });
+
+  // View fragment
+  router.get("/view", async (c) => {
+    const state = c.get("filterState" as never) as DomainFilterState;
+    const { all, filtered } = await loadFilteredItems(c, cfg, helpers, state);
+    const pageSize = state.limit
+      ? parseInt(String(state.limit), 10)
+      : cfg.pageSize;
+    const items = pageSize ? filtered.slice(0, pageSize) : filtered;
+    const hasMore = !!pageSize && filtered.length > pageSize;
+    const nextOffset = pageSize ?? 0;
+    const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
+      ? await cfg.customViewRenderer(
+        state.view,
+        state,
+        items,
+        c.get("nonce"),
+      )
+      : undefined;
+    return c.html(
+      toHtml(DomainViewContainer({
+        items,
+        totalCount: all.length,
+        filteredCount: filtered.length,
+        hasMore,
+        nextOffset,
+        state,
+        fragment: true,
+        customContent,
+      })),
+      200,
+      { "HX-Replace-Url": helpers.buildCanonicalUrl(state) },
+    );
+  });
+
+  // Pagination — load next page of items (table rows or grid cards)
+  if (cfg.pageSize) {
+    const MoreFragment = createMoreFragment(cfg);
+
+    router.get("/more", async (c) => {
+      const offset = parseInt(c.req.query("offset") ?? "0", 10);
+      const state = c.get("filterState" as never) as DomainFilterState;
+      const pageSize = state.limit
+        ? parseInt(String(state.limit), 10)
+        : cfg.pageSize!;
+      const all = cfg.listForRequest
+        ? await cfg.listForRequest(c)
+        : await cfg.getService().list();
+      const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
+      const filtered = await helpers.applyGlobalFilters(
+        helpers.applyFilters(all, state, dynamicFilterOptions),
+        c,
+      );
+      const slice = filtered.slice(offset, offset + pageSize);
+      const hasMore = filtered.length > offset + pageSize;
+      const nextOffset = offset + pageSize;
+      const view = state.view === "table" ? "table" : "grid";
+
+      return c.html(
+        toHtml(MoreFragment({
+          items: slice,
+          state,
+          hasMore,
+          nextOffset,
+          view,
+        })),
+      );
+    });
+  }
+}

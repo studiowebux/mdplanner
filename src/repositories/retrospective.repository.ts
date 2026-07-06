@@ -1,0 +1,173 @@
+// Retrospective repository — markdown file CRUD under retrospectives/.
+// Body format: # Title, then ## sections with keyword-matched headings.
+
+import type {
+  CreateRetrospective,
+  Retrospective,
+  RetrospectiveSectionKey,
+  UpdateRetrospective,
+} from "../types/retrospective.types.ts";
+import { RETROSPECTIVE_SECTIONS } from "../types/retrospective.types.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import {
+  RETROSPECTIVE_TABLE,
+  rowToRetrospective,
+} from "../domains/retrospective/cache.ts";
+import { RETROSPECTIVE_BODY_KEYS } from "../domains/retrospective/constants.ts";
+import { splitH2Sections } from "../utils/markdown-sections.ts";
+
+import {
+  fmStr,
+  fmStrArr,
+  resolveEntityId,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
+/** Persists Retrospective entities as markdown with a SQLite cache mirror. */
+export class RetrospectiveRepository extends CachedMarkdownRepository<
+  Retrospective,
+  CreateRetrospective,
+  UpdateRetrospective
+> {
+  protected readonly tableName = RETROSPECTIVE_TABLE;
+  protected override readonly supportsArchive = true;
+
+  constructor(projectDir: string) {
+    super(projectDir, {
+      directory: "retrospectives",
+      idPrefix: "retro",
+      nameField: "title",
+    });
+  }
+
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): Retrospective {
+    return rowToRetrospective(row);
+  }
+
+  protected fromCreateInput(
+    data: CreateRetrospective,
+    id: string,
+    now: string,
+  ): Retrospective {
+    return {
+      ...data,
+      id,
+      status: data.status ?? "open",
+      continue: data.continue ?? [],
+      stop: data.stop ?? [],
+      start: data.start ?? [],
+      participants: data.participants ?? [],
+      ...stampAuditFields(now),
+    };
+  }
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): Retrospective | null {
+    const bodyText = body.trim();
+    const headingMatch = bodyText.match(/^#\s+(.+)$/m);
+
+    // id and title live in RETROSPECTIVE_BODY_KEYS — serialize() writes the id
+    // via the filename and the title as the body `# heading`, never to
+    // frontmatter. A re-read of a freshly written file therefore has neither
+    // in fm; identify it by the body heading instead. Guarding on fm alone
+    // made every retrospective unreadable after its first update.
+    if (!fm.id && !fm.title && !headingMatch) return null;
+
+    const id = resolveEntityId(filename, fm);
+    const title = fm.title
+      ? String(fm.title)
+      : headingMatch
+      ? headingMatch[1]
+      : "";
+
+    const sections = this.parseSections(bodyText);
+
+    return {
+      id,
+      title,
+      date: fmStr(fm, "date"),
+      status: (fm.status === "closed" ? "closed" : "open") as
+        | "open"
+        | "closed",
+      continue: sections.continue ?? [],
+      stop: sections.stop ?? [],
+      start: sections.start ?? [],
+      participants: fmStrArr(fm, "participants")?.filter(Boolean) ?? [],
+      createdAt: fmStr(fm, "createdAt") ?? new Date().toISOString(),
+      updatedAt: fmStr(fm, "updatedAt") ?? new Date().toISOString(),
+      createdBy: fmStr(fm, "createdBy"),
+      updatedBy: fmStr(fm, "updatedBy"),
+    };
+  }
+
+  /** Parse H2 sections into named fields using keyword matching. */
+  private parseSections(
+    body: string,
+  ): Record<RetrospectiveSectionKey, string[] | undefined> {
+    const result: Record<string, string[] | undefined> = {};
+
+    for (const { heading, content } of splitH2Sections(body)) {
+      if (!content) continue;
+
+      const key = this.matchSectionKey(heading);
+      if (!key) continue;
+
+      result[key] = this.parseListItems(content);
+    }
+
+    return result as Record<RetrospectiveSectionKey, string[] | undefined>;
+  }
+
+  /** Match an H2 heading to a section key using keywords. */
+  private matchSectionKey(heading: string): RetrospectiveSectionKey | null {
+    const normalized = heading.trim().toLowerCase();
+    for (const section of RETROSPECTIVE_SECTIONS) {
+      if (section.keywords.some((kw) => normalized.includes(kw))) {
+        return section.key;
+      }
+    }
+    return null;
+  }
+
+  /** Parse section content into string array from bullet list items. */
+  private parseListItems(content: string): string[] {
+    const items: string[] = [];
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+        items.push(trimmed.slice(2).trim());
+      } else if (trimmed && !trimmed.startsWith("#")) {
+        items.push(trimmed);
+      }
+    }
+    return items;
+  }
+
+  protected serialize(item: Retrospective): string {
+    return this.serializeStandard(
+      item,
+      RETROSPECTIVE_BODY_KEYS,
+      this.buildBody(item),
+    );
+  }
+
+  private buildBody(item: Retrospective): string {
+    const parts: string[] = [`# ${item.title}`];
+
+    for (const section of RETROSPECTIVE_SECTIONS) {
+      const values = item[section.key as keyof Retrospective] as string[];
+      if (!values || values.length === 0) continue;
+      parts.push("", `## ${section.label}`);
+      parts.push("");
+      for (const v of values) {
+        parts.push(`- ${v}`);
+      }
+    }
+
+    return parts.join("\n");
+  }
+}

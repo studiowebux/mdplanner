@@ -1,0 +1,14 @@
+---
+id: default_sticky_1771000000004_dddd
+color: green
+position:
+  x: 80
+  y: 280
+size:
+  width: 200
+  height: 160
+created_at: "2026-04-11T02:26:29.081Z"
+updated_at: "2026-04-11T02:26:29.081Z"
+---
+
+Write integration tests for the billing module

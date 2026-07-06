@@ -1,40 +1,37 @@
-/**
- * MCP tool for the agent context-pack.
- * Tool: get_context_pack
- */
+// MCP tool for the agent context-pack: get_context_pack.
+// Thin wrapper over the context-pack service (assembleContextPack). The input
+// shape reuses ContextPackQuerySchema so the query contract lives in one place.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { assembleContextPack } from "../../lib/context-pack.ts";
-import { ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { ContextPackQuerySchema } from "../../types/context-pack.types.ts";
+import { assembleContextPack } from "../../services/context-pack.service.ts";
+import { ok } from "../utils.ts";
 
-export function registerContextPackTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
-
+export function registerContextPackTools(server: McpServer): void {
   server.registerTool(
     "get_context_pack",
     {
       description:
-        "Single-call agent boot. Returns people, active milestone, in-progress tasks, " +
-        "top-10 todo tasks, most recent progress note excerpt, and " +
-        "decision/architecture/constraint note titles. " +
-        "Replaces 8+ sequential MCP calls from Phase 1 Boot.",
+        "Single-call agent boot. Returns people, active milestone, in-progress " +
+        "tasks, top-10 todo tasks, most recent progress note excerpt, " +
+        "decision/architecture/constraint/feature/investigation note titles, a " +
+        "summary, and a suggested next action. Replaces 8+ sequential MCP calls.",
       inputSchema: {
-        project: z.string().optional().describe(
+        project: ContextPackQuerySchema.shape.project.describe(
           "Project name to scope all entities (e.g. 'MD Planner')",
         ),
-        milestone: z.string().optional().describe(
+        milestone: ContextPackQuerySchema.shape.milestone.describe(
           "Milestone name. Defaults to the most recently created open milestone.",
         ),
       },
     },
-    async ({ project, milestone }) => {
-      const pack = await assembleContextPack(parser, { project, milestone });
-      return ok(pack);
-    },
+    async ({ project, milestone }) =>
+      ok(await assembleContextPack({ project, milestone })),
   );
 }
+
+export const contextPackModule = defineMcpModule({
+  feature: null,
+  register: registerContextPackTools,
+});

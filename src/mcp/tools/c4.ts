@@ -1,95 +1,63 @@
-/**
- * MCP tools for C4 architecture diagram operations.
- * Tools: list_c4_components, get_c4_component, create_c4_component,
- *        update_c4_component, delete_c4_component,
- *        add_c4_connection, remove_c4_connection, get_c4_by_level
- */
+// MCP tools for C4 Architecture — thin wrappers over C4Service.
+// All Zod schemas derived from types/c4.types.ts — single source of truth.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { z } from "@hono/zod-openapi";
+import { getC4Service } from "../../singletons/services.ts";
+import {
+  C4_LEVELS,
+  C4ComponentSchema,
+  C4ConnectionSchema,
+  CreateC4ComponentSchema,
+  ListC4OptionsSchema,
+  UpdateC4ComponentSchema,
+} from "../../types/c4.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
-const C4_LEVEL = ["context", "container", "component", "code"] as const;
-
-export function registerC4Tools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerC4Tools(server: McpServer): void {
+  const service = getC4Service();
 
   server.registerTool(
     "list_c4_components",
     {
       description:
-        "List all C4 architecture components across all diagram levels.",
-      inputSchema: {},
+        "List C4 architecture components. Filter by diagram, level, parent, or full-text query.",
+      inputSchema: { ...ListC4OptionsSchema.shape, slim: slimParam },
     },
-    async () => ok(await parser.readC4Components()),
+    async ({ diagram, level, parent, q, slim }) => {
+      const items = await service.list({ diagram, level, parent, q });
+      return slim
+        ? ok(projectSlim(items, ["name", "level", "type", "diagram", "parent"]))
+        : ok(items);
+    },
   );
 
   server.registerTool(
     "get_c4_component",
     {
       description: "Get a single C4 component by its ID.",
-      inputSchema: { id: z.string().describe("Component ID") },
-    },
-    async ({ id }) => {
-      const components = await parser.readC4Components();
-      const component = components.find((c) => c.id === id);
-      if (!component) return err(`C4 component '${id}' not found`);
-      return ok(component);
-    },
-  );
-
-  server.registerTool(
-    "get_c4_by_level",
-    {
-      description:
-        "Get all C4 components at a specific diagram level (context, container, component, code).",
       inputSchema: {
-        level: z.enum(C4_LEVEL).describe("C4 diagram level"),
+        id: C4ComponentSchema.shape.id.describe("Component ID"),
       },
     },
-    async ({ level }) => ok(await parser.getC4ByLevel(level)),
+    async ({ id }) => {
+      const item = await service.getById(id);
+      if (!item) return err(`C4 component '${id}' not found`);
+      return ok(item);
+    },
   );
 
   server.registerTool(
     "create_c4_component",
     {
-      description: "Create a new C4 architecture component.",
-      inputSchema: {
-        name: z.string().describe("Component name"),
-        level: z.enum(C4_LEVEL).describe("C4 diagram level"),
-        type: z.string().describe(
-          "Component type (e.g. 'Person', 'System', 'Service', 'Database')",
-        ),
-        description: z.string().describe("What this component does"),
-        technology: z.string().optional().describe(
-          "Technology stack (e.g. 'Deno, TypeScript, SQLite')",
-        ),
-        parent: z.string().optional().describe(
-          "Parent component ID (for nesting)",
-        ),
-        position: z.object({
-          x: z.number(),
-          y: z.number(),
-        }).optional().describe("Canvas position (defaults to 0,0)"),
-      },
+      description:
+        "Create a new C4 architecture component. diagram defaults to 'default'. position defaults to {x:0, y:0}.",
+      inputSchema: CreateC4ComponentSchema.shape,
     },
-    async (
-      { name, level, type, description, technology, parent, position },
-    ) => {
-      const component = await parser.addC4Component({
-        name,
-        level,
-        type,
-        description,
-        ...(technology && { technology }),
-        ...(parent && { parent }),
-        position: position ?? { x: 0, y: 0 },
-      });
-      return ok({ id: component.id });
+    async (data) => {
+      const item = await service.create(data);
+      return ok({ id: item.id });
     },
   );
 
@@ -98,18 +66,13 @@ export function registerC4Tools(
     {
       description: "Update an existing C4 component's fields.",
       inputSchema: {
-        id: z.string().describe("Component ID"),
-        name: z.string().optional(),
-        level: z.enum(C4_LEVEL).optional(),
-        type: z.string().optional(),
-        description: z.string().optional(),
-        technology: z.string().optional(),
-        parent: z.string().optional(),
+        id: C4ComponentSchema.shape.id.describe("Component ID"),
+        ...UpdateC4ComponentSchema.shape,
       },
     },
-    async ({ id, ...updates }) => {
-      const updated = await parser.updateC4Component(id, updates);
-      if (!updated) return err(`C4 component '${id}' not found`);
+    async ({ id, ...fields }) => {
+      const item = await service.update(id, fields);
+      if (!item) return err(`C4 component '${id}' not found`);
       return ok({ success: true });
     },
   );
@@ -118,51 +81,100 @@ export function registerC4Tools(
     "delete_c4_component",
     {
       description: "Delete a C4 component by its ID.",
-      inputSchema: { id: z.string().describe("Component ID") },
+      inputSchema: {
+        id: C4ComponentSchema.shape.id.describe("Component ID"),
+      },
     },
     async ({ id }) => {
-      const success = await parser.deleteC4Component(id);
+      const success = await service.delete(id);
       if (!success) return err(`C4 component '${id}' not found`);
       return ok({ success: true });
     },
   );
 
   server.registerTool(
-    "add_c4_connection",
+    "get_c4_by_level",
     {
-      description: "Add a connection (dependency) between two C4 components.",
+      description:
+        "Get all C4 components at a given level, optionally scoped to a parent component.",
       inputSchema: {
-        source_id: z.string().describe("Source component ID"),
-        target_id: z.string().describe("Target component ID"),
-        label: z.string().describe(
-          "Connection label (e.g. 'Uses', 'Reads from', 'Sends events to')",
+        level: z.enum(C4_LEVELS).describe("C4 level to fetch"),
+        parent_id: z.string().optional().describe(
+          "Parent component ID to scope results (optional)",
         ),
       },
     },
-    async ({ source_id, target_id, label }) => {
-      const updated = await parser.addC4Connection(
+    async ({ level, parent_id }) => {
+      const items = await service.findByLevel(level, parent_id);
+      return ok(items);
+    },
+  );
+
+  server.registerTool(
+    "get_c4_by_parent",
+    {
+      description:
+        "Get all direct children of a C4 component (one level down). " +
+        "Returns components whose parent field matches the given ID.",
+      inputSchema: {
+        parent_id: z.string().describe("Parent component ID"),
+        diagram: C4ComponentSchema.shape.diagram.optional().describe(
+          "Diagram name to scope results (default: 'default')",
+        ),
+      },
+    },
+    async ({ parent_id, diagram }) => {
+      const items = await service.list({
+        parent: parent_id,
+        ...(diagram ? { diagram } : {}),
+      });
+      return ok(items);
+    },
+  );
+
+  server.registerTool(
+    "add_c4_connection",
+    {
+      description:
+        "Add a directed connection between two C4 components. Returns the new connection ID.",
+      inputSchema: {
+        source_id: C4ComponentSchema.shape.id.describe("Source component ID"),
+        target_id: C4ComponentSchema.shape.id.describe("Target component ID"),
+        label: C4ConnectionSchema.shape.label.describe("Connection label"),
+        technology: C4ConnectionSchema.shape.technology.optional().describe(
+          "Technology used on this connection (optional)",
+        ),
+      },
+    },
+    async ({ source_id, target_id, label, technology }) => {
+      const result = await service.addConnection(
         source_id,
         target_id,
         label,
+        technology ?? undefined,
       );
-      if (!updated) return err(`C4 component '${source_id}' not found`);
-      return ok({ success: true });
+      if (!result) return err(`Source component '${source_id}' not found`);
+      return ok({ connection_id: result.connectionId });
     },
   );
 
   server.registerTool(
     "remove_c4_connection",
     {
-      description: "Remove a connection between two C4 components.",
+      description: "Remove a connection by its ID.",
       inputSchema: {
-        source_id: z.string().describe("Source component ID"),
-        target_id: z.string().describe("Target component ID"),
+        connection_id: C4ConnectionSchema.shape.id.describe("Connection ID"),
       },
     },
-    async ({ source_id, target_id }) => {
-      const updated = await parser.removeC4Connection(source_id, target_id);
-      if (!updated) return err(`C4 component '${source_id}' not found`);
+    async ({ connection_id }) => {
+      const success = await service.removeConnection(connection_id);
+      if (!success) return err(`Connection '${connection_id}' not found`);
       return ok({ success: true });
     },
   );
 }
+
+export const c4Module = defineMcpModule({
+  feature: "c4_component",
+  register: registerC4Tools,
+});

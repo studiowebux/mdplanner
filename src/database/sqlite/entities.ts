@@ -1,0 +1,321 @@
+/**
+ * Entity Registry
+ * Pattern: Registry pattern — single source of truth for all cached entities
+ *
+ * To add a new entity:
+ *   1. Add one EntityDef object to the ENTITIES array below.
+ *   2. That is the entire interface.
+ *
+ * schema.ts, sync.ts, and search.ts iterate this array.
+ * No other files need to change.
+ */
+
+import { log } from "../../singletons/logger.ts";
+import type { BindValue, CacheDatabase } from "./database.ts";
+
+// ============================================================
+// Types
+// ============================================================
+
+export type FTSConfig = {
+  /** SearchResult.type value (e.g. "task", "note") */
+  type: string;
+  /** Columns in the FTS virtual table; must match base table columns */
+  columns: string[];
+  /** Which column becomes SearchResult.title */
+  titleCol: string;
+  /** Which column is used for snippet() */
+  contentCol: string;
+};
+
+/**
+ * Sync function signature for v2. Each entity provides a function that
+ * reads from v2 services and populates the cache table. Returns row count.
+ * syncedAt: ISO timestamp stamped on each row for version-based cleanup.
+ */
+export type TableSyncer = (
+  db: CacheDatabase,
+  syncedAt: string,
+) => Promise<number>;
+
+export type EntityDef = {
+  table: string;
+  /** Full CREATE TABLE IF NOT EXISTS ... SQL */
+  schema: string;
+  /** Present = FTS enabled; absent = cached only */
+  fts?: FTSConfig;
+  sync: TableSyncer;
+  /** Called after a successful sync for this table — repos use this to clear their listDirty flag. */
+  onSyncComplete?: () => void;
+  /** SQL statements run after schema creation for idempotent column migrations. Errors are silently ignored (column may already exist). */
+  migrations?: string[];
+};
+
+// ============================================================
+// Helpers (exported so schema.ts / sync.ts can reuse them)
+// ============================================================
+
+export function val(v: unknown): BindValue {
+  if (v === undefined) return null;
+  if (v === null) return null;
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return v;
+  if (typeof v === "bigint") return v;
+  if (v instanceof Uint8Array) return v;
+  return String(v);
+}
+
+export function json(v: unknown): string {
+  return JSON.stringify(v ?? []);
+}
+
+/**
+ * Serialize a nullable array or object to JSON, returning null when absent.
+ * Use in cache INSERT functions for optional columns.
+ * `parseJson` treats both null and "[]" as undefined on read, so empty
+ * arrays stored as null vs "[]" are semantically equivalent.
+ */
+export function jsonVal(v: unknown): string | null {
+  if (v == null) return null;
+  return JSON.stringify(v);
+}
+
+/** Column fragment for the four standard audit fields. */
+export function auditCols(): string {
+  return "created_at, updated_at, created_by, updated_by";
+}
+
+/** Values for the four standard audit fields, matching auditCols() order. */
+export function auditVals(e: {
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+}): BindValue[] {
+  return [
+    val(e.createdAt),
+    val(e.updatedAt),
+    val(e.createdBy),
+    val(e.updatedBy),
+  ];
+}
+
+/**
+ * Column DDL fragment for the four standard audit columns plus `synced_at`.
+ * Inline into CREATE TABLE after `ARCHIVE_COLS_DDL`. Pairs on read with
+ * `archiveFieldsFromRow` + the audit fields, and on write with
+ * `auditCols()`/`auditVals()` (+ the trailing `synced_at` bind).
+ */
+export const AUDIT_COLS_DDL =
+  "created_at TEXT,\n  updated_at TEXT,\n  created_by TEXT,\n  updated_by TEXT,\n  synced_at TEXT";
+
+// ============================================================
+// Archive (soft-delete) helpers
+// ============================================================
+// Drop these into any domain's cache.ts to opt into the canonical
+// soft-delete pattern. See `[architecture] MD Planner — Soft-delete
+// (archive) pattern` and the `ArchiveFieldsSchema` Zod fragment.
+
+/** Column DDL fragment for the three archive fields. Inline into CREATE TABLE. */
+export const ARCHIVE_COLS_DDL =
+  "archived INTEGER DEFAULT 0,\n  archived_at TEXT,\n  archived_by TEXT";
+
+/** Column fragment for the three archive fields. Pairs with `archiveVals`. */
+export function archiveCols(): string {
+  return "archived, archived_at, archived_by";
+}
+
+/** Values for the three archive fields, matching archiveCols() order. */
+export function archiveVals(e: {
+  archived?: boolean | null;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
+}): BindValue[] {
+  return [
+    e.archived ? 1 : 0,
+    val(e.archivedAt),
+    val(e.archivedBy),
+  ];
+}
+
+/**
+ * Deserialize the three archive columns from a cache row. Spread into the
+ * object literal returned by a domain's `rowTo<X>` mapper.
+ */
+export function archiveFieldsFromRow(
+  row: Record<string, string | number | null>,
+): { archived?: boolean; archivedAt?: string; archivedBy?: string } {
+  return {
+    archived: row.archived === 1 || row.archived === "1" ? true : undefined,
+    archivedAt: row.archived_at as string | undefined,
+    archivedBy: row.archived_by as string | undefined,
+  };
+}
+
+/**
+ * Deserialize the four standard audit columns from a cache row. Spread into
+ * the object literal returned by a domain's `rowTo<X>` mapper, alongside
+ * `archiveFieldsFromRow`. Missing timestamps fall back to now; ids stay
+ * optional. The SQLite-row read-side sibling of `auditCols`/`auditVals`.
+ */
+export function auditFieldsFromRow(
+  row: Record<string, string | number | null>,
+): {
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
+} {
+  return {
+    createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+    createdBy: row.created_by as string | undefined,
+    updatedBy: row.updated_by as string | undefined,
+  };
+}
+
+/**
+ * Idempotent ALTER TABLE statements for the three archive columns. Append
+ * to a domain's `EntityDef.migrations` array — failures are swallowed so
+ * pre-existing columns are a no-op.
+ */
+export function archiveMigrations(table: string): string[] {
+  return [
+    `ALTER TABLE ${table} ADD COLUMN archived INTEGER DEFAULT 0`,
+    `ALTER TABLE ${table} ADD COLUMN archived_at TEXT`,
+    `ALTER TABLE ${table} ADD COLUMN archived_by TEXT`,
+  ];
+}
+
+/** Parse a JSON string from a cache column back to a typed value. */
+export function parseJson<T>(v: unknown): T | undefined {
+  if (v == null || v === "[]" || v === "null") return undefined;
+  try {
+    const parsed = JSON.parse(v as string);
+    return Array.isArray(parsed) && parsed.length === 0 ? undefined : parsed;
+  } catch (err) {
+    log.warn("[cache] JSON parse failed:", err);
+    return undefined;
+  }
+}
+
+// ============================================================
+// FTS SQL generators
+// ============================================================
+
+export function buildFtsSql(def: EntityDef): string {
+  const { table, fts } = def;
+  if (!fts) return "";
+  const colList = fts.columns.join(", ");
+  const newVals = fts.columns.map((c) => `new.${c}`).join(", ");
+  const oldVals = fts.columns.map((c) => `old.${c}`).join(", ");
+  return `
+CREATE VIRTUAL TABLE IF NOT EXISTS ${table}_fts USING fts5(
+  ${fts.columns.join(",\n  ")},
+  content='${table}',
+  content_rowid='rowid'
+);
+
+CREATE TRIGGER IF NOT EXISTS ${table}_ai AFTER INSERT ON ${table} BEGIN
+  INSERT INTO ${table}_fts(rowid, ${colList})
+  VALUES (new.rowid, ${newVals});
+END;
+
+CREATE TRIGGER IF NOT EXISTS ${table}_ad AFTER DELETE ON ${table} BEGIN
+  INSERT INTO ${table}_fts(${table}_fts, rowid, ${colList})
+  VALUES ('delete', old.rowid, ${oldVals});
+END;
+
+CREATE TRIGGER IF NOT EXISTS ${table}_au AFTER UPDATE ON ${table} BEGIN
+  INSERT INTO ${table}_fts(${table}_fts, rowid, ${colList})
+  VALUES ('delete', old.rowid, ${oldVals});
+  INSERT INTO ${table}_fts(rowid, ${colList})
+  VALUES (new.rowid, ${newVals});
+END;
+`.trim();
+}
+
+export function buildFtsDropSql(def: EntityDef): string {
+  const { table, fts } = def;
+  if (!fts) return "";
+  return `
+DROP TRIGGER IF EXISTS ${table}_ai;
+DROP TRIGGER IF EXISTS ${table}_ad;
+DROP TRIGGER IF EXISTS ${table}_au;
+DROP TABLE IF EXISTS ${table}_fts;
+`.trim();
+}
+
+// ============================================================
+// Files table — shared file-to-entity mapping
+// ============================================================
+
+/**
+ * Central mapping from (entity_type, entity_id) to filesystem location.
+ * Enables O(1) file lookup by ID, change detection via content_hash,
+ * and raw markdown access for MCP tools.
+ */
+/**
+ * Staleness rule: during fullSync, each entity syncer touches `last_synced_at`
+ * on every file row it processes. After sync completes, rows where
+ * `last_synced_at < sync_started_at` are stale (file deleted or renamed).
+ * Consumers query `stale = 1` to list orphans; a periodic sweep can purge them.
+ */
+export const FILES_SCHEMA = `CREATE TABLE IF NOT EXISTS files (
+  entity_type TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  raw_content TEXT NOT NULL,
+  content_hash TEXT NOT NULL,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  last_synced_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  stale INTEGER DEFAULT 0,
+  PRIMARY KEY (entity_type, entity_id)
+)`;
+
+export const FILES_INDEX = `CREATE INDEX IF NOT EXISTS idx_files_path
+  ON files(file_path);
+CREATE INDEX IF NOT EXISTS idx_files_stale
+  ON files(stale) WHERE stale = 1`;
+
+// ============================================================
+// Entity Registry
+// ============================================================
+
+export const ENTITIES: EntityDef[] = [
+  // Entities are registered by domain modules.
+  // Import and push into this array from domain-specific files,
+  // or add inline definitions below.
+];
+
+/**
+ * Register a domain cache entity from a spec, replacing the per-domain
+ * `register<X>Entity` boilerplate (EntityDef literal + identical sync closure
+ * + `ENTITIES.push`). `source` yields the entities to mirror to the cache and
+ * `insert` writes one row; the standard sync closure loops them and returns the
+ * row count. Pass `fts`/`migrations`/`onSyncComplete` only when the domain
+ * needs them. Domain-specific `rowTo<X>`, schema, and `insert` row logic stay
+ * in the domain module — this only owns the invariant registration shape.
+ */
+export function registerEntityCache<T>(spec: {
+  table: string;
+  schema: string;
+  fts?: FTSConfig;
+  migrations?: string[];
+  onSyncComplete?: () => void;
+  source: () => Promise<T[]>;
+  insert: (db: CacheDatabase, item: T, syncedAt: string) => void;
+}): void {
+  ENTITIES.push({
+    table: spec.table,
+    schema: spec.schema,
+    fts: spec.fts,
+    migrations: spec.migrations,
+    onSyncComplete: spec.onSyncComplete,
+    sync: async (db, syncedAt) => {
+      const items = await spec.source();
+      for (const item of items) spec.insert(db, item, syncedAt);
+      return items.length;
+    },
+  });
+}

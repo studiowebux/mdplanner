@@ -1,0 +1,160 @@
+/* Strategic Levels domain styles */
+
+/* -- Detail header -------------------------------------------------------- */
+
+.sl-detail__header {
+  gap: var(--space-sm);
+}
+
+.sl-detail__date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* -- Level groups --------------------------------------------------------- */
+
+.sl-detail__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sl-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0 var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  border-left: var(--sl-border-accent-w) solid var(--color-border-default);
+}
+
+.sl-group:last-child {
+  border-bottom: none;
+}
+
+.sl-group--editing {
+  align-items: flex-start;
+}
+
+.sl-group__heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  min-width: var(--sl-tier-label-w);
+  flex-shrink: 0;
+}
+
+.sl-group[data-level="vision"] {
+  border-left-color: var(--color-sl-vision);
+}
+.sl-group[data-level="mission"] {
+  border-left-color: var(--color-sl-mission);
+}
+.sl-group[data-level="goals"] {
+  border-left-color: var(--color-sl-goals);
+}
+.sl-group[data-level="objectives"] {
+  border-left-color: var(--color-sl-objectives);
+}
+.sl-group[data-level="strategies"] {
+  border-left-color: var(--color-sl-strategies);
+}
+.sl-group[data-level="tactics"] {
+  border-left-color: var(--color-sl-tactics);
+}
+
+.sl-group__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.sl-group__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* -- Level items ---------------------------------------------------------- */
+
+.sl-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.sl-item__title {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.sl-item__input {
+  flex: 1;
+  border: none;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  border-radius: 0;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  padding: var(--space-xxs) 0;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sl-item__input:focus {
+  border-bottom-color: var(--color-accent);
+}
+
+/* .sl-item__remove base + :hover shared with .quadrant-card__remove (components.css) */
+.sl-item:hover .sl-item__remove {
+  opacity: 1;
+}
+
+.sl-detail--editing .sl-item:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* -- Add row -------------------------------------------------------------- */
+
+.sl-group__add {
+  padding: var(--space-sm) 0;
+  border-top: var(--border-width) solid var(--color-border-default);
+}
+
+.sl-group__add-input {
+  width: 100%;
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sl-group__add-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.sl-group__add-input:focus {
+  border-color: var(--color-accent);
+}
+
+/* -- Card ----------------------------------------------------------------- */
+
+.strategic-levels-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}

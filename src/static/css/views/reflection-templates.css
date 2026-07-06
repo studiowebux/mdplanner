@@ -1,0 +1,49 @@
+/* Reflection Templates view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.rtemplate-detail__title-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.rtemplate-detail__meta-row {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+/* -- Prompts --------------------------------------------------------------- */
+
+.rtemplate-detail__prompt-list {
+  list-style: decimal;
+  padding-left: var(--space-lg);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.rtemplate-detail__prompt-item {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  padding: var(--space-xs) 0;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.rtemplate-detail__prompt-item:last-child {
+  border-bottom: none;
+}
+
+.rtemplate-detail__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}

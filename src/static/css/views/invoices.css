@@ -1,0 +1,347 @@
+/* Invoices view — domain-specific styles only.
+   Shared billing styles (line items, totals) in billing.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.invoice-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.invoice-detail__title-sep {
+  color: var(--color-text-muted);
+}
+
+.invoice-detail__actions-row {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Balance summary */
+.invoice-detail__balance {
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.invoice-detail__balance-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.invoice-detail__balance-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.invoice-detail__balance-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-detail__balance-value--paid {
+  color: var(--color-success);
+}
+
+.invoice-detail__balance-value--due {
+  color: var(--color-warning);
+}
+
+/* Issue-state notice — explains the quote->invoice snapshot model inline. */
+.invoice-detail__issue-notice {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: var(--border-width-thick) var(--border-style)
+    var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.invoice-detail__issue-notice--draft {
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+}
+
+.invoice-detail__issue-notice--frozen {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+}
+
+.invoice-detail__issue-notice--issued {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+}
+
+.invoice-detail__footer {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Preserve author line breaks in plain-text terms/footer. */
+.invoice-detail__footer p {
+  white-space: pre-line;
+}
+
+.invoice-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Print view — /invoices/:id/print IS the print page, no @media print needed
+--------------------------------------------------------------------------- */
+
+/* Letter page with modest margins so the export frames itself (literals — Safari
+   ignores var() inside @page). The page margin replaces the on-screen padding at
+   print time, so a typical invoice fits on a single page instead of spilling. */
+@page {
+  size: letter;
+  margin: 0.5in;
+}
+
+.invoice-print {
+  max-width: var(--invoice-print-max-w);
+  margin: 0 auto;
+  padding: var(--invoice-print-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--invoice-print-section-gap);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+/* At print time the @page margin provides the frame — drop the element padding
+   so it does not stack on top of the page margin (doubled whitespace was pushing
+   content onto a second page). */
+@media print {
+  .invoice-print {
+    padding: 0;
+    gap: var(--space-md);
+    max-width: none;
+  }
+
+  .invoice-print__header {
+    padding-bottom: var(--space-md);
+  }
+}
+
+/* 2-col header: sender info LEFT, invoice meta RIGHT */
+.invoice-print__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-xl);
+  padding-bottom: var(--invoice-print-section-gap);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.invoice-print__header-left {
+  flex: 1 1 auto;
+}
+
+/* BillingDocumentHeader draws its own border/margin for the detail page;
+   suppress both inside the print header which provides its own divider. */
+.invoice-print__header-left .billing-document-header {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.invoice-print__header-right {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.invoice-print__label {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.invoice-print__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+}
+
+.invoice-print__meta-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+}
+
+.invoice-print__meta-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.invoice-print__meta-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+}
+
+/* Bill-to block */
+.invoice-print__bill-to {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.invoice-print__bill-to-heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.invoice-print__bill-to-address {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-style: normal;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.invoice-print__bill-to-name {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Short description / summary above line items */
+.invoice-print__description {
+  margin: 0;
+}
+
+.invoice-print__description p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Line items section */
+.invoice-print__items {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Terms and Conditions */
+.invoice-print__terms-heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.invoice-print__terms p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  /* Preserve author line breaks in plain-text terms. */
+  white-space: pre-line;
+}
+
+/* Fine-print Terms body — intentionally small on the export. */
+.invoice-print__terms .invoice-print__terms-text {
+  font-size: 9px;
+  line-height: var(--line-height-normal);
+}
+
+/* Footer / terms — tight against the Terms block above it. */
+.invoice-print__footer {
+  border-top: var(--border-width) solid var(--color-border-default);
+  padding-top: var(--space-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.invoice-print__footer p {
+  margin: 0;
+  /* Preserve author line breaks in plain-text terms/footer. */
+  white-space: pre-line;
+}
+
+/* Export fingerprint line — generation date + content checksum.
+   Negative top margin pulls it tight under the footer (counteracts the
+   flex column gap between the two). */
+.invoice-print__checksum {
+  margin: calc(-1 * var(--space-sm)) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+/* Keep notes/markdown typography aligned with the compact print scale so the
+   exported PDF never shows oversized headings — markdown h1 otherwise falls
+   back to the browser default (~2em) and dwarfs the rest of the document. */
+/* The Notes block reuses the screen `.detail-section` card (background, border,
+   padding) — strip that chrome so it renders flat like the rest of the export
+   instead of a boxed, over-padded panel in the PDF. */
+.invoice-print .detail-section {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.invoice-print .section-heading {
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.invoice-print .markdown-body h1 {
+  font-size: var(--font-size-base);
+}
+
+.invoice-print .markdown-body h2 {
+  font-size: var(--font-size-sm);
+}
+
+.invoice-print .markdown-body h3,
+.invoice-print .markdown-body p,
+.invoice-print .markdown-body li {
+  font-size: var(--font-size-sm);
+}
+
+/* Compact the sender (business) block on the export — name slightly smaller,
+   address + tax/registration numbers as fine print. */
+.invoice-print .billing-document-header__company {
+  font-size: var(--font-size-sm);
+}
+
+.invoice-print .billing-document-header__address,
+.invoice-print .billing-document-header__numbers,
+.invoice-print .billing-document-header__number,
+.invoice-print .billing-document-header__contact,
+.invoice-print .billing-document-header__contact-item {
+  font-size: 10px;
+}
+
+/* Compact the totals (subtotal/tax/discount) — keep the Total row prominent. */
+.invoice-print .billing-totals__row {
+  font-size: 10px;
+}
+
+.invoice-print .billing-totals__row--total {
+  font-size: var(--font-size-sm);
+}

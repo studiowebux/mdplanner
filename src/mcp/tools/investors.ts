@@ -1,153 +1,59 @@
-/**
- * MCP tools for investor pipeline operations.
- * Tools: list_investors, get_investor, create_investor, update_investor, delete_investor
- */
+// MCP tools for investor operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getInvestorService } from "../../singletons/services.ts";
+import {
+  CreateInvestorSchema,
+  InvestorSchema,
+  ListInvestorOptionsSchema,
+  UpdateInvestorSchema,
+} from "../../types/investor.types.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
-const InvestorType = z.enum([
-  "vc",
-  "angel",
-  "family_office",
-  "corporate",
-  "accelerator",
-]);
-const InvestorStage = z.enum(["lead", "associate", "partner", "passed"]);
-const InvestorStatus = z.enum([
-  "not_started",
-  "in_progress",
-  "term_sheet",
-  "passed",
-  "invested",
-]);
-
-export function registerInvestorTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
-
-  server.registerTool(
-    "list_investors",
-    {
-      description: "List all investors in the pipeline.",
-      inputSchema: {
-        status: InvestorStatus.optional().describe("Filter by status"),
+export function registerInvestorTools(server: McpServer): void {
+  registerCrudTools(server, {
+    service: getInvestorService(),
+    notFoundLabel: "Investor",
+    idParam: InvestorSchema.shape.id.describe("Investor ID"),
+    nameParam: InvestorSchema.shape.name.describe("Investor name"),
+    listSchema: ListInvestorOptionsSchema,
+    createSchema: CreateInvestorSchema,
+    updateSchema: UpdateInvestorSchema,
+    mutationReturn: "id-success",
+    slimFields: ["name", "type", "stage", "status"],
+    tools: {
+      list: {
+        name: "list_investors",
+        description:
+          "List all investors. Optionally filter by type, stage, or status. Pass slim: true to browse with a compact projection.",
+      },
+      get: {
+        name: "get_investor",
+        description: "Get a single investor by its ID.",
+      },
+      getByName: {
+        name: "get_investor_by_name",
+        description:
+          "Get an investor by name (case-insensitive). Prefer this over list_investors when the name is known.",
+      },
+      create: {
+        name: "create_investor",
+        description: "Create a new investor record.",
+      },
+      update: {
+        name: "update_investor",
+        description: "Update an existing investor's fields.",
+      },
+      delete: {
+        name: "delete_investor",
+        description: "Delete an investor by its ID.",
       },
     },
-    async ({ status }) => {
-      const investors = await parser.readInvestors();
-      return ok(
-        status ? investors.filter((i) => i.status === status) : investors,
-      );
-    },
-  );
-
-  server.registerTool(
-    "get_investor",
-    {
-      description: "Get a single investor by its ID.",
-      inputSchema: { id: z.string().describe("Investor ID") },
-    },
-    async ({ id }) => {
-      const investors = await parser.readInvestors();
-      const investor = investors.find((i) => i.id === id);
-      if (!investor) return err(`Investor '${id}' not found`);
-      return ok(investor);
-    },
-  );
-
-  server.registerTool(
-    "create_investor",
-    {
-      description: "Add an investor to the pipeline.",
-      inputSchema: {
-        name: z.string().describe("Investor or firm name"),
-        type: InvestorType.optional().describe(
-          "Investor type (default: vc)",
-        ),
-        stage: InvestorStage.optional().describe(
-          "Contact stage (default: lead)",
-        ),
-        status: InvestorStatus.optional().describe(
-          "Pipeline status (default: not_started)",
-        ),
-        amount_target: z.number().optional().describe(
-          "Target investment amount (USD)",
-        ),
-        contact: z.string().optional().describe("Contact person name or email"),
-        intro_date: z.string().optional().describe(
-          "Date of first introduction (YYYY-MM-DD)",
-        ),
-        last_contact: z.string().optional().describe(
-          "Date of last contact (YYYY-MM-DD)",
-        ),
-        notes: z.string().optional(),
-      },
-    },
-    async ({
-      name,
-      type = "vc",
-      stage = "lead",
-      status = "not_started",
-      amount_target = 0,
-      contact = "",
-      intro_date = "",
-      last_contact = "",
-      notes = "",
-    }) => {
-      const investor = await parser.addInvestor({
-        name,
-        type,
-        stage,
-        status,
-        amount_target,
-        contact,
-        intro_date,
-        last_contact,
-        notes,
-      });
-      return ok({ id: investor.id });
-    },
-  );
-
-  server.registerTool(
-    "update_investor",
-    {
-      description: "Update an existing investor record.",
-      inputSchema: {
-        id: z.string().describe("Investor ID"),
-        name: z.string().optional(),
-        type: InvestorType.optional(),
-        stage: InvestorStage.optional(),
-        status: InvestorStatus.optional(),
-        amount_target: z.number().optional(),
-        contact: z.string().optional(),
-        intro_date: z.string().optional(),
-        last_contact: z.string().optional(),
-        notes: z.string().optional(),
-      },
-    },
-    async ({ id, ...updates }) => {
-      const updated = await parser.updateInvestor(id, updates);
-      if (!updated) return err(`Investor '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_investor",
-    {
-      description: "Delete an investor record by its ID.",
-      inputSchema: { id: z.string().describe("Investor ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteInvestor(id);
-      if (!success) return err(`Investor '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
+
+export const investorModule = defineMcpModule({
+  feature: "investor",
+  register: registerInvestorTools,
+});

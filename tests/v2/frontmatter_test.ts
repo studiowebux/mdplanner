@@ -1,0 +1,200 @@
+/**
+ * Unit tests for v2/utils/frontmatter.ts — parseFrontmatter/serializeFrontmatter
+ * round-trip coverage. Originally added with the recursive-nesting fix for
+ * `serializeFrontmatter` (depth-2+ objects previously serialized as the
+ * literal `[object Object]`).
+ */
+
+import { assertEquals } from "@std/assert";
+import {
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "../../src/utils/frontmatter.ts";
+
+function roundTrip(
+  fm: Record<string, unknown>,
+  body = "",
+): Record<string, unknown> {
+  const serialized = serializeFrontmatter(fm, body);
+  const parsed = parseFrontmatter(serialized);
+  assertEquals(parsed.body, body);
+  return parsed.frontmatter;
+}
+
+Deno.test("frontmatter - round-trips flat scalars", () => {
+  const fm = {
+    title: "Hello",
+    count: 42,
+    enabled: true,
+    disabled: false,
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips arrays of scalars", () => {
+  const fm = {
+    tags: ["a", "b", "c"],
+    ids: [1, 2, 3],
+    empty: [] as string[],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips arrays of objects", () => {
+  const fm = {
+    models: [
+      { name: "claude-sonnet-4-5", provider: "anthropic" },
+      { name: "gpt-4", provider: "openai" },
+    ],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips array of objects with nested object/array fields", () => {
+  // Regression (dba34i): nested object/array values inside an array-of-objects
+  // item serialized to the literal "[object Object]" — a task comment's
+  // `metadata.files_changed` was silently dropped on the disk round-trip.
+  const fm = {
+    comments: [
+      {
+        id: "c1",
+        body: "did work",
+        author: "Claude",
+        metadata: { files_changed: ["src/a.ts", "src/b.ts"] },
+      },
+      {
+        id: "c2",
+        body: "more work",
+        author: "Tommy",
+        metadata: { files_changed: ["src/c.ts"], tags: ["wip"] },
+      },
+    ],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips array item whose first field is complex", () => {
+  // Exercises the YAML block-sequence dash splice + the symmetric first-key
+  // parse path when the leading field is itself an object / inline array.
+  const fm = {
+    items: [
+      { meta: { k: "v", nums: [1, 2] }, id: "x1" },
+      { tags: ["a", "b"], id: "x2" },
+    ],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips depth-1 object (flat Record)", () => {
+  const fm = {
+    accounts: { github: "octocat", asana: "rt" },
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips depth-2 nested object", () => {
+  // Regression: previously serialized as `[object Object]` and dropped on parse.
+  const fm = {
+    preferences: {
+      viewPrefs: { tasks: "board", goals: "grid" },
+      pinnedNav: ["/tasks", "/goals"],
+    },
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips depth-3 nested object", () => {
+  const fm = {
+    preferences: {
+      filterDefaults: {
+        tasks: { section: "In Progress", priority: "high" },
+        goals: { status: "active" },
+      },
+    },
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips mixed depth-1 and depth-2 siblings", () => {
+  const fm = {
+    name: "Mixed",
+    accounts: { github: "octocat" },
+    preferences: {
+      viewPrefs: { tasks: "board" },
+    },
+    skills: ["typescript", "go"],
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips empty nested object", () => {
+  const fm = {
+    preferences: {},
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - drops undefined and null at top level", () => {
+  const fm = {
+    title: "Kept",
+    skipped: undefined,
+    nulled: null,
+  };
+  const result = roundTrip(fm);
+  assertEquals(result, { title: "Kept" });
+});
+
+Deno.test("frontmatter - quotes strings containing colon/hash/quote", () => {
+  const fm = {
+    note: "Contains: a colon",
+    tag: "with#hash",
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips multi-line strings (newlines preserved)", () => {
+  // Regression: a bare multi-line scalar spilled past the key and was
+  // truncated to the first line on re-parse (meeting agenda/notes data loss).
+  const fm = {
+    agenda: "Line one\nLine two\nLine three",
+    notes: "Single line",
+    crlf: "win\r\nendings",
+    tabbed: "col1\tcol2",
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips embedded quotes and backslashes", () => {
+  const fm = {
+    quoted: 'she said "hi"',
+    backslash: "a\\b",
+    escapeLiteral: "not a real \\newline", // backslash + n, must stay literal
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - round-trips multi-line value with embedded quotes", () => {
+  const fm = {
+    agenda: 'Topic: "Q3 review"\n- item one\n- item two',
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - preserves array inside nested object", () => {
+  const fm = {
+    config: {
+      hosts: ["a", "b"],
+      env: { NODE_ENV: "production" },
+    },
+  };
+  assertEquals(roundTrip(fm), fm);
+});
+
+Deno.test("frontmatter - parses body after frontmatter", () => {
+  const fm = { title: "Doc" };
+  const body = "# Heading\n\nParagraph here.";
+  const serialized = serializeFrontmatter(fm, body);
+  const parsed = parseFrontmatter(serialized);
+  assertEquals(parsed.frontmatter, fm);
+  assertEquals(parsed.body, body);
+});

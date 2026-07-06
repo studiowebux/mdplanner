@@ -8,20 +8,21 @@ Run MD Planner as a background service on Linux.
 
 ## Installation
 
-Using the Makefile:
+v2 runs with Deno — no compiled binary required.
 
 ```bash
-make -f deploy/Makefile install
-```
+# Install Deno
+curl -fsSL https://deno.land/install.sh | sh
 
-Or manually:
+# Clone the repository
+git clone https://github.com/studiowebux/mdplanner.git /opt/mdplanner
 
-```bash
-sudo cp dist/mdplanner-linux /usr/local/bin/mdplanner
-sudo chmod +x /usr/local/bin/mdplanner
+# Create a system user and data directory
 sudo useradd --system --create-home --home-dir /var/lib/mdplanner mdplanner
 sudo mkdir -p /var/lib/mdplanner/project
 sudo chown -R mdplanner:mdplanner /var/lib/mdplanner
+
+# Install the service file
 sudo cp deploy/mdplanner.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable mdplanner
@@ -30,31 +31,54 @@ sudo systemctl start mdplanner
 
 ## Configuration
 
-Edit the service file to change runtime options:
-
-| Option       | Default                      | Description                     |
-| ------------ | ---------------------------- | ------------------------------- |
-| `--port`     | 8003                         | HTTP server port                |
-| `--cache`    | disabled                     | Add flag to enable SQLite cache |
-| Project path | `/var/lib/mdplanner/project` | Last argument to ExecStart      |
-
-To enable SQLite cache, modify ExecStart:
+All runtime options are set via environment variables in the `[Service]` block.
+Edit `/etc/systemd/system/mdplanner.service`:
 
 ```ini
-ExecStart=/usr/local/bin/mdplanner --cache --port 8003 /var/lib/mdplanner/project
-```
+[Unit]
+Description=MD Planner
+After=network.target
 
-To add authentication:
-
-```ini
-ExecStart=/usr/local/bin/mdplanner --api-token mysecret --mcp-token mcptoken --cache /var/lib/mdplanner/project
-```
-
-For integration secret encryption:
-
-```ini
 [Service]
-Environment=MDPLANNER_SECRET_KEY=<your-64-char-hex-key>
+Type=simple
+User=mdplanner
+Group=mdplanner
+WorkingDirectory=/opt/mdplanner
+ExecStart=/home/<your-user>/.deno/bin/deno run \
+  --allow-net --allow-read --allow-write --allow-env \
+  src/bin.ts
+Environment=PROJECT_DIR=/var/lib/mdplanner/project
+Environment=PORT=8003
+Environment=CACHE=true
+Environment=MCP_TOKEN=
+Environment=MDPLANNER_SECRET_KEY=
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mdplanner
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/mdplanner /opt/mdplanner
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+| Variable               | Default | Description                                                      |
+| ---------------------- | ------- | ---------------------------------------------------------------- |
+| `PROJECT_DIR`          | —       | Absolute path to the project data directory.                     |
+| `PORT`                 | `8003`  | HTTP port.                                                       |
+| `CACHE`                | `true`  | Set to `false` to disable the SQLite FTS cache.                  |
+| `MCP_TOKEN`            | —       | Bearer token for `/mcp` endpoint. Leave empty to disable auth.   |
+| `MDPLANNER_SECRET_KEY` | —       | AES-256-GCM key for encrypting integration secrets.              |
+
+Generate a secret key:
+
+```bash
+openssl rand -hex 32
 ```
 
 Apply changes:

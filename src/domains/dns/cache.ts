@@ -1,0 +1,115 @@
+// DNS entity registration for SQLite cache.
+// Called by initServices() after repos are created.
+
+import {
+  ARCHIVE_COLS_DDL,
+  archiveCols,
+  archiveFieldsFromRow,
+  archiveMigrations,
+  archiveVals,
+  AUDIT_COLS_DDL,
+  auditCols,
+  auditFieldsFromRow,
+  auditVals,
+  json,
+  parseJson,
+  registerEntityCache,
+  val,
+} from "../../database/sqlite/mod.ts";
+import type { CacheDatabase } from "../../database/sqlite/mod.ts";
+import type { DnsRepository } from "../../repositories/dns.repository.ts";
+import type { DnsDomain } from "../../types/dns.types.ts";
+
+export const DNS_TABLE = "dns_domains";
+
+/** Deserialize a SQLite row to a DnsDomain. */
+export function rowToDnsDomain(
+  row: Record<string, string | number | null>,
+): DnsDomain {
+  return {
+    id: row.id as string,
+    domain: (row.domain as string) ?? "",
+    provider: row.provider as string | undefined,
+    status: (row.status as DnsDomain["status"]) ?? "active",
+    expiryDate: row.expiry_date as string | undefined,
+    autoRenew: row.auto_renew != null ? Boolean(row.auto_renew) : undefined,
+    renewalCostUsd: row.renewal_cost_usd != null
+      ? Number(row.renewal_cost_usd)
+      : undefined,
+    nameservers: parseJson<string[]>(row.nameservers),
+    dnsRecords: parseJson(row.dns_records),
+    notes: row.notes as string | undefined,
+    lastFetchedAt: row.last_fetched_at as string | undefined,
+    project: row.project as string | undefined,
+    ...archiveFieldsFromRow(row),
+    ...auditFieldsFromRow(row),
+  };
+}
+
+const DNS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DNS_TABLE} (
+  id TEXT PRIMARY KEY,
+  domain TEXT NOT NULL,
+  provider TEXT,
+  status TEXT,
+  expiry_date TEXT,
+  auto_renew INTEGER,
+  renewal_cost_usd REAL,
+  nameservers TEXT,
+  dns_records TEXT,
+  notes TEXT,
+  last_fetched_at TEXT,
+  project TEXT,
+  ${ARCHIVE_COLS_DDL},
+  ${AUDIT_COLS_DDL}
+)`;
+
+function insertDnsRow(
+  db: CacheDatabase,
+  d: DnsDomain,
+  syncedAt?: string,
+): void {
+  db.execute(
+    `INSERT OR REPLACE INTO ${DNS_TABLE} (id, domain, provider, status,
+       expiry_date, auto_renew, renewal_cost_usd, nameservers, dns_records,
+       notes, last_fetched_at, project,
+       ${archiveCols()},
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      val(d.id),
+      val(d.domain),
+      val(d.provider),
+      val(d.status),
+      val(d.expiryDate),
+      d.autoRenew != null ? (d.autoRenew ? 1 : 0) : null,
+      d.renewalCostUsd ?? null,
+      json(d.nameservers),
+      json(d.dnsRecords),
+      val(d.notes),
+      val(d.lastFetchedAt),
+      val(d.project),
+      ...archiveVals(d),
+      ...auditVals(d),
+      syncedAt ?? new Date().toISOString(),
+    ],
+  );
+}
+
+/** Register the DNS cache entity. Call from initServices(). */
+export function registerDnsEntity(repo: DnsRepository): void {
+  registerEntityCache({
+    table: DNS_TABLE,
+    schema: DNS_SCHEMA,
+    migrations: [
+      ...archiveMigrations(DNS_TABLE),
+    ],
+    fts: {
+      type: "dns_domain",
+      columns: ["id", "domain", "notes"],
+      titleCol: "domain",
+      contentCol: "notes",
+    },
+    source: () => repo.findAllFromDisk(),
+    insert: insertDnsRow,
+  });
+}

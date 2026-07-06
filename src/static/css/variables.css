@@ -8,10 +8,8 @@
    4. Add theme class to <html> element
 
    Available themes:
-   - theme-light (default)
-   - theme-dark
-   - theme-yellow
-   - theme-minimal
+   - light (default)
+   - dark (toggle via .dark class)
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -19,25 +17,45 @@
    -------------------------------------------------------------------------- */
 
 :root {
+  /* Breakpoints — CSS vars can't be used in @media queries (spec limitation),
+     so 768px is hardcoded in @media rules. This var exists so JS can read
+     it via getComputedStyle instead of duplicating the magic number. */
+  --breakpoint-mobile: 768px;
+
   /* Typography - shared across all themes */
   --font-sans: "Roboto", system-ui, sans-serif;
-  --font-mono: "Roboto Mono", monospace;
+  --font-mono: "JetBrains Mono", monospace;
 
   /* Font size scale */
-  --font-size-xs: 0.75rem;       /* 12px — minimum floor: badges, micro labels */
-  --font-size-sm: 0.875rem;      /* 14px — captions, secondary info */
-  --font-size-base: 1rem;        /* 16px — body text, interactive elements */
-  --font-size-lg: 1.125rem;      /* 18px — subheadings, section titles */
-  --font-size-lg-plus: 1.25rem;  /* 20px — section headers, sidenav titles */
-  --font-size-xl: 1.5rem;        /* 24px — headings */
-  --font-size-xxl: 2rem;         /* 32px — display numbers, hero values */
+  --font-size-xs: 0.75rem; /* 12px — minimum floor: badges, micro labels */
+  --font-size-sm: 0.875rem; /* 14px — captions, secondary info */
+  --font-size-base: 1rem; /* 16px — body text, interactive elements */
+  --font-size-md: 1rem; /* alias for base — backwards compat */
+  --font-size-lg: 1.125rem; /* 18px — subheadings, section titles */
+  --font-size-lg-plus: 1.25rem; /* 20px — section headers, sidenav titles */
+  --font-size-xl: 1.5rem; /* 24px — headings */
+  --font-size-xxl: 2rem; /* 32px — display numbers, hero values */
+  --font-size-2xl: 1.75rem; /* 28px — between xl and xxl */
+  --font-size-3xl: 3rem; /* 48px — error pages, hero display */
 
   /* Spacing scale */
+  --space-1: 0.25rem; /* alias for xs — numeric spacing scale */
+  --space-2xs: 0.125rem;
+  --space-xxs: 0.125rem; /* alias for 2xs — backwards compat */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
+  --space-smd: 0.75rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
+  --space-xxl: 3rem;
+  /* canonical gap between detail-page sections */
+  --section-gap: var(--space-md);
+
+  /* Letter spacing */
+  --letter-spacing-tight: 0.01em;
+  --letter-spacing-wide: 0.03em;
+  --letter-spacing-task-badge: 0.04em;
 
   /* Border radius */
   --radius-sm: 0.25rem;
@@ -49,6 +67,15 @@
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;
   --transition-slow: 0.3s ease;
+  /* Defer the #global-loading bar's fade-in: sub-150ms swaps drop .htmx-request
+     before this elapses, so fast filter/search/sort requests never paint it. */
+  --loading-bar-delay: 150ms;
+
+  /* Opacity */
+  --opacity-hidden: 0;
+  --opacity-visible: 1;
+  --opacity-muted: 0.6;
+  --opacity-disabled: 0.4;
 
   /* Shadows - light theme defaults */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -66,322 +93,767 @@
   --color-level-key-result: #eab308;
   --color-level-initiative: #f97316;
   --color-level-project: #ef4444;
+  /* Strategic Levels builder hierarchy colors */
+  --color-sl-vision: #8b5cf6;
+  --color-sl-mission: #3b82f6;
+  --color-sl-goals: #22c55e;
+  --color-sl-objectives: #eab308;
+  --color-sl-strategies: #f97316;
+  --color-sl-tactics: #ef4444;
+  /* Strategic Levels layout tokens */
+  --sl-tier-label-w: 7rem;
+  --sl-border-accent-w: 3px;
+  --sl-pyramid-max-w: 56rem;
+
+  /* Org chart tokens */
+  --orgchart-canvas-height: 70vh;
+  --orgchart-min-height: 25rem;
+  --orgchart-node-min-w: 11.25rem;
+  --orgchart-node-max-w: 15rem;
+  --orgchart-node-min-w-mobile: 9.375rem;
+  --orgchart-node-max-w-mobile: 11.25rem;
+  --orgchart-connector-width: 1px;
+  --orgchart-connector-color: var(--color-text-secondary);
+  --orgchart-dept-border-width: 4px;
+  --orgchart-drag-opacity: 0.4;
+  --orgchart-drag-scale-down: 0.98;
+  --orgchart-drop-scale-up: 1.02;
+  --orgchart-drop-ring-size: 4px;
+  --orgchart-unlink-scale: 1.05;
+  --orgchart-handle-opacity: 0.6;
+  --orgchart-handle-spacing: -0.1em;
+  --orgchart-dept-spacing: 0.05em;
+  --orgchart-z-unlink: 100;
+
+  --orgchart-controls-slider-w: 8rem;
+  --orgchart-controls-label-min-w: 3rem;
+
+  /* ── Sticky note canvas ─────────────────────────────────────────────── */
+  --sticky-note-z-drag: 50;
+  --sticky-note-drag-scale: 1.02;
+  --sticky-note-drag-rotate: 1deg;
+  --sticky-note-enter-scale: 0.85;
+  --sticky-note-remove-scale: 0.90;
+  --sticky-note-dot-hover-scale: 1.2;
+  --sticky-note-dot-active-scale: 1.15;
+  --sticky-note-resize-opacity: 0.2;
+  --sticky-note-resize-opacity-hover: 0.45;
+  --sticky-note-toolbar-opacity-off: 0.25;
+  --sticky-note-zoom-display-w: 3rem;
+  --sticky-note-handle-h: 0.375rem;
+  --sticky-note-delete-hover-bg: var(--color-bg-tertiary);
+  --sticky-note-delete-line-height: 1;
+  --sticky-canvas-height: 600px; /* fallback; overridden by JS on init */
+
+  /* ── C4 Architecture canvas ─────────────────────────────────────────── */
+  --c4-canvas-height: 600px; /* fallback; overridden by JS on init */
+
+  /* ── Mindmap detail ─────────────────────────────────────────────────── */
+  --mindmap-canvas-height: 75vh;
+  --mindmap-min-height: 25rem;
+  --mindmap-fullscreen-offset: 12rem;
+  --mindmap-edit-textarea-min-height: 30rem;
+  /* Font sizes mirror ROOT_FONT/BRANCH_FONT/CHILD_FONT in mindmap.js */
+  --mm-font-root: 20px;
+  --mm-font-branch: 14px;
+  --mm-font-leaf: 13px;
+  --mm-badge-font: 11px;
+  --mm-halo-width: 6px;
+  --mm-line-root-width: 2px;
+  --mm-line-child-width: 1.5px;
+  --mm-badge-disc-opacity: 0.15;
+  --c4-box-w: 14rem; /* 224px — must match BOX_W constant in c4-canvas.tsx */
+  --c4-box-h: 8rem; /* 128px — must match BOX_H constant in c4-canvas.tsx */
+  --c4-box-gap: 3rem;
+  --c4-box-radius: var(--radius-md);
+  --c4-port-size: 0.625rem;
+  --c4-port-offset: -0.3125rem;
+  --c4-arrow-stroke-w: 1.5px;
+  --c4-minimap-w: 11rem;
+  --c4-minimap-h: 7rem;
+  --c4-minimap-opacity: 0.85;
+  --c4-toolbar-gap: var(--space-sm);
+  --c4-diagram-input-w: 12rem;
+  --c4-breadcrumb-gap: var(--space-xs);
+  --c4-z-box: 10;
+  --c4-z-connections: 1;
+  --c4-z-toolbar: var(--z-toolbar);
+  --c4-z-minimap: 20;
+  --c4-box-desc-clamp: 3;
+
+  /* C4 level badge colours */
+  --c4-level-context-bg: var(--color-cat-blue-light);
+  --c4-level-context-text: #fff;
+  --c4-level-container-bg: var(--color-cat-green);
+  --c4-level-container-text: #fff;
+  --c4-level-component-bg: var(--color-cat-orange);
+  --c4-level-component-text: #fff;
+  --c4-level-code-bg: var(--color-cat-purple);
+  --c4-level-code-text: #fff;
+
+  /* C4 box colours per level */
+  --c4-box-context-bg: #e3f2fd;
+  --c4-box-context-border: var(--color-cat-blue-light);
+  --c4-box-context-text: #0a1929;
+  --c4-box-container-bg: #e8f5e9;
+  --c4-box-container-border: var(--color-cat-green);
+  --c4-box-container-text: #1a2e1a;
+  --c4-box-component-bg: #fff3e0;
+  --c4-box-component-border: var(--color-cat-orange);
+  --c4-box-component-text: #33190a;
+  --c4-box-code-bg: #f3e5f5;
+  --c4-box-code-border: var(--color-cat-purple);
+  --c4-box-code-text: #2d0038;
+
+  /* ── Category color palette ─────────────────────────────────────────
+     Reusable across domains: org chart departments, tags, status badges.
+     Each category has light/base/dark variants. */
+
+  /* Orange */
+  --color-cat-orange-light: #ed8b00;
+  --color-cat-orange: #e57200;
+  --color-cat-orange-dark: #dc4405;
+
+  /* Yellow */
+  --color-cat-yellow-light: #fedb00;
+  --color-cat-yellow: #ffc600;
+  --color-cat-yellow-dark: #f2a900;
+
+  /* Green */
+  --color-cat-green-light: #78be20;
+  --color-cat-green: #4c8c2b;
+  --color-cat-green-dark: #44693d;
+
+  /* Blue */
+  --color-cat-blue-light: #00a3e0;
+  --color-cat-blue: #0085ad;
+  --color-cat-blue-dark: #005670;
+
+  /* Dark Blue */
+  --color-cat-navy-light: #006298;
+  --color-cat-navy: #003865;
+  --color-cat-navy-dark: #041e42;
+
+  /* Purple */
+  --color-cat-purple-light: #93328e;
+  --color-cat-purple: #642f6c;
+  --color-cat-purple-dark: #3c1053;
+
+  /* Pink */
+  --color-cat-pink-light: #ce0f69;
+  --color-cat-pink: #ac145a;
+  --color-cat-pink-dark: #6c1d45;
+
+  /* Org chart department palette — references category base colors */
+  --orgchart-dept-color-0: var(--color-cat-orange);
+  --orgchart-dept-color-1: var(--color-cat-green);
+  --orgchart-dept-color-2: var(--color-cat-blue);
+  --orgchart-dept-color-3: var(--color-cat-navy);
+  --orgchart-dept-color-4: var(--color-cat-purple);
+  --orgchart-dept-color-5: var(--color-cat-pink);
+  --orgchart-dept-color-6: var(--color-cat-yellow-dark);
+  --orgchart-dept-color-7: var(--color-cat-green-dark);
+
+  /* Mindmap branch palette — mirrors orgchart pattern */
+  --mm-branch-0: var(--color-cat-orange);
+  --mm-branch-1: var(--color-cat-green);
+  --mm-branch-2: var(--color-cat-blue);
+  --mm-branch-3: var(--color-cat-navy);
+  --mm-branch-4: var(--color-cat-purple);
+  --mm-branch-5: var(--color-cat-pink);
+  --mm-branch-6: var(--color-cat-yellow-dark);
+  --mm-branch-7: var(--color-cat-green-dark);
+
+  /* ── Component tokens ────────────────────────────────────────────────── */
+
+  /* Typography weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --body-line-height: 1.6;
+  --line-height-tight: 1;
+  --line-height-relaxed: 1.625;
+
+  /* Card */
+  --card-bg: var(--color-bg-primary);
+  --card-border: 1px solid var(--color-border-default);
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--space-lg);
+  --card-gap: var(--space-md);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-opacity-muted: 0.5;
+  --card-opacity-completed: 0.55;
+  --card-description-max-height: 16rem;
+  --card-min-width: 10rem;
+  --card-description-fade: 2rem;
+  /* mask-image opaque endpoint for card-description fade — only alpha matters, color is structural/theme-independent */
+  --card-description-fade-color: #000;
+  --finance-summary-tile-min-w: 8rem;
+  --finance-chart-section-gap: var(--space-lg);
+  --finance-chart-axis-font-size: var(--font-size-xs);
+  --finance-chart-legend-swatch-size: 0.75rem;
+  --finance-chart-svg-max-h: 22rem;
+
+  /* Avatar */
+  --avatar-size: var(--space-xl);
+  --avatar-size-sm: var(--space-lg);
+  --avatar-font-size: var(--font-size-sm);
+
+  /* Form controls */
+  --input-height: 2.25rem;
+  --input-height-sm: 1.75rem;
+
+  /* Badge */
+  --badge-padding: var(--space-xs) var(--space-sm);
+  --badge-font-weight: 500;
+  --filter-badge-size: 1.25rem;
+  --external-badge-height: 1.25rem;
+
+  /* Progress bar */
+  --progress-bar-height: 6px;
+
+  /* Grid */
+  --grid-col-min: 320px;
+  --grid-gap: var(--space-lg);
+
+  /* Page */
+  --page-padding: var(--space-lg);
+  --page-max-width: 100%;
+  --error-page-min-height: 60vh;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-width-thick: 3px;
+  --border-style: solid;
+
+  /* Nav / Shell */
+  --nav-height: 3rem;
+  --sidebar-width: 15rem;
+  --sidebar-w-min: 10rem;
+  --sidebar-w-max: 25rem;
+  --save-bar-h: 3.5rem;
+  --topbar-search-max-width: 28rem;
+  --topbar-person-name-max-w: 10rem;
+  --topbar-person-list-min-w: 12rem;
+  --topbar-person-list-max-h: 16rem;
+  --topbar-search-min-width: 8rem;
+  --topbar-pomodoro-min-width: 6.5rem;
+  --pomo-popover-min-w: 15rem;
+  --pomo-popover-input-w: 3.5rem;
+  --sidebar-active-border-width: 2px;
+
+  /* Z-index scale — single source of truth, ascending order */
+  --z-table-head: 2;
+  --z-table-sticky: 3;
+  --z-toolbar: 10;
+  --z-sticky: 20;
+  /* Topbar strip owns a stacking context above every content sticky header
+     (max --z-sticky) so its dropdowns clear all table/list headers on every
+     page, but stays below the mobile menu overlay/sidebar so the slide-in menu
+     still covers it. */
+  --z-topbar: 100;
+  --z-overlay: 199;
+  --z-sidebar: 200;
+  --z-dropdown: 320;
+  --z-sidenav: 400;
+  --z-toast: 500;
+  /* Global htmx loading bar — a 3px edge strip that must stay visible above
+     every overlay, including toasts. */
+  --z-loading: 550;
+  --z-resize-handle: 5;
+  --resize-handle-w: 6px;
+  --resize-handle-opacity: 0.4;
+
+  /* Mention autocomplete — set dynamically by mention-autocomplete.js */
+  --mention-top: 0px;
+  --mention-left: 0px;
+  --mention-width: 20rem;
+  --mention-dropdown-max-height: 12rem;
+
+  /* Overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+
+  /* Sidenav */
+  --sidenav-width: 24rem;
+  --sidenav-resize-width: 4px;
+
+  /* Dialog */
+  --dialog-max-width: 28rem;
+
+  /* Search dialog */
+  --search-dialog-max-width: 40rem;
+  --search-dialog-max-height: 28rem;
+  --search-badge-min-width: 5rem;
+
+  /* Shortcuts dialog */
+  --shortcuts-dialog-max-width: 28rem;
+
+  /* Spinner */
+  --spinner-size: 1.5rem;
+  --spinner-border-width: 2px;
+
+  /* Autocomplete */
+  --autocomplete-max-height: 12rem;
+
+  /* Table */
+  --progress-col-min-width: 6rem;
+  --progress-bar-inline-width: 5rem;
+  --table-compact-cell-max-width: 16rem;
+  --table-min-width: 36rem;
+  --table-row-stripe: var(--color-bg-secondary);
+  --table-row-hover: var(--color-bg-active);
+
+  /* Toolbar */
+  --toolbar-search-min-width: 12rem;
+  --toolbar-search-max-width: 20rem;
+
+  /* Bulk bar */
+  --bulk-tag-input-width: 7rem;
+  --bulk-field-label-w: 5.5rem;
+
+  /* Cerveau viewer */
+  --cerveau-sidebar-w: 16rem;
+
+  /* Pomodoro */
+  --pomodoro-paused-opacity: 0.6;
+
+  /* Column toggle */
+  --column-toggle-min-width: 10rem;
+
+  /* Swap animation */
+  --swap-transition-duration: 0.05s;
+
+  /* Habit views */
+  --habit-cell-size: 1.5rem;
+  --habit-heatmap-label-w: 10rem;
+  --habit-cell-gap: var(--space-2xs);
+  --habit-cell-outline-offset: var(--space-2xs);
+  --habit-done-opacity: var(--opacity-visible);
+
+  /* Task views */
+  --task-board-col-min-w: 22rem;
+  --task-board-col-max-w: none;
+  --task-board-card-min-h: 8rem;
+  --task-timeline-label-w: 20rem;
+  --task-timeline-label-w-mobile: 12rem;
+  --task-dep-stroke-w: 1.5;
+  --task-dep-stroke-w-active: 2.5;
+  --task-dep-dash: 4 3;
+  --task-dep-arrow-size: 5;
+  --task-meta-assignee-w: 8rem;
+  --task-meta-milestone-w: 10rem;
+  --task-meta-project-w: 9rem;
+  --task-meta-due-w: 6rem;
+  --task-meta-effort-w: 3rem;
+  --task-actions-w: 18rem;
+  --task-select-w: 1.1rem;
+  --task-detail-input-w: 14rem;
+
+  /* Note views */
+  --note-timeline-dot-size: 0.75rem;
+  --note-split-col-min-w: 15rem;
+
+  /* Settings */
+  --settings-input-narrow-max: var(--toolbar-search-min-width);
+  --settings-textarea-min-height: var(--autocomplete-max-height);
+  --settings-tab-indicator: var(--sidebar-active-border-width);
+  --settings-data-section-gap: var(--section-gap);
+  --settings-data-title-gap: var(--space-xs);
+  --settings-data-desc-gap: var(--space-md);
+  --settings-data-form-gap: var(--space-sm);
+  --settings-data-result-gap: var(--space-md);
+  --settings-data-desc-max-width: 52ch;
+  --settings-grid-col-min: 16rem;
+  --settings-toggle-w: 2.5rem;
+
+  /* Layout */
+  --prose-width: 52ch;
+
+  /* Analytics view — theme-independent layout dimensions (used in both light/dark) */
+  --analytics-progress-scroll-max-h: 18rem;
+  --analytics-stat-card-min-w: var(--card-min-width);
+  --analytics-stat-value-size: var(--font-size-xl);
+  --analytics-kpi-card-min-w: 11rem;
+  --analytics-kpi-value-size: var(--font-size-2xl);
+  --analytics-chart-max-h: 12rem;
+  --analytics-chart-label-size: 11px;
+  --analytics-stat-value-line-height: var(--line-height-tight);
+  --analytics-col-min-w: 14rem;
+  --analytics-filter-min-w: 10rem;
+  --analytics-util-bar-h: var(--progress-bar-height);
+  --analytics-by-value-min-w: 8rem;
+  --analytics-customize-panel-min-w: var(--analytics-col-min-w);
+  --analytics-details-content-pad: var(--space-md);
+  --analytics-donut-size: 9rem;
+  --analytics-habit-name-w: 9rem;
+  --analytics-habit-cell: 1rem;
+  --analytics-habit-cell-gap: 2px;
+  --analytics-heat-cell: 0.85rem;
+  --analytics-heat-gap: 3px;
+  --analytics-section-min-w: 22rem;
+
+  /* Global htmx loading bar height (shared affordance, components.css). */
+  --loading-bar-h: 3px;
+
+  /* Org chart — initial value overridden by JS at runtime */
+  --orgchart-current-zoom: 1;
+
+  /* Semantic color aliases — reference theme vars, resolve per active theme */
+  --color-badge-bg: var(--color-bg-secondary);
+  --color-badge-text: var(--color-text-secondary);
+  --color-highlight: var(--color-warning-bg);
+
+  /* Meeting detail — action items */
+  --meeting-action-input-basis: 12rem;
+  --meeting-action-input-sm-basis: 8rem;
+
+  /* Meeting detail — carry-over section */
+  --meeting-carryover-gap: var(--space-xs);
+  --meeting-carryover-item-gap: var(--space-sm);
+  --meeting-carryover-source-gap: var(--space-xs);
+
+  /* Capacity plan detail */
+  --cp-detail-gap: var(--section-gap);
+  --cp-section-inner-gap: var(--space-md);
+  --cp-section-header-gap: var(--space-sm);
+  --cp-bw-list-gap: var(--space-md);
+  --cp-bw-row-gap-x: var(--space-sm);
+  --cp-bw-row-gap-y: var(--space-xs);
+  --cp-bw-name-col-w: 10rem;
+  --cp-bw-pct-col-w: 3rem;
+  --cp-bw-bar-h: 0.5rem;
+  --cp-grid-cell-free-bg: #edf7ee;
+  --cp-grid-cell-over-bg: #fde8eb;
+
+  /* Risk matrix zone fills — cat palette at low opacity, light theme */
+  --risk-zone-low-bg: rgba(78, 140, 43, 0.12);
+  --risk-zone-medium-bg: rgba(242, 169, 0, 0.14);
+  --risk-zone-high-bg: rgba(229, 114, 0, 0.16);
+  --risk-zone-critical-bg: rgba(166, 25, 46, 0.14);
+  /* Accent colors for legend dots */
+  --risk-zone-low-accent: var(--color-cat-green);
+  --risk-zone-medium-accent: var(--color-cat-yellow-dark);
+  --risk-zone-high-accent: var(--color-cat-orange);
+  --risk-zone-critical-accent: var(--color-error);
+  --cp-grid-person-col-w: 10rem;
+  --cp-grid-week-col-w: 9rem;
+  --cp-grid-total-col-w: 9rem;
+  --cp-grid-sticky-z: 10;
+  --cp-grid-popup-z: 350;
+  --cp-cell-tasks-min-w: 14rem;
+  --cp-cell-popup-max-h: 16rem;
+
+  /* Print — @page size/margin are literals (Safari ignores var() there) */
+  --print-color-fg: #000;
+  --print-color-bg: #fff;
+  --print-font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --print-font-size-base: 10pt;
+  --print-section-gap: var(--space-xs);
+  --print-table-cell-padding: var(--space-xs) var(--space-sm);
+  --print-badge-padding: 0.05rem var(--space-xs);
+
+  /* Risk matrix */
+  --risk-matrix-cell-min-w: 8rem;
+  --risk-matrix-cell-min-h: 6rem;
+  --risk-matrix-cell-max-h: 10rem;
+  --risk-matrix-gap: 2px;
+  --risk-matrix-y-tick-w: 1.5rem;
+  --risk-matrix-legend-dot-size: 0.625rem;
+
+  /* Quote line-item inline editor */
+  --qli-add-time-field-min-width: 12rem;
+
+  /* Billing document header */
+  --billing-doc-header-gap: var(--space-md);
+  --billing-doc-header-logo-h: 3rem;
+  --billing-doc-header-company-size: var(--text-lg);
+  --billing-doc-header-address-size: var(--text-sm);
+  --billing-doc-header-address-color: var(--color-text-secondary);
+  --billing-doc-header-border: 1px solid var(--color-border-default);
+  --billing-doc-header-pb: var(--space-md);
+  --billing-doc-header-mb: var(--space-lg);
+
+  /* Invoice print view */
+  --invoice-print-max-w: 52rem;
+  --invoice-print-padding: var(--space-xl);
+  --invoice-print-section-gap: var(--space-lg);
+
+  /* Quadrant card max height (Eisenhower / MoSCoW) */
+  --quadrant-card-max-h: 40vh;
+
+  /* Lean canvas section edit max height */
+  --lc-section-edit-max-h: 40vh;
+
+  /* Deals pipeline */
+  --deal-pipeline-col-w: 16rem;
+
+  /* GitHub view */
+  --github-table-num-w: 3rem;
+  --github-milestone-bar-h: var(--space-sm);
+  --github-tab-border-w: 2px;
+  --github-summary-card-min-w: 20rem;
+
+  /* Uploads view */
+  --uploads-stat-card-min-w: var(--card-min-width);
+  --uploads-stat-value-size: var(--font-size-xl);
+  --uploads-table-actions-w: calc(var(--space-xl) * 3);
+
+  /* Time entries view */
+  --te-recap-label-min-w: var(--sidebar-width);
+  --te-recap-label-max-w: var(--table-compact-cell-max-width);
+  --te-recap-col-min-w: var(--card-min-width);
+  --te-recap-col-gap: var(--space-xl);
+  --te-recap-footer-border: var(--border-width-thick) solid var(
+    --color-border-default
+  );
+}
+
+html.font-mono {
+  --font-sans: "JetBrains Mono", monospace;
 }
 
 /* --------------------------------------------------------------------------
    Theme: Light (default)
    -------------------------------------------------------------------------- */
 
-.theme-light,
-:root:not(.theme-dark):not(.dark):not(.theme-yellow):not(.theme-minimal) {
+:root:not(.dark) {
   color-scheme: light;
 
   /* Backgrounds */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f9fafb;
-  --color-bg-tertiary: #f3f4f6;
-  --color-bg-inverse: #111827;
-  --color-bg-hover: #f3f4f6;
-  --color-bg-active: #e5e7eb;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #ebebeb;
+  --color-bg-inverse: #000000;
+  --color-bg-hover: #f5f5f5;
+  --color-bg-active: #e0e0e0;
+  --color-bg-selected: #fff8e1;
 
   /* Text */
-  --color-text-primary: #111827;
-  --color-text-secondary: #4b5563;
-  --color-text-muted: #9ca3af;
+  --color-text-primary: #000000;
+  --color-text-secondary: #2c2c2c;
+  --color-text-muted: #6b6b6b;
+  --color-text-tertiary: #9e9e9e;
   --color-text-inverse: #ffffff;
 
   /* Borders */
-  --color-border-default: #e5e7eb;
-  --color-border-strong: #d1d5db;
-  --color-border-focus: #9ca3af;
+  --color-border-default: #e0e0e0;
+  --color-border-strong: #c0c0c0;
+  --color-border-focus: #8e8e8e;
+  --color-border-subtle: #f0f0f0;
 
-  /* Accent */
-  --color-accent: #111827;
-  --color-accent-hover: #374151;
+  /* Surfaces */
+  --color-surface: var(--color-bg-secondary);
+  --color-surface-raised: var(--color-bg-primary);
+  --color-bg-warning: var(--color-warning-bg);
+
+  /* Accent — amber/gold */
+  --color-accent: #ffab00;
+  --color-accent-hover: #e69a00;
+  --color-accent-subtle: #fff3d0;
+  --color-text-on-accent: #000;
+  --color-accent-muted: #ffd666;
 
   /* Success */
-  --color-success: #059669;
-  --color-success-bg: #ecfdf5;
-  --color-success-border: #a7f3d0;
-  --color-success-text: #065f46;
+  --color-success: #04b34f;
+  --color-success-bg: #e8f5e9;
+  --color-success-border: #a5d6a7;
+  --color-success-text: #2e7d32;
 
   /* Warning */
-  --color-warning: #d97706;
-  --color-warning-bg: #fffbeb;
-  --color-warning-border: #fde68a;
-  --color-warning-text: #92400e;
+  --color-warning: #ff9900;
+  --color-warning-hover: #e68a00;
+  --color-warning-bg: #fff3e0;
+  --color-warning-border: #ffcc80;
+  --color-warning-text: #000000;
 
   /* Error */
-  --color-error: #dc2626;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #fecaca;
-  --color-error-text: #991b1b;
+  --color-error: #a6192e;
+  --color-danger: #a6192e;
+  --color-danger-subtle: #fbe9ec;
+  --color-error-bg: #fbe9ec;
+  --color-error-border: #f1b8bf;
+  --color-error-text: #a6192e;
 
   /* Info */
-  --color-info: #2563eb;
-  --color-info-bg: #eff6ff;
-  --color-info-border: #bfdbfe;
-  --color-info-text: #1e40af;
+  --color-info: #0057b8;
+  --color-info-bg: #e3f2fd;
+  --color-info-border: #90caf9;
+  --color-info-text: #0057b8;
+
+  /* Purple */
+  --color-purple-bg: #f3e8fd;
+  --color-purple-text: #6b21a8;
+
+  /* Teal */
+  --color-teal-bg: #e0f7fa;
+  --color-teal-text: #00695c;
+
+  /* Orange */
+  --color-orange-bg: #fff0e0;
+  --color-orange-text: #c25400;
+
+  /* Pink */
+  --color-pink-bg: #fce4ec;
+  --color-pink-text: #ad1457;
+
+  /* Shadows */
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  /* Sticky note colors — light theme (warm paper-like tones) */
+  --sticky-yellow-bg: #fff9c4;
+  --sticky-yellow-border: #f9a825;
+  --sticky-yellow-text: #33291a;
+  --sticky-pink-bg: #fce4ec;
+  --sticky-pink-border: #e91e63;
+  --sticky-pink-text: #33001a;
+  --sticky-blue-bg: #e3f2fd;
+  --sticky-blue-border: #1565c0;
+  --sticky-blue-text: #0a1929;
+  --sticky-green-bg: #e8f5e9;
+  --sticky-green-border: #2e7d32;
+  --sticky-green-text: #1a2e1a;
+  --sticky-purple-bg: #f3e5f5;
+  --sticky-purple-border: #7b1fa2;
+  --sticky-purple-text: #2d0038;
+  --sticky-orange-bg: #fff3e0;
+  --sticky-orange-border: #e65100;
+  --sticky-orange-text: #33190a;
 }
 
 /* --------------------------------------------------------------------------
    Theme: Dark
    -------------------------------------------------------------------------- */
 
-.theme-dark,
 .dark {
   color-scheme: dark;
 
-  /* Backgrounds - true black */
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #0a0a0a;
-  --color-bg-tertiary: #141414;
-  --color-bg-inverse: #ffffff;
-  --color-bg-hover: #1a1a1a;
-  --color-bg-active: #262626;
+  /* Backgrounds — warm dark */
+  --color-bg-primary: #343434;
+  --color-bg-secondary: #3e3e3e;
+  --color-bg-tertiary: #4a4a4a;
+  --color-bg-inverse: #f3f3f3;
+  --color-bg-hover: #4a4a4a;
+  --color-bg-active: #555555;
+  --color-bg-selected: #3a3520;
 
-  /* Text - true white */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #e5e5e5;
-  --color-text-muted: #a3a3a3;
-  --color-text-inverse: #000000;
+  /* Text — warm cream/beige */
+  --color-text-primary: #f3f3f3;
+  --color-text-secondary: #e9dcbe;
+  --color-text-muted: #8e8b82;
+  --color-text-tertiary: #6b6860;
+  --color-text-inverse: #343434;
 
-  /* Borders - neutral gray */
-  --color-border-default: #262626;
-  --color-border-strong: #404040;
-  --color-border-focus: #525252;
+  /* Borders — warm gray */
+  --color-border-default: #4a4a4a;
+  --color-border-strong: #5e5e5e;
+  --color-border-focus: #8e8b82;
+  --color-border-subtle: #3a3a3a;
 
-  /* Accent */
-  --color-accent: #ffffff;
-  --color-accent-hover: #e5e5e5;
-  --color-accent-control: #818cf8;
+  /* Surfaces */
+  --color-surface: var(--color-bg-secondary);
+  --color-surface-raised: var(--color-bg-tertiary);
+  --color-bg-warning: var(--color-warning-bg);
 
-  /* Success */
-  --color-success: #22c55e;
-  --color-success-bg: #052e16;
-  --color-success-border: #166534;
-  --color-success-text: #86efac;
-
-  /* Warning */
-  --color-warning: #eab308;
-  --color-warning-bg: #422006;
-  --color-warning-border: #854d0e;
-  --color-warning-text: #fef08a;
-
-  /* Error */
-  --color-error: #ef4444;
-  --color-error-bg: #450a0a;
-  --color-error-border: #991b1b;
-  --color-error-text: #fca5a5;
-
-  /* Info */
-  --color-info: #3b82f6;
-  --color-info-bg: #172554;
-  --color-info-border: #1e40af;
-  --color-info-text: #93c5fd;
-
-  /* Shadows - darker for dark theme */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6);
-}
-
-/* --------------------------------------------------------------------------
-   Theme: Yellow (warm, focused)
-   -------------------------------------------------------------------------- */
-
-.theme-yellow {
-  color-scheme: light;
-
-  /* Backgrounds */
-  --color-bg-primary: #fffbeb;
-  --color-bg-secondary: #fef3c7;
-  --color-bg-tertiary: #fde68a;
-  --color-bg-inverse: #78350f;
-  --color-bg-hover: #fde68a;
-  --color-bg-active: #fcd34d;
-
-  /* Text */
-  --color-text-primary: #78350f;
-  --color-text-secondary: #92400e;
-  --color-text-muted: #b45309;
-  --color-text-inverse: #fffbeb;
-
-  /* Borders */
-  --color-border-default: #fcd34d;
-  --color-border-strong: #f59e0b;
-  --color-border-focus: #d97706;
-
-  /* Accent */
-  --color-accent: #b45309;
-  --color-accent-hover: #92400e;
+  /* Accent — cream/beige */
+  --color-accent: #e9dcbe;
+  --color-accent-hover: #f3f3f3;
+  --color-text-on-accent: #000;
+  --color-accent-subtle: #4a4540;
+  --color-accent-muted: #b3a78e;
 
   /* Success */
-  --color-success: #059669;
-  --color-success-bg: #ecfdf5;
-  --color-success-border: #a7f3d0;
-  --color-success-text: #065f46;
+  --color-success: #04b34f;
+  --color-success-bg: #1a3a2a;
+  --color-success-border: #2e7d32;
+  --color-success-text: #a5d6a7;
 
   /* Warning */
-  --color-warning: #ea580c;
-  --color-warning-bg: #fff7ed;
-  --color-warning-border: #fed7aa;
-  --color-warning-text: #9a3412;
+  --color-warning: #ff9900;
+  --color-warning-hover: #cc7a00;
+  --color-warning-bg: #3d2e10;
+  --color-warning-border: #b36b00;
+  --color-warning-text: #ffcc80;
 
   /* Error */
-  --color-error: #dc2626;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #fecaca;
-  --color-error-text: #991b1b;
+  --color-error: #dc3545;
+  --color-danger: #dc3545;
+  --color-danger-subtle: #3d1520;
+  --color-error-bg: #3d1520;
+  --color-error-border: #7a1222;
+  --color-error-text: #ff8a95;
 
   /* Info */
-  --color-info: #0284c7;
-  --color-info-bg: #f0f9ff;
-  --color-info-border: #bae6fd;
-  --color-info-text: #075985;
+  --color-info: #0057b8;
+  --color-info-bg: #152a45;
+  --color-info-border: #003d82;
+  --color-info-text: #90caf9;
+
+  /* Purple */
+  --color-purple-bg: #2d1a45;
+  --color-purple-text: #c084fc;
+
+  /* Teal */
+  --color-teal-bg: #0d3838;
+  --color-teal-text: #5eead4;
+
+  /* Orange */
+  --color-orange-bg: #3d2800;
+  --color-orange-text: #ffb74d;
+
+  /* Pink */
+  --color-pink-bg: #3d1028;
+  --color-pink-text: #f48fb1;
+
+  /* Pomodoro */
+  --pomodoro-paused-opacity: 0.85;
+
+  /* Shadows — deeper for dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.8);
+
+  /* Sticky note colors — dark theme (muted, readable) */
+  --sticky-yellow-bg: #3d3510;
+  --sticky-yellow-border: #a07a00;
+  --sticky-yellow-text: #f5e49c;
+  --sticky-pink-bg: #3d1028;
+  --sticky-pink-border: #c2185b;
+  --sticky-pink-text: #f8bbd0;
+  --sticky-blue-bg: #0d1f3c;
+  --sticky-blue-border: #1565c0;
+  --sticky-blue-text: #bbdefb;
+  --sticky-green-bg: #0d2e14;
+  --sticky-green-border: #2e7d32;
+  --sticky-green-text: #c8e6c9;
+  --sticky-purple-bg: #2d1a45;
+  --sticky-purple-border: #7b1fa2;
+  --sticky-purple-text: #e1bee7;
+  --sticky-orange-bg: #3d1e08;
+  --sticky-orange-border: #e65100;
+  --sticky-orange-text: #ffe0b2;
+
+  /* Capacity grid cell tints — softer than alert bg in dark mode */
+  --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
+  --cp-grid-cell-over-bg: rgba(248, 113, 113, 0.12);
+
+  /* Risk matrix zone fills — higher opacity on warm dark bg */
+  --risk-zone-low-bg: rgba(120, 190, 32, 0.15);
+  --risk-zone-medium-bg: rgba(255, 198, 0, 0.16);
+  --risk-zone-high-bg: rgba(229, 114, 0, 0.2);
+  --risk-zone-critical-bg: rgba(166, 25, 46, 0.22);
+
+  /* Mindmap branch palette — light variants pop on dark bg */
+  --mm-branch-0: var(--color-cat-orange-light);
+  --mm-branch-1: var(--color-cat-green-light);
+  --mm-branch-2: var(--color-cat-blue-light);
+  --mm-branch-3: var(--color-cat-navy-light);
+  --mm-branch-4: var(--color-cat-purple-light);
+  --mm-branch-5: var(--color-cat-pink-light);
+  --mm-branch-6: var(--color-cat-yellow-light);
+  --mm-branch-7: var(--color-cat-green-light);
 }
-
-/* --------------------------------------------------------------------------
-   Theme: Minimal (reduced contrast, calming)
-   -------------------------------------------------------------------------- */
-
-.theme-minimal {
-  color-scheme: light;
-
-  /* Backgrounds */
-  --color-bg-primary: #fafafa;
-  --color-bg-secondary: #f5f5f5;
-  --color-bg-tertiary: #e5e5e5;
-  --color-bg-inverse: #525252;
-  --color-bg-hover: #e5e5e5;
-  --color-bg-active: #d4d4d4;
-
-  /* Text */
-  --color-text-primary: #525252;
-  --color-text-secondary: #737373;
-  --color-text-muted: #a3a3a3;
-  --color-text-inverse: #fafafa;
-
-  /* Borders */
-  --color-border-default: #e5e5e5;
-  --color-border-strong: #d4d4d4;
-  --color-border-focus: #a3a3a3;
-
-  /* Accent */
-  --color-accent: #525252;
-  --color-accent-hover: #404040;
-
-  /* Success - muted */
-  --color-success: #4ade80;
-  --color-success-bg: #f0fdf4;
-  --color-success-border: #bbf7d0;
-  --color-success-text: #166534;
-
-  /* Warning - muted */
-  --color-warning: #facc15;
-  --color-warning-bg: #fefce8;
-  --color-warning-border: #fef08a;
-  --color-warning-text: #854d0e;
-
-  /* Error - muted */
-  --color-error: #f87171;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #fecaca;
-  --color-error-text: #b91c1c;
-
-  /* Info - muted */
-  --color-info: #38bdf8;
-  --color-info-bg: #f0f9ff;
-  --color-info-border: #bae6fd;
-  --color-info-text: #0369a1;
-
-  /* Softer shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
-}
-
-/* --------------------------------------------------------------------------
-   High Contrast Mode (Accessibility)
-   -------------------------------------------------------------------------- */
-
-.high-contrast {
-  /* Stronger borders */
-  --color-border-default: #000000;
-  --color-border-strong: #000000;
-  --color-border-focus: #0000ff;
-
-  /* Higher text contrast */
-  --color-text-primary: #000000;
-  --color-text-secondary: #1a1a1a;
-  --color-text-muted: #333333;
-}
-
-.high-contrast.dark,
-.dark .high-contrast,
-.high-contrast.theme-dark,
-.theme-dark .high-contrast {
-  /* Dark mode high contrast - pure black/white */
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #000000;
-  --color-bg-tertiary: #0a0a0a;
-
-  --color-border-default: #ffffff;
-  --color-border-strong: #ffffff;
-  --color-border-focus: #ffffff;
-
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #ffffff;
-  --color-text-muted: #d4d4d4;
-}
-
-/* --------------------------------------------------------------------------
-   Theme: Template (copy this to create new themes)
-   --------------------------------------------------------------------------
-
-.theme-YOURNAME {
-    --color-bg-primary: ;
-    --color-bg-secondary: ;
-    --color-bg-tertiary: ;
-    --color-bg-inverse: ;
-    --color-bg-hover: ;
-    --color-bg-active: ;
-
-    --color-text-primary: ;
-    --color-text-secondary: ;
-    --color-text-muted: ;
-    --color-text-inverse: ;
-
-    --color-border-default: ;
-    --color-border-strong: ;
-    --color-border-focus: ;
-
-    --color-accent: ;
-    --color-accent-hover: ;
-
-    --color-success: ;
-    --color-success-bg: ;
-    --color-success-border: ;
-    --color-success-text: ;
-
-    --color-warning: ;
-    --color-warning-bg: ;
-    --color-warning-border: ;
-    --color-warning-text: ;
-
-    --color-error: ;
-    --color-error-bg: ;
-    --color-error-border: ;
-    --color-error-text: ;
-
-    --color-info: ;
-    --color-info-bg: ;
-    --color-info-border: ;
-    --color-info-text: ;
-
-    --shadow-sm: ;
-    --shadow-md: ;
-    --shadow-lg: ;
-}
-
-*/

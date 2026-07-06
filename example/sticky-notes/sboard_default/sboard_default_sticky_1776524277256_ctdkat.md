@@ -1,0 +1,15 @@
+---
+id: sboard_default_sticky_1776524277256_ctdkat
+color: purple
+position:
+  x: 792
+  y: -32
+size:
+  width: 336
+  height: 216
+board_id: sboard_default
+created_at: "2026-04-18T14:57:57.257Z"
+updated_at: "2026-05-08T19:36:02.526Z"
+---
+
+Ship v2.0.0 before the end of the sprint

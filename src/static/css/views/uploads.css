@@ -1,122 +1,186 @@
-/* Uploads Management View */
+/* Uploads management admin view. */
+/* All values from variables.css — zero hardcoded values. */
 
-.uploads-summary {
+/* ── page layout ─────────────────────────────────────────────────────────── */
+
+.uploads {
+  padding: var(--page-padding);
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+/* ── header ──────────────────────────────────────────────────────────────── */
+
+.uploads__header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border-default);
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  gap: var(--space-md);
 }
 
-.uploads-summary-sep {
-  color: var(--color-text-muted);
-}
-
-.uploads-orphan-badge {
-  color: var(--color-error);
-}
-
-.uploads-section {
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
-}
-
-.uploads-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.uploads-section-header h3 {
-  font-size: var(--font-size-base);
-  font-weight: 600;
+.uploads__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
 }
 
-.uploads-hint {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-bottom: 0.75rem;
+/* ── stat grid ───────────────────────────────────────────────────────────── */
+
+.uploads__stat-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(var(--uploads-stat-card-min-w), 1fr));
+  gap: var(--space-md);
 }
 
-.uploads-empty {
+.uploads__stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--color-surface-raised);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.uploads__stat-card--warn {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.uploads__stat-value {
+  font-size: var(--uploads-stat-value-size);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.uploads__stat-label {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  padding: 2rem 0;
-  text-align: center;
 }
 
-.uploads-table {
+/* ── toolbar ─────────────────────────────────────────────────────────────── */
+
+.uploads__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.uploads__filter-tabs {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.uploads__filter-tab {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+.uploads__filter-tab:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+.uploads__filter-tab--active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+/* ── table ───────────────────────────────────────────────────────────────── */
+
+.uploads__table-wrap {
+  overflow-x: auto;
+}
+
+.uploads__table {
   width: 100%;
-  border-collapse: collapse;
+}
+
+.uploads__file-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.uploads__td--size,
+.uploads__td--date,
+.uploads__td--ext {
+  white-space: nowrap;
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.uploads-table th {
-  text-align: left;
-  padding: 0.5rem 0.75rem;
-  color: var(--color-text-muted);
-  font-weight: 500;
-  border-bottom: 1px solid var(--color-border-default);
+.uploads__td--actions {
+  width: var(--uploads-table-actions-w);
+  text-align: right;
 }
 
-.uploads-table td {
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--color-border-default);
-  vertical-align: middle;
-  max-width: 20rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.data-table__row.uploads__row--dangling {
+  background: var(--color-warning-bg);
 }
 
-.uploads-table tr:last-child td {
-  border-bottom: none;
-}
-
-.uploads-link {
+.uploads__file-link {
   color: var(--color-text-primary);
   text-decoration: none;
+  font-size: var(--font-size-sm);
 }
 
-.uploads-link:hover {
+.uploads__file-link:hover {
+  color: var(--color-accent);
   text-decoration: underline;
 }
 
-.uploads-row-orphan td {
-  background: var(--color-error-bg);
+.uploads__task-link {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
 }
 
-.uploads-delete-btn {
-  background: transparent;
-  border: 1px solid var(--color-border-default);
-  color: var(--color-error);
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  white-space: nowrap;
+.uploads__task-link:hover {
+  color: var(--color-accent);
 }
 
-.uploads-delete-btn:hover {
-  background: var(--color-error-bg);
-  border-color: var(--color-error);
+.uploads__no-task {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
 }
 
-@media (max-width: 36rem) {
-  .uploads-table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+.uploads__badge--dangling {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+/* ── empty state ─────────────────────────────────────────────────────────── */
+
+.uploads__empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.uploads__empty-cell {
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }

@@ -1,97 +1,60 @@
-/**
- * MCP tools for SWOT analysis operations.
- * Tools: list_swot, get_swot, create_swot, update_swot, delete_swot
- */
+// SWOT MCP tools — thin wrappers over the service layer.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getSwotService } from "../../singletons/services.ts";
+import {
+  CreateSwotSchema,
+  ListSwotOptionsSchema,
+  SwotSchema,
+  UpdateSwotSchema,
+} from "../../types/swot.types.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
-export function registerSwotTools(server: McpServer, pm: ProjectManager): void {
-  const parser = pm.getActiveParser();
-
-  server.registerTool(
-    "list_swot",
-    {
-      description: "List all SWOT analyses in the project.",
-      inputSchema: {},
-    },
-    async () => ok(await parser.readSwotAnalyses()),
-  );
-
-  server.registerTool(
-    "get_swot",
-    {
-      description: "Get a single SWOT analysis by its ID.",
-      inputSchema: { id: z.string().describe("SWOT analysis ID") },
-    },
-    async ({ id }) => {
-      const analyses = await parser.readSwotAnalyses();
-      const a = analyses.find((a) => a.id === id);
-      if (!a) return err(`SWOT analysis '${id}' not found`);
-      return ok(a);
-    },
-  );
-
-  server.registerTool(
-    "create_swot",
-    {
-      description: "Create a new SWOT analysis.",
-      inputSchema: {
-        title: z.string().describe("SWOT analysis title"),
-        date: z.string().optional().describe("Date (YYYY-MM-DD)"),
+export function registerSwotTools(server: McpServer): void {
+  registerCrudTools(server, {
+    service: getSwotService(),
+    notFoundLabel: "SWOT",
+    idParam: SwotSchema.shape.id.describe("SWOT ID"),
+    nameParam: SwotSchema.shape.title.describe("SWOT title"),
+    listSchema: ListSwotOptionsSchema,
+    createSchema: CreateSwotSchema,
+    updateSchema: UpdateSwotSchema,
+    mutationReturn: "id-success",
+    slimFields: ["title", "project", "date"],
+    tools: {
+      list: {
+        name: "list_swot",
+        description:
+          "List all SWOT analyses. Optionally filter by project or search query.",
+      },
+      get: {
+        name: "get_swot",
+        description: "Get a single SWOT analysis by its ID.",
+      },
+      getByName: {
+        name: "get_swot_by_name",
+        description:
+          "Get a SWOT analysis by its title (case-insensitive). Prefer this over list when the name is known.",
+      },
+      create: {
+        name: "create_swot",
+        description:
+          "Create a new SWOT analysis. Provide title and optionally date, quadrant items, and project.",
+      },
+      update: {
+        name: "update_swot",
+        description: "Update an existing SWOT analysis's fields.",
+      },
+      delete: {
+        name: "delete_swot",
+        description: "Delete a SWOT analysis by its ID.",
       },
     },
-    async ({ title, date }) => {
-      const a = await parser.addSwotAnalysis({
-        title,
-        date: date ?? new Date().toISOString().slice(0, 10),
-        strengths: [],
-        weaknesses: [],
-        opportunities: [],
-        threats: [],
-      });
-      return ok({ id: a.id });
-    },
-  );
-
-  server.registerTool(
-    "update_swot",
-    {
-      description: "Update a SWOT analysis.",
-      inputSchema: {
-        id: z.string().describe("SWOT analysis ID"),
-        title: z.string().optional(),
-        strengths: z.array(z.string()).optional(),
-        weaknesses: z.array(z.string()).optional(),
-        opportunities: z.array(z.string()).optional(),
-        threats: z.array(z.string()).optional(),
-      },
-    },
-    async ({ id, title, strengths, weaknesses, opportunities, threats }) => {
-      const success = await parser.updateSwotAnalysis(id, {
-        ...(title !== undefined && { title }),
-        ...(strengths !== undefined && { strengths }),
-        ...(weaknesses !== undefined && { weaknesses }),
-        ...(opportunities !== undefined && { opportunities }),
-        ...(threats !== undefined && { threats }),
-      });
-      if (!success) return err(`SWOT analysis '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_swot",
-    {
-      description: "Delete a SWOT analysis by its ID.",
-      inputSchema: { id: z.string().describe("SWOT analysis ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteSwotAnalysis(id);
-      if (!success) return err(`SWOT analysis '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
+
+export const swotModule = defineMcpModule({
+  feature: "swot",
+  register: registerSwotTools,
+});

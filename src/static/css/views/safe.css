@@ -1,0 +1,14 @@
+/* SAFe Agreement styles */
+
+/* -- Detail header -------------------------------------------------------- */
+
+.safe-detail__header {
+  gap: var(--space-sm);
+}
+
+.safe-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}

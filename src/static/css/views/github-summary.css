@@ -1,0 +1,44 @@
+/* GitHub summary dashboard */
+
+.github-summary {
+  padding: var(--page-padding);
+}
+
+.github-summary__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-lg);
+}
+
+.github-summary__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(var(--github-summary-card-min-w), 1fr));
+  gap: var(--grid-gap);
+}
+
+.github-summary__card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.github-summary__card-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.github-summary__card-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.github-summary__card-repo {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

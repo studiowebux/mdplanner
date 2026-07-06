@@ -1,0 +1,208 @@
+/* Lean Canvases view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view — header
+--------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Canvas grid — classic lean canvas layout
+   5 columns, 3 rows using named template areas
+--------------------------------------------------------------------------- */
+
+.lc-canvas {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
+  grid-template-areas:
+    "problem    solution   uvp        unfair    customer"
+    "problem    metrics    uvp        channels  customer"
+    "existAlt   metrics    highLvl    channels  earlyAdopt"
+    "cost       cost       revenue    revenue   revenue";
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.lc-canvas__cell--problem {
+  grid-area: problem;
+}
+.lc-canvas__cell--solution {
+  grid-area: solution;
+}
+.lc-canvas__cell--uniqueValueProp {
+  grid-area: uvp;
+}
+.lc-canvas__cell--unfairAdvantage {
+  grid-area: unfair;
+}
+.lc-canvas__cell--customerSegments {
+  grid-area: customer;
+}
+.lc-canvas__cell--existingAlternatives {
+  grid-area: existAlt;
+}
+.lc-canvas__cell--keyMetrics {
+  grid-area: metrics;
+}
+.lc-canvas__cell--highLevelConcept {
+  grid-area: highLvl;
+}
+.lc-canvas__cell--channels {
+  grid-area: channels;
+}
+.lc-canvas__cell--earlyAdopters {
+  grid-area: earlyAdopt;
+}
+.lc-canvas__cell--costStructure {
+  grid-area: cost;
+}
+.lc-canvas__cell--revenueStreams {
+  grid-area: revenue;
+}
+
+/* ---------------------------------------------------------------------------
+   Section block
+--------------------------------------------------------------------------- */
+
+.lc-canvas__cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.lc-section {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lc-section__title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: var(--space-md) var(--space-md) var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.lc-section__list {
+  flex: 1;
+  list-style: disc;
+  padding-left: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+}
+
+.lc-section__list li {
+  margin-bottom: var(--space-xs);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.lc-section__empty {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* -- Section accent colours ------------------------------------------------ */
+
+.lc-canvas__cell--problem .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-danger);
+}
+.lc-canvas__cell--solution .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+.lc-canvas__cell--uniqueValueProp .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-accent);
+}
+.lc-canvas__cell--unfairAdvantage .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-warning);
+}
+.lc-canvas__cell--customerSegments .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-info);
+}
+.lc-canvas__cell--keyMetrics .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+.lc-canvas__cell--channels .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-warning);
+}
+.lc-canvas__cell--costStructure .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-danger);
+}
+.lc-canvas__cell--revenueStreams .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+
+/* ---------------------------------------------------------------------------
+   Edit mode — hover bg, ghost input (.quadrant-card__input--ghost), and
+   textarea (.quadrant-card__textarea) come from components.css.
+--------------------------------------------------------------------------- */
+
+/* Strip quadrant-card__add double-padding; lc-section already pads the card. */
+.lc-canvas .quadrant-card__add {
+  padding: var(--space-xs) 0 0;
+  border-top: none;
+}
+
+/* Bound section height in edit mode so long lists scroll internally and the
+   add-item input stays anchored at the bottom. Uses the canonical
+   `[class*="-detail--editing"]` ancestor selector (see
+   `[architecture] MD Planner — Quadrant edit-mode shared CSS`). Applies to
+   both Lean Canvas (`lc-detail--editing`) and Business Model
+   (`bmc-detail--editing`) detail views — both share `.lc-section`. */
+[class*="-detail--editing"] .lc-section {
+  max-height: var(--lc-section-edit-max-h);
+}
+
+[class*="-detail--editing"] .lc-section__list {
+  overflow-y: auto;
+}
+
+[class*="-detail--editing"] .lc-section .quadrant-card__add {
+  flex-shrink: 0;
+}
+
+/* -- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  /* intentional deviation: canvas wide-layout collapse (not a mobile breakpoint) */
+  .lc-canvas {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "problem    solution"
+      "existAlt   metrics"
+      "uvp        unfair"
+      "highLvl    channels"
+      "customer   earlyAdopt"
+      "cost       revenue";
+  }
+}
+
+@media (max-width: 700px) {
+  /* intentional deviation: canvas single-column collapse (dense layout needs earlier reflow than --bp-mobile 768px) */
+  .lc-canvas {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "problem"
+      "existAlt"
+      "solution"
+      "metrics"
+      "uvp"
+      "highLvl"
+      "unfair"
+      "channels"
+      "customer"
+      "earlyAdopt"
+      "cost"
+      "revenue";
+  }
+}

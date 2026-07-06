@@ -1,36 +1,47 @@
-/**
- * MCP tools for SAFE agreement operations.
- * Tools: list_safe, get_safe, create_safe, update_safe, delete_safe
- */
+// MCP tools for SAFe agreement operations — thin wrappers over SafeService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { getSafeService } from "../../singletons/services.ts";
+import { SAFE_STATUSES, SAFE_TYPES } from "../../types/safe.types.ts";
+import { err, ok } from "../utils.ts";
 
-const SAFE_TYPE = ["pre-money", "post-money", "mfn"] as const;
-const SAFE_STATUS = ["draft", "signed", "converted"] as const;
-
-export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
-  const parser = pm.getActiveParser();
-
-  // --- SAFE Agreements ---
+export function registerSafeTools(server: McpServer): void {
+  const service = getSafeService();
 
   server.registerTool(
     "list_safe",
-    { description: "List all SAFE agreements.", inputSchema: {} },
-    async () => ok(await parser.readSafeAgreements()),
+    {
+      description: "List all SAFE agreements.",
+      inputSchema: {
+        status: z.enum(SAFE_STATUSES).optional().describe(
+          "Filter by status: draft, signed, converted",
+        ),
+        type: z.enum(SAFE_TYPES).optional().describe(
+          "Filter by type: pre-money, post-money, mfn",
+        ),
+        q: z.string().optional().describe(
+          "Search query (matches investor, notes)",
+        ),
+      },
+    },
+    async ({ status, type, q }) => {
+      const items = await service.list({ status, type, q });
+      return ok(items);
+    },
   );
 
   server.registerTool(
     "get_safe",
     {
       description: "Get a single SAFE agreement by its ID.",
-      inputSchema: { id: z.string().describe("SAFE agreement ID") },
+      inputSchema: {
+        id: z.string().describe("SAFE agreement ID"),
+      },
     },
     async ({ id }) => {
-      const items = await parser.readSafeAgreements();
-      const item = items.find((i) => i.id === id);
+      const item = await service.getById(id);
       if (!item) return err(`SAFE agreement '${id}' not found`);
       return ok(item);
     },
@@ -42,27 +53,27 @@ export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
       description: "Create a new SAFE agreement.",
       inputSchema: {
         investor: z.string().describe("Investor name"),
-        amount: z.number().describe("Investment amount"),
+        amount: z.number().describe("Investment amount (USD)"),
         valuation_cap: z.number().optional().describe(
-          "Valuation cap (0 if none)",
+          "Valuation cap (USD, 0 if none)",
         ),
         discount: z.number().optional().describe(
-          "Discount rate 0-100 (e.g. 20 for 20%)",
+          "Discount rate 0–100 (e.g. 20 for 20%)",
         ),
-        type: z.enum(SAFE_TYPE).optional().describe(
+        type: z.enum(SAFE_TYPES).optional().describe(
           "SAFE type (default: post-money)",
         ),
-        status: z.enum(SAFE_STATUS).optional().describe(
+        status: z.enum(SAFE_STATUSES).optional().describe(
           "Agreement status (default: draft)",
         ),
         date: z.string().optional().describe("Agreement date (YYYY-MM-DD)"),
-        notes: z.string().optional(),
+        notes: z.string().optional().describe("Additional notes"),
       },
     },
     async (
       { investor, amount, valuation_cap, discount, type, status, date, notes },
     ) => {
-      const item = await parser.addSafeAgreement({
+      const item = await service.create({
         investor,
         amount,
         valuation_cap: valuation_cap ?? 0,
@@ -70,7 +81,7 @@ export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
         type: type ?? "post-money",
         status: status ?? "draft",
         date: date ?? new Date().toISOString().slice(0, 10),
-        notes: notes ?? "",
+        notes,
       });
       return ok({ id: item.id });
     },
@@ -83,12 +94,12 @@ export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
       inputSchema: {
         id: z.string().describe("SAFE agreement ID"),
         investor: z.string().optional(),
-        amount: z.number().optional(),
-        valuation_cap: z.number().optional(),
-        discount: z.number().optional(),
-        type: z.enum(SAFE_TYPE).optional(),
-        status: z.enum(SAFE_STATUS).optional(),
-        date: z.string().optional(),
+        amount: z.number().optional().describe("Investment amount (USD)"),
+        valuation_cap: z.number().optional().describe("Valuation cap (USD)"),
+        discount: z.number().optional().describe("Discount rate 0–100"),
+        type: z.enum(SAFE_TYPES).optional(),
+        status: z.enum(SAFE_STATUSES).optional(),
+        date: z.string().optional().describe("Agreement date (YYYY-MM-DD)"),
         notes: z.string().optional(),
       },
     },
@@ -105,7 +116,7 @@ export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
         notes,
       },
     ) => {
-      const success = await parser.updateSafeAgreement(id, {
+      const updated = await service.update(id, {
         ...(investor !== undefined && { investor }),
         ...(amount !== undefined && { amount }),
         ...(valuation_cap !== undefined && { valuation_cap }),
@@ -115,7 +126,7 @@ export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
         ...(date !== undefined && { date }),
         ...(notes !== undefined && { notes }),
       });
-      if (!success) return err(`SAFE agreement '${id}' not found`);
+      if (!updated) return err(`SAFE agreement '${id}' not found`);
       return ok({ success: true });
     },
   );
@@ -124,12 +135,19 @@ export function registerSafeTools(server: McpServer, pm: ProjectManager): void {
     "delete_safe",
     {
       description: "Delete a SAFE agreement by its ID.",
-      inputSchema: { id: z.string().describe("SAFE agreement ID") },
+      inputSchema: {
+        id: z.string().describe("SAFE agreement ID"),
+      },
     },
     async ({ id }) => {
-      const success = await parser.deleteSafeAgreement(id);
+      const success = await service.delete(id);
       if (!success) return err(`SAFE agreement '${id}' not found`);
       return ok({ success: true });
     },
   );
 }
+
+export const safeModule = defineMcpModule({
+  feature: "safe",
+  register: registerSafeTools,
+});

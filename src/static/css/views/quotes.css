@@ -1,0 +1,198 @@
+/* Quotes view — domain-specific styles only.
+   Shared billing styles (line items, totals) in billing.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.quote-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Locked banner — non-draft quotes are immutable until revised. */
+.quote-detail__lock-notice {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: var(--border-width-thick) var(--border-style)
+    var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+}
+
+.quote-detail__title-sep {
+  color: var(--color-text-muted);
+}
+
+.quote-detail__actions-row {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.quote-detail__footer {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.quote-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.quote-detail__approval-notes {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-sm) 0 0;
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   Revision history
+--------------------------------------------------------------------------- */
+
+.quote-detail__revisions-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  list-style: none;
+  user-select: none;
+}
+
+.quote-detail__revisions-summary::-webkit-details-marker {
+  display: none;
+}
+
+.quote-detail__revisions-summary::before {
+  content: "▶";
+  font-size: var(--font-size-xs);
+  transition: transform var(--transition-fast);
+}
+
+details[open] .quote-detail__revisions-summary::before {
+  transform: rotate(90deg);
+}
+
+.quote-detail__revisions-table {
+  margin-top: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Inline line-item editor (draft quotes) — Excel-like click-to-edit cells
+--------------------------------------------------------------------------- */
+
+.qli-cell {
+  padding: var(--space-sm) var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  vertical-align: middle;
+}
+
+.qli-cell--right {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.qli-cell--type {
+  white-space: nowrap;
+}
+
+/* Editable read cell — affords click-to-edit */
+.qli-cell--edit {
+  cursor: text;
+  border-radius: var(--radius-sm);
+}
+
+.qli-cell--edit:hover {
+  background: var(--color-accent-subtle);
+}
+
+.qli-cell__placeholder {
+  color: var(--color-text-muted);
+}
+
+.qli-cell--inert {
+  color: var(--color-text-muted);
+}
+
+/* Editing cell — input + Save/Cancel sit in a stable inline flex row so the
+   controls never overlap adjacent cells or hide behind them. */
+.qli-cell--editing {
+  padding: 0;
+}
+
+.qli-edit {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs);
+}
+
+.qli-edit .qli-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.qli-edit__btn {
+  flex: 0 0 auto;
+  padding: var(--space-xxs) var(--space-sm);
+  line-height: 1;
+}
+
+.qli-input {
+  width: 100%;
+  padding: var(--space-sm);
+  border: var(--border-width) solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+}
+
+.qli-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width) var(--color-accent);
+}
+
+.qli-cell--actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.qli-add {
+  margin-top: var(--space-sm);
+}
+
+.qli-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.qli-add-time__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.qli-add-time__fields .form__autocomplete {
+  min-width: var(--qli-add-time-field-min-width);
+}

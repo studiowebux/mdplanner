@@ -1,0 +1,53 @@
+---
+id: meeting_kickoff_001
+date: 2026-02-20
+attendees: [alice, bob, charlie, diana]
+agenda: Project kickoff — scope, timeline, and team responsibilities
+actions:
+  - id: act_001
+    description: Set up project repository and CI pipeline
+    owner: bob
+    due: 2026-02-24
+    status: done
+  - id: act_002
+    description: Draft initial architecture diagram
+    owner: alice
+    due: 2026-02-27
+    status: done
+  - id: act_003
+    description: Schedule weekly sync recurring meeting
+    owner: charlie
+    due: 2026-02-21
+    status: done
+  - id: act_004
+    description: Identify external API dependencies and request access
+    owner: diana
+    due: 2026-03-01
+    status: open
+project: TaskFlow Platform
+created_at: "2026-04-18T15:06:21.073Z"
+updated_at: "2026-04-18T15:06:21.073Z"
+related_meetings: []
+---
+
+# Project Kickoff
+
+## Summary
+
+Kicked off the project with the full team. Reviewed scope, agreed on the tech
+stack, and assigned initial responsibilities. Everyone aligned on the Q1
+delivery target.
+
+## Decisions
+
+- Tech stack confirmed: Deno + Hono backend, Vanilla JS frontend
+- Repository will be private during alpha phase
+- Weekly sync every Tuesday at 10am
+
+## Notes
+
+Bob will have the CI pipeline ready by end of next week. Alice flagged a risk
+around the third-party API availability — David will follow up with the vendor
+to get sandbox credentials before March.
+
+Carol volunteered to own the recurring meeting logistics.

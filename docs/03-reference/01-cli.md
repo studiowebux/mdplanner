@@ -1,73 +1,67 @@
 ---
-title: CLI Reference
+title: Running v2
 ---
 
-# CLI Reference
+# Running v2
 
-```text
-mdplanner [OPTIONS] <project-directory>
-mdplanner init <directory>
-mdplanner keygen
-mdplanner keygen-secret
-```
+MD Planner v2 has no compiled binary or CLI. It runs with Deno.
 
-## Commands
+## Deno tasks
 
-| Command         | Description                                          |
-| --------------- | ---------------------------------------------------- |
-| `<directory>`   | Start the server with the given project directory    |
-| `init <dir>`    | Scaffold a new project directory with `project.md`   |
-| `keygen`        | Generate RSA-4096 key pair for encrypted backups     |
-| `keygen-secret` | Generate 32-byte hex key for integration secret encryption |
-
-## Options
-
-| Flag                          | Env var                       | Default  | Description                                          |
-| ----------------------------- | ----------------------------- | -------- | ---------------------------------------------------- |
-| `-p, --port <port>`           | `MDPLANNER_PORT`              | `8003`   | HTTP server port                                     |
-| `-c, --cache`                 | `MDPLANNER_CACHE`             | disabled | Enable SQLite cache for FTS and fast queries         |
-| `--read-only`                 | `MDPLANNER_READ_ONLY`         | disabled | Block all mutations (public demo mode)               |
-| `--api-token <tok>`           | `MDPLANNER_API_TOKEN`         | —        | Protect REST API and UI with cookie-based auth       |
-| `--mcp-token <tok>`           | `MDPLANNER_MCP_TOKEN`         | —        | Protect `/mcp` endpoint with bearer token            |
-| `--webdav`                    | `MDPLANNER_WEBDAV`            | disabled | Enable WebDAV server at `/webdav`                    |
-| `--webdav-user <u>`           | `MDPLANNER_WEBDAV_USER`       | —        | WebDAV basic auth username                           |
-| `--webdav-pass <p>`           | `MDPLANNER_WEBDAV_PASS`       | —        | WebDAV basic auth password                           |
-| `--backup-dir <path>`         | `MDPLANNER_BACKUP_DIR`        | —        | Directory for automated backups                      |
-| `--backup-interval <hrs>`     | `MDPLANNER_BACKUP_INTERVAL`   | —        | Backup frequency in hours (requires `--backup-dir`)  |
-| `--backup-public-key <hex>`   | `MDPLANNER_BACKUP_PUBLIC_KEY` | —        | RSA public key hex for encrypted backups             |
-| `--cors-origin <origin>`      | `MDPLANNER_CORS_ORIGIN`       | allow all | Restrict CORS to this origin                        |
-| `--max-body-size <MB>`        | `MDPLANNER_MAX_BODY_SIZE`     | `10`     | Max request body in MB                               |
-| `--rate-limit <n>`            | `MDPLANNER_RATE_LIMIT`        | `200`    | Max requests per minute per IP                       |
-| `--cerveau-dir <path>`        | `MDPLANNER_CERVEAU_DIR`       | `~/.cerveau` | Path to cerveau directory for brain viewer        |
-| `-h, --help`                  | —                             | —        | Show help message                                    |
-
-Environment variables are fallbacks. CLI flags take precedence.
-
-## Examples
+| Task              | Description              |
+| ----------------- | ------------------------ |
+| `deno task dev:v2`| Start the v2 server      |
+| `deno task test`  | Run the test suite       |
+| `deno task fmt`   | Format all source files  |
 
 ```bash
-# Basic usage
-mdplanner ./my-project
-
-# With SQLite cache and custom port
-mdplanner --port 8080 --cache ./my-project
-
-# With authentication
-mdplanner --api-token mysecrettoken --mcp-token mcptoken ./my-project
-
-# Read-only demo mode
-mdplanner --read-only ./my-project
-
-# With WebDAV
-mdplanner --webdav --webdav-user admin --webdav-pass secret ./my-project
-
-# With automated encrypted backups every 24 hours
-mdplanner \
-  --backup-dir /var/backups/myproject \
-  --backup-interval 24 \
-  --backup-public-key <public-key-hex> \
-  ./my-project
-
-# With CORS restriction and rate limiting
-mdplanner --cors-origin https://example.com --rate-limit 100 ./my-project
+# Start against ./example (hardcoded in the deno task)
+deno task dev:v2
 ```
+
+Open `http://localhost:8003`.
+
+## Project directory
+
+`deno task dev:v2` hardcodes `./example` as the project directory — you cannot
+pass a different path as an argument to the task. To use a custom directory, set
+`PROJECT_DIR` and run deno directly:
+
+```bash
+PROJECT_DIR=/path/to/my-project \
+  deno run --allow-net --allow-read --allow-write --allow-env --watch src/bin.ts
+```
+
+Or set it as an environment variable before running the task (but the task still
+passes `./example` as `Deno.args[0]`, which takes precedence over `PROJECT_DIR`).
+Run deno directly when you need a custom path.
+
+If the directory does not contain a `project.md` file the server still starts —
+create `project.md` to enable project metadata and feature visibility settings.
+
+## Environment variables
+
+All runtime configuration is done via environment variables.
+
+| Variable               | Default | Required | Description                                                                 |
+| ---------------------- | ------- | -------- | --------------------------------------------------------------------------- |
+| `PROJECT_DIR`          | —       | Yes      | Absolute path to the project data directory.                                |
+| `PORT`                 | `8003`  | No       | HTTP port the server listens on.                                            |
+| `CACHE`                | `true`  | No       | Set to `false` to disable the SQLite FTS cache. Full-text search needs `true`. |
+| `MCP_TOKEN`            | —       | No       | Bearer token for MCP API requests. Leave empty to disable auth.             |
+| `MDPLANNER_SECRET_KEY` | —       | No       | AES-256-GCM key for encrypting integration secrets in `project.md`.         |
+
+Generate a secret key:
+
+```bash
+openssl rand -hex 32
+```
+
+Example with env vars inline:
+
+```bash
+PROJECT_DIR=/path/to/my-project PORT=8080 MCP_TOKEN=secret deno task dev:v2
+```
+
+For Docker deployment see [Docker Deployment](../02-guides/01-docker-deployment.md).
+For systemd deployment see [systemd Deployment](../02-guides/02-systemd-deployment.md).

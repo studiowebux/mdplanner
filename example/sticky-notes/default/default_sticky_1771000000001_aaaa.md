@@ -1,0 +1,14 @@
+---
+id: default_sticky_1771000000001_aaaa
+color: yellow
+position:
+  x: 800
+  y: 288
+size:
+  width: 432
+  height: 328
+created_at: "2026-04-11T16:26:17.391Z"
+updated_at: "2026-04-11T16:26:17.391Z"
+---
+
+Ship the v2 rewrite before end of Q1

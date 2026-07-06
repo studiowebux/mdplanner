@@ -1,0 +1,21 @@
+/* Companies view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css.
+   Type badge reuses shared .badge--{variant} tokens. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.company-detail__tags {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.company-detail__tag {
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}

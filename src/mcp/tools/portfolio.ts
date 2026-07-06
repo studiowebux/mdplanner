@@ -1,34 +1,51 @@
-/**
- * MCP tools for portfolio operations.
- * Tools: list_portfolio, get_portfolio_item, get_portfolio_summary,
- *        create_portfolio_item, update_portfolio_item, delete_portfolio_item,
- *        add_portfolio_status_update, delete_portfolio_status_update
- */
+// MCP tools for portfolio operations — thin wrappers over PortfolioService.
+// All Zod schemas derived from types/portfolio.types.ts — single source of truth.
 
+import { z } from "@hono/zod-openapi";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getPortfolioService } from "../../singletons/services.ts";
+import {
+  AddStatusUpdateSchema,
+  CreatePortfolioItemSchema,
+  PORTFOLIO_STATUSES,
+  PortfolioItemSchema,
+  UpdatePortfolioItemSchema,
+} from "../../types/portfolio.types.ts";
+import { err, ok } from "../utils.ts";
 
-export function registerPortfolioTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerPortfolioTools(server: McpServer): void {
+  const service = getPortfolioService();
 
   server.registerTool(
     "list_portfolio",
     {
-      description: "List all portfolio projects.",
+      description:
+        "List all portfolio projects, optionally filtered by status. " +
+        "Pass slim: true when browsing to get a compact overview — returns id, name, status, category, progress only, cutting token usage by ~90%. " +
+        "Prefer get_portfolio_by_name when the project name is known.",
       inputSchema: {
-        status: z.string().optional().describe(
-          "Filter by status (e.g. active, completed, archived)",
+        status: z.enum(PORTFOLIO_STATUSES).optional().describe(
+          "Filter by status",
+        ),
+        slim: z.boolean().optional().describe(
+          "Return minimal fields only: id, name, status, category, progress. Use when browsing projects.",
         ),
       },
     },
-    async ({ status }) => {
-      const items = await parser.readPortfolioItems();
-      return ok(status ? items.filter((i) => i.status === status) : items);
+    async ({ status, slim }) => {
+      let items = await service.list();
+      if (status) items = items.filter((i) => i.status === status);
+      if (slim) {
+        return ok(items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          status: i.status,
+          category: i.category,
+          progress: i.progress,
+        })));
+      }
+      return ok(items);
     },
   );
 
@@ -36,10 +53,12 @@ export function registerPortfolioTools(
     "get_portfolio_item",
     {
       description: "Get a single portfolio project by its ID.",
-      inputSchema: { id: z.string().describe("Portfolio item ID") },
+      inputSchema: {
+        id: PortfolioItemSchema.shape.id.describe("Portfolio item ID"),
+      },
     },
     async ({ id }) => {
-      const item = await parser.readPortfolioItem(id);
+      const item = await service.getById(id);
       if (!item) return err(`Portfolio item '${id}' not found`);
       return ok(item);
     },
@@ -49,13 +68,13 @@ export function registerPortfolioTools(
     "get_portfolio_by_name",
     {
       description:
-        "Get a portfolio project by its name (case-insensitive). Prefer this over list_portfolio when the project name is known.",
+        "Get a portfolio project by name (case-insensitive). Prefer this over list_portfolio when the name is known.",
       inputSchema: {
-        name: z.string().describe("Portfolio project name"),
+        name: PortfolioItemSchema.shape.name.describe("Portfolio item name"),
       },
     },
     async ({ name }) => {
-      const item = await parser.readPortfolioItemByName(name);
+      const item = await service.getByName(name);
       if (!item) return err(`Portfolio item '${name}' not found`);
       return ok(item);
     },
@@ -65,108 +84,50 @@ export function registerPortfolioTools(
     "get_portfolio_summary",
     {
       description:
-        "Get aggregated portfolio statistics: total count, breakdown by status, breakdown by category, average progress, total revenue, total expenses.",
+        "Get aggregated portfolio statistics: total count, breakdown by status and category, average progress, total revenue, total expenses.",
       inputSchema: {},
     },
-    async () => ok(await parser.getPortfolioSummary()),
+    async () => {
+      const items = await service.list();
+      const byStatus: Record<string, number> = {};
+      const byCategory: Record<string, number> = {};
+      let totalRevenue = 0;
+      let totalExpenses = 0;
+      let progressSum = 0;
+
+      for (const item of items) {
+        byStatus[item.status] = (byStatus[item.status] ?? 0) + 1;
+        byCategory[item.category] = (byCategory[item.category] ?? 0) + 1;
+        totalRevenue += item.revenue ?? 0;
+        totalExpenses += item.expenses ?? 0;
+        progressSum += item.progress ?? 0;
+      }
+
+      return ok({
+        total: items.length,
+        byStatus,
+        byCategory,
+        avgProgress: items.length > 0
+          ? Math.round(progressSum / items.length)
+          : 0,
+        totalRevenue,
+        totalExpenses,
+      });
+    },
   );
 
   server.registerTool(
     "create_portfolio_item",
     {
       description: "Create a new portfolio project.",
-      inputSchema: {
-        name: z.string().describe("Project name"),
-        description: z.string().optional(),
-        status: z.string().optional().describe(
-          "Status (e.g. active, completed, archived, production, maintenance, cancelled)",
-        ),
-        category: z.string().optional(),
-        license: z.string().optional(),
-        start_date: z.string().optional().describe("YYYY-MM-DD"),
-        end_date: z.string().optional().describe("YYYY-MM-DD"),
-        team: z.array(z.string()).optional().describe(
-          "Team member names or person IDs",
-        ),
-        tech_stack: z.array(z.string()).optional(),
-        client: z.string().optional().describe("Client name"),
-        revenue: z.number().optional().describe("Total revenue"),
-        expenses: z.number().optional().describe("Total expenses"),
-        progress: z.number().min(0).max(100).optional().describe(
-          "Completion percentage (0–100)",
-        ),
-        kpis: z.array(z.object({
-          name: z.string(),
-          value: z.union([z.string(), z.number()]),
-          target: z.union([z.string(), z.number()]).optional(),
-        })).optional().describe("Key performance indicators"),
-        urls: z.array(z.object({
-          label: z.string(),
-          href: z.string(),
-        })).optional().describe("Project URLs (website, repo, docs, etc.)"),
-        logo: z.string().optional().describe(
-          "Logo path (relative to project dir) or external URL",
-        ),
-        billing_customer_id: z.string().optional().describe(
-          "Billing customer ID linking this project to a billing customer",
-        ),
-        github_repo: z.string().optional().describe(
-          "GitHub repository in owner/repo format",
-        ),
-        brain_managed: z.boolean().optional().describe(
-          "Whether this project is managed by a brain protocol",
-        ),
-        linked_goals: z.array(z.string()).optional().describe(
-          "Goal IDs linked to this portfolio item",
-        ),
-      },
+      inputSchema: CreatePortfolioItemSchema.shape,
     },
-    async (
-      {
-        name,
-        description,
-        status,
-        category,
-        license,
-        start_date,
-        end_date,
-        team,
-        tech_stack,
-        client,
-        revenue,
-        expenses,
-        progress,
-        kpis,
-        urls,
-        logo,
-        billing_customer_id,
-        github_repo,
-        brain_managed,
-        linked_goals,
-      },
-    ) => {
-      const item = await parser.createPortfolioItem({
-        name,
-        status: status ?? "active",
-        category: category ?? "",
-        ...(description && { description }),
-        ...(license && { license }),
-        ...(start_date && { startDate: start_date }),
-        ...(end_date && { endDate: end_date }),
-        ...(team?.length && { team }),
-        ...(tech_stack?.length && { techStack: tech_stack }),
-        ...(client && { client }),
-        ...(revenue !== undefined && { revenue }),
-        ...(expenses !== undefined && { expenses }),
-        ...(progress !== undefined && { progress }),
-        ...(kpis?.length && { kpis }),
-        ...(urls?.length && { urls }),
-        ...(logo && { logo }),
-        ...(billing_customer_id && { billingCustomerId: billing_customer_id }),
-        ...(github_repo && { githubRepo: github_repo }),
-        ...(brain_managed !== undefined && { brainManaged: brain_managed }),
-        ...(linked_goals?.length && { linkedGoals: linked_goals }),
-      });
+    async (args) => {
+      const existing = await service.getByName(args.name);
+      if (existing) {
+        return err(`Portfolio item '${args.name}' already exists`);
+      }
+      const item = await service.create(args);
       return ok({ id: item.id });
     },
   );
@@ -176,66 +137,28 @@ export function registerPortfolioTools(
     {
       description: "Update an existing portfolio project's fields.",
       inputSchema: {
-        id: z.string().describe("Portfolio item ID"),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        status: z.string().optional(),
-        category: z.string().optional(),
-        license: z.string().optional(),
-        start_date: z.string().optional(),
-        end_date: z.string().optional(),
-        team: z.array(z.string()).optional(),
-        tech_stack: z.array(z.string()).optional(),
-        client: z.string().optional(),
-        revenue: z.number().optional(),
-        expenses: z.number().optional(),
-        progress: z.number().min(0).max(100).optional(),
-        kpis: z.array(z.object({
-          name: z.string(),
-          value: z.union([z.string(), z.number()]),
-          target: z.union([z.string(), z.number()]).optional(),
-        })).optional(),
-        urls: z.array(z.object({
-          label: z.string(),
-          href: z.string(),
-        })).optional(),
-        logo: z.string().optional(),
-        billing_customer_id: z.string().optional(),
-        github_repo: z.string().optional(),
-        brain_managed: z.boolean().optional().describe(
-          "Whether this project is managed by a brain protocol",
-        ),
-        linked_goals: z.array(z.string()).optional().describe(
-          "Goal IDs linked to this portfolio item",
-        ),
+        id: PortfolioItemSchema.shape.id.describe("Portfolio item ID"),
+        ...UpdatePortfolioItemSchema.shape,
       },
     },
-    async (
-      {
-        id,
-        tech_stack,
-        start_date,
-        end_date,
-        billing_customer_id,
-        github_repo,
-        brain_managed,
-        linked_goals,
-        ...rest
+    async ({ id, ...fields }) => {
+      const item = await service.update(id, fields);
+      if (!item) return err(`Portfolio item '${id}' not found`);
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "delete_portfolio_item",
+    {
+      description: "Delete a portfolio project by ID.",
+      inputSchema: {
+        id: PortfolioItemSchema.shape.id.describe("Portfolio item ID"),
       },
-    ) => {
-      const result = await parser.updatePortfolioItem(id, {
-        ...rest,
-        ...(tech_stack !== undefined && { techStack: tech_stack }),
-        ...(start_date !== undefined && { startDate: start_date }),
-        ...(end_date !== undefined && { endDate: end_date }),
-        ...(billing_customer_id !== undefined && {
-          billingCustomerId: billing_customer_id,
-        }),
-        ...(github_repo !== undefined && { githubRepo: github_repo }),
-        ...(brain_managed !== undefined && { brainManaged: brain_managed }),
-        ...(linked_goals !== undefined && { linkedGoals: linked_goals }),
-      });
-      if (!result) return err(`Portfolio item '${id}' not found`);
+    },
+    async ({ id }) => {
+      const success = await service.delete(id);
+      if (!success) return err(`Portfolio item '${id}' not found`);
       return ok({ success: true });
     },
   );
@@ -246,15 +169,14 @@ export function registerPortfolioTools(
       description:
         "Add a status update entry to a portfolio project's timeline.",
       inputSchema: {
-        id: z.string().describe("Portfolio item ID"),
-        message: z.string().describe("Status update message"),
+        id: PortfolioItemSchema.shape.id.describe("Portfolio item ID"),
+        ...AddStatusUpdateSchema.shape,
       },
     },
     async ({ id, message }) => {
-      if (!message.trim()) return err("message must not be empty");
-      const update = await parser.addPortfolioStatusUpdate(id, message.trim());
+      const update = await service.addStatusUpdate(id, message);
       if (!update) return err(`Portfolio item '${id}' not found`);
-      return ok({ success: true, update });
+      return ok(update);
     },
   );
 
@@ -263,27 +185,21 @@ export function registerPortfolioTools(
     {
       description: "Delete a status update entry from a portfolio project.",
       inputSchema: {
-        id: z.string().describe("Portfolio item ID"),
-        update_id: z.string().describe("Status update ID to delete"),
+        id: PortfolioItemSchema.shape.id.describe("Portfolio item ID"),
+        updateId: z.string().describe("Status update ID to delete"),
       },
     },
-    async ({ id, update_id }) => {
-      const success = await parser.deletePortfolioStatusUpdate(id, update_id);
-      if (!success) return err(`Portfolio item or status update not found`);
-      return ok({ success: true });
-    },
-  );
-
-  server.registerTool(
-    "delete_portfolio_item",
-    {
-      description: "Delete a portfolio project by its ID.",
-      inputSchema: { id: z.string().describe("Portfolio item ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deletePortfolioItem(id);
-      if (!success) return err(`Portfolio item '${id}' not found`);
+    async ({ id, updateId }) => {
+      const success = await service.deleteStatusUpdate(id, updateId);
+      if (!success) {
+        return err(`Status update '${updateId}' not found on item '${id}'`);
+      }
       return ok({ success: true });
     },
   );
 }
+
+export const portfolioModule = defineMcpModule({
+  feature: "portfolio",
+  register: registerPortfolioTools,
+});

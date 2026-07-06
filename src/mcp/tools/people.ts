@@ -1,254 +1,268 @@
-/**
- * MCP tools for people registry operations.
- * Tools: list_people, get_person, create_person, update_person, delete_person,
- *        get_people_tree, get_people_summary, get_people_departments,
- *        get_person_reports
- */
+// MCP tools for people registry operations — thin wrappers over PeopleService.
+// All Zod schemas derived from types/person.types.ts — single source of truth.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { AgentModelSchema } from "../../lib/types.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getPeopleService } from "../../singletons/services.ts";
+import {
+  CreatePersonSchema,
+  FindPersonForSkillsSchema,
+  GetPeopleAvailabilitySchema,
+  HeartbeatInputSchema,
+  ListPeopleBySkillSchema,
+  ListPeopleOptionsSchema,
+  PersonSchema,
+  PersonWorkloadSchema,
+  UpdatePersonSchema,
+} from "../../types/person.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
-export function registerPeopleTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerPeopleTools(server: McpServer): void {
+  const service = getPeopleService();
 
+  // ── list_people ──────────────────────────────────────────────────────
   server.registerTool(
     "list_people",
     {
       description: "List all people in the project's people registry.",
-      inputSchema: {
-        department: z.string().optional().describe("Filter by department"),
-      },
+      inputSchema: { ...ListPeopleOptionsSchema.shape, slim: slimParam },
     },
-    async ({ department }) => {
-      const people = department
-        ? await parser.getPeopleByDepartment(department)
-        : await parser.readPeople();
-      return ok(people);
+    async ({ department, slim }) => {
+      const people = await service.list(
+        department ? { department } : undefined,
+      );
+      return slim
+        ? ok(projectSlim(people, ["name", "title", "role", "status"]))
+        : ok(people);
     },
   );
 
+  // ── get_person ───────────────────────────────────────────────────────
   server.registerTool(
     "get_person",
     {
       description: "Get a single person by their ID.",
-      inputSchema: { id: z.string().describe("Person ID") },
+      inputSchema: {
+        id: PersonSchema.shape.id.describe("Person ID"),
+      },
     },
     async ({ id }) => {
-      const person = await parser.readPerson(id);
+      const person = await service.getById(id);
       if (!person) return err(`Person '${id}' not found`);
       return ok(person);
     },
   );
 
+  // ── get_people_tree ──────────────────────────────────────────────────
   server.registerTool(
     "get_people_tree",
     {
       description:
-        "Get the org chart as a hierarchical tree. Each node has a person record with a 'children' array of their direct reports.",
+        "Get the org chart as a hierarchical tree. Each node has a person " +
+        "record with a 'children' array of their direct reports.",
       inputSchema: {},
     },
-    async () => ok(await parser.getPeopleTree()),
+    async () => ok(await service.getTree()),
   );
 
+  // ── get_people_summary ───────────────────────────────────────────────
   server.registerTool(
     "get_people_summary",
     {
-      description:
-        "Get people registry summary statistics: total headcount, breakdown by department, managers count.",
+      description: "Get people registry summary statistics: total headcount, " +
+        "breakdown by department.",
       inputSchema: {},
     },
-    async () => ok(await parser.getPeopleSummary()),
+    async () => ok(await service.getSummary()),
   );
 
+  // ── get_people_departments ───────────────────────────────────────────
   server.registerTool(
     "get_people_departments",
     {
       description: "List all department names used in the people registry.",
       inputSchema: {},
     },
-    async () => ok(await parser.getPeopleDepartments()),
+    async () => ok(await service.getDepartments()),
   );
 
+  // ── get_person_reports ───────────────────────────────────────────────
   server.registerTool(
     "get_person_reports",
     {
       description: "Get the direct reports for a given person.",
-      inputSchema: { id: z.string().describe("Person ID") },
+      inputSchema: {
+        id: PersonSchema.shape.id.describe("Person ID"),
+      },
     },
-    async ({ id }) => ok(await parser.getPeopleDirectReports(id)),
+    async ({ id }) => ok(await service.getDirectReports(id)),
   );
 
+  // ── create_person ────────────────────────────────────────────────────
   server.registerTool(
     "create_person",
     {
       description: "Add a new person to the people registry.",
-      inputSchema: {
-        name: z.string().describe("Full name"),
-        title: z.string().optional().describe("Job title"),
-        role: z.string().optional().describe(
-          "Role within the team (e.g. 'developer', 'designer')",
-        ),
-        email: z.string().optional(),
-        phone: z.string().optional(),
-        departments: z.array(z.string()).optional(),
-        reportsTo: z.string().optional().describe(
-          "Person ID of direct manager",
-        ),
-        startDate: z.string().optional().describe("Start date (YYYY-MM-DD)"),
-        hoursPerDay: z.number().optional().describe(
-          "Working hours per day (used by capacity planning)",
-        ),
-        workingDays: z.array(z.string()).optional().describe(
-          "Working days of the week (e.g. ['Mon','Tue','Wed','Thu','Fri'])",
-        ),
-        notes: z.string().optional(),
-        agentType: z.enum(["human", "ai", "hybrid"]).optional().describe(
-          "Agent type: human, ai, or hybrid",
-        ),
-        skills: z.array(z.string()).optional().describe(
-          "Capabilities (e.g. ['go', 'typescript', 'code-review'])",
-        ),
-        models: z.array(AgentModelSchema).optional().describe(
-          "AI models this agent can use",
-        ),
-        systemPrompt: z.string().optional().describe(
-          "Default system prompt / persona for AI agents",
-        ),
-      },
+      inputSchema: CreatePersonSchema.shape,
     },
-    async (
-      {
-        name,
-        title,
-        role,
-        email,
-        phone,
-        departments,
-        reportsTo,
-        startDate,
-        hoursPerDay,
-        workingDays,
-        notes,
-        agentType,
-        skills,
-        models,
-        systemPrompt,
-      },
-    ) => {
-      const person = await parser.addPerson({
-        name,
-        ...(title && { title }),
-        ...(role && { role }),
-        ...(email && { email }),
-        ...(phone && { phone }),
-        ...(departments?.length && { departments }),
-        ...(reportsTo && { reportsTo }),
-        ...(startDate && { startDate }),
-        ...(hoursPerDay !== undefined && { hoursPerDay }),
-        ...(workingDays?.length && { workingDays }),
-        ...(notes && { notes }),
-        ...(agentType && { agentType }),
-        ...(skills?.length && { skills }),
-        ...(models?.length && { models }),
-        ...(systemPrompt && { systemPrompt }),
-      });
+    async (input) => {
+      const person = await service.create(input);
       return ok({ id: person.id });
     },
   );
 
+  // ── update_person ────────────────────────────────────────────────────
   server.registerTool(
     "update_person",
     {
       description: "Update an existing person's fields.",
       inputSchema: {
-        id: z.string().describe("Person ID"),
-        name: z.string().optional(),
-        title: z.string().optional(),
-        role: z.string().optional(),
-        email: z.string().optional(),
-        phone: z.string().optional(),
-        departments: z.array(z.string()).optional(),
-        reportsTo: z.string().optional(),
-        startDate: z.string().optional(),
-        hoursPerDay: z.number().optional(),
-        workingDays: z.array(z.string()).optional(),
-        notes: z.string().optional(),
-        agentType: z.enum(["human", "ai", "hybrid"]).optional().describe(
-          "Agent type: human, ai, or hybrid",
-        ),
-        skills: z.array(z.string()).optional().describe(
-          "Capabilities (e.g. ['go', 'typescript', 'code-review'])",
-        ),
-        models: z.array(AgentModelSchema).optional().describe(
-          "AI models this agent can use",
-        ),
-        systemPrompt: z.string().optional().describe(
-          "Default system prompt / persona for AI agents",
-        ),
-        status: z.enum(["idle", "working", "offline"]).optional().describe(
-          "Agent availability status",
-        ),
-        lastSeen: z.string().optional().describe(
-          "ISO timestamp of last agent interaction (auto-set or manual)",
-        ),
-        currentTaskId: z.string().optional().describe(
-          "Task ID the agent is currently working on",
-        ),
+        id: PersonSchema.shape.id.describe("Person ID"),
+        ...UpdatePersonSchema.shape,
       },
     },
     async ({ id, ...updates }) => {
-      const success = await parser.updatePerson(id, updates);
-      if (!success) return err(`Person '${id}' not found`);
+      const person = await service.update(id, updates);
+      if (!person) return err(`Person '${id}' not found`);
       return ok({ success: true });
     },
   );
 
+  // ── delete_person ────────────────────────────────────────────────────
   server.registerTool(
     "delete_person",
     {
       description: "Delete a person from the registry by their ID.",
-      inputSchema: { id: z.string().describe("Person ID") },
+      inputSchema: {
+        id: PersonSchema.shape.id.describe("Person ID"),
+      },
     },
     async ({ id }) => {
-      const success = await parser.deletePerson(id);
+      const success = await service.delete(id);
       if (!success) return err(`Person '${id}' not found`);
       return ok({ success: true });
     },
   );
 
+  // ── agent_heartbeat ──────────────────────────────────────────────────
   server.registerTool(
     "agent_heartbeat",
     {
       description:
         "Update an agent's lastSeen timestamp and optionally set status " +
         "and currentTaskId. Call periodically to signal the agent is alive.",
-      inputSchema: {
-        id: z.string().describe("Person ID of the agent"),
-        status: z.enum(["idle", "working", "offline"]).optional().describe(
-          "Agent status (default: keeps current value)",
-        ),
-        currentTaskId: z.string().optional().describe(
-          "Task ID the agent is currently working on (empty string to clear)",
-        ),
-      },
+      inputSchema: HeartbeatInputSchema.shape,
     },
     async ({ id, status, currentTaskId }) => {
-      const updates: Record<string, unknown> = {
-        lastSeen: new Date().toISOString(),
-      };
-      if (status !== undefined) updates.status = status;
-      if (currentTaskId !== undefined) {
-        updates.currentTaskId = currentTaskId || undefined;
-      }
-      const success = await parser.updatePerson(id, updates);
+      const success = await service.heartbeat(id, status, currentTaskId);
       if (!success) return err(`Person '${id}' not found`);
       return ok({ success: true });
     },
   );
+
+  // ── get_person_by_name ─────────────────────────────────────────────
+  server.registerTool(
+    "get_person_by_name",
+    {
+      description: "Get a person by their name (case-insensitive). " +
+        "Prefer this over list_people when the name is known.",
+      inputSchema: {
+        name: PersonSchema.shape.name.describe("Person name"),
+      },
+    },
+    async ({ name }) => {
+      const person = await service.getByName(name);
+      if (!person) return err(`Person '${name}' not found`);
+      return ok(person);
+    },
+  );
+
+  // ── list_people_by_skill ───────────────────────────────────────────
+  server.registerTool(
+    "list_people_by_skill",
+    {
+      description: "List people who have a specific skill. " +
+        "Use this to find candidates for task assignment.",
+      inputSchema: ListPeopleBySkillSchema.shape,
+    },
+    async ({ skill }) => {
+      const people = await service.listBySkill(skill);
+      return ok(people);
+    },
+  );
+
+  // ── get_people_availability ────────────────────────────────────────
+  server.registerTool(
+    "get_people_availability",
+    {
+      description:
+        "Get available people. Excludes offline agents by default. " +
+        "Use this before assigning tasks to check who is reachable.",
+      inputSchema: GetPeopleAvailabilitySchema.shape,
+    },
+    async ({ excludeOffline }) => {
+      const people = await service.getAvailable(excludeOffline ?? true);
+      return ok(people);
+    },
+  );
+
+  // ── find_person_for_task ───────────────────────────────────────────
+  server.registerTool(
+    "find_person_for_task",
+    {
+      description:
+        "Find the best-fit people for a task based on required skills. " +
+        "Returns a ranked list sorted by match score (highest first). " +
+        "Excludes offline agents.",
+      inputSchema: FindPersonForSkillsSchema.shape,
+    },
+    async ({ skills }) => {
+      const matches = await service.findForSkills(skills);
+      return ok(matches);
+    },
+  );
+
+  // ── get_person_workload ────────────────────────────────────────────
+  server.registerTool(
+    "get_person_workload",
+    {
+      description:
+        "Get a person's current workload info: status, current task, " +
+        "capacity (hours/day, working days), and agent type. " +
+        "Use this to check if someone has bandwidth before assigning work.",
+      inputSchema: {
+        id: PersonWorkloadSchema.shape.id.describe("Person ID"),
+      },
+    },
+    async ({ id }) => {
+      const workload = await service.getWorkload(id);
+      if (!workload) return err(`Person '${id}' not found`);
+      return ok(workload);
+    },
+  );
+
+  // ── set_identity ────────────────────────────────────────────────────
+  server.registerTool(
+    "set_identity",
+    {
+      description:
+        "Resolve a person by ID and return their full profile (name, accounts, " +
+        "skills, department). Use this to establish which person context the agent " +
+        "is acting as — the returned record includes the accounts map needed for " +
+        "GitHub, Slack, and other integrations.",
+      inputSchema: {
+        personId: PersonSchema.shape.id.describe("Person ID to act as"),
+      },
+    },
+    async ({ personId }) => {
+      const person = await service.getById(personId);
+      if (!person) return err(`Person '${personId}' not found`);
+      return ok(person);
+    },
+  );
 }
+
+export const peopleModule = defineMcpModule({
+  feature: "person",
+  register: registerPeopleTools,
+});

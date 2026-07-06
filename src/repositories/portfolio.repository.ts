@@ -1,0 +1,500 @@
+// Portfolio repository — markdown-backed PortfolioItem store with cache mirror.
+import { join } from "@std/path";
+import { log } from "../singletons/logger.ts";
+import {
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "../utils/frontmatter.ts";
+import { toKebab } from "../utils/slug.ts";
+import { generateId } from "../utils/id.ts";
+import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
+import {
+  fmBool,
+  fmNum,
+  fmStr,
+  fmStrArr,
+  mapKeysToFm,
+  parseAuditFields,
+} from "../utils/frontmatter-mapper.ts";
+import type {
+  CreatePortfolioItem,
+  PortfolioItem,
+  PortfolioStatus,
+  PortfolioStatusUpdate,
+  TeamMember,
+  UpdatePortfolioItem,
+} from "../types/portfolio.types.ts";
+import { ciEquals, ciIncludes } from "../utils/string.ts";
+import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
+import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
+import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
+
+// Serialize field rules (camelCase keys → raw record, then mapKeysToFm):
+//  truthy  — emit when truthy   defined — emit when != null   array — emit when non-empty
+type SerMode = "truthy" | "defined" | "array";
+const PORTFOLIO_SER_FIELDS:
+  readonly (readonly [keyof PortfolioItem, SerMode])[] = [
+    ["client", "truthy"],
+    ["revenue", "defined"],
+    ["expenses", "defined"],
+    ["progress", "defined"],
+    ["startDate", "truthy"],
+    ["endDate", "truthy"],
+    ["team", "array"],
+    ["techStack", "array"],
+    ["logo", "truthy"],
+    ["license", "truthy"],
+    ["githubRepo", "truthy"],
+    ["vcsProvider", "truthy"],
+    ["billingCustomerId", "truthy"],
+    ["brainManaged", "defined"],
+    ["linkedGoals", "array"],
+    ["kpis", "array"],
+    ["urls", "array"],
+    ["badges", "array"],
+    ["statusUpdates", "array"],
+    ["createdAt", "truthy"],
+    ["updatedAt", "truthy"],
+    ["createdBy", "truthy"],
+    ["updatedBy", "truthy"],
+    ["archived", "truthy"],
+    ["archivedAt", "truthy"],
+    ["archivedBy", "truthy"],
+  ];
+
+/** Persists PortfolioItem entities as markdown with a SQLite cache mirror; standalone (not BaseMarkdownRepository) with disk/cache split reads (findAllFromDisk/findFromDisk), full-text search, soft-delete, and status updates. */
+export class PortfolioRepository {
+  private dir: string;
+  private writer = new SafeWriter();
+  private cacheDb: CacheDatabase | null = null;
+  // Set after archive/restore/hardDelete so the next list read bypasses the
+  // (now-stale) cache and falls through to disk. Cleared by `markClean`,
+  // wired to `EntityDef.onSyncComplete` in registerPortfolioEntity. Matches
+  // the canonical CachedMarkdownRepository pattern.
+  private listDirty = false;
+
+  constructor(projectDir: string) {
+    this.dir = join(projectDir, "portfolio");
+  }
+
+  setCacheDb(db: CacheDatabase): void {
+    this.cacheDb = db;
+  }
+
+  /** Called by EntityDef.onSyncComplete after fullSync — re-enables list cache. */
+  markClean(): void {
+    this.listDirty = false;
+  }
+
+  async findAll(): Promise<PortfolioItem[]> {
+    if (this.cacheDb && !this.listDirty) {
+      try {
+        const count = this.cacheDb.count(PORTFOLIO_TABLE);
+        if (count > 0) {
+          return this.cacheDb.query<QueryResult>(
+            `SELECT * FROM "${PORTFOLIO_TABLE}"
+             WHERE archived IS NULL OR archived = 0
+             ORDER BY category, name`,
+          ).map(rowToPortfolioItem);
+        }
+      } catch (err) {
+        log.warn("[cache] portfolio read failed, falling back to disk:", err);
+      }
+    }
+    return this.findAllFromDisk();
+  }
+
+  /** Always read from disk — used by cache sync. Archived items are excluded;
+   * cache sync receives the full set via `findArchived` separately when
+   * needed. Matches the canonical pattern: `findAll` is the default view. */
+  async findAllFromDisk(): Promise<PortfolioItem[]> {
+    const items: PortfolioItem[] = [];
+    try {
+      for await (const entry of Deno.readDir(this.dir)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        const content = await Deno.readTextFile(join(this.dir, entry.name));
+        const item = this.parse(entry.name, content);
+        if (item && item.archived !== true) items.push(item);
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return items.sort((a, b) =>
+      a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+    );
+  }
+
+  /** Disk-only list of archived items. Mirror of `findAllFromDisk` for the
+   * archived-view route and `BaseService.listArchived`. */
+  async findArchived(): Promise<PortfolioItem[]> {
+    const items: PortfolioItem[] = [];
+    try {
+      for await (const entry of Deno.readDir(this.dir)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        const content = await Deno.readTextFile(join(this.dir, entry.name));
+        const item = this.parse(entry.name, content);
+        if (item && item.archived === true) items.push(item);
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return items.sort((a, b) =>
+      a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+    );
+  }
+
+  /** Read a single item from disk, bypassing cache. */
+  async findFromDisk(id: string): Promise<PortfolioItem | null> {
+    try {
+      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
+      return this.parse(`${id}.md`, content);
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return null;
+      throw err;
+    }
+  }
+
+  async findById(id: string): Promise<PortfolioItem | null> {
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<QueryResult>(
+          `SELECT * FROM "${PORTFOLIO_TABLE}" WHERE id = ?`,
+          [id],
+        );
+        if (row) return rowToPortfolioItem(row);
+      } catch (err) {
+        log.warn("[cache] portfolio read failed, falling back to disk:", err);
+      }
+    }
+    try {
+      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
+      return this.parse(`${id}.md`, content);
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return null;
+      throw err;
+    }
+  }
+
+  async findByName(name: string): Promise<PortfolioItem | null> {
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<QueryResult>(
+          `SELECT * FROM "${PORTFOLIO_TABLE}" WHERE LOWER(name) = LOWER(?)`,
+          [name],
+        );
+        if (row) return rowToPortfolioItem(row);
+      } catch (err) {
+        log.warn("[cache] portfolio read failed, falling back to disk:", err);
+      }
+    }
+    const slug = toKebab(name);
+    const fast = await this.findById(slug);
+    if (fast) return fast;
+    const all = await this.findAllFromDisk();
+    return all.find((i) => ciEquals(i.name, name)) ?? null;
+  }
+
+  async search(query: string): Promise<PortfolioItem[]> {
+    const all = await this.findAll();
+    return all.filter((item) => ciIncludes(item.name, query));
+  }
+
+  async create(data: CreatePortfolioItem): Promise<PortfolioItem> {
+    await Deno.mkdir(this.dir, { recursive: true });
+    let id = toKebab(data.name);
+    let filePath = join(this.dir, `${id}.md`);
+    let counter = 0;
+    while (await this.fileExists(filePath)) {
+      counter++;
+      id = `${toKebab(data.name)}-${counter}`;
+      filePath = join(this.dir, `${id}.md`);
+    }
+
+    const item: PortfolioItem = {
+      ...data,
+      id,
+      category: data.category ?? "Uncategorized",
+      status: data.status ?? "active",
+      progress: data.progress ?? 0,
+    };
+
+    await this.writer.write(
+      id,
+      () => atomicWrite(filePath, this.serialize(item)),
+    );
+    return item;
+  }
+
+  async update(
+    id: string,
+    data: UpdatePortfolioItem,
+  ): Promise<PortfolioItem | null> {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+    // Type assertion: spread is safe — required fields (category, status) fall
+    // back to existing values when omitted from the update payload.
+    const updated = { ...existing, ...data, id: existing.id } as PortfolioItem;
+    await this.writeItem(id, updated);
+    return updated;
+  }
+
+  private async writeItem(id: string, item: PortfolioItem): Promise<void> {
+    await this.writer.write(
+      id,
+      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(item)),
+    );
+  }
+
+  /** Default delete = soft delete (archive). Hard removal requires an
+   * explicit `hardDelete(id)` call. See
+   * `[architecture] MD Planner — Soft-delete (archive) pattern`. */
+  async delete(id: string): Promise<boolean> {
+    return this.archive(id);
+  }
+
+  /**
+   * Soft-delete: flip `archived` to true and stamp `archived_at` /
+   * `archived_by` directly into the file's frontmatter. Bypasses
+   * `serialize()` on purpose — direct frontmatter mutation guarantees
+   * archive flags round-trip even when serialize() rebuilds the body from
+   * description. Mirrors `BaseMarkdownRepository.archive`. Idempotent.
+   */
+  async archive(id: string, by?: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      const found = await this.findRawFile(id);
+      if (!found) return false;
+      const now = new Date().toISOString();
+      const fm = { ...found.frontmatter };
+      fm.archived = true;
+      fm.archived_at = now;
+      if (by !== undefined) fm.archived_by = by;
+      fm.updated_at = now;
+      await atomicWrite(found.filePath, serializeFrontmatter(fm, found.body));
+      return true;
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /** Restore an archived item: drop the three archive frontmatter fields. */
+  async restore(id: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      const found = await this.findRawFile(id);
+      if (!found) return false;
+      const fm = { ...found.frontmatter };
+      delete fm.archived;
+      delete fm.archived_at;
+      delete fm.archived_by;
+      fm.updated_at = new Date().toISOString();
+      await atomicWrite(found.filePath, serializeFrontmatter(fm, found.body));
+      return true;
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /** Permanent delete — removes the file from disk. No recovery. Cascades
+   * to embedded status updates (they live inside the same file). */
+  async hardDelete(id: string): Promise<boolean> {
+    const ok = await this.writer.write(id, async () => {
+      try {
+        await Deno.remove(join(this.dir, `${id}.md`));
+        return true;
+      } catch (err) {
+        if (err instanceof Deno.errors.NotFound) return false;
+        throw err;
+      }
+    });
+    if (ok) this.invalidate(id);
+    return ok;
+  }
+
+  /** Evict the row from the cache and mark the list cache stale. Called
+   * by archive/restore/hardDelete since those paths skip `PortfolioService`'s
+   * cacheUpsert. */
+  private invalidate(id: string): void {
+    this.listDirty = true;
+    if (!this.cacheDb) return;
+    try {
+      this.cacheDb.execute(
+        `DELETE FROM "${PORTFOLIO_TABLE}" WHERE id = ?`,
+        [id],
+      );
+    } catch (err) {
+      log.error(`[cache] failed to remove portfolio/${id}:`, err);
+    }
+  }
+
+  /**
+   * Locate a file by id and return its raw frontmatter + body. Used by
+   * `archive`/`restore` so they can mutate frontmatter without going
+   * through `serialize()` (which rebuilds the body from description).
+   */
+  private async findRawFile(
+    id: string,
+  ): Promise<
+    {
+      frontmatter: Record<string, unknown>;
+      body: string;
+      filePath: string;
+    } | null
+  > {
+    const filePath = join(this.dir, `${id}.md`);
+    try {
+      const content = await Deno.readTextFile(filePath);
+      const parsed = parseFrontmatter(content);
+      return { ...parsed, filePath };
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return null;
+      throw err;
+    }
+  }
+
+  async addStatusUpdate(
+    id: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
+    const item = await this.findById(id);
+    if (!item) return null;
+    const update: PortfolioStatusUpdate = {
+      id: generateId("statusUpdate"),
+      date: new Date().toISOString().slice(0, 10),
+      message,
+    };
+    await this.writeItem(id, {
+      ...item,
+      statusUpdates: [update, ...(item.statusUpdates ?? [])],
+    });
+    return update;
+  }
+
+  async updateStatusUpdate(
+    id: string,
+    updateId: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
+    const item = await this.findById(id);
+    if (!item) return null;
+    const target = (item.statusUpdates ?? []).find((u) => u.id === updateId);
+    if (!target) return null;
+    target.message = message;
+    await this.writeItem(id, { ...item, statusUpdates: item.statusUpdates });
+    return target;
+  }
+
+  async deleteStatusUpdate(id: string, updateId: string): Promise<boolean> {
+    const item = await this.findById(id);
+    if (!item) return false;
+    const before = item.statusUpdates?.length ?? 0;
+    const filtered = (item.statusUpdates ?? []).filter((u) =>
+      u.id !== updateId
+    );
+    if (filtered.length === before) return false;
+    await this.writeItem(id, { ...item, statusUpdates: filtered });
+    return true;
+  }
+
+  private async fileExists(path: string): Promise<boolean> {
+    try {
+      await Deno.stat(path);
+      return true;
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return false;
+      throw err;
+    }
+  }
+
+  private parse(filename: string, content: string): PortfolioItem | null {
+    const { frontmatter: fm, body } = parseFrontmatter(content);
+    const id = filename.replace(/\.md$/, "");
+    const titleMatch = body.match(/^#\s+(.+)/m);
+    const name = fm.name ? String(fm.name) : titleMatch?.[1]?.trim() ?? id;
+
+    const lines = body.split("\n");
+    const titleIdx = lines.findIndex((l) => /^#\s+/.test(l));
+    const desc = titleIdx >= 0
+      ? lines.slice(titleIdx + 1).join("\n").trim()
+      : undefined;
+
+    const statusUpdates = fm.status_updates ?? fm.statusUpdates;
+    return {
+      id,
+      name,
+      category: fmStr(fm, "category") ?? "Uncategorized",
+      status: (fmStr(fm, "status") ?? "active") as PortfolioStatus,
+      description: desc || undefined,
+      client: fmStr(fm, "client"),
+      revenue: fmNum(fm, "revenue"),
+      expenses: fmNum(fm, "expenses"),
+      progress: fmNum(fm, "progress") ?? 0,
+      startDate: fmStr(fm, "start_date"),
+      endDate: fmStr(fm, "end_date", "endDate"),
+      team: Array.isArray(fm.team)
+        ? fm.team.map((m): TeamMember =>
+          typeof m === "string" ? { personId: m } : {
+            personId: String((m as Record<string, unknown>).personId ?? ""),
+            role: (m as Record<string, unknown>).role != null
+              ? String((m as Record<string, unknown>).role)
+              : undefined,
+          }
+        )
+        : undefined,
+      techStack: fmStrArr(fm, "tech_stack", "techStack"),
+      logo: fmStr(fm, "logo"),
+      license: fmStr(fm, "license"),
+      githubRepo: fmStr(fm, "github_repo", "githubRepo"),
+      vcsProvider: fmStr(fm, "vcs_provider", "vcsProvider") as
+        | "github"
+        | "gitea"
+        | undefined,
+      billingCustomerId: fmStr(fm, "billing_customer_id", "billingCustomerId"),
+      brainManaged: fmBool(fm, "brain_managed", "brainManaged"),
+      linkedGoals: fmStrArr(fm, "linked_goals", "linkedGoals"),
+      kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
+      urls: Array.isArray(fm.urls) ? fm.urls : undefined,
+      badges: Array.isArray(fm.badges)
+        ? (fm.badges as PortfolioItem["badges"])
+        : undefined,
+      statusUpdates: Array.isArray(statusUpdates)
+        ? (statusUpdates as PortfolioStatusUpdate[])
+        : undefined,
+      ...parseAuditFields(fm),
+      archived: fm.archived === true ? true : undefined,
+      archivedAt: fmStr(fm, "archived_at"),
+      archivedBy: fmStr(fm, "archived_by"),
+    };
+  }
+
+  async upsertEntity(item: PortfolioItem): Promise<PortfolioItem> {
+    await Deno.mkdir(this.dir, { recursive: true });
+    const filePath = join(this.dir, `${item.id}.md`);
+    await this.writer.write(
+      item.id,
+      () => atomicWrite(filePath, this.serialize(item)),
+    );
+    return item;
+  }
+
+  private serialize(item: PortfolioItem): string {
+    const raw: Record<string, unknown> = {
+      name: item.name,
+      category: item.category,
+      status: item.status,
+    };
+    const src = item as Record<string, unknown>;
+    for (const [key, mode] of PORTFOLIO_SER_FIELDS) {
+      const v = src[key];
+      if (mode === "truthy") {
+        if (v) raw[key] = v;
+      } else if (mode === "defined") {
+        if (v != null) raw[key] = v;
+      } else if (Array.isArray(v) && v.length > 0) {
+        raw[key] = v;
+      }
+    }
+
+    const fm = mapKeysToFm(raw);
+    const body = `# ${item.name}\n\n${item.description ?? ""}`.trimEnd();
+    return serializeFrontmatter(fm, body);
+  }
+}

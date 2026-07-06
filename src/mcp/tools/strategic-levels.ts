@@ -1,77 +1,82 @@
-/**
- * MCP tools for Strategic Levels Builder operations.
- * Tools: list_strategic_levels, get_strategic_levels,
- *        create_strategic_levels, update_strategic_levels,
- *        delete_strategic_levels, add_strategic_level,
- *        update_strategic_level, remove_strategic_level
- */
+// MCP tools for Strategic Levels Builder operations — thin wrappers over StrategicLevelsService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { defineMcpModule } from "../module.ts";
 import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { STRATEGIC_LEVEL_ORDER } from "../../lib/types.ts";
-import { err, ok } from "./utils.ts";
+import { getStrategicLevelsService } from "../../singletons/services.ts";
+import {
+  LEVEL_ORDER,
+  StrategicLevelsBuildersSchema,
+} from "../../types/strategic-levels.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
-export function registerStrategicLevelsTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerStrategicLevelsTools(server: McpServer): void {
+  const service = getStrategicLevelsService();
 
   server.registerTool(
     "list_strategic_levels",
     {
       description: "List all Strategic Levels builders.",
-      inputSchema: {},
+      inputSchema: {
+        q: z.string().optional().describe("Search query (matches title)"),
+        date: z.string().optional().describe("Filter by date (YYYY-MM-DD)"),
+        slim: slimParam,
+      },
     },
-    async () => ok(await parser.readStrategicLevelsBuilders()),
+    async ({ q, date, slim }) => {
+      const items = await service.list({ q, date });
+      return slim ? ok(projectSlim(items, ["title", "date"])) : ok(items);
+    },
   );
 
   server.registerTool(
     "get_strategic_levels",
     {
       description: "Get a single Strategic Levels builder by its ID.",
-      inputSchema: { id: z.string().describe("Builder ID") },
+      inputSchema: {
+        id: StrategicLevelsBuildersSchema.shape.id.describe("Builder ID"),
+      },
     },
     async ({ id }) => {
-      const builders = await parser.readStrategicLevelsBuilders();
-      const builder = builders.find((b) => b.id === id);
-      if (!builder) return err(`Strategic Levels builder '${id}' not found`);
-      return ok(builder);
+      const item = await service.getById(id);
+      if (!item) return err(`Strategic Levels builder '${id}' not found`);
+      return ok(item);
     },
   );
 
   server.registerTool(
     "create_strategic_levels",
     {
-      description: "Create a new Strategic Levels builder.",
+      description: "Create a new Strategic Levels builder document.",
       inputSchema: {
-        title: z.string().describe("Builder title"),
+        title: StrategicLevelsBuildersSchema.shape.title.describe(
+          "Builder title",
+        ),
         date: z.string().optional().describe("Date (YYYY-MM-DD)"),
       },
     },
     async ({ title, date }) => {
-      const builder = await parser.addStrategicLevelsBuilder({
+      const item = await service.create({
         title,
         date: date ?? new Date().toISOString().slice(0, 10),
         levels: [],
       });
-      return ok({ id: builder.id });
+      return ok({ id: item.id });
     },
   );
 
   server.registerTool(
     "update_strategic_levels",
     {
-      description: "Update an existing Strategic Levels builder.",
+      description: "Update an existing Strategic Levels builder (title/date).",
       inputSchema: {
-        id: z.string().describe("Builder ID"),
+        id: StrategicLevelsBuildersSchema.shape.id.describe("Builder ID"),
         title: z.string().optional(),
-        date: z.string().optional(),
+        date: z.string().optional().describe("Date (YYYY-MM-DD)"),
       },
     },
-    async ({ id, ...updates }) => {
-      const updated = await parser.updateStrategicLevelsBuilder(id, updates);
+    async ({ id, title, date }) => {
+      const updated = await service.update(id, { title, date });
       if (!updated) return err(`Strategic Levels builder '${id}' not found`);
       return ok({ success: true });
     },
@@ -81,10 +86,12 @@ export function registerStrategicLevelsTools(
     "delete_strategic_levels",
     {
       description: "Delete a Strategic Levels builder by its ID.",
-      inputSchema: { id: z.string().describe("Builder ID") },
+      inputSchema: {
+        id: StrategicLevelsBuildersSchema.shape.id.describe("Builder ID"),
+      },
     },
     async ({ id }) => {
-      const success = await parser.deleteStrategicLevelsBuilder(id);
+      const success = await service.delete(id);
       if (!success) return err(`Strategic Levels builder '${id}' not found`);
       return ok({ success: true });
     },
@@ -97,24 +104,58 @@ export function registerStrategicLevelsTools(
       inputSchema: {
         builder_id: z.string().describe("Builder ID"),
         title: z.string().describe("Level title"),
-        level: z.enum(STRATEGIC_LEVEL_ORDER).describe(
-          "Level type (vision, mission, goals, objectives, strategies, tactics)",
+        level: z.enum(LEVEL_ORDER).describe(
+          "Level type: vision, mission, goals, objectives, strategies, tactics",
         ),
         description: z.string().optional().describe("Level description"),
         parent_id: z.string().optional().describe("Parent level ID"),
+        linked_tasks: z.array(z.string()).optional().describe(
+          "Linked task IDs",
+        ),
+        linked_milestones: z.array(z.string()).optional().describe(
+          "Linked milestone IDs",
+        ),
       },
     },
-    async ({ builder_id, title, level, description, parent_id }) => {
-      const updated = await parser.addStrategicLevel(builder_id, {
+    async (
+      {
+        builder_id,
         title,
         level,
-        ...(description && { description }),
-        ...(parent_id && { parentId: parent_id }),
-      });
-      if (!updated) {
+        description,
+        parent_id,
+        linked_tasks,
+        linked_milestones,
+      },
+    ) => {
+      const builder = await service.getById(builder_id);
+      if (!builder) {
         return err(`Strategic Levels builder '${builder_id}' not found`);
       }
-      return ok({ success: true });
+      if (builder.archived === true) {
+        return err(`Strategic Levels builder '${builder_id}' is archived`);
+      }
+      const maxOrder = builder.levels.reduce(
+        (max, l) => Math.max(max, l.order),
+        -1,
+      );
+      const newLevel = {
+        id: `level_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        title,
+        level,
+        description,
+        parentId: parent_id,
+        linkedTasks: linked_tasks,
+        linkedMilestones: linked_milestones,
+        order: maxOrder + 1,
+      };
+      const updated = await service.update(builder_id, {
+        levels: [...builder.levels, newLevel],
+      });
+      if (!updated) {
+        return err(`Failed to add level to builder '${builder_id}'`);
+      }
+      return ok({ success: true, levelId: newLevel.id });
     },
   );
 
@@ -127,20 +168,51 @@ export function registerStrategicLevelsTools(
         level_id: z.string().describe("Level entry ID"),
         title: z.string().optional(),
         description: z.string().optional(),
-        level: z.enum(STRATEGIC_LEVEL_ORDER).optional(),
+        level: z.enum(LEVEL_ORDER).optional(),
+        parent_id: z.string().optional(),
+        linked_tasks: z.array(z.string()).optional(),
+        linked_milestones: z.array(z.string()).optional(),
       },
     },
-    async ({ builder_id, level_id, ...updates }) => {
-      const updated = await parser.updateStrategicLevel(
+    async (
+      {
         builder_id,
         level_id,
-        updates,
-      );
-      if (!updated) {
+        title,
+        description,
+        level,
+        parent_id,
+        linked_tasks,
+        linked_milestones,
+      },
+    ) => {
+      const builder = await service.getById(builder_id);
+      if (!builder) {
+        return err(`Strategic Levels builder '${builder_id}' not found`);
+      }
+      if (builder.archived === true) {
+        return err(`Strategic Levels builder '${builder_id}' is archived`);
+      }
+      const idx = builder.levels.findIndex((l) => l.id === level_id);
+      if (idx === -1) {
         return err(
-          `Strategic Levels builder '${builder_id}' or level '${level_id}' not found`,
+          `Level '${level_id}' not found in builder '${builder_id}'`,
         );
       }
+      const levels = [...builder.levels];
+      levels[idx] = {
+        ...levels[idx],
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        ...(level !== undefined && { level }),
+        ...(parent_id !== undefined && { parentId: parent_id }),
+        ...(linked_tasks !== undefined && { linkedTasks: linked_tasks }),
+        ...(linked_milestones !== undefined && {
+          linkedMilestones: linked_milestones,
+        }),
+      };
+      const updated = await service.update(builder_id, { levels });
+      if (!updated) return err(`Failed to update level '${level_id}'`);
       return ok({ success: true });
     },
   );
@@ -155,13 +227,27 @@ export function registerStrategicLevelsTools(
       },
     },
     async ({ builder_id, level_id }) => {
-      const updated = await parser.removeStrategicLevel(builder_id, level_id);
-      if (!updated) {
+      const builder = await service.getById(builder_id);
+      if (!builder) {
+        return err(`Strategic Levels builder '${builder_id}' not found`);
+      }
+      if (builder.archived === true) {
+        return err(`Strategic Levels builder '${builder_id}' is archived`);
+      }
+      const levels = builder.levels.filter((l) => l.id !== level_id);
+      if (levels.length === builder.levels.length) {
         return err(
-          `Strategic Levels builder '${builder_id}' or level '${level_id}' not found`,
+          `Level '${level_id}' not found in builder '${builder_id}'`,
         );
       }
+      const updated = await service.update(builder_id, { levels });
+      if (!updated) return err(`Failed to remove level '${level_id}'`);
       return ok({ success: true });
     },
   );
 }
+
+export const strategicLevelsModule = defineMcpModule({
+  feature: "strategic_builder",
+  register: registerStrategicLevelsTools,
+});

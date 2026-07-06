@@ -1,98 +1,73 @@
-/**
- * MCP tools for mindmap operations.
- * Tools: list_mindmaps, get_mindmap, create_mindmap, update_mindmap, delete_mindmap
- */
+// Mindmap MCP tools — thin wrappers over the service layer.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { MindmapNode } from "../../lib/types.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getMindmapService } from "../../singletons/services.ts";
+import {
+  CreateMindmapSchema,
+  ListMindmapOptionsSchema,
+  MindmapSchema,
+  UpdateMindmapSchema,
+} from "../../types/mindmap.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
-export function registerMindmapTools(
-  server: McpServer,
-  pm: ProjectManager,
-): void {
-  const parser = pm.getActiveParser();
+export function registerMindmapTools(server: McpServer): void {
+  const service = getMindmapService();
 
-  server.registerTool(
-    "list_mindmaps",
-    {
-      description: "List all mindmaps in the project.",
-      inputSchema: {},
-    },
-    async () => {
-      const info = await parser.readProjectInfo();
-      return ok(info.mindmaps);
-    },
-  );
+  server.registerTool("list_mindmaps", {
+    description:
+      "List all mindmaps. Optionally filter by project (name) or search query (matches title and node text).",
+    inputSchema: { ...ListMindmapOptionsSchema.shape, slim: slimParam },
+  }, async ({ project, q, slim }) => {
+    const items = await service.list({ project, q });
+    return slim ? ok(projectSlim(items, ["title", "project"])) : ok(items);
+  });
 
-  server.registerTool(
-    "get_mindmap",
-    {
-      description: "Get a single mindmap by its ID.",
-      inputSchema: { id: z.string().describe("Mindmap ID") },
+  server.registerTool("get_mindmap", {
+    description: "Get a single mindmap by its ID.",
+    inputSchema: {
+      id: MindmapSchema.shape.id.describe("Mindmap ID"),
     },
-    async ({ id }) => {
-      const info = await parser.readProjectInfo();
-      const mindmap = info.mindmaps.find((m) => m.id === id);
-      if (!mindmap) return err(`Mindmap '${id}' not found`);
-      return ok(mindmap);
-    },
-  );
+  }, async ({ id }) => {
+    const item = await service.getById(id);
+    if (!item) return err(`Mindmap '${id}' not found`);
+    return ok(item);
+  });
 
-  server.registerTool(
-    "create_mindmap",
-    {
-      description: "Create a new mindmap.",
-      inputSchema: {
-        title: z.string().describe("Mindmap title"),
-        nodes: z.array(z.any()).optional().describe(
-          "Initial node tree. Each node: { id, text, level, children: [], parent? }",
-        ),
-      },
-    },
-    async ({ title, nodes }) => {
-      const id = await parser.addMindmap({
-        title,
-        nodes: (nodes ?? []) as MindmapNode[],
-      });
-      return ok({ id });
-    },
-  );
+  server.registerTool("create_mindmap", {
+    description:
+      "Create a new mindmap linked to a project. Provide title, project (required), and optionally an indented-bullet tree of nodes and notes.",
+    inputSchema: CreateMindmapSchema.shape,
+  }, async (data) => {
+    const item = await service.create(data);
+    return ok({ id: item.id });
+  });
 
-  server.registerTool(
-    "update_mindmap",
-    {
-      description: "Update an existing mindmap's title or node tree.",
-      inputSchema: {
-        id: z.string().describe("Mindmap ID"),
-        title: z.string().optional(),
-        nodes: z.array(z.any()).optional().describe(
-          "Full replacement node tree",
-        ),
-      },
+  server.registerTool("update_mindmap", {
+    description: "Update an existing mindmap's fields.",
+    inputSchema: {
+      id: MindmapSchema.shape.id.describe("Mindmap ID"),
+      ...UpdateMindmapSchema.shape,
     },
-    async ({ id, title, nodes }) => {
-      const success = await parser.updateMindmap(id, {
-        ...(title !== undefined && { title }),
-        ...(nodes !== undefined && { nodes: nodes as MindmapNode[] }),
-      });
-      if (!success) return err(`Mindmap '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  }, async ({ id, ...fields }) => {
+    const item = await service.update(id, fields);
+    if (!item) return err(`Mindmap '${id}' not found`);
+    return ok({ success: true });
+  });
 
-  server.registerTool(
-    "delete_mindmap",
-    {
-      description: "Delete a mindmap by its ID.",
-      inputSchema: { id: z.string().describe("Mindmap ID") },
+  server.registerTool("delete_mindmap", {
+    description: "Delete a mindmap by its ID.",
+    inputSchema: {
+      id: MindmapSchema.shape.id.describe("Mindmap ID"),
     },
-    async ({ id }) => {
-      const success = await parser.deleteMindmap(id);
-      if (!success) return err(`Mindmap '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  }, async ({ id }) => {
+    const success = await service.delete(id);
+    if (!success) return err(`Mindmap '${id}' not found`);
+    return ok({ success: true });
+  });
 }
+
+export const mindmapModule = defineMcpModule({
+  feature: "mindmap",
+  register: registerMindmapTools,
+});

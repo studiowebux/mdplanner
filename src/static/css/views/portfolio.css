@@ -1,229 +1,401 @@
-/* Portfolio View */
+/* Portfolio view — domain-specific styles only.
+   Card base provided by .domain-card in components.css.
+   Header, name, meta, actions provided by .domain-card__* */
 
-/* Ensure the name span can shrink inside its flex container */
-.portfolio-row-name {
-  min-width: 0;
-}
+/* Status badge colors now use shared .badge--{variant} from components.css */
 
-/* Project logo thumbnail in list/tree rows */
-.portfolio-logo {
-  width: 1.5rem;
-  height: 1.5rem;
-  object-fit: contain;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-/* URL links row below project name */
-.portfolio-urls {
+.portfolio-card__progress {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.125rem;
+  flex-direction: column;
+  gap: var(--space-xs);
 }
 
-.portfolio-url-link {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
+/* Shared progress bar — uses native <progress>, styled via pseudo-elements */
 
-.portfolio-url-link:hover {
-  color: var(--color-text-primary);
-}
-
-/* License badge */
-.portfolio-license {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: 0.0625rem 0.375rem;
-  white-space: nowrap;
-}
-
-/* Brain managed badge */
-.portfolio-brain-badge {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: 0.0625rem 0.375rem;
-  white-space: nowrap;
-}
-
-/* URL management rows in the detail panel */
-.portfolio-url-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-/* Compact duration shown below the progress bar in list/tree rows */
-.portfolio-row-duration {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-  margin-top: 0.125rem;
-}
-
-/* Full duration label in the detail panel Timeline section */
-.portfolio-duration-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-top: 0.5rem;
-}
-
-/* On mobile, hide progress and financials columns so the project name has room */
-@media (max-width: 36rem) {
-  .portfolio-row-progress,
-  .portfolio-row-financials {
-    display: none;
-  }
-}
-
-/* Analytics collapsible wrapper */
-.portfolio-analytics-collapsible {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-}
-
-.portfolio-analytics-collapsible > summary {
+.portfolio-progress {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  list-style: none;
-  user-select: none;
+  gap: var(--space-sm);
 }
 
-.portfolio-analytics-collapsible > summary::-webkit-details-marker {
-  display: none;
-}
-
-.portfolio-analytics-collapsible > summary::after {
-  content: "▸";
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  transition: transform var(--transition-fast);
-}
-
-.portfolio-analytics-collapsible[open] > summary::after {
-  transform: rotate(90deg);
-}
-
-.portfolio-analytics-collapsible > summary:hover {
-  background: var(--color-bg-hover);
-}
-
-.portfolio-analytics-collapsible-body {
-  padding: 1rem;
-  border-top: 1px solid var(--color-border-default);
-}
-
-/* Analytics panel */
-.portfolio-analytics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 1rem;
-}
-
-.portfolio-analytics-panel {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: 0.875rem 1rem;
-}
-
-.portfolio-analytics-title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-bottom: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.portfolio-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.375rem;
-}
-
-.portfolio-bar-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  min-width: 6rem;
-  flex-shrink: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.portfolio-bar-track {
+.portfolio-progress__bar {
   flex: 1;
-  height: 0.375rem;
-  background: var(--color-bg-tertiary);
-  border-radius: 2px;
-  overflow: hidden;
+  height: var(--space-sm);
+  border: var(--border-width) solid var(--color-border-default);
 }
 
-.portfolio-bar-fill {
-  height: 100%;
-  background: var(--color-text-secondary);
-  border-radius: 2px;
-  min-width: 2px;
-}
-
-.portfolio-bar-count {
+.portfolio-progress__label {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  min-width: 1.25rem;
+  white-space: nowrap;
+  min-width: var(--space-xl);
   text-align: right;
 }
 
-/* Category filter select in the filter bar */
-.portfolio-category-select {
-  padding: 0.3rem 0.5rem;
+/* Tech stack pills */
+
+.portfolio-card__tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* External status badges (CI/CD/pipeline shields images) */
+
+.external-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.external-badges__img {
+  display: block;
+  height: var(--external-badge-height);
+  width: auto;
+}
+
+.portfolio-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Detail view */
+
+.portfolio-detail__header {
+  gap: var(--space-sm) var(--space-md);
+}
+
+.portfolio-detail__meta,
+.portfolio-detail__progress {
+  width: 100%;
+}
+
+.portfolio-detail__title-row {
+  align-items: baseline;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.portfolio-detail__logo {
+  width: var(--space-xxl);
+  height: var(--space-xxl);
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.portfolio-detail__meta {
   font-size: var(--font-size-sm);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-primary);
   color: var(--color-text-secondary);
-  cursor: pointer;
+  margin-bottom: var(--space-sm);
 }
 
-/* Status updates feed in sidenav */
-.portfolio-status-update {
-  padding: 0.5rem 0.625rem;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-primary);
+.portfolio-detail__progress {
+  margin-top: var(--space-sm);
 }
 
-.portfolio-status-meta {
+/* Financials summary */
+
+.portfolio-detail__financials {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.portfolio-detail__financial-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  text-align: center;
+}
+
+.portfolio-detail__financial-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.portfolio-detail__financial-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.portfolio-detail__financial-value--profit {
+  color: var(--color-success);
+}
+
+.portfolio-detail__financial-value--loss {
+  color: var(--color-error);
+}
+
+/* KPI table */
+
+.portfolio-detail__kpis {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+/* KPI table uses shared .data-table .data-table--header-bg from components.css */
+
+.portfolio-detail__kpi-met {
+  color: var(--color-success);
+}
+
+/* Status updates timeline */
+
+.portfolio-detail__status-updates {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+.portfolio-detail__update-form {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+}
+
+.portfolio-detail__update-form textarea,
+.portfolio-detail__update--editing textarea {
+  flex: 1;
+}
+
+.portfolio-detail__update--editing {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  padding: var(--space-sm) 0;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.portfolio-detail__update {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.portfolio-detail__update:last-child {
+  border-bottom: none;
+}
+
+.portfolio-detail__update-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  min-width: var(--space-xxl);
+}
+
+.portfolio-detail__update-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.portfolio-detail__update-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+/* URLs list */
+
+.portfolio-detail__urls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* Team chips */
+
+.portfolio-detail__team {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.portfolio-detail__team-member {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.portfolio-detail__team-chip {
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+}
+
+.portfolio-detail__team-role {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding: var(--badge-padding);
+  background: var(--color-badge-bg);
+  border-radius: var(--radius-sm);
+}
+
+/* References — compact grouped links to tasks/notes naming this project */
+
+.portfolio-detail__references {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-md);
+}
+
+.portfolio-detail__reference-group-title {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.portfolio-detail__reference-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+/* Grid view — client → category → status-coloured cards */
+
+.portfolio-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.portfolio-grid__client {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.portfolio-grid__client-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.portfolio-grid__categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.portfolio-grid__category {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+.portfolio-grid__category-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
 }
 
-.portfolio-status-delete {
+.portfolio-grid__category-count {
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
+  background: var(--color-bg-tertiary);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
 }
 
-.portfolio-status-delete:hover {
-  color: var(--color-error);
+.portfolio-grid__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.portfolio-grid__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-left: var(--border-width-thick) solid var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
+.portfolio-grid__card:hover {
+  background: var(--color-bg-tertiary);
+  text-decoration: none;
+}
+
+.portfolio-grid__card-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Per-status left-border accent — reuses badge variant colour tokens. */
+.portfolio-grid__card--accent {
+  border-left-color: var(--color-accent);
+}
+.portfolio-grid__card--info {
+  border-left-color: var(--color-info-text);
+}
+.portfolio-grid__card--success {
+  border-left-color: var(--color-success-text);
+}
+.portfolio-grid__card--warning {
+  border-left-color: var(--color-warning-text);
+}
+.portfolio-grid__card--error {
+  border-left-color: var(--color-error-text);
+}
+.portfolio-grid__card--purple {
+  border-left-color: var(--color-purple-text);
+}
+.portfolio-grid__card--teal {
+  border-left-color: var(--color-teal-text);
+}
+.portfolio-grid__card--orange {
+  border-left-color: var(--color-orange-text);
+}
+.portfolio-grid__card--pink {
+  border-left-color: var(--color-pink-text);
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
+  .portfolio-detail__financials {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-detail__references {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-grid__categories {
+    grid-template-columns: 1fr;
+  }
 }

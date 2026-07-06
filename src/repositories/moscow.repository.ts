@@ -1,0 +1,123 @@
+// MoSCoW Analysis repository — markdown file CRUD under moscow/.
+// Body uses ## Must Have/Should Have/Could Have/Won't Have sections with bullet lists.
+
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
+import type {
+  CreateMoscow,
+  Moscow,
+  UpdateMoscow,
+} from "../types/moscow.types.ts";
+import {
+  MOSCOW_QUADRANT_KEYS,
+  MOSCOW_QUADRANTS,
+  MOSCOW_SECTION_MAP,
+  type MoscowQuadrantKey,
+} from "../domains/moscow/constants.tsx";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { parseQuadrantEntity } from "../utils/quadrant-parse.ts";
+import { MOSCOW_TABLE, rowToMoscow } from "../domains/moscow/cache.ts";
+
+import {
+  serializeAuditFields,
+  stampAuditFields,
+} from "../utils/frontmatter-mapper.ts";
+/** Persists MoSCoW boards as markdown with a SQLite cache mirror. */
+export class MoscowRepository extends CachedMarkdownRepository<
+  Moscow,
+  CreateMoscow,
+  UpdateMoscow
+> {
+  protected readonly tableName = MOSCOW_TABLE;
+  protected override readonly supportsArchive = true;
+
+  constructor(projectDir: string) {
+    super(projectDir, {
+      directory: "moscow",
+      idPrefix: "moscow",
+      nameField: "title",
+    });
+  }
+
+  protected rowToEntity(row: Record<string, string | number | null>): Moscow {
+    return rowToMoscow(row);
+  }
+
+  protected fromCreateInput(
+    data: CreateMoscow,
+    id: string,
+    now: string,
+  ): Moscow {
+    return {
+      ...data,
+      id,
+      date: data.date ?? new Date().toISOString().split("T")[0],
+      must: data.must ?? [],
+      should: data.should ?? [],
+      could: data.could ?? [],
+      wont: data.wont ?? [],
+      ...stampAuditFields(now),
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Parse — frontmatter + body sections
+  // ---------------------------------------------------------------------------
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): Moscow | null {
+    const base = parseQuadrantEntity(
+      filename,
+      fm,
+      body,
+      MOSCOW_SECTION_MAP,
+      "Untitled MoSCoW",
+    );
+    if (!base) return null;
+
+    const { quadrants, ...common } = base;
+    return {
+      ...common,
+      must: quadrants.must,
+      should: quadrants.should,
+      could: quadrants.could,
+      wont: quadrants.wont,
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Serialize — frontmatter + body sections
+  // ---------------------------------------------------------------------------
+
+  protected serialize(item: Moscow): string {
+    const fm: Record<string, unknown> = {};
+    fm.title = item.title;
+    fm.date = item.date;
+    if (item.project) fm.project = item.project;
+    serializeAuditFields(fm, item);
+
+    const sections: string[] = [];
+
+    for (const name of MOSCOW_QUADRANTS) {
+      const key = MOSCOW_QUADRANT_KEYS[MOSCOW_QUADRANTS.indexOf(name)];
+      const items = item[key];
+      sections.push(`## ${name}`);
+      sections.push("");
+      if (items.length > 0) {
+        for (const entry of items) {
+          sections.push(`- ${entry}`);
+        }
+      }
+      sections.push("");
+    }
+
+    if (item.notes) {
+      sections.push(item.notes);
+      sections.push("");
+    }
+
+    return serializeFrontmatter(fm, sections.join("\n").trimEnd());
+  }
+}

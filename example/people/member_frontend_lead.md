@@ -2,19 +2,16 @@
 id: member_frontend_lead
 title: Frontend Lead
 role: Frontend Lead
-departments:
-  - Engineering
-  - Design
-reportsTo: member_cto
+departments: [Engineering, Design]
+reports_to: member_cto
+agent_type: human
+skills: [typescript, react, performance, accessibility, design-systems]
 email: frontend.lead@example.com
-startDate: "2021-04-15"
-hoursPerDay: 8
-workingDays:
-  - Mon
-  - Tue
-  - Wed
-  - Thu
-  - Fri
+start_date: 2021-04-15
+hours_per_day: 8
+working_days: [Mon, Tue, Wed, Thu, Fri]
+created_at: "2026-04-05T06:09:18.092Z"
+updated_at: "2026-04-05T06:09:18.092Z"
 ---
 
 # Jordan Lee

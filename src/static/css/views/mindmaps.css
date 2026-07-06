@@ -1,0 +1,158 @@
+/* Mindmap list view — card layout. */
+
+.mindmap-card__node-count {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* Mindmap detail view */
+
+.mindmap-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mindmap-detail__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.mindmap-detail__canvas {
+  height: var(--mindmap-canvas-height);
+  min-height: var(--mindmap-min-height);
+  background: var(--color-bg-primary);
+  overflow: hidden;
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mindmap-svg {
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  cursor: grab;
+}
+
+.mm-text-bg {
+  fill: var(--color-bg-primary);
+  pointer-events: none;
+}
+
+.mm-text {
+  cursor: pointer;
+  fill: var(--color-text-primary);
+  stroke: var(--color-bg-primary);
+  stroke-width: var(--mm-halo-width);
+  paint-order: stroke;
+  font-family: var(--font-sans);
+}
+
+.mm-text--root {
+  font-size: var(--mm-font-root);
+  font-weight: var(--font-weight-bold);
+}
+
+.mm-text--branch {
+  font-size: var(--mm-font-branch);
+  font-weight: var(--font-weight-semibold);
+}
+
+.mm-text--leaf {
+  font-size: var(--mm-font-leaf);
+  font-weight: var(--font-weight-normal);
+}
+
+.mm-badge {
+  cursor: pointer;
+}
+
+.mm-badge__bg {
+  fill: var(--color-bg-primary);
+  pointer-events: none;
+}
+
+.mm-badge__disc {
+  fill: currentColor;
+  opacity: var(--mm-badge-disc-opacity);
+}
+
+.mm-badge__count {
+  fill: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--mm-badge-font);
+  font-weight: var(--font-weight-semibold);
+  pointer-events: none;
+}
+
+.mm-line {
+  stroke: currentColor;
+  stroke-linecap: round;
+}
+
+.mm-line--child {
+  stroke-width: var(--mm-line-child-width);
+}
+
+.mm-line--root {
+  stroke-width: var(--mm-line-root-width);
+}
+
+.mm-branch-0 {
+  color: var(--mm-branch-0);
+}
+
+.mm-branch-1 {
+  color: var(--mm-branch-1);
+}
+
+.mm-branch-2 {
+  color: var(--mm-branch-2);
+}
+
+.mm-branch-3 {
+  color: var(--mm-branch-3);
+}
+
+.mm-branch-4 {
+  color: var(--mm-branch-4);
+}
+
+.mm-branch-5 {
+  color: var(--mm-branch-5);
+}
+
+.mm-branch-6 {
+  color: var(--mm-branch-6);
+}
+
+.mm-branch-7 {
+  color: var(--mm-branch-7);
+}
+
+html.focus-mode .mindmap-detail__canvas {
+  height: calc(100vh - var(--mindmap-fullscreen-offset));
+}
+
+/* Mindmap inline edit form */
+
+.mindmap-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mindmap-edit-form__textarea {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  min-height: var(--mindmap-edit-textarea-min-height);
+  resize: vertical;
+}
+
+.mindmap-edit-form__actions {
+  display: flex;
+  gap: var(--space-sm);
+}

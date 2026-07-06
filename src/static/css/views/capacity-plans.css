@@ -1,0 +1,296 @@
+/* Capacity plans view — list and detail styles. */
+/* All values from variables.css — zero hardcoded px/rem/color. */
+
+/* ---------------------------------------------------------------------------
+   Detail layout
+   --------------------------------------------------------------------------- */
+
+.capacity-plan-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-detail-gap);
+  width: 100%;
+}
+
+.capacity-plan-detail__header {
+  gap: var(--cp-section-header-gap);
+}
+
+.capacity-plan-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-section-inner-gap);
+  width: 100%;
+}
+
+.capacity-plan-detail__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cp-section-header-gap);
+  width: 100%;
+}
+
+.capacity-plan-detail__table {
+  width: 100%;
+}
+
+.capacity-plan-detail__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.capacity-plan-detail__alloc-qty {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+}
+
+.capacity-plan-detail__alloc-project {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.capacity-plan-detail__no-range {
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--cp-section-inner-gap);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Capacity grid
+   --------------------------------------------------------------------------- */
+
+.capacity-plan-detail__grid-legend {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.capacity-plan-detail__legend-planned {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.capacity-plan-detail__legend-tasks {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.capacity-plan-detail__grid-scroll {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.capacity-plan-detail__grid {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.capacity-plan-detail__grid-person-col {
+  min-width: var(--cp-grid-person-col-w);
+  position: sticky;
+  left: 0;
+  background: var(--color-bg-primary);
+  z-index: var(--cp-grid-sticky-z);
+  border-right: var(--border-width) solid var(--color-border-default);
+}
+
+.capacity-plan-detail__grid-week-col {
+  min-width: var(--cp-grid-week-col-w);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.capacity-plan-detail__grid-total-col {
+  min-width: var(--cp-grid-total-col-w);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  border-left: var(--border-width) solid var(--color-border-default);
+  background: var(--color-bg-secondary);
+}
+
+.capacity-plan-detail__grid-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: var(--space-xs);
+}
+
+.capacity-plan-detail__grid-cell--free {
+  background: var(--cp-grid-cell-free-bg);
+}
+
+.capacity-plan-detail__grid-cell--over {
+  background: var(--cp-grid-cell-over-bg);
+}
+
+/* Cell wrap: inline, no layout side-effects */
+
+.capacity-plan-detail__cell-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capacity-plan-detail__cell-summary {
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Dashed underline hint when tasks exist */
+.capacity-plan-detail__cell-wrap--has-tasks .capacity-plan-detail__cell-summary {
+  cursor: default;
+  border-bottom: var(--border-width) dashed var(--color-border-default);
+}
+
+/* Popup — position:fixed, positioned by JS to escape overflow containers */
+.capacity-plan-detail__cell-popup {
+  position: fixed;
+  z-index: var(--cp-grid-popup-z);
+  list-style: none;
+  padding: var(--space-sm);
+  margin: 0;
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: var(--cp-cell-tasks-min-w);
+  max-height: var(--cp-cell-popup-max-h);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.capacity-plan-detail__cell-popup.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.capacity-plan-detail__cell-task-h {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.capacity-plan-detail__cell-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Bandwidth summary
+   --------------------------------------------------------------------------- */
+
+.capacity-plan-detail__bandwidth-legend {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.capacity-plan-detail__bandwidth-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-bw-list-gap);
+}
+
+.capacity-plan-detail__bw-row {
+  display: grid;
+  grid-template-columns: var(--cp-bw-name-col-w) 1fr var(--cp-bw-pct-col-w);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--cp-bw-row-gap-x);
+  row-gap: var(--cp-bw-row-gap-y);
+}
+
+.capacity-plan-detail__bw-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.capacity-plan-detail__bw-bar-wrap {
+  position: relative;
+  height: var(--cp-bw-bar-h);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.capacity-plan-detail__bw-bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.capacity-plan-detail__bw-bar--ok {
+  background: var(--color-success);
+}
+
+.capacity-plan-detail__bw-bar--warn {
+  background: var(--color-warning);
+}
+
+.capacity-plan-detail__bw-bar--under {
+  background: var(--color-danger);
+}
+
+.capacity-plan-detail__bw-bar--over {
+  background: var(--color-danger);
+}
+
+.capacity-plan-detail__bw-bar-over {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-danger);
+  border-radius: var(--radius-full);
+}
+
+.capacity-plan-detail__bw-pct {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.capacity-plan-detail__bw--under {
+  color: var(--color-danger);
+}
+
+.capacity-plan-detail__bw--ok {
+  color: var(--color-success);
+}
+
+.capacity-plan-detail__bw--warn {
+  color: var(--color-warning);
+}
+
+.capacity-plan-detail__bw--over {
+  color: var(--color-danger);
+}
+
+.capacity-plan-detail__bw-detail {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  grid-column: 2 / 4;
+  grid-row: 2;
+}

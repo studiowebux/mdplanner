@@ -1,200 +1,53 @@
-/**
- * MCP tools for goal operations.
- * Tools: list_goals, get_goal, create_goal, update_goal, delete_goal
- */
+// MCP tools for goal operations — registered via the shared CRUD factory.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getGoalService } from "../../singletons/services.ts";
+import {
+  CreateGoalSchema,
+  GoalSchema,
+  ListGoalOptionsSchema,
+  UpdateGoalSchema,
+} from "../../types/goal.types.ts";
+import { registerCrudTools } from "../crud-tools.ts";
 
-const STATUS = [
-  "planning",
-  "on-track",
-  "at-risk",
-  "late",
-  "success",
-  "failed",
-] as const;
-
-export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
-  const parser = pm.getActiveParser();
-
-  server.registerTool(
-    "list_goals",
-    {
-      description:
-        "List all goals in the project. Optionally filter by status.",
-      inputSchema: {
-        status: z.enum(STATUS).optional().describe("Filter by goal status"),
-        type: z.enum(["enterprise", "project"]).optional().describe(
-          "Filter by goal type",
-        ),
+export function registerGoalTools(server: McpServer): void {
+  registerCrudTools(server, {
+    service: getGoalService(),
+    notFoundLabel: "Goal",
+    idParam: GoalSchema.shape.id.describe("Goal ID"),
+    nameParam: GoalSchema.shape.title.describe("Goal title"),
+    listSchema: ListGoalOptionsSchema,
+    createSchema: CreateGoalSchema,
+    updateSchema: UpdateGoalSchema,
+    mutationReturn: "id-success",
+    slimFields: ["title", "status", "type", "progress", "project"],
+    tools: {
+      list: {
+        name: "list_goals",
+        description:
+          "List all goals in the project. Optionally filter by status, type, or project. Pass slim: true to browse with a compact projection.",
       },
-    },
-    async ({ status, type }) => {
-      let goals = await parser.readGoals();
-      if (status) goals = goals.filter((g) => g.status === status);
-      if (type) goals = goals.filter((g) => g.type === type);
-      return ok(goals);
-    },
-  );
-
-  server.registerTool(
-    "get_goal",
-    {
-      description: "Get a single goal by its ID.",
-      inputSchema: { id: z.string().describe("Goal ID") },
-    },
-    async ({ id }) => {
-      const goals = await parser.readGoals();
-      const goal = goals.find((g) => g.id === id);
-      if (!goal) return err(`Goal '${id}' not found`);
-      return ok(goal);
-    },
-  );
-
-  server.registerTool(
-    "get_goal_by_name",
-    {
-      description:
-        "Get a goal by its title (case-insensitive). Prefer this over list_goals when the title is known.",
-      inputSchema: { name: z.string().describe("Goal title") },
-    },
-    async ({ name }) => {
-      const goal = await parser.readGoalByName(name);
-      if (!goal) return err(`Goal '${name}' not found`);
-      return ok(goal);
-    },
-  );
-
-  server.registerTool(
-    "create_goal",
-    {
-      description: "Create a new goal in the project.",
-      inputSchema: {
-        title: z.string().describe("Goal title"),
-        description: z.string().optional().describe(
-          "Goal description (markdown)",
-        ),
-        status: z.enum(STATUS).optional().describe(
-          "Goal status (default: planning)",
-        ),
-        type: z.enum(["enterprise", "project"]).optional().describe(
-          "Goal type (default: project)",
-        ),
-        kpi: z.string().optional().describe("Key performance indicator"),
-        kpiMetric: z.string().optional().describe(
-          "KPI snapshot metric to track (e.g. mrr, active_users, growth_rate)",
-        ),
-        kpiTarget: z.number().optional().describe(
-          "Target value for the KPI metric",
-        ),
-        startDate: z.string().optional().describe("Start date (YYYY-MM-DD)"),
-        endDate: z.string().optional().describe("End date (YYYY-MM-DD)"),
-        linkedPortfolioItems: z.array(z.string()).optional().describe(
-          "Portfolio item IDs this goal is linked to",
-        ),
+      get: { name: "get_goal", description: "Get a single goal by its ID." },
+      getByName: {
+        name: "get_goal_by_name",
+        description:
+          "Get a goal by its title (case-insensitive). Prefer this over list_goals when the title is known.",
       },
-    },
-    async ({
-      title,
-      description,
-      status,
-      type,
-      kpi,
-      kpiMetric,
-      kpiTarget,
-      startDate,
-      endDate,
-      linkedPortfolioItems,
-    }) => {
-      const id = await parser.addGoal({
-        title,
-        description: description ?? "",
-        status: status ?? "planning",
-        type: type ?? "project",
-        kpi: kpi ?? "",
-        startDate: startDate ?? "",
-        endDate: endDate ?? "",
-        ...(kpiMetric && { kpiMetric }),
-        ...(kpiTarget !== undefined && { kpiTarget }),
-        ...(linkedPortfolioItems?.length && { linkedPortfolioItems }),
-      });
-      return ok({ id });
-    },
-  );
-
-  server.registerTool(
-    "update_goal",
-    {
-      description: "Update an existing goal's fields.",
-      inputSchema: {
-        id: z.string().describe("Goal ID"),
-        title: z.string().optional(),
-        description: z.string().optional(),
-        status: z.enum(STATUS).optional(),
-        type: z.enum(["enterprise", "project"]).optional(),
-        kpi: z.string().optional(),
-        kpiMetric: z.string().nullable().optional().describe(
-          "KPI snapshot metric to track (null to clear)",
-        ),
-        kpiTarget: z.number().nullable().optional().describe(
-          "Target value for the KPI metric (null to clear)",
-        ),
-        startDate: z.string().optional(),
-        endDate: z.string().optional(),
-        linkedPortfolioItems: z.array(z.string()).optional().describe(
-          "Portfolio item IDs this goal is linked to",
-        ),
+      create: {
+        name: "create_goal",
+        description: "Create a new goal in the project.",
       },
-    },
-    async (
-      {
-        id,
-        title,
-        description,
-        status,
-        type,
-        kpi,
-        kpiMetric,
-        kpiTarget,
-        startDate,
-        endDate,
-        linkedPortfolioItems,
+      update: {
+        name: "update_goal",
+        description: "Update an existing goal's fields.",
       },
-    ) => {
-      const success = await parser.updateGoal(id, {
-        ...(title !== undefined && { title }),
-        ...(description !== undefined && { description }),
-        ...(status !== undefined && { status }),
-        ...(type !== undefined && { type }),
-        ...(kpi !== undefined && { kpi }),
-        ...(kpiMetric !== undefined && {
-          kpiMetric: kpiMetric ?? undefined,
-        }),
-        ...(kpiTarget !== undefined && {
-          kpiTarget: kpiTarget ?? undefined,
-        }),
-        ...(startDate !== undefined && { startDate }),
-        ...(endDate !== undefined && { endDate }),
-        ...(linkedPortfolioItems !== undefined && { linkedPortfolioItems }),
-      });
-      if (!success) return err(`Goal '${id}' not found`);
-      return ok({ success: true });
+      delete: { name: "delete_goal", description: "Delete a goal by its ID." },
     },
-  );
-
-  server.registerTool(
-    "delete_goal",
-    {
-      description: "Delete a goal by its ID.",
-      inputSchema: { id: z.string().describe("Goal ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteGoal(id);
-      if (!success) return err(`Goal '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
+  });
 }
+
+export const goalModule = defineMcpModule({
+  feature: "goal",
+  register: registerGoalTools,
+});

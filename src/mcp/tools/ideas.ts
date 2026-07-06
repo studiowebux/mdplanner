@@ -1,29 +1,39 @@
-/**
- * MCP tools for idea operations.
- * Tools: list_ideas, get_idea, create_idea, update_idea, delete_idea
- */
+// MCP tools for idea operations — thin wrappers over IdeaService.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { ProjectManager } from "../../lib/project-manager.ts";
-import { err, ok } from "./utils.ts";
+import { defineMcpModule } from "../module.ts";
+import { getIdeaService } from "../../singletons/services.ts";
+import {
+  CreateIdeaSchema,
+  IdeaSchema,
+  ListIdeaOptionsSchema,
+  UpdateIdeaSchema,
+} from "../../types/idea.types.ts";
+import { err, ok, projectSlim, slimParam } from "../utils.ts";
 
-export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
-  const parser = pm.getActiveParser();
+export function registerIdeaTools(server: McpServer): void {
+  const service = getIdeaService();
 
   server.registerTool(
     "list_ideas",
     {
-      description: "List all ideas in the project.",
-      inputSchema: {
-        category: z.string().optional().describe("Filter by category"),
-      },
+      description:
+        "List all ideas. Optionally filter by status, category, priority, or search query.",
+      inputSchema: { ...ListIdeaOptionsSchema.shape, slim: slimParam },
     },
-    async ({ category }) => {
-      const ideas = await parser.readIdeas();
-      return ok(
-        category ? ideas.filter((i) => i.category === category) : ideas,
-      );
+    async ({ status, category, priority, q, slim }) => {
+      const ideas = await service.list({ status, category, priority, q });
+      return slim
+        ? ok(
+          projectSlim(ideas, [
+            "title",
+            "status",
+            "category",
+            "priority",
+            "project",
+          ]),
+        )
+        : ok(ideas);
     },
   );
 
@@ -31,11 +41,10 @@ export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
     "get_idea",
     {
       description: "Get a single idea by its ID.",
-      inputSchema: { id: z.string().describe("Idea ID") },
+      inputSchema: { id: IdeaSchema.shape.id.describe("Idea ID") },
     },
     async ({ id }) => {
-      const ideas = await parser.readIdeas();
-      const idea = ideas.find((i) => i.id === id);
+      const idea = await service.getById(id);
       if (!idea) return err(`Idea '${id}' not found`);
       return ok(idea);
     },
@@ -46,10 +55,12 @@ export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
     {
       description:
         "Get an idea by its title (case-insensitive). Prefer this over list_ideas when the title is known.",
-      inputSchema: { name: z.string().describe("Idea title") },
+      inputSchema: {
+        name: IdeaSchema.shape.title.describe("Idea title"),
+      },
     },
     async ({ name }) => {
-      const idea = await parser.readIdeaByName(name);
+      const idea = await service.getByName(name);
       if (!idea) return err(`Idea '${name}' not found`);
       return ok(idea);
     },
@@ -58,40 +69,12 @@ export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
   server.registerTool(
     "create_idea",
     {
-      description: "Create a new idea.",
-      inputSchema: {
-        title: z.string().describe("Idea title"),
-        category: z.string().optional(),
-        priority: z.enum(["low", "medium", "high"]).optional(),
-        description: z.string().optional().describe(
-          "Idea description (markdown)",
-        ),
-        start_date: z.string().optional().describe("YYYY-MM-DD"),
-        end_date: z.string().optional().describe("YYYY-MM-DD"),
-        resources: z.string().optional(),
-      },
+      description:
+        "Create a new idea. Status defaults to 'new' if not specified.",
+      inputSchema: CreateIdeaSchema.shape,
     },
-    async (
-      {
-        title,
-        category,
-        priority,
-        description,
-        start_date,
-        end_date,
-        resources,
-      },
-    ) => {
-      const idea = await parser.addIdea({
-        title,
-        status: "new",
-        ...(category && { category }),
-        ...(priority && { priority }),
-        ...(description && { description }),
-        ...(start_date && { startDate: start_date }),
-        ...(end_date && { endDate: end_date }),
-        ...(resources && { resources }),
-      });
+    async (data) => {
+      const idea = await service.create(data);
       return ok({ id: idea.id });
     },
   );
@@ -101,19 +84,13 @@ export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
     {
       description: "Update an existing idea's fields.",
       inputSchema: {
-        id: z.string().describe("Idea ID"),
-        title: z.string().optional(),
-        category: z.string().optional(),
-        priority: z.enum(["low", "medium", "high"]).optional(),
-        description: z.string().optional(),
-        start_date: z.string().optional(),
-        end_date: z.string().optional(),
-        resources: z.string().optional(),
+        id: IdeaSchema.shape.id.describe("Idea ID"),
+        ...UpdateIdeaSchema.shape,
       },
     },
-    async ({ id, ...updates }) => {
-      const result = await parser.updateIdea(id, updates);
-      if (!result) return err(`Idea '${id}' not found`);
+    async ({ id, ...fields }) => {
+      const idea = await service.update(id, fields);
+      if (!idea) return err(`Idea '${id}' not found`);
       return ok({ success: true });
     },
   );
@@ -122,12 +99,50 @@ export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
     "delete_idea",
     {
       description: "Delete an idea by its ID.",
-      inputSchema: { id: z.string().describe("Idea ID") },
+      inputSchema: { id: IdeaSchema.shape.id.describe("Idea ID") },
     },
     async ({ id }) => {
-      const success = await parser.deleteIdea(id);
+      const success = await service.delete(id);
       if (!success) return err(`Idea '${id}' not found`);
       return ok({ success: true });
     },
   );
+
+  server.registerTool(
+    "link_ideas",
+    {
+      description:
+        "Create a bidirectional link between two ideas (Zettelkasten-style).",
+      inputSchema: {
+        id1: IdeaSchema.shape.id.describe("First idea ID"),
+        id2: IdeaSchema.shape.id.describe("Second idea ID"),
+      },
+    },
+    async ({ id1, id2 }) => {
+      const success = await service.linkIdeas(id1, id2);
+      if (!success) return err("One or both ideas not found");
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "unlink_ideas",
+    {
+      description: "Remove the bidirectional link between two ideas.",
+      inputSchema: {
+        id1: IdeaSchema.shape.id.describe("First idea ID"),
+        id2: IdeaSchema.shape.id.describe("Second idea ID"),
+      },
+    },
+    async ({ id1, id2 }) => {
+      const success = await service.unlinkIdeas(id1, id2);
+      if (!success) return err("One or both ideas not found");
+      return ok({ success: true });
+    },
+  );
 }
+
+export const ideaModule = defineMcpModule({
+  feature: "idea",
+  register: registerIdeaTools,
+});

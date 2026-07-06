@@ -1,0 +1,145 @@
+/* Vacation request domain styles */
+
+/* -- Calendar view -------------------------------------------------------- */
+
+.vacation-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.vacation-calendar__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.vacation-calendar__grid {
+  position: relative;
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.vacation-calendar__days {
+  display: grid;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.vacation-calendar__day {
+  padding: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  border-right: var(--border-width) solid var(--color-border-default);
+}
+
+.vacation-calendar__day:last-child {
+  border-right: none;
+}
+
+.vacation-calendar__day--today {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.vacation-calendar__rows {
+  position: relative;
+  min-height: var(--space-xl);
+}
+
+.vacation-calendar__row {
+  position: relative;
+  height: var(--space-xl);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.vacation-calendar__row:last-child {
+  border-bottom: none;
+}
+
+.vacation-calendar__bar {
+  position: absolute;
+  top: var(--space-xs);
+  height: calc(var(--space-xl) - var(--space-sm));
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-xs);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.vacation-calendar__bar--approved {
+  background: var(--color-success-bg);
+  border: var(--border-width) solid var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+.vacation-calendar__bar--pending {
+  background: var(--color-warning-bg);
+  border: var(--border-width) solid var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+
+.vacation-calendar__bar--conflict {
+  border-width: var(--border-width-thick);
+  border-color: var(--color-error);
+}
+
+.vacation-calendar__legend {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  flex-wrap: wrap;
+}
+
+.vacation-calendar__legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.vacation-calendar__legend-swatch {
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-width) solid transparent;
+}
+
+.vacation-calendar__legend-swatch--approved {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+}
+
+.vacation-calendar__legend-swatch--pending {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+}
+
+.vacation-calendar__legend-swatch--conflict {
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
+}
+
+/* -- Summary slot --------------------------------------------------------- */
+
+.vacation-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+  border-left: var(--border-width-thick) solid var(--color-accent);
+}
+
+/* Card view reuses the shared `.domain-card` / `.card-meta` styles
+   (components.css) via the DomainCard component — no bespoke card CSS. */

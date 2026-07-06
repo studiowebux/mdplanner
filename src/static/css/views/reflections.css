@@ -1,0 +1,21 @@
+/* Reflection-specific styles */
+
+/* -- Detail header -------------------------------------------------------- */
+
+.reflection-detail__header {
+  gap: var(--space-sm);
+}
+
+.reflection-detail__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.reflection-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}

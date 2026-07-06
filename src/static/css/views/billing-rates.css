@@ -1,0 +1,18 @@
+/* Billing Rates view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.billing-rate-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.billing-rate-detail__rate {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
